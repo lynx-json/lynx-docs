@@ -1,0 +1,25 @@
+{
+  "name": "lynx-docs",
+  "version": "1.0.0",
+  "description": "Lynx templates in YAML",
+  "main": "src/index.js",
+  "scripts": {
+    "test": "mocha test/**/*.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/danmork/lynx-docs.git"
+  },
+  "keywords": [
+    "Lynx+JSON"
+  ],
+  "author": "Dan Mork",
+  "license": "UNLICENSED",
+  "bugs": {
+    "url": "https://github.com/danmork/lynx-docs/issues"
+  },
+  "homepage": "https://github.com/danmork/lynx-docs#readme",
+  "dependencies": {
+    "yamljs": "^0.2.8"
+  }
+}
