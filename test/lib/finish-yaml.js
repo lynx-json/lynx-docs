@@ -55,6 +55,10 @@ describe("finishing without added functions", function () {
 });
 
 describe("finishing with added functions", function () {
+  beforeEach(function () {
+    finishYaml.clear();  
+  });
+  
   it("should call each function", function () {
     var first = sinon.spy();
     var second = sinon.spy();
@@ -95,6 +99,24 @@ describe("finishing with added functions", function () {
     }
     
     finishYaml.add(modifyKey);
+    var finished = finishYaml({ key: "greeting", value: "Hi" });
+    
+    finished.key.should.equal("greeting-modified");
+  });
+  
+  it("subsequent finishing functions should receive modified kvp", function () {
+    function modifyKey(kvp) {
+      kvp.key += "-modified";
+      kvp.value += "-modified";
+      return kvp;
+    }
+    
+    finishYaml.add(modifyKey);
+    finishYaml.add(function (kvp) {
+      kvp.key.should.equal("greeting-modified");
+      kvp.value.should.equal("Hi-modified");
+    });
+    
     var finished = finishYaml({ key: "greeting", value: "Hi" });
     
     finished.key.should.equal("greeting-modified");
