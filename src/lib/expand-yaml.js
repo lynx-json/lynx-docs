@@ -12,7 +12,7 @@ function isValuePropertyName(key) {
 }
 
 function hasValueProperty(obj) {
-  if (!obj) return false;
+  if (!obj || util.isArray(obj)) return false;
   return Object.getOwnPropertyNames(obj).some(isValuePropertyName)
 }
 

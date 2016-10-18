@@ -1,15 +1,28 @@
 var util = require("util");
 
-function finishing(value, key) {
+function finishing(kvp) {
   finishing.functions.forEach(function (fn) {
-    fn(value, key);
+    var result = fn(kvp);
+    if (result) kvp = result;
   });
 
-  if (!util.isObject(value)) return;
-  Object.getOwnPropertyNames(value).forEach(function (childKey) {
-    finishing(value[childKey], childKey);
+  if (!util.isObject(kvp.value)) return kvp;
+  
+  Object.getOwnPropertyNames(kvp.value).forEach(function (childKey) {
+    var childValue = kvp.value[childKey];
+    var childKvp = { key: childKey, value: childValue };
+    var result = finishing(childKvp);
+    
+    if (result) {
+      kvp.value[result.key] = result.value;
+      
+      if (result.key !== childKey) {
+        delete kvp.value[childKey];
+      }
+    }
   });
-
+  
+  return kvp;
 }
 
 finishing.functions = [];

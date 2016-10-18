@@ -36,9 +36,11 @@ function applyTemplateMeta(key, meta) {
   }
 }
 
-module.exports = exports = function getMeta(key) {
+module.exports = exports = function getMeta(kvp) {
+  if (typeof kvp === "string") kvp = { key: kvp };
+  if (typeof kvp === "number") kvp = { key: kvp.toString() };
   var meta = {};
-  meta.key = getKeyName(key);
-  applyTemplateMeta(key, meta);
+  meta.key = getKeyName(kvp.key);
+  applyTemplateMeta(kvp.key, meta);
   return meta;
 };

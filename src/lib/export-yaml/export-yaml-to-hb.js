@@ -1,7 +1,10 @@
 var util = require("util");
 var getMeta = require("./meta-yaml");
 
-function exportArrayTemplate(value, cb, key) {
+function exportArrayTemplate(kvp, cb) {
+  var value = kvp.value;
+  var key = kvp.key;
+  
   cb("[");
   var meta = getMeta(key);
   cb(" {{#" + meta.template.section + "}} ");
@@ -11,8 +14,11 @@ function exportArrayTemplate(value, cb, key) {
   cb("]");
 }
 
-function exportObjectTemplate(value, cb, key) {
+function exportObjectTemplate(kvp, cb) {
+  var value = kvp.value;
+  var key = kvp.key;
   var meta = getMeta(key);
+  
   cb(" {{#" + meta.template.section + "}} ");
   cb("{");
   var properties = Object.getOwnPropertyNames(value);
@@ -27,7 +33,10 @@ function exportObjectTemplate(value, cb, key) {
   cb(" {{/" + meta.template.section + "}} ");
 }
 
-function exportArray(value, cb, key) {
+function exportArray(kvp, cb) {
+  var value = kvp.value;
+  var key = kvp.key;
+  
   cb("[");
   var lastKey = value.length - 1;
   value.forEach(function (childValue, childKey) {
@@ -39,7 +48,10 @@ function exportArray(value, cb, key) {
   cb("]");
 }
 
-function exportObject(value, cb, key) {
+function exportObject(kvp, cb) {
+  var value = kvp.value;
+  var key = kvp.key;
+  
   cb("{");
   var properties = Object.getOwnPropertyNames(value);
   var lastIndex = properties.length - 1;
@@ -52,11 +64,14 @@ function exportObject(value, cb, key) {
   cb("}");
 }
 
-function exportSimpleValue(value, cb, key) {
-  cb(JSON.stringify(value));
+function exportSimpleValue(kvp, cb) {
+  cb(JSON.stringify(kvp.value));
 }
 
-function exportYaml(value, cb, key) {
+function exportYaml(kvp, cb) {
+  var value = kvp.value;
+  var key = kvp.key;
+  
   var meta = getMeta(key);
 
   if (meta.key) {
@@ -64,15 +79,15 @@ function exportYaml(value, cb, key) {
   }
 
   if (meta.template && meta.template.type === "array") {
-    exportArrayTemplate(value, cb, key);
+    exportArrayTemplate(kvp, cb);
   } else if (meta.template && meta.template.type === "object") {
-    exportObjectTemplate(value, cb, key);
+    exportObjectTemplate(kvp, cb);
   } else if (util.isArray(value)) {
-    exportArray(value, cb, key);
+    exportArray(kvp, cb);
   } else if (util.isObject(value)) {
-    exportObject(value, cb, key);
+    exportObject(kvp, cb);
   } else {
-    exportSimpleValue(value, cb, key);
+    exportSimpleValue(kvp, cb);
   }
 }
 
