@@ -1,12 +1,12 @@
 var util = require("util");
-var getMeta = require("./meta-yaml");
+var getMetadata = require("./meta-yaml");
 
 function exportArrayTemplate(kvp, cb) {
   var value = kvp.value;
   var key = kvp.key;
   
   cb("[");
-  var meta = getMeta(key);
+  var meta = getMetadata(key);
   cb(" {{#" + meta.template.section + "}} ");
   exportObject(value, cb, key);
   cb("{{#unless @last}},{{/unless}}");
@@ -17,7 +17,7 @@ function exportArrayTemplate(kvp, cb) {
 function exportObjectTemplate(kvp, cb) {
   var value = kvp.value;
   var key = kvp.key;
-  var meta = getMeta(key);
+  var meta = getMetadata(key);
   
   cb(" {{#" + meta.template.section + "}} ");
   cb("{");
@@ -72,7 +72,7 @@ function exportYaml(kvp, cb) {
   var value = kvp.value;
   var key = kvp.key;
   
-  var meta = getMeta(key);
+  var meta = getMetadata(key);
 
   if (meta.key) {
     cb(JSON.stringify(meta.key) + ":");

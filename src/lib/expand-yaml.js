@@ -1,14 +1,14 @@
 var YAML = require("yamljs");
 var util = require("util");
 var partials = require("./partials-yaml");
-var getMeta = require("./meta-yaml");
+var getMetadata = require("./metadata-yaml");
 
 function info() {
   // console.log(arguments);
 }
 
 function isValuePropertyName(key) {
-  return getMeta(key).key === "value";
+  return getMetadata(key).key === "value";
 }
 
 function hasValueProperty(obj) {
