@@ -3,6 +3,9 @@
   "version": "1.0.0",
   "description": "Lynx templates in YAML",
   "main": "src/index.js",
+  "bin": {
+    "lynx-docs": "./cli/index.js"
+  },
   "scripts": {
     "test": "mocha test/**/*.js"
   },
@@ -20,7 +23,14 @@
   },
   "homepage": "https://github.com/danmork/lynx-docs#readme",
   "dependencies": {
-    "yamljs": "^0.2.8"
+    "isstream": "^0.1.2",
+    "through2": "^2.0.1",
+    "vinyl": "^2.0.0",
+    "vinyl-buffer": "^1.0.0",
+    "vinyl-fs": "^2.4.4",
+    "vinyl-source-stream": "^1.1.0",
+    "yamljs": "^0.2.8",
+    "yargs": "^6.2.0"
   },
   "devDependencies": {
     "chai": "^3.5.0",
