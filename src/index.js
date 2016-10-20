@@ -8,3 +8,5 @@ exports.lib.partials = require("./lib/partials-yaml");
 
 exports.cli = {};
 exports.cli.export = require("./cli/export");
+
+exports.server = require("./server");
