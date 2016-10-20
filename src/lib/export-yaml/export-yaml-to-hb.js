@@ -1,46 +1,35 @@
 var util = require("util");
-var getMetadata = require("./meta-yaml");
+var getMetadata = require("../metadata-yaml");
 
-function exportArrayTemplate(kvp, cb) {
-  var value = kvp.value;
-  var key = kvp.key;
-  
-  cb("[");
-  var meta = getMetadata(key);
-  cb(" {{#" + meta.template.section + "}} ");
-  exportObject(value, cb, key);
+function exportArrayValueTemplate(meta, cb) {
+  cb(" {{" + meta.template.section.replace(/^@/, "#") + "}} ");
+  var valueKvp = {
+    value: meta.src.value
+  };
+  exportYaml(valueKvp, cb);
   cb("{{#unless @last}},{{/unless}}");
-  cb(" {{/" + meta.template.section + "}} ");
-  cb("]");
+  cb(" {{" + meta.template.section.replace(/^@/, "/") + "}} ");
 }
 
-function exportObjectTemplate(kvp, cb) {
-  var value = kvp.value;
-  var key = kvp.key;
-  var meta = getMetadata(key);
-  
-  cb(" {{#" + meta.template.section + "}} ");
-  cb("{");
-  var properties = Object.getOwnPropertyNames(value);
-  var lastIndex = properties.length - 1;
-  properties.forEach(function (childKey, index) {
-    exportYaml(value[childKey], cb, childKey);
-    if (index !== lastIndex) {
-      cb(",");
-    }
-  });
-  cb("}");
-  cb(" {{/" + meta.template.section + "}} ");
+function exportObjectValueTemplate(meta, cb) {
+  cb(" {{" + meta.template.section + "}} ");
+  exportObjectValue(meta, cb);
+  cb(" {{" + meta.template.section.replace(/^#|^\^/, "/") + "}} ");
 }
 
-function exportArray(kvp, cb) {
-  var value = kvp.value;
-  var key = kvp.key;
+function exportArrayValue(meta, cb) {
+  var value = meta.src.value;
+  var key = meta.src.key;
   
   cb("[");
   var lastKey = value.length - 1;
   value.forEach(function (childValue, childKey) {
-    exportYaml(childValue, cb);
+    var childKvp = {
+      value: childValue
+    };
+    
+    exportYaml(childKvp, cb);
+    
     if (childKey !== lastKey) {
       cb(",");
     }
@@ -48,46 +37,67 @@ function exportArray(kvp, cb) {
   cb("]");
 }
 
-function exportObject(kvp, cb) {
-  var value = kvp.value;
-  var key = kvp.key;
+function exportObjectValue(meta, cb) {
+  var value = meta.src.value;
+  var key = meta.src.key;
   
   cb("{");
-  var properties = Object.getOwnPropertyNames(value);
-  var lastIndex = properties.length - 1;
-  properties.forEach(function (childKey, index) {
-    exportYaml(value[childKey], cb, childKey);
-    if (index !== lastIndex) {
-      cb(",");
+  
+  var childKeys = Object.getOwnPropertyNames(meta.children);
+  var lastChildKeyIndex = childKeys.length - 1;
+  
+  childKeys.forEach(function (childKey, childKeyIndex) {
+    // write the key
+    cb(JSON.stringify(childKey) + ":");
+    
+    var firstChildMeta = meta.children[childKey][0];
+    var isArrayTemplate = firstChildMeta.template && firstChildMeta.template.type === "array";
+    
+    // write the value
+    if (isArrayTemplate) {
+      cb("[");
+    }
+    
+    // write the template sections or the untemplated value
+    var lastChildMetaIndex = meta.children[childKey].length - 1;
+    meta.children[childKey].forEach(function (childMeta, childMetaIndex) {
+      var childKvp = {
+        key: childMeta.src.key,
+        value: value[childMeta.src.key]
+      };
+      
+      exportYaml(childKvp, cb);
+      
+      if (childMetaIndex === lastChildMetaIndex && childKeyIndex !== lastChildKeyIndex) {
+        cb(",");
+      }
+    });
+    
+    if (isArrayTemplate) {
+      cb("]");
     }
   });
+  
   cb("}");
 }
 
-function exportSimpleValue(kvp, cb) {
-  cb(JSON.stringify(kvp.value));
+function exportSimpleValue(meta, cb) {
+  cb(JSON.stringify(meta.src.value));
 }
 
 function exportYaml(kvp, cb) {
-  var value = kvp.value;
-  var key = kvp.key;
-  
-  var meta = getMetadata(key);
-
-  if (meta.key) {
-    cb(JSON.stringify(meta.key) + ":");
-  }
+  var meta = getMetadata(kvp);
 
   if (meta.template && meta.template.type === "array") {
-    exportArrayTemplate(kvp, cb);
+    exportArrayValueTemplate(meta, cb);
   } else if (meta.template && meta.template.type === "object") {
-    exportObjectTemplate(kvp, cb);
-  } else if (util.isArray(value)) {
-    exportArray(kvp, cb);
-  } else if (util.isObject(value)) {
-    exportObject(kvp, cb);
+    exportObjectValueTemplate(meta, cb);
+  } else if (util.isArray(kvp.value)) {
+    exportArrayValue(meta, cb);
+  } else if (util.isObject(kvp.value)) {
+    exportObjectValue(meta, cb);
   } else {
-    exportSimpleValue(kvp, cb);
+    exportSimpleValue(meta, cb);
   }
 }
 

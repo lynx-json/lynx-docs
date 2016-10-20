@@ -41,9 +41,17 @@ function applyTemplateMeta(key, meta) {
 
 function applyObjectMeta(value, meta) {
   if (!util.isObject(value) || util.isArray(value)) return;
-  meta.children = [];
+  
+  meta.children = {};
+  
   Object.getOwnPropertyNames(value).forEach(function (childKey) {
-    meta.children.push( getMetadata(childKey) );
+    var childMeta = getMetadata(childKey);
+    
+    if (!meta.children[childMeta.key]) {
+      meta.children[childMeta.key] = [];    
+    }
+    
+    meta.children[childMeta.key].push(childMeta);
   });
 }
 
