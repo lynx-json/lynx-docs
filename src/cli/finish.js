@@ -24,7 +24,7 @@ function buildCommand(yargs) {
 var expandVinylFile = function() {
   return through2.obj(function(file, enc, cb) {
     var value = YAML.parse(file.contents.toString());
-    var result = finishYaml(object);
+    var result = finishYaml(value);
     content = YAML.stringify(result, { depth: null });
     this.push(new Vinyl({ cwd: file.cwd, base: file.base, path: file.path, contents: new Buffer(content) }));
     cb(); //signal completion

@@ -4,7 +4,7 @@
   "description": "Lynx templates in YAML",
   "main": "src/index.js",
   "bin": {
-    "lynx-docs": "./cli/index.js"
+    "lynx-docs": "./src/cli/index.js"
   },
   "scripts": {
     "test": "mocha test/**/*.js"
