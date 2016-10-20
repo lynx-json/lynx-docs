@@ -140,6 +140,16 @@ describe("when getting metadata for a key/value pair", function () {
       meta.children.greeting[0].should.deep.equal({ src: { key: "greeting^dataVariable" }, key: "greeting", template: { type: "object", section: "^dataVariable" } });
     });
   });
+  
+  describe("child with two object templates", function () {
+    it("should return correct metadata", function () {
+      var meta = getMetadata({ key: undefined, value: { "greeting#dataVariable": { message: "{{{message}}}" }, "greeting^dataVariable": { message: "{{{message}}}" } } });
+      should.exist(meta.children);
+      should.exist(meta.children.greeting);
+      meta.children.greeting[0].should.deep.equal({ src: { key: "greeting#dataVariable" }, key: "greeting", template: { type: "object", section: "#dataVariable" } });
+      meta.children.greeting[1].should.deep.equal({ src: { key: "greeting^dataVariable" }, key: "greeting", template: { type: "object", section: "^dataVariable" } });
+    });
+  });
 
   describe("child array template key with a name", function () {
     it("should return correct metadata", function () {
