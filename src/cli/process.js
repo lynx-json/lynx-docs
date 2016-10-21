@@ -1,17 +1,23 @@
 var streamUtils = require("./stream-utils");
 var expand = require("./expand");
 var finish = require("./finish");
+var ex = require("./export");
 
 function buildCommand(yargs) {
   return yargs
-    .usage("$0 process [--input] [--output]")
+    .usage("$0 process [--input] [--output] [--format]")
     .option("input", {
       alias: "i",
-      describe: "input file(s) to finish as glob string or array of glob strings. Omit to read from stdin.",
+      describe: "Input file(s) to expand as glob string, array of glob strings, or stream. [default: stdin]",
     })
     .option("output", {
       alias: "o",
-      describe: "Output folder. Omit to write to stdout.",
+      describe: "Output folder or stream. [default: stdout]",
+    })
+    .option("format", {
+      alias: "f",
+      describe: "The template destination format. ",
+      default: 'handlebars'
     })
     .example("$0 process -i **/*.yml -o ./out")
     .example("cat default.yml | $0 process")
@@ -25,6 +31,7 @@ var processCli = function(options) {
 
   source.pipe(expand.vinyl())
     .pipe(finish.vinyl())
+    .pipe(ex.vinyl(options.format))
     .pipe(dest);
 }
 

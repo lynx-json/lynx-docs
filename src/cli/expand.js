@@ -9,11 +9,11 @@ function buildCommand(yargs) {
     .usage("$0 expand [--input] [--output]")
     .option("input", {
       alias: "i",
-      describe: "input file(s) to expand as glob string or array of glob strings. Omit to read from stdin.",
+      describe: "Input file(s) to expand as glob string, array of glob strings, or stream. [default: stdin]",
     })
     .option("output", {
       alias: "o",
-      describe: "Output folder. Omit to write to stdout.",
+      describe: "Output folder or stream. [default: stdout]",
     })
     .example("$0 expand -i **/*.yml -o ./out")
     .example("cat default.yml | $0 expand")
