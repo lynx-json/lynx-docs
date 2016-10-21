@@ -6,7 +6,7 @@ var YAML = require("yamljs");
 
 function buildCommand(yargs) {
   return yargs
-    .usage("$0 expand [--input] [--output] [--format]")
+    .usage("$0 export [--input] [--output] [--format]")
     .option("input", {
       alias: "i",
       describe: "Input file(s) to expand as glob string, array of glob strings, or stream. [default: stdin]",

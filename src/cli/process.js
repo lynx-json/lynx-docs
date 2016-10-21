@@ -19,7 +19,7 @@ function buildCommand(yargs) {
       describe: "The template destination format. ",
       default: 'handlebars'
     })
-    .example("$0 process -i **/*.yml -o ./out")
+    .example("$0 process -i **/*.yml -o ./out -f handlebars")
     .example("cat default.yml | $0 process")
     .help()
     .argv;
