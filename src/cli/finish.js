@@ -1,8 +1,5 @@
-var Vinyl = require("vinyl");
-var through2 = require("through2");
-var YAML = require("yamljs");
 var streamUtils = require("./stream-utils");
-var finishYaml = require("../lib/finish-yaml");
+var finishVinyl = require("../lib/finish-vinyl");
 
 function buildCommand(yargs) {
   return yargs
@@ -21,22 +18,12 @@ function buildCommand(yargs) {
     .argv;
 }
 
-var expandVinylFile = function() {
-  return through2.obj(function(file, enc, cb) {
-    var value = YAML.parse(file.contents.toString());
-    var result = finishYaml(value);
-    content = YAML.stringify(result, { depth: null });
-    this.push(new Vinyl({ cwd: file.cwd, base: file.base, path: file.path, contents: new Buffer(content) }));
-    cb(); //signal completion
-  });
-}
-
 var finishCli = function(options) {
   var source = streamUtils.createSourceStream(options.input || process.stdin);
   var dest = streamUtils.createDestinationStream(options.output || process.stdout);
 
-  source.pipe(expandVinylFile())
+  source.pipe(finishVinyl())
     .pipe(dest);
 }
 
-module.exports = { command: "finish", describe: "Applies finishing to expanded YAML file", builder: buildCommand, handler: finishCli, vinyl: expandVinylFile }
+module.exports = { command: "finish", describe: "Applies finishing to expanded YAML file", builder: buildCommand, handler: finishCli }

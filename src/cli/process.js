@@ -1,14 +1,12 @@
 var streamUtils = require("./stream-utils");
-var expand = require("./expand");
-var finish = require("./finish");
-var ex = require("./export");
+var processVinyl = require("../lib/process-vinyl");
 
 function buildCommand(yargs) {
   return yargs
     .usage("$0 process [--input] [--output] [--format]")
     .option("input", {
       alias: "i",
-      describe: "Input file(s) to expand as glob string, array of glob strings, or stream. [default: stdin]",
+      describe: "Input file(s) to process as glob string, array of glob strings, or stream. [default: stdin]",
     })
     .option("output", {
       alias: "o",
@@ -16,7 +14,7 @@ function buildCommand(yargs) {
     })
     .option("format", {
       alias: "f",
-      describe: "The template destination format. ",
+      describe: "The template destination format.",
       default: 'handlebars'
     })
     .example("$0 process -i **/*.yml -o ./out -f handlebars")
@@ -29,9 +27,7 @@ var processCli = function(options) {
   var source = streamUtils.createSourceStream(options.input || process.stdin);
   var dest = streamUtils.createDestinationStream(options.output || process.stdout);
 
-  source.pipe(expand.vinyl())
-    .pipe(finish.vinyl())
-    .pipe(ex.vinyl(options.format))
+  source.pipe(processVinyl(options.format))
     .pipe(dest);
 }
 

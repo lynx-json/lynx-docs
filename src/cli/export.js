@@ -1,8 +1,5 @@
-var Vinyl = require("vinyl");
-var through2 = require("through2");
 var streamUtils = require("./stream-utils");
-var exportYaml = require("../lib/export-yaml");
-var YAML = require("yamljs");
+var exportVinyl = require("../lib/export-vinyl");
 
 function buildCommand(yargs) {
   return yargs
@@ -26,28 +23,12 @@ function buildCommand(yargs) {
     .argv;
 }
 
-var exportVinylFile = function(format) {
-  return through2.obj(function(file, enc, cb) {
-    var value = YAML.parse(file.contents.toString());
-
-    var buffer = "";
-    exportYaml(format, value, function(data) {
-      buffer += data;
-    });
-    if(buffer.length > 0) buffer += "\n";
-
-    this.push(new Vinyl({ cwd: file.cwd, base: file.base, path: file.path, contents: new Buffer(buffer) }));
-    cb(); //signal completion
-  });
-}
-
-
 var exportCli = function(options) {
   var source = streamUtils.createSourceStream(options.input || process.stdin);
   var dest = streamUtils.createDestinationStream(options.output || process.stdout);
 
-  source.pipe(exportVinylFile(options.format))
+  source.pipe(exportVinyl(options.format))
     .pipe(dest);
 }
 
-module.exports = { command: "export", describe: "Export YAML file to template", builder: buildCommand, handler: exportCli, vinyl: exportVinylFile }
+module.exports = { command: "export", describe: "Export YAML file to template", builder: buildCommand, handler: exportCli }
