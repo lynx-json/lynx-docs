@@ -5,6 +5,8 @@ const fs = require("fs");
 const mime = require("mime");
 const getFolderMetadata = require("../lib/meta-folder");
 const exportYaml = require("../lib/export-yaml");
+const finish = require("../lib/finish-yaml");
+const expand = require("../lib/expand-yaml");
 const handlebars = require("handlebars");
 const YAML = require("yamljs");
 
@@ -20,19 +22,45 @@ function serverError(ctx) {
   ctx.res.end();
 }
 
+function readData(filePath) {
+  var content = fs.readFileSync(filePath);
+  var parsedFilePath = path.parse(filePath);
+  
+  if (parsedFilePath.ext === ".json") {
+    return JSON.parse(content.toString());
+  } else if (parsedFilePath.ext === ".yml" || parsedFilePath.ext === ".yaml") {
+    return YAML.parse(content.toString());
+  }
+  
+  throw new Error("Failed to read data from " + filePath);
+}
+
+function writeStateDocument(ctx) {
+  var state = ctx.res.state;
+  //TODO: use parse yaml module...
+  var yaml = YAML.parse(fs.readFileSync(state.template).toString());
+  yaml = expand({ value: yaml });
+  yaml = finish(yaml);
+
+  var output = [];
+  exportYaml("handlebars", yaml, c => output.push(c));
+  
+  var data = state.dataFile ? readData(state.dataFile) : {};
+  var content = handlebars.compile(output.join(""))(data);
+  
+  ctx.res.writeHead(200, { "Content-Type": "application/lynx+json" });
+  ctx.res.write(content);
+  ctx.res.end();
+}
+
 function handleDirectory(ctx) {
   var metadata = getFolderMetadata(ctx.req.foldername);
   
   if (metadata.states.default) {
-    var yaml = YAML.parse(fs.readFileSync(metadata.states.default.template).toString());
-
-    exportYaml("handlebars", { value: yaml }, hb => {
-      ctx.res.writeHead(200, { "Content-Type": "application/lynx+json"});
-      var content = handlebars.compile(hb)({});
-      console.log(content);
-      ctx.res.end(content);
-    });
-  }
+    ctx.res.state = metadata.states.default;
+  } 
+  
+  writeStateDocument(ctx);
 }
 
 function handleFile(ctx) {
