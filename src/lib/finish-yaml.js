@@ -1,7 +1,7 @@
 var util = require("util");
 
 function finishing(kvp) {
-  finishing.functions.forEach(function (fn) {
+  finishingFunctions.forEach(function (fn) {
     var result = fn(kvp);
     if (result) kvp = result;
   });
@@ -25,9 +25,14 @@ function finishing(kvp) {
   return kvp;
 }
 
-finishing.functions = [];
+var finishingFunctions = [];
+
 finishing.add = function(finishingFn) {
-  finishing.functions.push(finishingFn);
-}
+  finishingFunctions.push(finishingFn);
+};
+
+finishing.clear = function() {
+  finishingFunctions = [];
+};
 
 module.exports = exports = finishing;

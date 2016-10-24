@@ -4,6 +4,9 @@ const path = require("path");
 const fs = require("fs");
 const mime = require("mime");
 const getFolderMetadata = require("../lib/meta-folder");
+const exportYaml = require("../lib/export-yaml");
+const handlebars = require("handlebars");
+const YAML = require("yamljs");
 
 function notFound(ctx) {
   ctx.res.writeHead(404, { "Content-Type": "text/plain" });
@@ -18,10 +21,18 @@ function serverError(ctx) {
 }
 
 function handleDirectory(ctx) {
-  // if (err) return serverError(ctx);
-  // If there is a default file (static or dynamic), return it.
-    // If there are alternates, return a document that allows selection of an alternate representation.
-  // 
+  var metadata = getFolderMetadata(ctx.req.foldername);
+  
+  if (metadata.states.default) {
+    var yaml = YAML.parse(fs.readFileSync(metadata.states.default.template).toString());
+
+    exportYaml("handlebars", { value: yaml }, hb => {
+      ctx.res.writeHead(200, { "Content-Type": "application/lynx+json"});
+      var content = handlebars.compile(hb)({});
+      console.log(content);
+      ctx.res.end(content);
+    });
+  }
 }
 
 function handleFile(ctx) {
@@ -47,7 +58,7 @@ var server = http.createServer((req, res) => {
     if (fs.statSync(ctx.req.filename).isDirectory()) {
       ctx.req.foldername = ctx.req.filename;
       delete ctx.req.filename;
-      return handleDirectory(ctx)
+      return handleDirectory(ctx);
     } else {
       handleFile(ctx);
     }

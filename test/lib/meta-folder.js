@@ -20,11 +20,11 @@ describe.only("when getting metadata for a folder", function () {
     
     it("should have single state, 'default'", function () {
       meta.states.list.length.should.equal(1);
-      meta.states.list[0].should.equal("default");
+      meta.states.list[0].name.should.equal("default");
     });
     
     it("should have a default state, 'default'", function () {
-      meta.states.default.should.equal("default");
+      meta.states.default.name.should.equal("default");
     });
   });
 
@@ -36,11 +36,11 @@ describe.only("when getting metadata for a folder", function () {
     
     it("should have a single state, 'one'", function () {
       meta.states.list.length.should.equal(1);
-      meta.states.list[0].should.equal("one");
+      meta.states.list[0].name.should.equal("one");
     });
     
     it("should have a default state, 'one'", function () {
-      meta.states.default.should.equal("one");
+      meta.states.default.name.should.equal("one");
     });
   });
 
@@ -52,12 +52,12 @@ describe.only("when getting metadata for a folder", function () {
     
     it("should have two states, 'default' and 'two'", function () {
       meta.states.list.length.should.equal(2);
-      meta.states.list[0].should.equal("default");
-      meta.states.list[1].should.equal("two");
+      meta.states.list[0].name.should.equal("default");
+      meta.states.list[1].name.should.equal("two");
     });
     
     it("should have a default state, 'default'", function () {
-      meta.states.default.should.equal("default");
+      meta.states.default.name.should.equal("default");
     });
   });
 
@@ -69,8 +69,8 @@ describe.only("when getting metadata for a folder", function () {
     
     it("should have two states, 'one' and 'two'", function () {
       meta.states.list.length.should.equal(2);
-      meta.states.list[0].should.equal("one");
-      meta.states.list[1].should.equal("two");
+      meta.states.list[0].name.should.equal("one");
+      meta.states.list[1].name.should.equal("two");
     });
     
     it("should not have a default state", function () {
@@ -89,38 +89,94 @@ describe.only("when getting metadata for a folder", function () {
     
     it("should have one state, 'default'", function () {
       meta.states.list.length.should.equal(1);
-      meta.states.list[0].should.equal("default");
+      meta.states.list[0].name.should.equal("default");
     });
     
     it("should have a default state, 'default'", function () {
-      meta.states.default.should.equal("default");
+      meta.states.default.name.should.equal("default");
     });
   });
   
   describe("a folder with a template, 'default.yml' and one data file, 'one.yml'", function () {
     
     beforeEach(function () {
-      var stub = sinon.stub(fs, "readdirSync");
-      stub.withArgs("/x").returns(["default.yml"]);
-      stub.withArgs("/x/default.data").returns(["one.yml"]);
+      var readdirStub = sinon.stub(fs, "readdirSync");
+      readdirStub.withArgs("/x").returns(["default.yml"]);
+      readdirStub.withArgs("/x/default.data").returns(["one.yml"]);
+      
+      var existsStub = sinon.stub(fs, "existsSync");
+      existsStub.withArgs("/x/default.data").returns(true);
+      
       meta = getFolderMetadata("/x");
+    });
+    
+    afterEach(function () {
+      fs.existsSync.restore();
     });
     
     it("should have one state, 'one'", function () {
       meta.states.list.length.should.equal(1);
-      meta.states.list[0].should.equal("one");
+      meta.states.list[0].name.should.equal("one");
     });
     
-    it("should have a default state, 'one'");
+    it("should have a default state, 'one'", function () {
+      meta.states.default.name.should.equal("one");
+    });
   });
   
   describe("a folder with a template, 'one.yml' and one data file, 'default.yml'", function () {
-    it("should have one state, 'one'");
-    it("should have a default state, 'one'");
+    
+    beforeEach(function () {
+      var readdirStub = sinon.stub(fs, "readdirSync");
+      readdirStub.withArgs("/x").returns(["one.yml"]);
+      readdirStub.withArgs("/x/one.data").returns(["default.yml"]);
+      
+      var existsStub = sinon.stub(fs, "existsSync");
+      existsStub.withArgs("/x/one.data").returns(true);
+      
+      meta = getFolderMetadata("/x");
+    });
+    
+    afterEach(function () {
+      fs.existsSync.restore();
+    });
+    
+    it("should have one state, 'one'", function () {
+      meta.states.list.length.should.equal(1);
+      meta.states.list[0].name.should.equal("one");
+    });
+    
+    it("should have a default state, 'one'", function () {
+      meta.states.default.name.should.equal("one");
+    });
   });
   
   describe("a folder with a template, 'one.yml' and one data file, 'two.yml'", function () {
-    it("should have one state, 'one two'");
-    it("should have a default state, 'one'");
+    
+    beforeEach(function () {
+      var readdirStub = sinon.stub(fs, "readdirSync");
+      readdirStub.withArgs("/x").returns(["one.yml"]);
+      readdirStub.withArgs("/x/one.data").returns(["two.yml"]);
+      
+      var existsStub = sinon.stub(fs, "existsSync");
+      existsStub.withArgs("/x/one.data").returns(true);
+      
+      meta = getFolderMetadata("/x");
+    });
+    
+    afterEach(function () {
+      fs.existsSync.restore();
+    });
+    
+    it("should have one state, 'one-two'", function () {
+      meta.states.list.length.should.equal(1);
+      meta.states.list[0].name.should.equal("one-two");
+    });
+    
+    it("should have a default state, 'one-two'", function () {
+      meta.states.default.name.should.equal("one-two");
+      meta.states.default.template.should.equal("/x/one.yml");
+      meta.states.default.dataFile.should.equal("/x/one.data/two.yml");
+    });
   });
 });
