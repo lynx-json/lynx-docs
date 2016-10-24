@@ -1,46 +1,49 @@
-var fs = require("fs");
+var streamUtils = require("./stream-utils");
+var exportVinyl = require("../lib/export-vinyl");
 var path = require("path");
-var util = require("util");
-var parse = require("../lib/parse-yaml");
-var expand = require("../lib/expand-yaml");
-var finish = require("../lib/finish-yaml");
-var exportYaml = require("../lib/export-yaml");
-var parseYaml = require("../lib/parse-yaml");
-var YAML = require("yamljs");
 
-function onContent(src, dest, format) {
-  return function (err, content) {
-    if (err) {
-      console.log("Error reading input file:", src, err);
-      throw err;
-    }
-
-    var yaml = parse(content);
-
-    var kvp = {
-      value: yaml,
-      global: {
-        src: src
-      }
-    };
-
-    kvp = finish( expand( kvp ) );
-
-    var hb = [];
-    exportYaml(format, kvp, function(data) {
-      hb.push(data);
-    });
-
-    fs.writeFile(dest, hb.join(""), function (err) {
-      console.log("Error writing output file:", dest, err);
-      throw err;
-    });
-  };
+function buildCommand(yargs) {
+  return yargs
+    .usage("$0 export [--input] [--output] [--format] [--config]")
+    .option("input", {
+      alias: "i",
+      describe: "Input file(s) to export as glob string, array of glob strings, or stream.",
+      default: "stdin"
+    })
+    .option("output", {
+      alias: "o",
+      describe: "Output folder or stream.",
+      default: "stdout"
+    })
+    .option("format", {
+      alias: "f",
+      describe: "The format to export to.",
+      default: 'handlebars'
+    })
+    .option("config", {
+      alias: "c",
+      describe: "External configuration file to import."
+    })
+    .example("$0 export -i **/*.yml -o ./out -f handlebars")
+    .example("cat default.yml | $0 export")
+    .help()
+    .argv;
 }
 
-module.exports = exports = function exportYaml(inFile, outFile, outFormat, importModule) {
-  if (importModule) require(importModule);
-  inFile = path.resolve(inFile);
-  outFile = path.resolve(outFile);
-  fs.readFile(inFile, onContent(inFile, outFile, outFormat));
-};
+var exportCli = function(options) {
+  if (options.config) {
+    var config = path.resolve(process.cwd(), options.config);
+    require(config);
+  }
+  
+  var input = options.input === "stdin" ? process.stdin : options.input;
+  var source = streamUtils.createSourceStream(input);
+  
+  var output = options.output === "stdout" ? process.stdout : options.stdout;
+  var dest = streamUtils.createDestinationStream(output);
+
+  source.pipe(exportVinyl(options.format))
+    .pipe(dest);
+}
+
+module.exports = { command: "export", describe: "Exports Lynx YAML templates to another format", builder: buildCommand, handler: exportCli }

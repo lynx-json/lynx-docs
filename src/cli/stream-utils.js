@@ -14,9 +14,9 @@ function createDestStream(output) {
   return vfs.dest(output);
 }
 
-function vinylToWritable(nodeStream) {
+function vinylToWritable(writeable) {
   return through2.obj(function(file, enc, cb) {
-    nodeStream.write(file.contents.toString(), enc, cb);
+    writeable.write(file.contents.toString(), enc, cb);
   });
 };
 
