@@ -7,12 +7,12 @@ function buildCommand(yargs) {
     .usage("$0 export [--input] [--output] [--format] [--config]")
     .option("input", {
       alias: "i",
-      describe: "Input file(s) to export as glob string, array of glob strings, or stream.",
+      describe: "Input file(s) to export as glob string, array of glob strings, or stdin.",
       default: "stdin"
     })
     .option("output", {
       alias: "o",
-      describe: "Output folder or stream.",
+      describe: "Output folder or stdout.",
       default: "stdout"
     })
     .option("format", {
@@ -39,7 +39,7 @@ var exportCli = function(options) {
   var input = options.input === "stdin" ? process.stdin : options.input;
   var source = streamUtils.createSourceStream(input);
   
-  var output = options.output === "stdout" ? process.stdout : options.stdout;
+  var output = options.output === "stdout" ? process.stdout : options.output;
   var dest = streamUtils.createDestinationStream(output);
 
   source.pipe(exportVinyl(options.format))
