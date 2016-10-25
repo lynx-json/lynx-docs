@@ -19,12 +19,12 @@ describe.only("when getting metadata for a folder", function () {
     });
 
     it("should have single state, 'default'", function () {
-      meta.states.list.length.should.equal(1);
-      meta.states.list[0].name.should.equal("default");
+      meta.variants.list.length.should.equal(1);
+      meta.variants.list[0].name.should.equal("default");
     });
 
     it("should have a default state, 'default'", function () {
-      meta.states.default.name.should.equal("default");
+      meta.variants.default.name.should.equal("default");
     });
   });
 
@@ -35,12 +35,12 @@ describe.only("when getting metadata for a folder", function () {
     });
 
     it("should have a single state, 'one'", function () {
-      meta.states.list.length.should.equal(1);
-      meta.states.list[0].name.should.equal("one");
+      meta.variants.list.length.should.equal(1);
+      meta.variants.list[0].name.should.equal("one");
     });
 
     it("should have a default state, 'one'", function () {
-      meta.states.default.name.should.equal("one");
+      meta.variants.default.name.should.equal("one");
     });
   });
 
@@ -51,13 +51,13 @@ describe.only("when getting metadata for a folder", function () {
     });
 
     it("should have two states, 'default' and 'two'", function () {
-      meta.states.list.length.should.equal(2);
-      meta.states.list[0].name.should.equal("default");
-      meta.states.list[1].name.should.equal("two");
+      meta.variants.list.length.should.equal(2);
+      meta.variants.list[0].name.should.equal("default");
+      meta.variants.list[1].name.should.equal("two");
     });
 
     it("should have a default state, 'default'", function () {
-      meta.states.default.name.should.equal("default");
+      meta.variants.default.name.should.equal("default");
     });
   });
 
@@ -68,13 +68,13 @@ describe.only("when getting metadata for a folder", function () {
     });
 
     it("should have two states, 'one' and 'two'", function () {
-      meta.states.list.length.should.equal(2);
-      meta.states.list[0].name.should.equal("one");
-      meta.states.list[1].name.should.equal("two");
+      meta.variants.list.length.should.equal(2);
+      meta.variants.list[0].name.should.equal("one");
+      meta.variants.list[1].name.should.equal("two");
     });
 
     it("should not have a default state", function () {
-      should.not.exist(meta.states.default);
+      should.not.exist(meta.variants.default);
     });
   });
 
@@ -88,12 +88,12 @@ describe.only("when getting metadata for a folder", function () {
     });
 
     it("should have one state, 'default'", function () {
-      meta.states.list.length.should.equal(1);
-      meta.states.list[0].name.should.equal("default");
+      meta.variants.list.length.should.equal(1);
+      meta.variants.list[0].name.should.equal("default");
     });
 
     it("should have a default state, 'default'", function () {
-      meta.states.default.name.should.equal("default");
+      meta.variants.default.name.should.equal("default");
     });
   });
 
@@ -115,12 +115,12 @@ describe.only("when getting metadata for a folder", function () {
     });
 
     it("should have one state, 'one'", function () {
-      meta.states.list.length.should.equal(1);
-      meta.states.list[0].name.should.equal("one");
+      meta.variants.list.length.should.equal(1);
+      meta.variants.list[0].name.should.equal("one");
     });
 
     it("should have a default state, 'one'", function () {
-      meta.states.default.name.should.equal("one");
+      meta.variants.default.name.should.equal("one");
     });
   });
 
@@ -142,12 +142,12 @@ describe.only("when getting metadata for a folder", function () {
     });
 
     it("should have one state, 'one'", function () {
-      meta.states.list.length.should.equal(1);
-      meta.states.list[0].name.should.equal("one");
+      meta.variants.list.length.should.equal(1);
+      meta.variants.list[0].name.should.equal("one");
     });
 
     it("should have a default state, 'one'", function () {
-      meta.states.default.name.should.equal("one");
+      meta.variants.default.name.should.equal("one");
     });
   });
 
@@ -169,14 +169,14 @@ describe.only("when getting metadata for a folder", function () {
     });
 
     it("should have one state, 'one-two'", function () {
-      meta.states.list.length.should.equal(1);
-      meta.states.list[0].name.should.equal("one-two");
+      meta.variants.list.length.should.equal(1);
+      meta.variants.list[0].name.should.equal("one-two");
     });
 
     it("should have a default state, 'one-two'", function () {
-      meta.states.default.name.should.equal("one-two");
-      meta.states.default.template.should.equal("/x/one.yml");
-      meta.states.default.dataName.should.equal("two");
+      meta.variants.default.name.should.equal("one-two");
+      meta.variants.default.template.should.equal("/x/one.yml");
+      meta.variants.default.data.should.equal("two");
     });
   });
 });

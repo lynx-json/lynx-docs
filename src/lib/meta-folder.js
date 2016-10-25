@@ -4,19 +4,19 @@ const fs = require("fs");
 const path = require("path");
 const templatePattern = /^.*\.yml$/;
 
-function createState(name, template, dataName) {
+function createState(name, template, data) {
   return {
     name: name,
     template: template,
-    dataName: dataName
+    data: data
   };
 }
 
 module.exports = exports = folderPath => {
   var folderContents = fs.readdirSync(folderPath);
 
-  function getStates() {
-    var states = [];
+  function getVariants() {
+    var variants = [];
 
     var templateStates = folderContents.filter(n => templatePattern.test(n))
       .map(n => createState(path.parse(n).name, path.join(folderPath, n)));
@@ -25,7 +25,7 @@ module.exports = exports = folderPath => {
       var dataFolderPath = path.join(folderPath, t.name + ".data");
       if (fs.existsSync(dataFolderPath)) {
         let contents = fs.readdirSync(dataFolderPath);
-        states = states.concat(contents.map(n => {
+        variants = variants.concat(contents.map(n => {
           var stateName = path.parse(n).name;
           if (stateName === "default") stateName = t.name;
           else if (t.name !== "default") stateName = t.name + "-" + stateName;
@@ -33,27 +33,27 @@ module.exports = exports = folderPath => {
           return createState(stateName, t.template, path.parse(n).name);
         }));
       } else {
-        states.push(t);
+        variants.push(t);
       }
     });
 
-    return states;
+    return variants;
   }
 
-  function getDefaultState(states) {
-    if (states.length === 1) return states[0];
-    return states.find(s => s.name === "default");
+  function getDefaultVariant(variants) {
+    if (variants.length === 1) return variants[0];
+    return variants.find(s => s.name === "default");
   }
 
   var meta = {
-    states: {}
+    variants: {}
   };
 
-  var states = getStates();
-  meta.states.list = states;
+  var variants = getVariants();
+  meta.variants.list = variants;
 
-  var defaultState = getDefaultState(states);
-  if (defaultState) meta.states.default = defaultState;
+  var defaultVariant = getDefaultVariant(variants);
+  if (defaultVariant) meta.variants.default = defaultVariant;
 
   return meta;
 };

@@ -3,7 +3,7 @@ const url = require("url");
 const path = require("path");
 const fs = require("fs");
 const mime = require("mime");
-const metaVariations = require("../lib/meta-folder");
+const getFolderMetadata = require("../lib/meta-folder");
 const exportYaml = require("../cli/export");
 
 function notFound(ctx) {
@@ -19,12 +19,18 @@ function serverError(ctx) {
 }
 
 function handleDirectory(ctx) {
-  var variations = metaVariations(ctx.req.foldername);
+  var meta = getFolderMetadata(ctx.req.foldername);
 
-  var variation = variations.states.default;
+  var variant = meta.variants.default;
 
   ctx.res.setHeader("Content-Type", "application/lynx+json");
-  exportYaml.handler({ input: variation.template, output: ctx.res, format: "lynx", state: variation.dataName });
+  exportYaml.handler({
+    format: "lynx",
+    input: variant.template,
+    output: ctx.res,
+    state: variant.data
+  });
+
   //TODO: Need to figure out handling of non-default states
 }
 
@@ -32,7 +38,7 @@ function handleFile(ctx) {
   fs.readFile(ctx.req.filename, "binary", function(err, file) {
     if (err) return serverError(ctx);
 
-    ctx.res.writeHead(200, { "Content-Type": mime.lookup(ctx.req.filename)});
+    ctx.res.writeHead(200, { "Content-Type": mime.lookup(ctx.req.filename) });
     ctx.res.write(file, "binary");
     ctx.res.end();
   });

@@ -38,9 +38,9 @@ function getDataFolderPath(templatePath) {
   return path.resolve(templatePath, relative);
 }
 
-function resolveData(templatePath, dataName) {
+function resolveData(templatePath, data) {
   var dataFolderPath = getDataFolderPath(templatePath)
-  var dataPath = path.resolve(dataFolderPath, dataName);
+  var dataPath = path.resolve(dataFolderPath, data);
   try {
     return readDataFile(dataPath);
   } catch (err) {
