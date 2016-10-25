@@ -18,7 +18,7 @@ function buildCommand(yargs) {
     .option("format", {
       alias: "f",
       describe: "The format to export to.",
-      default: 'handlebars'
+      default: 'lynx'
     })
     .option("config", {
       alias: "c",
@@ -35,14 +35,14 @@ var exportCli = function(options) {
     var config = path.resolve(process.cwd(), options.config);
     require(config);
   }
-  
+
   var input = options.input === "stdin" ? process.stdin : options.input;
   var source = streamUtils.createSourceStream(input);
-  
+
   var output = options.output === "stdout" ? process.stdout : options.output;
   var dest = streamUtils.createDestinationStream(output);
 
-  source.pipe(exportVinyl(options.format))
+  source.pipe(exportVinyl(options))
     .pipe(dest);
 }
 
