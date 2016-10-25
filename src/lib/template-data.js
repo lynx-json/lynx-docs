@@ -1,8 +1,9 @@
 var fs = require("fs");
 var path = require("path");
-var parseYaml = require("../parse-yaml");
+var parseYaml = require("./parse-yaml");
 
 var extensions = [".js", ".yml", ".json"];
+
 
 function readDataFile(dataFile) {
   var ext = extensions.find(function(value){
@@ -31,4 +32,21 @@ function readDataFile(dataFile) {
   }
 }
 
-module.exports = exports = readDataFile;
+function getDataFolderPath(templatePath) {
+  var name = path.parse(templatePath).name;
+  var relative = ".." + path.sep + name + ".data" + path.sep;
+  return path.resolve(templatePath, relative);
+}
+
+function resolveData(templatePath, dataName) {
+  var dataFolderPath = getDataFolderPath(templatePath)
+  var dataPath = path.resolve(dataFolderPath, dataName);
+  try {
+    return readDataFile(dataPath);
+  } catch (err) {
+    console.log(err);
+    return {};
+  }
+}
+
+module.exports = exports = resolveData

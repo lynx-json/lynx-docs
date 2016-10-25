@@ -1,5 +1,5 @@
 var exportToHandleBars = require("./export-yaml-to-hb");
-var states = require("../states");
+var templateData = require("../template-data");
 var handlebars = require("handlebars");
 
 function bindData(contents, data) {
@@ -17,7 +17,7 @@ function exportLynx(kvp, cb, options) {
 
   options.state = options.state || "default";
 
-  var data = states.resolveStateData(options.origin.path, options.state);
+  var data = templateData(options.origin.path, options.state);
   //TODO: Need to add urls onto the data object
   //data.urls = getUrlDataFromSomewhere();
 

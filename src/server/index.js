@@ -3,7 +3,7 @@ const url = require("url");
 const path = require("path");
 const fs = require("fs");
 const mime = require("mime");
-const templateStates = require("../lib/states");
+const metaVariations = require("../lib/meta-folder");
 const exportYaml = require("../cli/export");
 
 function notFound(ctx) {
@@ -19,11 +19,12 @@ function serverError(ctx) {
 }
 
 function handleDirectory(ctx) {
-  var templatePath = path.resolve(ctx.req.foldername, "default.yml");
-  var states = templateStates.getStates(templatePath);
+  var variations = metaVariations(ctx.req.foldername);
+
+  var variation = variations.states.default;
 
   ctx.res.setHeader("Content-Type", "application/lynx+json");
-  exportYaml.handler({ input: templatePath, output: ctx.res, format: "lynx", state: states.default.name });
+  exportYaml.handler({ input: variation.template, output: ctx.res, format: "lynx", state: variation.dataName });
   //TODO: Need to figure out handling of non-default states
 }
 
