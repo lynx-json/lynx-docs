@@ -3,12 +3,8 @@ const url = require("url");
 const path = require("path");
 const fs = require("fs");
 const mime = require("mime");
-const getFolderMetadata = require("../lib/meta-folder");
-const exportYaml = require("../lib/export-yaml");
-const finish = require("../lib/finish-yaml");
-const expand = require("../lib/expand-yaml");
-const handlebars = require("handlebars");
-const YAML = require("yamljs");
+const templateStates = require("../lib/states");
+const exportYaml = require("../cli/export");
 
 function notFound(ctx) {
   ctx.res.writeHead(404, { "Content-Type": "text/plain" });
@@ -22,51 +18,19 @@ function serverError(ctx) {
   ctx.res.end();
 }
 
-function readData(filePath) {
-  var content = fs.readFileSync(filePath);
-  var parsedFilePath = path.parse(filePath);
-  
-  if (parsedFilePath.ext === ".json") {
-    return JSON.parse(content.toString());
-  } else if (parsedFilePath.ext === ".yml" || parsedFilePath.ext === ".yaml") {
-    return YAML.parse(content.toString());
-  }
-  
-  throw new Error("Failed to read data from " + filePath);
-}
-
-function writeStateDocument(ctx) {
-  var state = ctx.res.state;
-  //TODO: use parse yaml module...
-  var yaml = YAML.parse(fs.readFileSync(state.template).toString());
-  yaml = expand({ value: yaml });
-  yaml = finish(yaml);
-
-  var output = [];
-  exportYaml("handlebars", yaml, c => output.push(c));
-  
-  var data = state.dataFile ? readData(state.dataFile) : {};
-  var content = handlebars.compile(output.join(""))(data);
-  
-  ctx.res.writeHead(200, { "Content-Type": "application/lynx+json" });
-  ctx.res.write(content);
-  ctx.res.end();
-}
-
 function handleDirectory(ctx) {
-  var metadata = getFolderMetadata(ctx.req.foldername);
-  
-  if (metadata.states.default) {
-    ctx.res.state = metadata.states.default;
-  } 
-  
-  writeStateDocument(ctx);
+  var templatePath = path.resolve(ctx.req.foldername, "default.yml");
+  var states = templateStates.getStates(templatePath);
+
+  ctx.res.setHeader("Content-Type", "application/lynx+json");
+  exportYaml.handler({ input: templatePath, output: ctx.res, format: "lynx", state: states.default.name });
+  //TODO: Need to figure out handling of non-default states
 }
 
 function handleFile(ctx) {
   fs.readFile(ctx.req.filename, "binary", function(err, file) {
     if (err) return serverError(ctx);
-    
+
     ctx.res.writeHead(200, { "Content-Type": mime.lookup(ctx.req.filename)});
     ctx.res.write(file, "binary");
     ctx.res.end();
@@ -79,10 +43,10 @@ var server = http.createServer((req, res) => {
   var ctx = { req: req, res: res };
   ctx.req.pathname = url.parse(req.url).pathname;
   ctx.req.filename = path.join(process.cwd(), ctx.req.pathname);
-  
+
   fs.exists(ctx.req.filename, exists => {
     if (!exists) return notFound(ctx);
-    
+
     if (fs.statSync(ctx.req.filename).isDirectory()) {
       ctx.req.foldername = ctx.req.filename;
       delete ctx.req.filename;

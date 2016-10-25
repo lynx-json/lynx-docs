@@ -17,6 +17,7 @@ function createDestStream(output) {
 function vinylToWritable(writeable) {
   return through2.obj(function(file, enc, cb) {
     writeable.write(file.contents.toString(), enc, cb);
+    writeable.end();
   });
 };
 
