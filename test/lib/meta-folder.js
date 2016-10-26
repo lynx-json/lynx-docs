@@ -5,7 +5,7 @@ var sinon = require("sinon");
 var getFolderMetadata = require("../../src/lib/meta-folder");
 var fs = require("fs");
 
-describe.only("when getting metadata for a folder", function () {
+describe("when getting metadata for a folder", function () {
   var meta;
 
   afterEach(function () {
