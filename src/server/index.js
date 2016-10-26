@@ -3,8 +3,9 @@ const url = require("url");
 const path = require("path");
 const fs = require("fs");
 const mime = require("mime");
-const getFolderMetadata = require("../lib/meta-folder");
 const exportYaml = require("../cli/export");
+const parseYaml = require("../lib/parse-yaml");
+const YAML = require("yamljs");
 
 function notFound(ctx) {
   ctx.res.writeHead(404, { "Content-Type": "text/plain" });
@@ -18,23 +19,28 @@ function serverError(ctx) {
   ctx.res.end();
 }
 
-function handleDirectory(ctx) {
-  var meta = getFolderMetadata(ctx.req.foldername);
+function getRealmMetadata(folderPath) {
+  return parseYaml(fs.readFileSync(path.join(folderPath, ".meta.yml")));
+}
 
-  var variant = meta.variants.default;
+function serveRealm(ctx) {
+  var metadata = getRealmMetadata(ctx.req.foldername);
+  var variantName = ctx.req.query.variant || metadata.default || "default";
+  
+  var variant = metadata.variants.find(v => v.name === variantName);
+  
+  if (!variant) return notFound(ctx);
 
   ctx.res.setHeader("Content-Type", "application/lynx+json");
   exportYaml.handler({
     format: "lynx",
     input: variant.template,
     output: ctx.res,
-    state: variant.data
+    data: variant.data
   });
-
-  //TODO: Need to figure out handling of non-default states
 }
 
-function handleFile(ctx) {
+function serveFile(ctx) {
   fs.readFile(ctx.req.filename, "binary", function(err, file) {
     if (err) return serverError(ctx);
 
@@ -48,7 +54,10 @@ var port = process.argv[2] || 0;
 
 var server = http.createServer((req, res) => {
   var ctx = { req: req, res: res };
-  ctx.req.pathname = url.parse(req.url).pathname;
+  var parsedURL = url.parse(req.url, true);
+  ctx.req.pathname = parsedURL.pathname;
+  ctx.req.query = parsedURL.query;
+  
   ctx.req.filename = path.join(process.cwd(), ctx.req.pathname);
 
   fs.exists(ctx.req.filename, exists => {
@@ -57,9 +66,9 @@ var server = http.createServer((req, res) => {
     if (fs.statSync(ctx.req.filename).isDirectory()) {
       ctx.req.foldername = ctx.req.filename;
       delete ctx.req.filename;
-      return handleDirectory(ctx);
+      return serveRealm(ctx);
     } else {
-      handleFile(ctx);
+      serveFile(ctx);
     }
   })
 }).listen(port);

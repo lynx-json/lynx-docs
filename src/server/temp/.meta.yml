@@ -1,0 +1,4 @@
+default: default
+variants:
+  - name: default
+    template: /Users/johnhowes/lynx-json-org/lynx-docs/src/server/temp/default.lynx.yml
