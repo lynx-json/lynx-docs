@@ -30,6 +30,11 @@ function serveRealm(ctx) {
   var variant = metadata.variants.find(v => v.name === variantName);
   
   if (!variant) return notFound(ctx);
+  
+  // [later] If there is a variant, display it along with alternates.
+  // [later] Use query string param to just display the variant (without alternates)
+  // [now] If no variant selected, but variants exist display list of variants.
+  // [now] If no variant selected, but child realms exist, display list of realms.
 
   ctx.res.setHeader("Content-Type", "application/lynx+json");
   exportYaml.handler({
