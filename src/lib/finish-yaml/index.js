@@ -1,8 +1,8 @@
 var util = require("util");
 
-function finishing(kvp) {
+function finishing(kvp, options) {
   finishingFunctions.forEach(function (fn) {
-    var result = fn(kvp);
+    var result = fn(kvp, options);
     if (result) kvp = result;
   });
 
@@ -11,7 +11,7 @@ function finishing(kvp) {
   Object.getOwnPropertyNames(kvp.value).forEach(function (childKey) {
     var childValue = kvp.value[childKey];
     var childKvp = { key: childKey, value: childValue };
-    var result = finishing(childKvp);
+    var result = finishing(childKvp, options);
     
     if (result) {
       kvp.value[result.key] = result.value;
@@ -34,5 +34,7 @@ finishing.add = function(finishingFn) {
 finishing.clear = function() {
   finishingFunctions = [];
 };
+
+require("./addl-functions")(finishing);
 
 module.exports = exports = finishing;

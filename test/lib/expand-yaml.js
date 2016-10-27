@@ -14,6 +14,7 @@ describe("when expanding YAML", function () {
     
     it("should have a spec and hints", function() {
       should.exist(kvp.value.spec);
+      should.not.exist(kvp.value.spec.name);
       should.exist(kvp.value.spec.hints);
     });
   });
@@ -28,6 +29,7 @@ describe("when expanding YAML", function () {
     
     it("should have a spec and hints", function() {
       should.exist(kvp.value.spec);
+      should.not.exist(kvp.value.spec.name);
       should.exist(kvp.value.spec.hints);
     });
   });
@@ -42,6 +44,7 @@ describe("when expanding YAML", function () {
     
     it("should have a spec and hints", function() {
       should.exist(kvp.value.spec);
+      should.not.exist(kvp.value.spec.name);
       should.exist(kvp.value.spec.hints);
     });
   });
@@ -58,8 +61,10 @@ describe("when expanding YAML", function () {
     
     it("should have a spec and hints", function() {
       should.exist(kvp.value.spec);
+      should.not.exist(kvp.value.spec.name);
       should.exist(kvp.value.spec.hints);
       should.exist(kvp.value.value.greeting.spec);
+      kvp.value.value.greeting.spec.name.should.equal("greeting");
       should.exist(kvp.value.value.greeting.spec.hints);
     });
   });
@@ -75,6 +80,7 @@ describe("when expanding YAML", function () {
     
     it("should have a spec and hints", function() {
       should.exist(kvp.value.spec);
+      should.not.exist(kvp.value.spec.name);
       should.exist(kvp.value.spec.hints);
     });
   });
@@ -89,25 +95,48 @@ describe("when expanding YAML", function () {
     
     it("should have a spec and hints", function() {
       should.exist(kvp.value.spec);
+      should.not.exist(kvp.value.spec.name);
       should.exist(kvp.value.spec.hints);
     });
   });
 
   describe("an expanded partial node (spec)", function () {
-    var kvp = expandYaml({ value: { spec: { hints: [ "text" ] } } });
-    
-    it("should have the correct value", function () {
-      kvp.value.should.have.property("value");
-      expect(kvp.value.value).to.be.null;
+    describe("with a hints array", function () {
+      var kvp = expandYaml({ value: { spec: { hints: [ "text" ] } } });
+      
+      it("should have the correct value", function () {
+        kvp.value.should.have.property("value");
+        expect(kvp.value.value).to.be.null;
+      });
+      
+      it("should have a spec and hints", function() {
+        should.exist(kvp.value.spec);
+        should.not.exist(kvp.value.spec.name);
+        should.exist(kvp.value.spec.hints);
+      });
+      
+      it("should contain the predefined hint", function () {
+        kvp.value.spec.hints[0].should.equal("text");
+      });
     });
     
-    it("should have a spec and hints", function() {
-      should.exist(kvp.value.spec);
-      should.exist(kvp.value.spec.hints);
-    });
-    
-    it("should contain the predefined hint", function () {
-      kvp.value.spec.hints[0].should.equal("text");
+    describe("with a hints string", function () {
+      var kvp = expandYaml({ value: { spec: { hints: "text" } } });
+      
+      it("should have the correct value", function () {
+        kvp.value.should.have.property("value");
+        expect(kvp.value.value).to.be.null;
+      });
+      
+      it("should have a spec and hints", function() {
+        should.exist(kvp.value.spec);
+        should.not.exist(kvp.value.spec.name);
+        should.exist(kvp.value.spec.hints);
+      });
+      
+      it("should contain the predefined hint", function () {
+        kvp.value.spec.hints[0].should.equal("text");
+      });
     });
   });
 
@@ -123,8 +152,10 @@ describe("when expanding YAML", function () {
     
     it("should have a spec and hints", function() {
       should.exist(kvp.value.spec);
+      should.not.exist(kvp.value.spec.name);
       should.exist(kvp.value.spec.hints);
       should.exist(kvp.value["value@"].greeting.spec);
+      kvp.value["value@"].greeting.spec.name.should.equal("greeting");
       should.exist(kvp.value["value@"].greeting.spec.hints);
     });
   });
@@ -141,8 +172,10 @@ describe("when expanding YAML", function () {
     
     it("should have a spec and hints", function() {
       should.exist(kvp.value.spec);
+      should.not.exist(kvp.value.spec.name);
       should.exist(kvp.value.spec.hints);
       should.exist(kvp.value["value#"].greeting.spec);
+      kvp.value["value#"].greeting.spec.name.should.equal("greeting");
       should.exist(kvp.value["value#"].greeting.spec.hints);
     });
   });
@@ -159,8 +192,10 @@ describe("when expanding YAML", function () {
     
     it("should have a spec and hints", function() {
       should.exist(kvp.value.spec);
+      should.not.exist(kvp.value.spec.name);
       should.exist(kvp.value.spec.hints);
       should.exist(kvp.value["value@dataVariable"].greeting.spec);
+      kvp.value["value@dataVariable"].greeting.spec.name.should.equal("greeting");
       should.exist(kvp.value["value@dataVariable"].greeting.spec.hints);
     });
   });
@@ -177,8 +212,10 @@ describe("when expanding YAML", function () {
     
     it("should have a spec and hints", function() {
       should.exist(kvp.value.spec);
+      should.not.exist(kvp.value.spec.name);
       should.exist(kvp.value.spec.hints);
       should.exist(kvp.value["value#dataVariable"].greeting.spec);
+      kvp.value["value#dataVariable"].greeting.spec.name.should.equal("greeting");
       should.exist(kvp.value["value#dataVariable"].greeting.spec.hints);
     });
   });
@@ -194,8 +231,10 @@ describe("when expanding YAML", function () {
     
     it("should have a spec and hints", function() {
       should.exist(kvp.value.spec);
+      should.not.exist(kvp.value.spec.name);
       should.exist(kvp.value.spec.hints);
       should.exist(kvp.value.value["array@"].spec);
+      kvp.value.value["array@"].spec.name.should.equal("array");
       should.exist(kvp.value.value["array@"].spec.hints);
     });
   });
@@ -213,10 +252,13 @@ describe("when expanding YAML", function () {
     
     it("should have a spec and hints", function() {
       should.exist(kvp.value.spec);
+      should.not.exist(kvp.value.spec.name);
       should.exist(kvp.value.spec.hints);
       should.exist(kvp.value.value["object#"].spec);
+      kvp.value.value["object#"].spec.name.should.equal("object");
       should.exist(kvp.value.value["object#"].spec.hints);
       should.exist(kvp.value.value["object#"].value.greeting.spec);
+      kvp.value.value["object#"].value.greeting.spec.name.should.equal("greeting");
       should.exist(kvp.value.value["object#"].value.greeting.spec.hints);
     });
   });

@@ -40,21 +40,23 @@ function convertValueToNode(value) {
   };
 }
 
-function expandNode(node) {
+function expandNode(node, options) {
   info("expandNode");
   if (!hasValueProperty(node)) node.value = null;
   if (!node.spec) node.spec = { hints: [] };
+  if (!node.spec.hints) node.spec.hints = [];
+  if (!util.isArray(node.spec.hints)) node.spec.hints = [node.spec.hints];
   return node;
 }
 
-function expandNodeValue(node) {
+function expandNodeValue(node, options) {
   info("expandNodeValue", node.value);
   var valueKey = getValuePropertyName(node);
 
   //TODO: Review document-level partials.
   if (partials.isPartial(node[valueKey], valueKey)) {
     var partial = partials.getPartial(node[valueKey], valueKey);
-    var replacement = expandValue({ value: partial.value, key: partial.key }).value;
+    var replacement = expandValue({ value: partial.value, key: partial.key }, options).value;
     delete node[valueKey];
     node.value = replacement.value;
     node.spec = replacement.spec;
@@ -63,7 +65,7 @@ function expandNodeValue(node) {
 
   if (util.isArray(node[valueKey])) {
     node[valueKey] = node[valueKey].map(function (childValue, childKey) {
-      return expandValue({ value: childValue, key: childKey }).value;
+      return expandValue({ value: childValue, key: childKey }, options).value;
     });
   }
   else if (util.isObject(node[valueKey])) {
@@ -77,23 +79,28 @@ function expandNodeValue(node) {
         childValue = partial.value;
       }
 
-      node[valueKey][childKey] = expandValue({ value: childValue, key: childKey }).value;
+      node[valueKey][childKey] = expandValue({ value: childValue, key: childKey }, options).value;
     });
   }
 }
 
-function expandValue(kvp) {
+function expandValue(kvp, options) {
   info("expandValue", kvp);
   var node;
 
   if (isNodeLike(kvp.value)) {
-    node = expandNode(kvp.value);
+    node = expandNode(kvp.value, options);
   }
   else {
-    node = convertValueToNode(kvp.value);
+    node = convertValueToNode(kvp.value, options);
   }
-
-  expandNodeValue(node);
+  
+  if (kvp.key) {
+    var metadata = getMetadata(kvp.key);
+    node.spec.name = metadata.key;
+  }
+  
+  expandNodeValue(node, options);
 
   var result = {
     key: kvp.key,
