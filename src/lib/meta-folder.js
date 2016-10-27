@@ -10,7 +10,7 @@ const dataFilePattern = /^(.*)\.data(\.(.*))?\.yml$/;
 function createVariant(name, templateFile, dataFile) {
   return {
     name: name,
-    template: templateFile,
+    template: path.format(templateFile),
     data: dataFile
   };
 }
@@ -22,7 +22,7 @@ function deriveVariantsForTemplateFile(templateFile, templateName, contents) {
       var result = dataFilePattern.exec(item);
       if(!result || result[1] !== templateName) return;
       var name = result[3] || templateName;
-      templateVariants.push(createVariant(name, templateFile.base, item));
+      templateVariants.push(createVariant(name, templateFile, path.join(templateFile.dir, item)));
     });
     //add files from data folders for the template
     contents.forEach(function(item){
@@ -30,14 +30,14 @@ function deriveVariantsForTemplateFile(templateFile, templateName, contents) {
       if(!result || result[1] !== templateName) return;
 
       fs.readdirSync(path.join(templateFile.dir, item)).forEach(function(data){
-        var dataFilePath = path.join(item, data);
+        var dataFilePath = path.join(templateFile.dir, item, data);
         var dataName = path.parse(data).name;
         var name = dataName === "default" ? templateName : dataName;
-        templateVariants.push(createVariant(name, templateFile.base, dataFilePath));
+        templateVariants.push(createVariant(name, templateFile, dataFilePath));
       });
     });
     //if there are no variants, then the template itself is the variant
-    if(templateVariants.length === 0) templateVariants.push(createVariant(templateName, templateFile.base));
+    if(templateVariants.length === 0) templateVariants.push(createVariant(templateName, templateFile));
 
     return templateVariants;
 }
