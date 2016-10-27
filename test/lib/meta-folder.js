@@ -12,7 +12,7 @@ function statsStub(isDirectory) {
   }
 }
 
-describe.only("when getting metadata for a folder", function () {
+describe("when getting metadata for a folder", function () {
 
   afterEach(function () {
     fs.readdirSync.restore();
