@@ -32,30 +32,35 @@ function deriveVariantsForTemplateFile(templateFile, templateName, contents) {
       fs.readdirSync(path.join(templateFile.dir, item)).forEach(function(data){
         var dataFilePath = path.join(item, data);
         var dataName = path.parse(data).name;
-        var name = templateName === dataName ? dataName: templateName + "-" + dataName;
+        var name = dataName === "default" ? templateName : dataName;
         templateVariants.push(createVariant(name, templateFile.base, dataFilePath));
       });
     });
-    //if there are no data files, then the template itself is the variant
+    //if there are no variants, then the template itself is the variant
     if(templateVariants.length === 0) templateVariants.push(createVariant(templateName, templateFile.base));
 
     return templateVariants;
 }
 
-function Realm(realmName) {
+function Realm(folderPath) {
   var self = this;
-  var parsedPath = path.parse(realmName);
-  var dir = parsedPath.dir ? "/" + parsedPath.dir + "/" : "/";
-  self.name = dir + parsedPath.base + "/";
-  var contents = fs.readdirSync(realmName);
+  var contents = fs.readdirSync(folderPath);
+
+  function calculateRealmName() {
+    var folder = path.parse(folderPath);
+    var dir = folder.dir ? "/" + folder.dir + "/" : "/";
+    return dir + folder.base + "/";
+  }
+
+  self.realm = calculateRealmName();
 
   self.getRealms = function getRealms(){
     return contents.filter(function(item){
-      var stats = fs.statSync(path.join(realmName, item));
+      var stats = fs.statSync(path.join(folderPath, item));
       return stats.isDirectory() && !dataFolderPattern.test(item);
     })
     .map(function(item){
-      return new Realm(path.join(self.name.substr(1), item));
+      return new Realm(path.join(folderPath, item));
     });
   };
 
@@ -64,7 +69,7 @@ function Realm(realmName) {
     contents.forEach(function(item) {
       var result = templatePattern.exec(item);
       if(!result) return;
-      var templateFile = path.parse(path.join(realmName, item));
+      var templateFile = path.parse(path.join(folderPath, item));
       var templateVariants = deriveVariantsForTemplateFile(templateFile, result[1], contents);
       Array.prototype.push.apply(variants, templateVariants);
     });

@@ -28,7 +28,28 @@ describe.only("when getting metadata for a folder", function () {
     });
 
     it("should have a realm name of '/x/'", function () {
-      realm.name.should.equal("/x/");
+      realm.realm.should.equal("/x/");
+    });
+  });
+
+  describe("a folder with name 'x' and sub folders ['y', 'z']", function (){
+    var realm;
+
+    beforeEach(function () {
+      sinon.stub(fs, "readdirSync").withArgs("x").returns(['y', 'z']);
+      sinon.stub(fs, "statSync").returns(statsStub(true));
+      realm =  getFolderMetadata("x");
+    });
+
+    it("should have a realm name of '/x/'", function () {
+      realm.realm.should.equal("/x/");
+    });
+
+    it("should have realms with names ['/x/y/','/x/z/']", function() {
+      var subRealms = realm.getRealms();
+      subRealms.length.should.equal(2);
+      subRealms[0].realm.should.equal("/x/y/");
+      subRealms[1].realm.should.equal("/x/z/");
     });
   });
 
@@ -179,10 +200,10 @@ describe.only("when getting metadata for a folder", function () {
       variants = getFolderMetadata("x").getVariants();
     });
 
-    it("should have variants ['one-default', 'one-invalid']", function () {
+    it("should have variants ['one', 'invalid']", function () {
       variants.length.should.equal(2);
-      variants[0].name.should.equal("one-default");
-      variants[1].name.should.equal("one-invalid");
+      variants[0].name.should.equal("one");
+      variants[1].name.should.equal("invalid");
     });
 
     it("should have a value for template and data", function () {
