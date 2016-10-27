@@ -2,58 +2,74 @@
 
 const fs = require("fs");
 const path = require("path");
-const templatePattern = /^.*\.yml$/;
-
-function createState(name, template, data) {
-  return {
-    name: name,
-    template: template,
-    data: data
-  };
-}
+const metaPattern = /^.*\.meta.yml$/;
+const templatePattern = /^(.*)\.lynx\.yml$/;
+const dataFolderPattern = /^(.*)\.data$/;
+const dataFilePattern = /^(.*)\.data(\.(.*))?\.yml$/;
 
 module.exports = exports = folderPath => {
-  var folderContents = fs.readdirSync(folderPath);
 
-  function getVariants() {
-    var variants = [];
+  function createVariant(name, templateFile, dataFile) {
+    return {
+      name: name,
+      template: templateFile,
+      data: dataFile
+    };
+  }
 
-    var templateStates = folderContents.filter(n => templatePattern.test(n))
-      .map(n => createState(path.parse(n).name, path.join(folderPath, n)));
+  function deriveVariantsForTemplateFile(templateFile, templateName, contents) {
+      var templateVariants = [];
+      //add data files for the template
+      contents.forEach(function(item){
+        var result = dataFilePattern.exec(item);
+        if(!result || !result[1] === templateName) return;
+        var name = result[3] || templateName;
+        templateVariants.push(createVariant(name, templateFile.base, item));
+      });
+      //add files from data folders for the template
+      contents.forEach(function(item){
+        var result = dataFolderPattern.exec(item);
+        if(!result || result[1] !== templateName) return;
 
-    templateStates.forEach(t => {
-      var dataFolderPath = path.join(folderPath, t.name + ".data");
-      if (fs.existsSync(dataFolderPath)) {
-        let contents = fs.readdirSync(dataFolderPath);
-        variants = variants.concat(contents.map(n => {
-          var stateName = path.parse(n).name;
-          if (stateName === "default") stateName = t.name;
-          else if (t.name !== "default") stateName = t.name + "-" + stateName;
+        fs.readdirSync(path.resolve(templateFile.dir, item)).forEach(function(data){
+          var dataFilePath = path.join(item, data);
+          var dataName = path.parse(data).name;
+          var name = templateName === dataName ? dataName: templateName + "-" + dataName;
+          templateVariants.push(createVariant(name, templateFile.base, dataFilePath));
+        });
+      });
+      //if there are no data files, then the template itself is the variant
+      if(templateVariants.length === 0) templateVariants.push(createVariant(templateName, templateFile.base));
 
-          return createState(stateName, t.template, path.parse(n).name);
-        }));
-      } else {
-        variants.push(t);
-      }
+      return templateVariants;
+  }
+
+  function deriveFromFileSystem(folder){
+    var contents = fs.readdirSync(folder);
+
+    var realm = { name: folder, realms: [], variants: [] };
+
+    realm.realms = contents.filter(function(item){
+      var stats = fs.statSync(path.resolve(folder, item));
+      return stats.isDirectory() && !dataFolderPattern.test(item);
     });
 
-    return variants;
+    contents.forEach(function(item) {
+      var result = templatePattern.exec(item);
+      if(!result) return;
+      var templateFile = path.parse(path.join(folder, item));
+      var templateVariants = deriveVariantsForTemplateFile(templateFile, result[1], contents);
+      Array.prototype.push.apply(realm.variants, templateVariants);
+    });
+
+    return realm;
   }
 
-  function getDefaultVariant(variants) {
-    if (variants.length === 1) return variants[0];
-    return variants.find(s => s.name === "default");
+  function getRealm(folder) {
+
+    var realm = deriveFromFileSystem(folder);
+    return realm;
   }
 
-  var meta = {
-    variants: {}
-  };
-
-  var variants = getVariants();
-  meta.variants.list = variants;
-
-  var defaultVariant = getDefaultVariant(variants);
-  if (defaultVariant) meta.variants.default = defaultVariant;
-
-  return meta;
+  return getRealm(folderPath);
 };
