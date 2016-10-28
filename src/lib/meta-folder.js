@@ -114,14 +114,14 @@ function Realm(pathOrMeta, parent) {
   }
 
   function applyMetadata() {
-    if (!self.meta) return;
-
-    for (var k in self.meta) {
-      if (self.meta.hasOwnProperty(k) && !self.hasOwnProperty(k)) { self[k] = self.meta[k]; }
-    }
+    var meta = self.meta;
     delete self.meta;
-  }
 
+    if (!meta) return;
+    for (var k in meta) {
+      if (meta.hasOwnProperty(k) && !self.hasOwnProperty(k)) { self[k] = meta[k]; }
+    }
+  }
 
   self.parent = parent;
   if (util.isString(pathOrMeta)) {
