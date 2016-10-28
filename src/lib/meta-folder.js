@@ -2,6 +2,8 @@
 
 const fs = require("fs");
 const path = require("path");
+const url = require("url");
+const parseYaml = require("./parse-yaml");
 const metaPattern = /^.*\.meta.yml$/;
 const templatePattern = /^(.*)\.lynx\.yml$/;
 const dataFolderPattern = /^(.*)\.data$/;
@@ -42,40 +44,56 @@ function deriveVariantsForTemplateFile(templateFile, templateName, contents) {
     return templateVariants;
 }
 
-function Realm(folderPath) {
-  var self = this;
+function getVariantsForFolder(folderPath){
+  var variants = [];
   var contents = fs.readdirSync(folderPath);
+  contents.forEach(function(item) {
+    var result = templatePattern.exec(item);
+    if(!result) return;
+    var templateFile = path.parse(path.join(folderPath, item));
+    var templateVariants = deriveVariantsForTemplateFile(templateFile, result[1], contents);
+    Array.prototype.push.apply(variants, templateVariants);
+  });
+  return variants;
+};
 
-  function calculateRealmName() {
+function getFileSystemMeta(folderPath){
+  var metaFile = fs.readdirSync(folderPath).find(function(item) { return metaPattern.test(item); });
+  if(!metaFile) return null;
+
+  return parseYaml(fs.readFileSync(path.join(folderPath, metaFile)));
+}
+
+function Realm(folderPath, baseRealm) {
+  var self = this;
+
+  function calculateRealmValue() {
+    var value = meta && meta.realm;
+    if(value) return url.resolve(baseRealm, value);
+
     var folder = path.parse(folderPath);
     var dir = folder.dir ? "/" + folder.dir + "/" : "/";
-    return dir + folder.base + "/";
+    value = dir + folder.base + "/";
+    return url.resolve(baseRealm, value);
   }
 
-  self.realm = calculateRealmName();
+  var meta = getFileSystemMeta(folderPath);
+  self.realm = calculateRealmValue();
+  var variants = getVariantsForFolder(folderPath);
 
   self.getRealms = function getRealms(){
-    return contents.filter(function(item){
+    return fs.readdirSync(folderPath).filter(function(item){
       var stats = fs.statSync(path.join(folderPath, item));
       return stats.isDirectory() && !dataFolderPattern.test(item);
     })
     .map(function(item){
-      return new Realm(path.join(folderPath, item));
+      return new Realm(path.join(folderPath, item), self.realm);
     });
   };
 
   self.getVariants = function getVariants(){
-    var variants = [];
-    contents.forEach(function(item) {
-      var result = templatePattern.exec(item);
-      if(!result) return;
-      var templateFile = path.parse(path.join(folderPath, item));
-      var templateVariants = deriveVariantsForTemplateFile(templateFile, result[1], contents);
-      Array.prototype.push.apply(variants, templateVariants);
-    });
-
     return variants;
-  };
+  }
 }
 
 module.exports = exports = folderPath => {

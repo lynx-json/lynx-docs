@@ -36,7 +36,10 @@ describe("when getting metadata for a folder", function () {
     var realm;
 
     beforeEach(function () {
-      sinon.stub(fs, "readdirSync").withArgs("x").returns(['y', 'z']);
+      var readdirStub = sinon.stub(fs, "readdirSync");
+      readdirStub.withArgs("x").returns(['y', 'z']);
+      readdirStub.returns([]);
+
       sinon.stub(fs, "statSync").returns(statsStub(true));
       realm =  getFolderMetadata("x");
     });
