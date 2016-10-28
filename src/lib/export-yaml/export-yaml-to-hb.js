@@ -17,6 +17,12 @@ function exportObjectValueTemplate(meta, cb) {
   cb(" {{" + meta.template.section.replace(/^#|^\^/, "/") + "}} ");
 }
 
+function exportSimpleValueTemplate(meta, cb) {
+  cb(" {{" + meta.template.section.replace(/</, "#") + "}} ");
+  cb("{{{" + meta.template.section.replace(/</, "") + "}}}");
+  cb(" {{" + meta.template.section.replace(/</, "/") + "}} ");
+}
+
 function exportArrayValue(meta, cb) {
   var value = meta.src.value;
   var key = meta.src.key;
@@ -43,7 +49,8 @@ function exportObjectValue(meta, cb) {
   
   cb("{");
   
-  var childKeys = Object.getOwnPropertyNames(meta.children);
+  var childKeys = [];
+  if (meta.children) childKeys = Object.getOwnPropertyNames(meta.children);
   var lastChildKeyIndex = childKeys.length - 1;
   
   childKeys.forEach(function (childKey, childKeyIndex) {
@@ -92,6 +99,8 @@ function exportYaml(kvp, cb) {
     exportArrayValueTemplate(meta, cb);
   } else if (meta.template && meta.template.type === "object") {
     exportObjectValueTemplate(meta, cb);
+  } else if (meta.template && meta.template.type === "simple") {
+    exportSimpleValueTemplate(meta, cb);
   } else if (util.isArray(kvp.value)) {
     exportArrayValue(meta, cb);
   } else if (util.isObject(kvp.value)) {

@@ -2,8 +2,8 @@ var util = require("util");
 
 function applyKeyName(key, meta) {
   if (!key) return;
-  // key, key@, key#, key^, key@foo, key#foo, should all yield 'key'
-  var keyPattern = /^([a-zA-Z]*)($|[@#\^>](.*)$)/;
+  // key, key@, key#, key^, key<, key@foo, key#foo, key^foo, key<foo, should all yield 'key'
+  var keyPattern = /^([a-zA-Z]*)($|[@#\^><](.*)$)/;
   var match = keyPattern.exec(key);
   if (match && match[1]) {
     meta.key = match[1];
@@ -11,27 +11,25 @@ function applyKeyName(key, meta) {
 }
 
 function getSectionName(key) {
-  var keyPattern = /^([a-zA-Z]*)($|([@#\^])(.*)$)/;
+  var keyPattern = /^([a-zA-Z]*)($|([@#\^<])(.*)$)/;
   var match = keyPattern.exec(key);
   if (!match) throw new Error("Unable to parse key: " + key);
   return match[3] + (match[4] || match[1]);
 }
 
 var objectTemplatePattern = /#|\^/;
-function isObjectTemplate(key) {
-  return objectTemplatePattern.test(key);
-}
-
 var arrayTemplatePattern = /@/;
-function isArrayTemplate(key) {
-  return arrayTemplatePattern.test(key);
-}
+var simpleTemplatePattern = /</;
 
 function applyTemplateMeta(key, meta) {
-  if (isObjectTemplate(key)) {
+  if (!key) return;
+  
+  if (key.match(objectTemplatePattern)) {
     meta.template = { type: "object" };
-  } else if (isArrayTemplate(key)) {
+  } else if (key.match(arrayTemplatePattern)) {
     meta.template = { type: "array" };
+  } else if (key.match(simpleTemplatePattern)) {
+    meta.template = { type: "simple" };
   }
 
   if (meta.template) {

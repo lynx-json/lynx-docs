@@ -179,6 +179,21 @@ describe("when expanding YAML", function () {
       should.exist(kvp.value["value#"].greeting.spec.hints);
     });
   });
+  
+  describe("an expanded simple template value without section", function () {
+    var kvp = expandYaml({ value: { "value<": null } });
+    
+    it("should have the correct value", function () {
+      kvp.value.should.have.property("value<");
+      expect(kvp.value["value<"]).to.be.null;
+    });
+    
+    it("should have a spec and hints", function() {
+      should.exist(kvp.value.spec);
+      should.not.exist(kvp.value.spec.name);
+      should.exist(kvp.value.spec.hints);
+    });
+  });
 
   describe("an expanded array template value with section", function () {
     var kvp = expandYaml({ value: { "value@dataVariable": { greeting: "Hi" } } });
@@ -217,6 +232,21 @@ describe("when expanding YAML", function () {
       should.exist(kvp.value["value#dataVariable"].greeting.spec);
       kvp.value["value#dataVariable"].greeting.spec.name.should.equal("greeting");
       should.exist(kvp.value["value#dataVariable"].greeting.spec.hints);
+    });
+  });
+  
+  describe("an expanded simple template value with section", function () {
+    var kvp = expandYaml({ value: { "value<dataVariable": null } });
+    
+    it("should have the correct value", function () {
+      kvp.value.should.have.property("value<dataVariable");
+      expect(kvp.value["value<dataVariable"]).to.be.null;
+    });
+    
+    it("should have a spec and hints", function() {
+      should.exist(kvp.value.spec);
+      should.not.exist(kvp.value.spec.name);
+      should.exist(kvp.value.spec.hints);
     });
   });
 
@@ -260,6 +290,24 @@ describe("when expanding YAML", function () {
       should.exist(kvp.value.value["object#"].value.greeting.spec);
       kvp.value.value["object#"].value.greeting.spec.name.should.equal("greeting");
       should.exist(kvp.value.value["object#"].value.greeting.spec.hints);
+    });
+  });
+  
+  describe("an expanded simple template kvp", function () {
+    var kvp = expandYaml({ value: { "foo<": null } });
+    
+    it("should have the correct value", function () {
+      should.exist(kvp.value.value["foo<"]);
+      expect(kvp.value.value["foo<"].value).to.be.null;
+    });
+    
+    it("should have a spec and hints", function() {
+      should.exist(kvp.value.spec);
+      should.not.exist(kvp.value.spec.name);
+      should.exist(kvp.value.spec.hints);
+      should.exist(kvp.value.value["foo<"].spec);
+      kvp.value.value["foo<"].spec.name.should.equal("foo");
+      should.exist(kvp.value.value["foo<"].spec.hints);
     });
   });
 });
