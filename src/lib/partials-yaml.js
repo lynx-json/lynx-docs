@@ -5,7 +5,7 @@ const YAML = require("yamljs");
 const path = require("path");
 const partialKeyPattern = /^.*>(.*)?$/;
 
-exports.isPartial = function (value, key) {
+function isPartial(value, key) {
   return partialKeyPattern.test(key);
 };
 
@@ -17,27 +17,27 @@ function fileExists(location) {
   }
 }
 
-function getPartialValue(value, key) {
-  function findAndLoadPartial() {
-    var location;
+function resolvePartial(value, key) {
+  var location;
 
-    // TODO: Figure out the real location and iterate up to source root until partial is found.
-    location = "./_partials/" + value.partial + ".js";
-    if (fileExists(location)) {
-      return require(location)(value, key);
-    }
-
-    location = "./_partials/" + value.partial + ".yml";
-    if (fileExists(location)) {
-      let content = fs.readFileSync(location).toString();
-      return {
-        key: key,
-        value: YAML.parse(content)
-      };
-    }
+  // TODO: Figure out the real location and iterate up to source root until partial is found.
+  location = "./_partials/" + value.partial + ".js";
+  if (fileExists(location)) {
+    return require(location)(value, key);
   }
 
-  var partial = findAndLoadPartial();
+  location = "./_partials/" + value.partial + ".yml";
+  if (fileExists(location)) {
+    let content = fs.readFileSync(location).toString();
+    return {
+      key: key,
+      value: YAML.parse(content)
+    };
+  }
+}
+
+function getPartialValue(value, key) {
+  var partial = resolvePartial(value, key);
   if (!partial) throw new Error("Failed to find partial " + value.partial);
 
   // Replace simple parameters.
@@ -52,7 +52,7 @@ function getPartialValue(value, key) {
   return partial;
 }
 
-exports.getPartial = function (value, key) {
+function getPartial(value, key) {
   if (typeof value === "string") value = { partial: value };
 
   var match = partialKeyPattern.exec(key);
@@ -62,3 +62,7 @@ exports.getPartial = function (value, key) {
 
   return getPartialValue(value, key);
 };
+
+exports.isPartial = isPartial;
+exports.getPartial = getPartial;
+exports.resolvePartial = resolvePartial;
