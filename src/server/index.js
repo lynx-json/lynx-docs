@@ -6,7 +6,7 @@ const mime = require("mime");
 const exportYaml = require("../cli/export");
 const parseYaml = require("../lib/parse-yaml");
 const YAML = require("yamljs");
-const getRealmMetadata = require("../lib/meta-folder");
+const getRealmMetadata = require("../lib/metadata-realm");
 
 function notFound(ctx) {
   ctx.res.writeHead(404, { "Content-Type": "text/plain" });
@@ -22,8 +22,8 @@ function serverError(ctx) {
 
 function serveRealm(ctx) {
   var metadata = getRealmMetadata(ctx.req.foldername);
-  var variants = metadata.getVariants();
-  var realms = metadata.getRealms();
+  var variants = metadata.variants;
+  var realms = metadata.realms;
   
   function serveRealmIndex(ctx) {
     ctx.res.setHeader("Content-Type", "application/lynx+json");
@@ -41,7 +41,7 @@ function serveRealm(ctx) {
     });
   }
   
-  var variantName = ctx.req.query.variant || metadata.default || "default";
+  var variantName = ctx.req.query.variant || metadata.getDefaultVariant() || "default";
   var variant = variants.find(v => v.name === variantName);
   
   // if (!variant ) return notFound(ctx);
