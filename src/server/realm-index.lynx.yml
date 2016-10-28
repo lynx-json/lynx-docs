@@ -1,0 +1,6 @@
+variants@:
+  label: Case
+  name: "{{{name}}}"
+realms@:
+  label: Case
+  realm: "{{{realm}}}"

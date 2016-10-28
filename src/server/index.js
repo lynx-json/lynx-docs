@@ -6,6 +6,7 @@ const mime = require("mime");
 const exportYaml = require("../cli/export");
 const parseYaml = require("../lib/parse-yaml");
 const YAML = require("yamljs");
+const getRealmMetadata = require("../lib/meta-folder");
 
 function notFound(ctx) {
   ctx.res.writeHead(404, { "Content-Type": "text/plain" });
@@ -19,23 +20,45 @@ function serverError(ctx) {
   ctx.res.end();
 }
 
-function getRealmMetadata(folderPath) {
-  return parseYaml(fs.readFileSync(path.join(folderPath, ".meta.yml")));
-}
-
 function serveRealm(ctx) {
   var metadata = getRealmMetadata(ctx.req.foldername);
-  var variantName = ctx.req.query.variant || metadata.default || "default";
+  var variants = metadata.getVariants();
+  var realms = metadata.getRealms();
   
-  var variant = metadata.variants.find(v => v.name === variantName);
+  function serveRealmIndex(ctx) {
+    ctx.res.setHeader("Content-Type", "application/lynx+json");
+    
+    var data = {};
+    data.realm = metadata.realm;
+    if (variants.length > 0) data.variants = variants;
+    else data.realms = realms;
+    
+    exportYaml.handler({
+      format: "lynx",
+      input: path.join(__dirname, "realm-index.lynx.yml"),
+      output: ctx.res,
+      data: data
+    });
+  }
+  
+  var variantName = ctx.req.query.variant || metadata.default || "default";
+  var variant = variants.find(v => v.name === variantName);
+  
+  // if (!variant ) return notFound(ctx);
+  // 
+  // // [later] If there is a variant, display it along with alternates.
+  // // [later] Use query string param to just display the variant (without alternates)
+  // // [now] If no variant selected, but variants exist display list of variants.
+  // // [now] If no variant selected, but child realms exist, display list of realms.
+  
+  if (ctx.req.query.variant && !variant) return notFound(ctx);
+  
+  if (!variant && (variants.length > 0 || realms.length > 0))  {
+    return serveRealmIndex(ctx);
+  }
   
   if (!variant) return notFound(ctx);
   
-  // [later] If there is a variant, display it along with alternates.
-  // [later] Use query string param to just display the variant (without alternates)
-  // [now] If no variant selected, but variants exist display list of variants.
-  // [now] If no variant selected, but child realms exist, display list of realms.
-
   ctx.res.setHeader("Content-Type", "application/lynx+json");
   exportYaml.handler({
     format: "lynx",
@@ -63,7 +86,7 @@ var server = http.createServer((req, res) => {
   ctx.req.pathname = parsedURL.pathname;
   ctx.req.query = parsedURL.query;
   
-  ctx.req.filename = path.join(process.cwd(), ctx.req.pathname);
+  ctx.req.filename = ctx.req.pathname.replace(/^\//, "");
 
   fs.exists(ctx.req.filename, exists => {
     if (!exists) return notFound(ctx);

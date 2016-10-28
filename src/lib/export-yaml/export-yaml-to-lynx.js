@@ -17,10 +17,14 @@ function exportLynx(kvp, cb, options) {
 
   options.state = options.state || "default";
 
-  var data = templateData(options.origin.path, options.state);
-  //TODO: Need to add urls onto the data object
-  //data.urls = getUrlDataFromSomewhere();
-
+  var data;
+  
+  if ((typeof options.data) === "string") {
+    data = templateData(options.data);
+  } else {
+    data = options.data;
+  }
+  
   cb(bindData(buffer, data));
 }
 

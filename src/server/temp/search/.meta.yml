@@ -1,7 +1,0 @@
-default: default
-variants:
-  - name: default
-    template: /Users/johnhowes/lynx-json-org/lynx-docs/src/server/temp/search/default.lynx.yml
-    data: /Users/johnhowes/lynx-json-org/lynx-docs/src/server/temp/search/default.data.yml
-  - name: other
-    template: /Users/johnhowes/lynx-json-org/lynx-docs/src/server/temp/search/other.lynx.yml
