@@ -5,13 +5,228 @@ var sinon = require("sinon");
 var getFolderMetadata = require("../../src/lib/meta-folder");
 var fs = require("fs");
 var path = require("path");
+var YAML = require("yamljs");
 
-function statsStub(isDirectory) {
+function statsFake(isDirectory) {
   return {
     isDirectory: function() { return isDirectory; },
     isFile: function() { return !isDirectory; }
   }
 }
+
+function toYamlBuffer(value) {
+  return new Buffer(YAML.stringify(value, null));
+}
+
+describe.only("when applying custom metadata", function() {
+  afterEach(function() {
+    fs.readdirSync.restore();
+    fs.readFileSync.restore();
+    if (fs.statSync.restore) fs.statSync.restore();
+  });
+
+  describe("a folder with .meta.yml with standard and custom keys", function() {
+    var realm;
+    var meta = { realm: "/desktop/", name: "Desktop", custom: "My Value", arr: ['One', 'Tow'], obj: { one: "One" } };
+
+    beforeEach(function() {
+      sinon.stub(fs, "readdirSync").returns([".meta.yml"]);
+      sinon.stub(fs, "readFileSync").returns(toYamlBuffer(meta));
+      sinon.stub(fs, "statSync").returns(statsFake(false));
+      realm = getFolderMetadata("x");
+    })
+
+    it("should have copied meta properties to realm", function() {
+      realm.realm.should.equal(meta.realm);
+      realm.name.should.equal(meta.name);
+      realm.custom.should.equal(meta.custom);
+      expect(meta.arr).to.eql(realm.arr);
+      expect(meta.obj).to.eql(realm.obj);
+    });
+
+    it("should have removed meta key", function() {
+      should.not.exist(realm.meta);
+    });
+  });
+
+  describe("a folder with variants ['default'] and .meta.yml with variants ['y','z'].", function() {
+    var realm;
+    var meta = { variants: [{ name: "y", template: "t-y" }, { name: "z", template: "t-z" }] };
+
+    beforeEach(function() {
+      sinon.stub(fs, "readdirSync").returns([".meta.yml", "default.lynx.yml"]);
+      sinon.stub(fs, "readFileSync").returns(toYamlBuffer(meta));
+      sinon.stub(fs, "statSync").returns(statsFake(false));
+      realm = getFolderMetadata("x");
+    })
+
+    it("should have variants ['default', 'y', 'z']", function() {
+      realm.variants.length.should.equal(3);
+      realm.variants[0].name.should.equal("default");
+      realm.variants[1].name.should.equal("y");
+      realm.variants[2].name.should.equal("z");
+    });
+  });
+  describe("a folder with variants ['default'] and .meta.yml with variants ['default'].", function() {
+    var realm;
+    var meta = { variants: [{ name: "default", template: "default.lynx.yml", custom: "One" }] };
+
+    beforeEach(function() {
+      sinon.stub(fs, "readdirSync").returns([".meta.yml", "default.lynx.yml"]);
+      sinon.stub(fs, "readFileSync").returns(toYamlBuffer(meta));
+      sinon.stub(fs, "statSync").returns(statsFake(false));
+      realm = getFolderMetadata("x");
+    })
+
+    it("should have variants ['default']", function() {
+      realm.variants.length.should.equal(1);
+      realm.variants[0].name.should.equal("default");
+    });
+
+    it("should use variant from .meta.yml", function() {
+      should.exist(realm.variants[0].custom);
+      realm.variants[0].custom.should.equal(meta.variants[0].custom);
+    })
+  });
+  describe("a folder with .meta.yml with realms ['./y/']", function() {
+    var realm;
+    var meta = { realms: [{ name: "The Y Realm", realm: "./y/" }] };
+
+    beforeEach(function() {
+      sinon.stub(fs, "readdirSync").returns([".meta.yml"]);
+      sinon.stub(fs, "readFileSync").returns(toYamlBuffer(meta));
+      sinon.stub(fs, "statSync").returns(statsFake(false));
+      realm = getFolderMetadata("x");
+    })
+
+    it("should have realm ['/x/y/']", function() {
+      realm.realms.length.should.equal(1);
+      realm.realms[0].name.should.equal(meta.realms[0].name);
+      realm.realms[0].realm.should.equal("/x/y/");
+    });
+  });
+  describe("a folder with child folders ['y'] and .meta.yml with realms ['y']", function() {
+    var realm;
+    var meta = { realms: [{ name: "The Y Realm", realm: "./y/" }] };
+
+    beforeEach(function() {
+      sinon.stub(fs, "readdirSync").returns([".meta.yml", "y"]);
+      sinon.stub(fs, "readFileSync").returns(toYamlBuffer(meta));
+      var statStub = sinon.stub(fs, "statSync");
+      statStub.withArgs(path.join("x", "y")).returns(statsFake(true));
+      statStub.returns(statsFake(false));
+      realm = getFolderMetadata("x");
+    })
+
+    it("should use realm from filesystem and not .meta.yml", function() {
+      realm.realms.length.should.equal(1);
+      realm.realms[0].name.should.not.equal(meta.realms[0].name);
+      realm.realms[0].name.should.equal('y');
+      realm.realms[0].realm.should.equal("/x/y/");
+    });
+  });
+  describe("a folder with .meta.yml with variants ['y'].", function() {
+    var realm;
+    var meta = { variants: [{ name: "y", template: "t-y" }] };
+
+    beforeEach(function() {
+      sinon.stub(fs, "readdirSync").returns([".meta.yml"]);
+      sinon.stub(fs, "readFileSync").returns(toYamlBuffer(meta));
+      sinon.stub(fs, "statSync").returns(statsFake(false));
+      realm = getFolderMetadata("x");
+    })
+
+    it("should have default 'y'", function() {
+      realm.variants.length.should.equal(1);
+      var variant = realm.getDefaultVariant();
+      should.exist(variant);
+      variant.name.should.equal("y");
+    });
+  });
+  describe("a folder with .meta.yml with variants ['y', 'z'] and no default.", function() {
+    var realm;
+    var meta = { variants: [{ name: "y", template: "t-y" }, { name: "z", template: "t-z" }] };
+
+    beforeEach(function() {
+      sinon.stub(fs, "readdirSync").returns([".meta.yml"]);
+      sinon.stub(fs, "readFileSync").returns(toYamlBuffer(meta));
+      sinon.stub(fs, "statSync").returns(statsFake(false));
+      realm = getFolderMetadata("x");
+    })
+
+    it("should not have default", function() {
+      realm.variants.length.should.equal(2);
+      var variant = realm.getDefaultVariant();
+      should.not.exist(variant);
+    });
+  });
+  describe("a folder with .meta.yml with variants ['y', 'z'] and default 'z'", function() {
+    var realm;
+    var meta = { "default": "z", variants: [{ name: "y", template: "t-y" }, { name: "z", template: "t-z" }] };
+
+    beforeEach(function() {
+      sinon.stub(fs, "readdirSync").returns([".meta.yml"]);
+      sinon.stub(fs, "readFileSync").returns(toYamlBuffer(meta));
+      sinon.stub(fs, "statSync").returns(statsFake(false));
+      realm = getFolderMetadata("x");
+    })
+
+    it("should have default 'z'", function() {
+      realm.variants.length.should.equal(2);
+      var variant = realm.getDefaultVariant();
+      should.exist(variant);
+      variant.name.should.equal("z");
+    });
+  });
+  describe("a folder with .meta.yml with variants ['default', 'z'] and no default.", function() {
+    var realm;
+    var meta = { variants: [{ name: "default", template: "t-default" }, { name: "z", template: "t-z" }] };
+
+    beforeEach(function() {
+      sinon.stub(fs, "readdirSync").returns([".meta.yml"]);
+      sinon.stub(fs, "readFileSync").returns(toYamlBuffer(meta));
+      sinon.stub(fs, "statSync").returns(statsFake(false));
+      realm = getFolderMetadata("x");
+    })
+
+    it("should have default 'default'", function() {
+      realm.variants.length.should.equal(2);
+      var variant = realm.getDefaultVariant();
+      should.exist(variant);
+      variant.name.should.equal("default");
+    });
+  });
+  describe("a folder with .meta.yml with realms ['y', 'z']", function() {
+    var realm;
+    var meta = { realms: [{ realm: "./y/", name: "y" }, { realm: "./z/", name: "z" }] };
+
+    beforeEach(function() {
+      sinon.stub(fs, "readdirSync").returns([".meta.yml"]);
+      sinon.stub(fs, "readFileSync").returns(toYamlBuffer(meta));
+      sinon.stub(fs, "statSync").returns(statsFake(false));
+      realm = getFolderMetadata("x");
+    })
+
+    it("should resolve '/x/y/'", function() {
+      realm.realms.length.should.equal(2);
+      var resolved = realm.find("/x/y/");
+      should.exist(resolved);
+      resolved.name.should.equal("y");
+    });
+    it("should not resolve '/x/a/'", function() {
+      realm.realms.length.should.equal(2);
+      var resolved = realm.find("/x/a/");
+      should.not.exist(resolved);
+    });
+    it("should resolve '/x/'", function() {
+      realm.realms.length.should.equal(2);
+      var resolved = realm.find("/x/");
+      should.exist(resolved);
+      resolved.name.should.equal("x");
+    });
+  });
+
+});
 
 describe("when deriving metadata from a folder", function() {
 
@@ -28,7 +243,7 @@ describe("when deriving metadata from a folder", function() {
       realm = getFolderMetadata("x");
     });
 
-    it("should have a realm name of '/x/'", function() {
+    it("should have a realm value of '/x/'", function() {
       realm.realm.should.equal("/x/");
     });
   });
@@ -41,7 +256,7 @@ describe("when deriving metadata from a folder", function() {
       readdirStub.withArgs("x").returns(['y', 'z']);
       readdirStub.returns([]);
 
-      sinon.stub(fs, "statSync").returns(statsStub(true));
+      sinon.stub(fs, "statSync").returns(statsFake(true));
       realm = getFolderMetadata("x");
     });
 
@@ -65,7 +280,7 @@ describe("when deriving metadata from a folder", function() {
 
     beforeEach(function() {
       sinon.stub(fs, "readdirSync").withArgs("x").returns(["one.lynx.yml"]);
-      sinon.stub(fs, "statSync").returns(statsStub(false));
+      sinon.stub(fs, "statSync").returns(statsFake(false));
       variants = getFolderMetadata("x").variants;
     });
 
@@ -85,7 +300,7 @@ describe("when deriving metadata from a folder", function() {
 
     beforeEach(function() {
       sinon.stub(fs, "readdirSync").withArgs("x").returns(["default.lynx.yml", "two.lynx.yml"]);
-      sinon.stub(fs, "statSync").returns(statsStub(false));
+      sinon.stub(fs, "statSync").returns(statsFake(false));
       variants = getFolderMetadata("x").variants;
     });
 
@@ -109,7 +324,7 @@ describe("when deriving metadata from a folder", function() {
 
     beforeEach(function() {
       sinon.stub(fs, "readdirSync").withArgs("x").returns(["default.lynx.yml", "two.lynx.yml", "default.data.yml"]);
-      sinon.stub(fs, "statSync").returns(statsStub(false));
+      sinon.stub(fs, "statSync").returns(statsFake(false));
       variants = getFolderMetadata("x").variants;
     });
 
@@ -135,7 +350,7 @@ describe("when deriving metadata from a folder", function() {
 
     beforeEach(function() {
       sinon.stub(fs, "readdirSync").withArgs("x").returns(["one.lynx.yml", "one.data.yml"]);
-      sinon.stub(fs, "statSync").returns(statsStub(false));
+      sinon.stub(fs, "statSync").returns(statsFake(false));
       variants = getFolderMetadata("x").variants;
     });
 
@@ -155,7 +370,7 @@ describe("when deriving metadata from a folder", function() {
 
     beforeEach(function() {
       sinon.stub(fs, "readdirSync").withArgs("x").returns(["one.lynx.yml", "one.data.variant.yml"]);
-      sinon.stub(fs, "statSync").returns(statsStub(false));
+      sinon.stub(fs, "statSync").returns(statsFake(false));
       variants = getFolderMetadata("x").variants;
     });
 
@@ -178,8 +393,8 @@ describe("when deriving metadata from a folder", function() {
       readDirStub.withArgs("x").returns(["default.lynx.yml", "default.data"]);
       readDirStub.withArgs(path.join("x", "default.data")).returns(["default.yml"]);
       var statStub = sinon.stub(fs, "statSync");
-      statStub.withArgs(path.join("x", "default.data")).returns(statsStub(true));
-      statStub.returns(statsStub(false));
+      statStub.withArgs(path.join("x", "default.data")).returns(statsFake(true));
+      statStub.returns(statsFake(false));
       variants = getFolderMetadata("x").variants;
     });
 
@@ -202,8 +417,8 @@ describe("when deriving metadata from a folder", function() {
       readDirStub.withArgs("x").returns(["one.lynx.yml", "one.data"]);
       readDirStub.withArgs(path.join("x", "one.data")).returns(["default.yml", "invalid.yml"]);
       var statStub = sinon.stub(fs, "statSync");
-      statStub.withArgs(path.join("x", "one.data")).returns(statsStub(true));
-      statStub.returns(statsStub(false));
+      statStub.withArgs(path.join("x", "one.data")).returns(statsFake(true));
+      statStub.returns(statsFake(false));
       variants = getFolderMetadata("x").variants;
     });
 
