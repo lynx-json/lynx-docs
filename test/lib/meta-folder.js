@@ -18,7 +18,7 @@ function toYamlBuffer(value) {
   return new Buffer(YAML.stringify(value, null));
 }
 
-describe.only("when applying custom metadata", function() {
+describe("when applying custom metadata", function() {
   afterEach(function() {
     fs.readdirSync.restore();
     fs.readFileSync.restore();
