@@ -4,6 +4,7 @@ var expect = chai.expect;
 var sinon = require("sinon");
 var getFolderMetadata = require("../../src/lib/meta-folder");
 var fs = require("fs");
+var path = require("path");
 
 function statsStub(isDirectory) {
   return {
@@ -12,87 +13,90 @@ function statsStub(isDirectory) {
   }
 }
 
-describe("when getting metadata for a folder", function () {
+describe.only("when deriving metadata from a folder", function() {
 
-  afterEach(function () {
+  afterEach(function() {
     fs.readdirSync.restore();
-    if(fs.statSync.restore) fs.statSync.restore();
+    if (fs.statSync.restore) fs.statSync.restore();
   });
 
-  describe("a folder with name 'x'", function (){
+  describe("a folder with name 'x'", function() {
     var realm;
 
-    beforeEach(function () {
-      sinon.stub(fs, "readdirSync").withArgs("x").returns([]);
-      realm =  getFolderMetadata("x");
+    beforeEach(function() {
+      sinon.stub(fs, "readdirSync").returns([]);
+      realm = getFolderMetadata("x");
     });
 
-    it("should have a realm name of '/x/'", function () {
+    it("should have a realm name of '/x/'", function() {
       realm.realm.should.equal("/x/");
     });
   });
 
-  describe("a folder with name 'x' and sub folders ['y', 'z']", function (){
+  describe("a folder with name 'x' and sub folders ['y', 'z']", function() {
     var realm;
 
-    beforeEach(function () {
+    beforeEach(function() {
       var readdirStub = sinon.stub(fs, "readdirSync");
       readdirStub.withArgs("x").returns(['y', 'z']);
       readdirStub.returns([]);
 
       sinon.stub(fs, "statSync").returns(statsStub(true));
-      realm =  getFolderMetadata("x");
+      realm = getFolderMetadata("x");
     });
 
-    it("should have a realm name of '/x/'", function () {
+    it("should have a realm value of '/x/' and name ['x']", function() {
       realm.realm.should.equal("/x/");
+      realm.name.should.equal("x");
     });
 
-    it("should have realms with names ['/x/y/','/x/z/']", function() {
-      var subRealms = realm.getRealms();
-      subRealms.length.should.equal(2);
-      subRealms[0].realm.should.equal("/x/y/");
-      subRealms[1].realm.should.equal("/x/z/");
+    it("should have realms with value of ['/x/y/','/x/z/'] and name ['y', 'z']", function() {
+      var children = realm.realms;
+      children.length.should.equal(2);
+      children[0].realm.should.equal("/x/y/");
+      children[0].name.should.equal("y");
+      children[1].realm.should.equal("/x/z/");
+      children[1].name.should.equal("z");
     });
   });
 
-  describe("a folder with template ['one.lynx.yml']", function () {
+  describe("a folder with template ['one.lynx.yml']", function() {
     var variants;
 
-    beforeEach(function () {
+    beforeEach(function() {
       sinon.stub(fs, "readdirSync").withArgs("x").returns(["one.lynx.yml"]);
-      sinon.stub(fs, "statSync").withArgs("x/one.lynx.yml").returns(statsStub(false));
-      variants =  getFolderMetadata("x").getVariants();
+      sinon.stub(fs, "statSync").returns(statsStub(false));
+      variants = getFolderMetadata("x").variants;
     });
 
-    it("should have a variants ['one']", function () {
+    it("should have a variants ['one']", function() {
       variants.length.should.equal(1);
       variants[0].name.should.equal("one");
     });
 
-    it("should have a value for template only", function () {
+    it("should have a value for template only", function() {
       should.exist(variants[0].template);
       should.not.exist(variants[0].data);
     });
   });
 
-  describe("a folder with templates ['default.lynx.yml', 'two.lynx.yml']", function () {
+  describe("a folder with templates ['default.lynx.yml', 'two.lynx.yml']", function() {
     var variants;
 
-    beforeEach(function () {
+    beforeEach(function() {
       sinon.stub(fs, "readdirSync").withArgs("x").returns(["default.lynx.yml", "two.lynx.yml"]);
       sinon.stub(fs, "statSync").returns(statsStub(false));
-      variants = getFolderMetadata("x").getVariants();
+      variants = getFolderMetadata("x").variants;
     });
 
-    it("should have variants ['default', 'two']", function () {
+    it("should have variants ['default', 'two']", function() {
       variants.length.should.equal(2);
       variants[0].name.should.equal("default");
       variants[1].name.should.equal("two");
     });
 
-    it("should have a value for template only", function () {
-      variants.forEach(function(variant){
+    it("should have a value for template only", function() {
+      variants.forEach(function(variant) {
         should.exist(variant.template);
         should.not.exist(variant.data);
       })
@@ -100,117 +104,117 @@ describe("when getting metadata for a folder", function () {
 
   });
 
-  describe("a folder with templates ['default.lynx.yml', 'two.lynx.yml'] and data ['default.data.yml']", function () {
+  describe("a folder with templates ['default.lynx.yml', 'two.lynx.yml'] and data ['default.data.yml']", function() {
     var variants;
 
-    beforeEach(function () {
+    beforeEach(function() {
       sinon.stub(fs, "readdirSync").withArgs("x").returns(["default.lynx.yml", "two.lynx.yml", "default.data.yml"]);
       sinon.stub(fs, "statSync").returns(statsStub(false));
-      variants = getFolderMetadata("x").getVariants();
+      variants = getFolderMetadata("x").variants;
     });
 
-    it("should have variants ['default', 'two']", function () {
+    it("should have variants ['default', 'two']", function() {
       variants.length.should.equal(2);
       variants[0].name.should.equal("default");
       variants[1].name.should.equal("two");
     });
 
-    it("'default' should have a value for template and data", function () {
+    it("'default' should have a value for template and data", function() {
       should.exist(variants[0].template);
       should.exist(variants[0].data);
     });
 
-    it("'two' should have a value for template only", function () {
+    it("'two' should have a value for template only", function() {
       should.exist(variants[1].template);
       should.not.exist(variants[1].data);
     });
   });
 
-  describe("a folder with template ['one.lynx.yml'] and data ['one.data.yml']", function () {
+  describe("a folder with template ['one.lynx.yml'] and data ['one.data.yml']", function() {
     var variants;
 
-    beforeEach(function () {
+    beforeEach(function() {
       sinon.stub(fs, "readdirSync").withArgs("x").returns(["one.lynx.yml", "one.data.yml"]);
       sinon.stub(fs, "statSync").returns(statsStub(false));
-      variants = getFolderMetadata("x").getVariants();
+      variants = getFolderMetadata("x").variants;
     });
 
-    it("should have variants ['one']", function () {
+    it("should have variants ['one']", function() {
       variants.length.should.equal(1);
       variants[0].name.should.equal("one");
     });
 
-    it("should have a value for template and data", function () {
+    it("should have a value for template and data", function() {
       should.exist(variants[0].template);
       should.exist(variants[0].data);
     });
   });
 
-  describe("a folder with template ['one.lynx.yml'] and data ['one.data.variant.yml']", function () {
+  describe("a folder with template ['one.lynx.yml'] and data ['one.data.variant.yml']", function() {
     var variants;
 
-    beforeEach(function () {
+    beforeEach(function() {
       sinon.stub(fs, "readdirSync").withArgs("x").returns(["one.lynx.yml", "one.data.variant.yml"]);
       sinon.stub(fs, "statSync").returns(statsStub(false));
-      variants = getFolderMetadata("x").getVariants();
+      variants = getFolderMetadata("x").variants;
     });
 
-    it("should have variants ['variant']", function () {
+    it("should have variants ['variant']", function() {
       variants.length.should.equal(1);
       variants[0].name.should.equal("variant");
     });
 
-    it("should have a value for template and data", function () {
+    it("should have a value for template and data", function() {
       should.exist(variants[0].template);
       should.exist(variants[0].data);
     });
   });
 
-  describe("a folder with template ['default.lynx.yml'] and data ['default.data'] that contains ['default.yml']", function () {
+  describe("a folder with template ['default.lynx.yml'] and data ['default.data'] that contains ['default.yml']", function() {
     var variants;
 
-    beforeEach(function () {
-      var readDirStuf = sinon.stub(fs, "readdirSync");
-      readDirStuf.withArgs("x").returns(["default.lynx.yml", "default.data"]);
-      readDirStuf.withArgs("x/default.data").returns(["default.yml"]);
+    beforeEach(function() {
+      var readDirStub = sinon.stub(fs, "readdirSync");
+      readDirStub.withArgs("x").returns(["default.lynx.yml", "default.data"]);
+      readDirStub.withArgs(path.join("x", "default.data")).returns(["default.yml"]);
       var statStub = sinon.stub(fs, "statSync");
-      statStub.withArgs("x/default.data").returns(statsStub(true));
+      statStub.withArgs(path.join("x", "default.data")).returns(statsStub(true));
       statStub.returns(statsStub(false));
-      variants = getFolderMetadata("x").getVariants();
+      variants = getFolderMetadata("x").variants;
     });
 
-    it("should have variants ['default']", function () {
+    it("should have variants ['default']", function() {
       variants.length.should.equal(1);
       variants[0].name.should.equal("default");
     });
 
-    it("should have a value for template and data", function () {
+    it("should have a value for template and data", function() {
       should.exist(variants[0].template);
       should.exist(variants[0].data);
     });
   });
 
-  describe("a folder with template ['one.lynx.yml'] and data ['one.data'] that contains ['default.yml', 'invalid.yml']", function () {
+  describe("a folder with template ['one.lynx.yml'] and data ['one.data'] that contains ['default.yml', 'invalid.yml']", function() {
     var variants;
 
-    beforeEach(function () {
-      var readDirStuf = sinon.stub(fs, "readdirSync");
-      readDirStuf.withArgs("x").returns(["one.lynx.yml", "one.data"]);
-      readDirStuf.withArgs("x/one.data").returns(["default.yml", "invalid.yml"]);
+    beforeEach(function() {
+      var readDirStub = sinon.stub(fs, "readdirSync");
+      readDirStub.withArgs("x").returns(["one.lynx.yml", "one.data"]);
+      readDirStub.withArgs(path.join("x", "one.data")).returns(["default.yml", "invalid.yml"]);
       var statStub = sinon.stub(fs, "statSync");
-      statStub.withArgs("x/one.data").returns(statsStub(true));
+      statStub.withArgs(path.join("x", "one.data")).returns(statsStub(true));
       statStub.returns(statsStub(false));
-      variants = getFolderMetadata("x").getVariants();
+      variants = getFolderMetadata("x").variants;
     });
 
-    it("should have variants ['one', 'invalid']", function () {
+    it("should have variants ['one', 'invalid']", function() {
       variants.length.should.equal(2);
       variants[0].name.should.equal("one");
       variants[1].name.should.equal("invalid");
     });
 
-    it("should have a value for template and data", function () {
-      variants.forEach(function(variant){
+    it("should have a value for template and data", function() {
+      variants.forEach(function(variant) {
         should.exist(variant.template);
         should.exist(variant.data);
       })

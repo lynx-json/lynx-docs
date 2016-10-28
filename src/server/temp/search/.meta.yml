@@ -1,7 +1,11 @@
 default: default
 variants:
-  - name: default
-    template: /Users/johnhowes/lynx-json-org/lynx-docs/src/server/temp/search/default.lynx.yml
-    data: /Users/johnhowes/lynx-json-org/lynx-docs/src/server/temp/search/default.data.yml
-  - name: other
-    template: /Users/johnhowes/lynx-json-org/lynx-docs/src/server/temp/search/other.lynx.yml
+  - name: Another Default
+    template: default.lynx.yml
+    data: default.data.yml
+  - name: Other
+    template: other.lynx.yml
+    data: default.data.yml
+  - name: Invalid Form
+    template: ../default.data.yml
+    data: default.data.yml
