@@ -26,6 +26,11 @@ var startCli = function(options) {
   
   // start the server
   require("../server/index.js")(options);
-}
+};
 
-module.exports = { command: "start", describe: "Starts a web server to browse Lynx documents", builder: buildCommand, handler: startCli }
+module.exports = { 
+  command: "start", 
+  describe: "Starts a web server to browse Lynx documents", 
+  builder: buildCommand, 
+  handler: startCli 
+};

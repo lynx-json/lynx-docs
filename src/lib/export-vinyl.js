@@ -1,3 +1,5 @@
+"use strict";
+
 var Vinyl = require("vinyl");
 var through2 = require("through2");
 var parseYaml = require("./parse-yaml");
@@ -25,6 +27,6 @@ var exportVinyl = function(options) {
     this.push(new Vinyl({ cwd: file.cwd, base: file.base, path: file.path, contents: new Buffer(buffer) }));
     cb(); //signal completion
   });
-}
+};
 
 module.exports = exports = exportVinyl;

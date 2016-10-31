@@ -25,8 +25,8 @@ function readDataFile(dataFile) {
       var generator = require(dataFile);
       return generator(resolveDataFile);
     default:
-      throw new Error("Unrecognized example data file format: ", parsedPath.ext)
+      throw new Error("Unrecognized example data file format: ", parsedPath.ext);
   }
 }
 
-module.exports = exports = readDataFile
+module.exports = exports = readDataFile;

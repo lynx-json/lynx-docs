@@ -70,7 +70,7 @@ function getVariants(realm) {
     });
   }
   return variants;
-};
+}
 
 function getRealms(realm) {
   var realms = realm.path ? fs.readdirSync(realm.path).filter(function(item) {
@@ -88,7 +88,7 @@ function getRealms(realm) {
     });
   }
   return realms;
-};
+}
 
 function getFolderMeta(realm) {
   var metaFile = fs.readdirSync(realm.path).find(function(item) { return metaPattern.test(item); });
@@ -141,7 +141,7 @@ function Realm(pathOrMeta, parent) {
 Realm.prototype.resolvePath = function(relative) {
   if (!this.path) return this.parent.resolvePath(relative);
   return path.join(this.path, relative);
-}
+};
 
 Realm.prototype.getDefaultVariant = function() {
   if (this.variants.length === 1) return this.variants[0];
@@ -149,7 +149,7 @@ Realm.prototype.getDefaultVariant = function() {
   return this.variants.find(function(variant) {
     return variant.name === defaultName;
   });
-}
+};
 
 Realm.prototype.find = function(realmUri) {
   var normalizedA = urijs(this.realm).normalize().toString();
@@ -164,7 +164,7 @@ Realm.prototype.find = function(realmUri) {
   }
 
   return null;
-}
+};
 
 module.exports = exports = folderPath => {
   return new Realm(folderPath);
