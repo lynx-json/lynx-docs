@@ -62,7 +62,7 @@ function getPartial(value, key) {
     let originalValue = value;
     value = {};
     if (originalValue) value.value = originalValue;
-  };
+  }
 
   // If a partial name is specified like this: key>partial-name
   var match = partialKeyPattern.exec(key);
