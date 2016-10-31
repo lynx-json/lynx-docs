@@ -1,3 +1,5 @@
+"use strict";
+
 var vfs = require("vinyl-fs");
 var vss = require("vinyl-source-stream");
 var vbuffer = require("vinyl-buffer");
@@ -19,6 +21,9 @@ function vinylToWritable(writeable) {
     writeable.write(file.contents.toString(), enc, cb);
     if (writeable !== process.stdout) writeable.end();
   });
-};
+}
 
-module.exports = { createSourceStream: createSourceStream, createDestinationStream: createDestStream }
+module.exports = { 
+  createSourceStream: createSourceStream, 
+  createDestinationStream: createDestStream 
+};

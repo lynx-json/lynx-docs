@@ -1,3 +1,5 @@
+"use strict";
+
 var should = require("chai").should();
 var getMetadata = require("../../src/lib/metadata-yaml");
 

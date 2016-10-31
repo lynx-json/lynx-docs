@@ -1,3 +1,5 @@
+"use strict";
+
 var should = require("chai").should();
 var exportYaml = require("../../src/lib/export-yaml");
 
@@ -78,7 +80,7 @@ describe("when exporting YAML", function () {
         "value#": null
       };
       
-      var expected = '{"spec":{},"value": {{#value}} {} {{/value}} }'
+      var expected = '{"spec":{},"value": {{#value}} {} {{/value}} }';
       
       runTest(yaml, expected);
     });
@@ -93,7 +95,7 @@ describe("when exporting YAML", function () {
         }
       };
       
-      var expected = '{"spec":{},"value": {{#value}} {"greeting":"Hi"} {{/value}} }'
+      var expected = '{"spec":{},"value": {{#value}} {"greeting":"Hi"} {{/value}} }';
       
       runTest(yaml, expected);
     });
@@ -113,7 +115,7 @@ describe("when exporting YAML", function () {
         }
       };
       
-      var expected = '{"spec":{},"value": {{#foo}} {"greeting":"Hi","name":"Dan"} {{/foo}}  {{#bar}} {"greeting":"Yo","name":"John"} {{/bar}} }'
+      var expected = '{"spec":{},"value": {{#foo}} {"greeting":"Hi","name":"Dan"} {{/foo}}  {{#bar}} {"greeting":"Yo","name":"John"} {{/bar}} }';
       
       runTest(yaml, expected);
     });
@@ -126,7 +128,7 @@ describe("when exporting YAML", function () {
         "value@": "{{{greeting}}}"
       };
       
-      var expected = '{"spec":{},"value":[ {{#value}} "{{{greeting}}}"{{#unless @last}},{{/unless}} {{/value}} ]}'
+      var expected = '{"spec":{},"value":[ {{#value}} "{{{greeting}}}"{{#unless @last}},{{/unless}} {{/value}} ]}';
       
       runTest(yaml, expected);
     });
@@ -141,7 +143,7 @@ describe("when exporting YAML", function () {
         }
       };
       
-      var expected = '{"spec":{},"value":[ {{#value}} {"greeting":"{{{greeting}}}"}{{#unless @last}},{{/unless}} {{/value}} ]}'
+      var expected = '{"spec":{},"value":[ {{#value}} {"greeting":"{{{greeting}}}"}{{#unless @last}},{{/unless}} {{/value}} ]}';
       
       runTest(yaml, expected);
     });
@@ -155,7 +157,7 @@ describe("when exporting YAML", function () {
         "value@bar": "{{{bar-greeting}}}",
       };
       
-      var expected = '{"spec":{},"value":[ {{#foo}} "{{{foo-greeting}}}"{{#unless @last}},{{/unless}} {{/foo}}  {{#bar}} "{{{bar-greeting}}}"{{#unless @last}},{{/unless}} {{/bar}} ]}'
+      var expected = '{"spec":{},"value":[ {{#foo}} "{{{foo-greeting}}}"{{#unless @last}},{{/unless}} {{/foo}}  {{#bar}} "{{{bar-greeting}}}"{{#unless @last}},{{/unless}} {{/bar}} ]}';
       
       runTest(yaml, expected);
     });
@@ -173,7 +175,7 @@ describe("when exporting YAML", function () {
         }
       };
       
-      var expected = '{"spec":{},"value":[ {{#foo}} {"greeting":"{{{foo-greeting}}}"}{{#unless @last}},{{/unless}} {{/foo}}  {{#bar}} {"greeting":"{{{bar-greeting}}}"}{{#unless @last}},{{/unless}} {{/bar}} ]}'
+      var expected = '{"spec":{},"value":[ {{#foo}} {"greeting":"{{{foo-greeting}}}"}{{#unless @last}},{{/unless}} {{/foo}}  {{#bar}} {"greeting":"{{{bar-greeting}}}"}{{#unless @last}},{{/unless}} {{/bar}} ]}';
       
       runTest(yaml, expected);
     });
@@ -190,7 +192,7 @@ describe("when exporting YAML", function () {
         }
       };
       
-      var expected = '{"spec":{},"value":[ {{#value}} {"greeting": {{#greeting}} {"message":"{{{message}}}"} {{/greeting}} }{{#unless @last}},{{/unless}} {{/value}} ]}'
+      var expected = '{"spec":{},"value":[ {{#value}} {"greeting": {{#greeting}} {"message":"{{{message}}}"} {{/greeting}} }{{#unless @last}},{{/unless}} {{/value}} ]}';
       
       runTest(yaml, expected);
     });
@@ -203,7 +205,7 @@ describe("when exporting YAML", function () {
         "value<": null
       };
       
-      var expected = '{"spec":{},"value": {{#value}} {{{value}}} {{/value}} }'
+      var expected = '{"spec":{},"value": {{#value}} {{{value}}} {{/value}} }';
       
       runTest(yaml, expected);
     });

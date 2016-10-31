@@ -1,0 +1,10 @@
+{
+  "esversion": 6,
+  "node": true,
+  "mocha": true,
+  "overrides": {
+    "test/**/*.js": {
+      "expr": true
+    }
+  }
+}

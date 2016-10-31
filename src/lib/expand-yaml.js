@@ -1,3 +1,5 @@
+"use strict";
+
 var YAML = require("yamljs");
 var util = require("util");
 var partials = require("./partials-yaml");
@@ -13,7 +15,7 @@ function isValuePropertyName(key) {
 
 function hasValueProperty(obj) {
   if (!obj || util.isArray(obj)) return false;
-  return Object.getOwnPropertyNames(obj).some(isValuePropertyName)
+  return Object.getOwnPropertyNames(obj).some(isValuePropertyName);
 }
 
 function getValuePropertyName(obj) {
@@ -104,7 +106,7 @@ function expandValue(kvp, options) {
 
   var result = {
     key: kvp.key,
-    value: node || value
+    value: node || kvp.value
   };
 
   return result;

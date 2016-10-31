@@ -11,7 +11,7 @@ function statsFake(isDirectory) {
   return {
     isDirectory: function() { return isDirectory; },
     isFile: function() { return !isDirectory; }
-  }
+  };
 }
 
 function toYamlBuffer(value) {
@@ -34,7 +34,7 @@ describe("when applying custom metadata", function() {
       sinon.stub(fs, "readFileSync").returns(toYamlBuffer(meta));
       sinon.stub(fs, "statSync").returns(statsFake(false));
       realm = getFolderMetadata("x");
-    })
+    });
 
     it("should have copied meta properties to realm", function() {
       realm.realm.should.equal(meta.realm);
@@ -58,7 +58,7 @@ describe("when applying custom metadata", function() {
       sinon.stub(fs, "readFileSync").returns(toYamlBuffer(meta));
       sinon.stub(fs, "statSync").returns(statsFake(false));
       realm = getFolderMetadata("x");
-    })
+    });
 
     it("should have variants ['default', 'y', 'z']", function() {
       realm.variants.length.should.equal(3);
@@ -76,7 +76,7 @@ describe("when applying custom metadata", function() {
       sinon.stub(fs, "readFileSync").returns(toYamlBuffer(meta));
       sinon.stub(fs, "statSync").returns(statsFake(false));
       realm = getFolderMetadata("x");
-    })
+    });
 
     it("should have variants ['default']", function() {
       realm.variants.length.should.equal(1);
@@ -86,7 +86,7 @@ describe("when applying custom metadata", function() {
     it("should use variant from .meta.yml", function() {
       should.exist(realm.variants[0].custom);
       realm.variants[0].custom.should.equal(meta.variants[0].custom);
-    })
+    });
   });
   describe("a folder with .meta.yml with realms ['./y/']", function() {
     var realm;
@@ -97,7 +97,7 @@ describe("when applying custom metadata", function() {
       sinon.stub(fs, "readFileSync").returns(toYamlBuffer(meta));
       sinon.stub(fs, "statSync").returns(statsFake(false));
       realm = getFolderMetadata("x");
-    })
+    });
 
     it("should have realm ['/x/y/']", function() {
       realm.realms.length.should.equal(1);
@@ -116,7 +116,7 @@ describe("when applying custom metadata", function() {
       statStub.withArgs(path.join("x", "y")).returns(statsFake(true));
       statStub.returns(statsFake(false));
       realm = getFolderMetadata("x");
-    })
+    });
 
     it("should use realm from filesystem and not .meta.yml", function() {
       realm.realms.length.should.equal(1);
@@ -134,7 +134,7 @@ describe("when applying custom metadata", function() {
       sinon.stub(fs, "readFileSync").returns(toYamlBuffer(meta));
       sinon.stub(fs, "statSync").returns(statsFake(false));
       realm = getFolderMetadata("x");
-    })
+    });
 
     it("should have default 'y'", function() {
       realm.variants.length.should.equal(1);
@@ -152,7 +152,7 @@ describe("when applying custom metadata", function() {
       sinon.stub(fs, "readFileSync").returns(toYamlBuffer(meta));
       sinon.stub(fs, "statSync").returns(statsFake(false));
       realm = getFolderMetadata("x");
-    })
+    });
 
     it("should not have default", function() {
       realm.variants.length.should.equal(2);
@@ -169,7 +169,7 @@ describe("when applying custom metadata", function() {
       sinon.stub(fs, "readFileSync").returns(toYamlBuffer(meta));
       sinon.stub(fs, "statSync").returns(statsFake(false));
       realm = getFolderMetadata("x");
-    })
+    });
 
     it("should have default 'z'", function() {
       realm.variants.length.should.equal(2);
@@ -187,7 +187,7 @@ describe("when applying custom metadata", function() {
       sinon.stub(fs, "readFileSync").returns(toYamlBuffer(meta));
       sinon.stub(fs, "statSync").returns(statsFake(false));
       realm = getFolderMetadata("x");
-    })
+    });
 
     it("should have default 'default'", function() {
       realm.variants.length.should.equal(2);
@@ -205,7 +205,7 @@ describe("when applying custom metadata", function() {
       sinon.stub(fs, "readFileSync").returns(toYamlBuffer(meta));
       sinon.stub(fs, "statSync").returns(statsFake(false));
       realm = getFolderMetadata("x");
-    })
+    });
 
     it("should resolve '/x/y/'", function() {
       realm.realms.length.should.equal(2);
@@ -314,7 +314,7 @@ describe("when deriving metadata from a folder", function() {
       variants.forEach(function(variant) {
         should.exist(variant.template);
         should.not.exist(variant.data);
-      })
+      });
     });
 
   });
@@ -432,7 +432,7 @@ describe("when deriving metadata from a folder", function() {
       variants.forEach(function(variant) {
         should.exist(variant.template);
         should.exist(variant.data);
-      })
+      });
     });
   });
 });

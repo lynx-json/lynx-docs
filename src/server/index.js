@@ -1,3 +1,5 @@
+"use strict";
+
 const http = require("http");
 const url = require("url");
 const path = require("path");
@@ -99,7 +101,7 @@ module.exports = exports = function startServer(options) {
       } else {
         serveFile(ctx);
       }
-    })
+    });
   }).listen(port);
 
   var address = server.address();
@@ -107,4 +109,4 @@ module.exports = exports = function startServer(options) {
   if (address) console.log("Lynx Docs server is running at http://localhost:" + address.port);
   
   return server;
-}
+};
