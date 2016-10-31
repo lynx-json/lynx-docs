@@ -37,7 +37,7 @@ function resolvePartial(value, key) {
 }
 
 function getPartialValue(value, key) {
-  var partial = resolvePartial(value, key);
+  var partial = exports.resolvePartial(value, key);
   if (!partial) throw new Error("Failed to find partial " + value.partial);
 
   // Replace simple parameters.
@@ -53,12 +53,20 @@ function getPartialValue(value, key) {
 }
 
 function getPartial(value, key) {
-  if (typeof value === "string") value = { partial: value };
+  var isExplicitValue = typeof value !== "object" || Array.isArray(value) || value === null;
+  if (isExplicitValue) {
+    let originalValue = value;
+    value = {};
+    if (originalValue) value.value = originalValue;
+  };
 
+  // If a partial name is specified like this: key>partial-name
   var match = partialKeyPattern.exec(key);
   if (match[1]) value.partial = match[1];
-
+  
+  // Otherwise the partial name is assumed to be the key name: partial-name>
   var key = key.replace(/>.*$/, "");
+  if (!value.partial) value.partial = key;
 
   return getPartialValue(value, key);
 };
