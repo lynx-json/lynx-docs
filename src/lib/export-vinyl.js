@@ -5,6 +5,11 @@ var expandYaml = require("./expand-yaml");
 var finishYaml = require("./finish-yaml");
 var exportYaml = require("./export-yaml");
 
+for (var p in finishYaml) { //TODO: Probably want to configure finishing differently than this.
+  if (!finishYaml.hasOwnProperty(p) || p === "add" || p === "clear" || typeof finishYaml[p] !== "function") continue;
+  finishYaml.add(finishYaml[p]);
+}
+
 var exportVinyl = function(options) {
   return through2.obj(function(file, enc, cb) {
     var value = parseYaml(file.contents);
