@@ -7,7 +7,7 @@ const partialKeyPattern = /^.*>(.*)?$/;
 
 function isPartial(value, key) {
   return partialKeyPattern.test(key);
-};
+}
 
 function fileExists(location) {
   try {
@@ -44,8 +44,12 @@ function getPartialValue(value, key) {
   var content = YAML.stringify(partial.value);
   content = content.replace(new RegExp("{{{key}}}", "g"), key);
   for (var p in value) {
-    let pattern = new RegExp("{{{" + p + "}}}", "g");
-    content = content.replace(pattern, value[p]);
+    let mustachePattern = new RegExp("{{{" + p + "}}}", "g");
+    content = content.replace(mustachePattern, value[p]);
+    
+    // key<:
+    let literalPattern = new RegExp("['\"]?" + p + "<" + "['\"]?" + ": null", "g");
+    content = content.replace(literalPattern, p + ": " + value[p]);
   }
 
   partial.value = YAML.parse(content);
@@ -65,11 +69,11 @@ function getPartial(value, key) {
   if (match[1]) value.partial = match[1];
   
   // Otherwise the partial name is assumed to be the key name: partial-name>
-  var key = key.replace(/>.*$/, "");
+  key = key.replace(/>.*$/, "");
   if (!value.partial) value.partial = key;
 
   return getPartialValue(value, key);
-};
+}
 
 exports.isPartial = isPartial;
 exports.getPartial = getPartial;
