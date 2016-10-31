@@ -1,3 +1,5 @@
+"use strict";
+
 var util = require("util");
 
 function applyKeyName(key, meta) {

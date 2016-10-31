@@ -1,3 +1,5 @@
+"use strict";
+
 var YAML = require("yamljs");
 
 module.exports = exports = function parseYaml(buffer) {

@@ -1,3 +1,5 @@
+"use strict";
+
 var should = require("chai").should();
 var exportYaml = require("../../src/lib/export-yaml");
 

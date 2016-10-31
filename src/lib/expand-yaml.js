@@ -1,3 +1,5 @@
+"use strict";
+
 var YAML = require("yamljs");
 var util = require("util");
 var partials = require("./partials-yaml");

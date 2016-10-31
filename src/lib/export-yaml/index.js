@@ -1,3 +1,5 @@
+"use strict";
+
 var formats = {
   handlebars: require("./export-yaml-to-hb"),
   lynx: require("./export-yaml-to-lynx")
