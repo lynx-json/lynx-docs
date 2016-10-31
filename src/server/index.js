@@ -78,29 +78,33 @@ function serveFile(ctx) {
   });
 }
 
-var port = process.argv[2] || 0;
+module.exports = exports = function startServer(options) {
+  var port = options.port || 0;
 
-var server = http.createServer((req, res) => {
-  var ctx = { req: req, res: res };
-  var parsedURL = url.parse(req.url, true);
-  ctx.req.pathname = parsedURL.pathname;
-  ctx.req.query = parsedURL.query;
+  var server = http.createServer((req, res) => {
+    var ctx = { req: req, res: res };
+    var parsedURL = url.parse(req.url, true);
+    ctx.req.pathname = parsedURL.pathname;
+    ctx.req.query = parsedURL.query;
+    
+    ctx.req.filename = ctx.req.pathname.replace(/^\//, "");
+
+    fs.exists(ctx.req.filename, exists => {
+      if (!exists) return notFound(ctx);
+
+      if (fs.statSync(ctx.req.filename).isDirectory()) {
+        ctx.req.foldername = ctx.req.filename;
+        delete ctx.req.filename;
+        return serveRealm(ctx);
+      } else {
+        serveFile(ctx);
+      }
+    })
+  }).listen(port);
+
+  var address = server.address();
+
+  if (address) console.log("Lynx Docs server is running at http://localhost:" + address.port);
   
-  ctx.req.filename = ctx.req.pathname.replace(/^\//, "");
-
-  fs.exists(ctx.req.filename, exists => {
-    if (!exists) return notFound(ctx);
-
-    if (fs.statSync(ctx.req.filename).isDirectory()) {
-      ctx.req.foldername = ctx.req.filename;
-      delete ctx.req.filename;
-      return serveRealm(ctx);
-    } else {
-      serveFile(ctx);
-    }
-  })
-}).listen(port);
-
-var address = server.address();
-
-if (address) console.log("Lynx Docs server is running at http://localhost:" + address.port);
+  return server;
+}

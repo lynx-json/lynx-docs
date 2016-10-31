@@ -47,6 +47,16 @@ describe("when getting metadata for a key/value pair", function () {
       meta.template.section.should.equal("@arrayTemplate");
     });
   });
+  
+  describe("a simple value template key without a name", function () {
+    it("should return correct metadata", function () {
+      var meta = getMetadata({ key: "simpleTemplate<" });
+      meta.key.should.equal("simpleTemplate");
+      should.exist(meta.template);
+      meta.template.type.should.equal("simple");
+      meta.template.section.should.equal("<simpleTemplate");
+    });
+  });
 
   describe("an object template key with a name", function () {
     it("should return correct metadata", function () {
@@ -75,6 +85,16 @@ describe("when getting metadata for a key/value pair", function () {
       should.exist(meta.template);
       meta.template.type.should.equal("array");
       meta.template.section.should.equal("@dataVariable");
+    });
+  });
+  
+  describe("a simple value template key with a name", function () {
+    it("should return correct metadata", function () {
+      var meta = getMetadata({ key: "simpleTemplate<dataVariable" });
+      meta.key.should.equal("simpleTemplate");
+      should.exist(meta.template);
+      meta.template.type.should.equal("simple");
+      meta.template.section.should.equal("<dataVariable");
     });
   });
 

@@ -70,8 +70,21 @@ describe("when exporting YAML", function () {
       runTest(yaml, expected);
     });
   });
+  
+  describe("YAML with an null object template value", function () {
+    it("should return a template for an empty object", function () {
+      var yaml = {
+        spec: {},
+        "value#": null
+      };
+      
+      var expected = '{"spec":{},"value": {{#value}} {} {{/value}} }'
+      
+      runTest(yaml, expected);
+    });
+  });
 
-  describe("YAML with an object value template", function () {
+  describe("YAML with an object template value", function () {
     it("should return the correct template", function () {
       var yaml = {
         spec: {},
@@ -178,6 +191,19 @@ describe("when exporting YAML", function () {
       };
       
       var expected = '{"spec":{},"value":[ {{#value}} {"greeting": {{#greeting}} {"message":"{{{message}}}"} {{/greeting}} }{{#unless @last}},{{/unless}} {{/value}} ]}'
+      
+      runTest(yaml, expected);
+    });
+  });
+  
+  describe("YAML with a simple template value", function () {
+    it("should return the correct template", function () {
+      var yaml = {
+        spec: {},
+        "value<": null
+      };
+      
+      var expected = '{"spec":{},"value": {{#value}} {{{value}}} {{/value}} }'
       
       runTest(yaml, expected);
     });
