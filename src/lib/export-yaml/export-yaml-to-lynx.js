@@ -1,3 +1,5 @@
+"use strict";
+
 var exportToHandleBars = require("./export-yaml-to-hb");
 var templateData = require("../template-data");
 var handlebars = require("handlebars");
@@ -5,7 +7,7 @@ var handlebars = require("handlebars");
 function bindData(contents, data) {
   var template = handlebars.compile(contents); //TODO: Review adding { compat: true } as option
   return template(data);
-};
+}
 
 function exportLynx(kvp, cb, options) {
 

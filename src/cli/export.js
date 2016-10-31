@@ -1,3 +1,5 @@
+"use strict";
+
 var streamUtils = require("./stream-utils");
 var exportVinyl = require("../lib/export-vinyl");
 var path = require("path");
@@ -44,6 +46,11 @@ var exportCli = function(options) {
 
   source.pipe(exportVinyl(options))
     .pipe(dest);
-}
+};
 
-module.exports = { command: "export", describe: "Exports Lynx YAML templates to another format", builder: buildCommand, handler: exportCli }
+module.exports = { 
+  command: "export", 
+  describe: "Exports Lynx YAML templates to another format", 
+  builder: buildCommand, 
+  handler: exportCli 
+};
