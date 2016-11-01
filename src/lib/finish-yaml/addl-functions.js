@@ -9,13 +9,13 @@ function isNode(meta) {
 
 function nodeHasProperty(kvp, meta, property) {
   if (!isNode(meta)) return false;
-  return meta.children.value.map(mapExpandedChildMetadata(kvp.value)).some(function (childMeta) {
+  return meta.children.value.map(mapExpandedChildMetadata(kvp.value)).some(function(childMeta) {
     return childMeta.children && property in childMeta.children;
   });
 }
 
 function mapExpandedChildMetadata(value) {
-  return function (childMeta) {
+  return function(childMeta) {
     var childKvp = { key: childMeta.src.key, value: value[childMeta.src.key] };
     return getMetadata(childKvp);
   };
@@ -28,7 +28,7 @@ function addHint(kvp, hint) {
 }
 
 function toDataProperty(kvp, property) {
-  if (!kvp.value || !kvp.value.value) return;
+  if (!kvp.value || !kvp.value.value || !util.isObject(kvp.value.value)) return;
   if (property in kvp.value.value === false) return;
   if ("value" in kvp.value.value[property] === false) return;
   kvp.value.value[property] = kvp.value.value[property].value;
@@ -96,7 +96,7 @@ function submits(kvp, options) {
 }
 
 function hasImageProperties(kvp, meta) {
-  return nodeHasProperty(kvp, meta, "height") && 
+  return nodeHasProperty(kvp, meta, "height") &&
     nodeHasProperty(kvp, meta, "width");
 }
 
@@ -118,7 +118,7 @@ function content(kvp, options) {
 
 function containers(kvp, options) {
   var meta = getMetadata(kvp);
-  if (meta.template && 
+  if (meta.template &&
     (meta.template.type === "object" || meta.template.type === "array")) {
     addHint(kvp, "container");
   } else if (isNode(meta) && util.isObject(kvp.value.value)) {
@@ -128,7 +128,7 @@ function containers(kvp, options) {
 
 function forms(kvp, options) {
   var meta = getMetadata(kvp);
-  if (meta.key.match(/form/i)) {
+  if (meta.key && meta.key.match(/form/i)) {
     addHint(kvp, "form");
   }
 }
@@ -137,7 +137,7 @@ function sections(kvp, options) {
   var meta = getMetadata(kvp);
   if (nodeHasProperty(kvp, meta, "header")) {
     addHint(kvp, "section");
-  } else if (meta.key.match(/section/i)) {
+  } else if (meta.key && meta.key.match(/section/i)) {
     addHint(kvp, "section");
   }
 }
@@ -169,7 +169,7 @@ function dataProperties(kvp, options) {
   toDataProperty(kvp, "for");
 }
 
-module.exports = exports = function (finish) {
+module.exports = exports = function(finish) {
   finish.titles = titles;
   finish.labels = labels;
   finish.links = links;
