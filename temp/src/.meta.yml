@@ -1,4 +1,1 @@
-default: default
-variants:
-  - name: Another Default
-    template: default.lynx.yml
+realm: http://example.com/app/

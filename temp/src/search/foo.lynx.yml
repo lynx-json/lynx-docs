@@ -1,18 +1,1 @@
-message>em: This text will get emphasis 1.
-message>em:
-  level: 3
-  content: This text will get emphasis 3.
-address>:
-  lineOne: 100 Main Street
-  city: Minneapolis
-  state: MN
-billingAddress>address:
-  lineOne: 100 Main St
-  
-  {{{lineOne}}}
-  
-shippingAddress>:
-  partial: address
-  lineOne: 100 Main Street
-  city: Minneapolis
-  state: MN
+Hola

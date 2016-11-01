@@ -1,5 +1,6 @@
 var path = require("path");
 var util = require("util");
+var lynxDocs = require("../");
 
 function buildCommand(yargs) {
   return yargs
@@ -27,7 +28,7 @@ function buildCommand(yargs) {
 var startCli = function(options) {
   if (options.config) {
     var config = path.resolve(process.cwd(), options.config);
-    require(config);
+    require(config)(lynxDocs);
   }
   
   if (!util.isArray(options.root)) options.root = [options.root];
