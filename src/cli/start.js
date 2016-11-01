@@ -1,4 +1,6 @@
 var path = require("path");
+var util = require("util");
+var lynxDocs = require("../");
 
 function buildCommand(yargs) {
   return yargs
@@ -7,6 +9,11 @@ function buildCommand(yargs) {
       alias: "p",
       describe: "Port to listen on.",
       default: 3000
+    })
+    .option("root", {
+      alias: "r",
+      describe: "Root folder for server.",
+      default: "."
     })
     .option("config", {
       alias: "c",
@@ -21,8 +28,10 @@ function buildCommand(yargs) {
 var startCli = function(options) {
   if (options.config) {
     var config = path.resolve(process.cwd(), options.config);
-    require(config);
+    require(config)(lynxDocs);
   }
+  
+  if (!util.isArray(options.root)) options.root = [options.root];
   
   // start the server
   require("../server/index.js")(options);
