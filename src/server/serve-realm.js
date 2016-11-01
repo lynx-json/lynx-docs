@@ -30,10 +30,7 @@ function realmOrVariantMatchesRequestUrl(requestUrl) {
 function findRealmOrVariantMetadata(req) {
   for (let i = 0; i < req.realms.length; i++) {
     let match = req.realms[i].find(realmOrVariantMatchesRequestUrl(req.url));
-    if (match) {
-      realmOrVariantMetadata = match;
-      break;
-    }
+    if (match) return match;
   }
 }
 
