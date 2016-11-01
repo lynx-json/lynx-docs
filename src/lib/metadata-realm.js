@@ -3,7 +3,6 @@
 const fs = require("fs");
 const path = require("path");
 const url = require("url");
-const urijs = require("urijs");
 const util = require("util");
 const parseYaml = require("./parse-yaml");
 const metaPattern = /^.*\.meta.yml$/;
