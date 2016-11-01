@@ -8,7 +8,7 @@ const parseYaml = require("./parse-yaml");
 const metaPattern = /^.*\.meta.yml$/;
 const templatePattern = /^(.*)\.lynx\.yml$/;
 const dataFolderPattern = /^(.*)\.data$/;
-const dataFilePattern = /^(.*)\.data(\.(.*))?\.yml$/;
+const dataFilePattern = /^(.*?)(\.(.*?))?\.data\.yml$/;
 
 function createVariant(realm, name, templateFile, dataFile) {
   return {
@@ -63,6 +63,8 @@ function getVariants(realm) {
     realm.meta.variants.forEach(function(variant) {
       variant.template = realm.resolvePath(variant.template);
       if (variant.data) variant.data = realm.resolvePath(variant.data);
+      variant.type = "variant";
+      variant.parent = realm;
       var index = variants.findIndex(function(candidate) {
         return candidate.template === variant.template && candidate.data === variant.data;
       });
@@ -163,8 +165,12 @@ Realm.prototype.find = function(predicate) {
   var result = this.variants.find(predicate);
   if (result) return result;
 
-  result = this.realms.find(predicate);
-  return result;
+  for (var i = 0; i < this.realms.length; i++) {
+    result = this.realms[i].find(predicate);
+    if (result) return result;
+  }
+
+  return null;
 };
 
 module.exports = exports = folderPath => {

@@ -18,10 +18,85 @@ function toYamlBuffer(value) {
   return new Buffer(YAML.stringify(value, null));
 }
 
-//TODO: Tests for find.
-//TODO: Verify coverage for all variations of calculating name and realm.
-//TODO: Tests to verify type property on variants and realms.
-//TODO: Tests to verify parent property of variants.
+describe("when finding a realm", function() {
+  var realm;
+  var meta = {
+    realm: "/",
+    name: "Root",
+    variants: [{ name: "default", template: "default.lynx.yml" }],
+    realms: [{
+      realm: "/y/",
+      name: "child",
+      realms: [{
+        realm: "/y/z",
+        name: "grandchild"
+      }]
+    }]
+  };
+
+  beforeEach(function() {
+    sinon.stub(fs, "readdirSync").returns([".meta.yml"]);
+    sinon.stub(fs, "readFileSync").returns(toYamlBuffer(meta));
+    sinon.stub(fs, "statSync").returns(statsFake(false));
+    realm = getFolderMetadata("x");
+  });
+
+  afterEach(function() {
+    fs.readdirSync.restore();
+    fs.readFileSync.restore();
+    if (fs.statSync.restore) fs.statSync.restore();
+  });
+
+  describe("having no matching items", function() {
+    var predicate = sinon.spy(function(item) { return false; });
+
+    it("should call predicate for all items", function() {
+      var result = realm.find(predicate);
+      expect(predicate.callCount).equals(4);
+    });
+
+    it("should have a falsey result", function() {
+      var result = realm.find(predicate);
+      should.not.exist(result);
+    });
+
+  });
+  describe("having matching variant", function() {
+    var predicate = sinon.spy(function(item) { return item.type === "variant"; });
+
+    it("should result in variant", function() {
+      var result = realm.find(predicate);
+      expect(result).equal(realm.variants[0]);
+    });
+  });
+
+  describe("having matching child realm", function() {
+    var predicate = sinon.spy(function(item) { return item.name === "child"; });
+
+    it("should result in ", function() {
+      var result = realm.find(predicate);
+      expect(result.realm).to.equal(realm.realms[0].realm);
+    });
+  });
+
+  describe("having matching descenant realm", function() {
+    var predicate = sinon.spy(function(item) { return item.name === "grandchild"; });
+
+    it("should result in ", function() {
+      var result = realm.find(predicate);
+      expect(result.realm).to.equal(realm.realms[0].realms[0].realm);
+    });
+  });
+
+  describe("having matching variant and matching realm", function() {
+    var predicate = sinon.spy(function(item) { return item.parent !== undefined; });
+
+    it("should result in variant", function() {
+      var result = realm.find(predicate);
+      expect(result).eql(realm.variants[0]);
+    });
+  });
+});
 
 describe("when applying custom metadata", function() {
   afterEach(function() {
@@ -340,11 +415,11 @@ describe("when deriving metadata from a folder", function() {
     });
   });
 
-  describe("a folder with template ['one.lynx.yml'] and data ['one.data.variant.yml']", function() {
+  describe("a folder with template ['one.lynx.yml'] and data ['one.variant.data.yml']", function() {
     var variants;
 
     beforeEach(function() {
-      sinon.stub(fs, "readdirSync").withArgs("x").returns(["one.lynx.yml", "one.data.variant.yml"]);
+      sinon.stub(fs, "readdirSync").withArgs("x").returns(["one.lynx.yml", "one.variant.data.yml"]);
       sinon.stub(fs, "statSync").returns(statsFake(false));
       variants = getFolderMetadata("x").variants;
     });
