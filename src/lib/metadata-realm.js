@@ -11,22 +11,24 @@ const templatePattern = /^(.*)\.lynx\.yml$/;
 const dataFolderPattern = /^(.*)\.data$/;
 const dataFilePattern = /^(.*)\.data(\.(.*))?\.yml$/;
 
-function createVariant(name, templateFile, dataFile) {
+function createVariant(realm, name, templateFile, dataFile) {
   return {
+    parent: realm,
     name: name,
     template: path.format(templateFile),
-    data: dataFile
+    data: dataFile,
+    type: "variant"
   };
 }
 
-function deriveVariantsForTemplateFile(templateFile, templateName, contents) {
+function deriveVariantsForTemplateFile(realm, templateFile, templateName, contents) {
   var templateVariants = [];
   //add data files for the template
   contents.forEach(function(item) {
     var result = dataFilePattern.exec(item);
     if (!result || result[1] !== templateName) return;
     var name = result[3] || templateName;
-    templateVariants.push(createVariant(name, templateFile, path.join(templateFile.dir, item)));
+    templateVariants.push(createVariant(realm, name, templateFile, path.join(templateFile.dir, item)));
   });
   //add files from data folders for the template
   contents.forEach(function(item) {
@@ -39,11 +41,11 @@ function deriveVariantsForTemplateFile(templateFile, templateName, contents) {
       var dataFilePath = path.join(templateFile.dir, item, data);
       var dataName = path.parse(data).name;
       var name = dataName === "default" ? templateName : dataName;
-      templateVariants.push(createVariant(name, templateFile, dataFilePath));
+      templateVariants.push(createVariant(realm, name, templateFile, dataFilePath));
     });
   });
   //if there are no variants, then the template itself is the variant
-  if (templateVariants.length === 0) templateVariants.push(createVariant(templateName, templateFile));
+  if (templateVariants.length === 0) templateVariants.push(createVariant(realm, templateName, templateFile));
 
   return templateVariants;
 }
@@ -55,7 +57,7 @@ function getVariants(realm) {
     var result = templatePattern.exec(item);
     if (!result) return;
     var templateFile = path.parse(path.join(realm.path, item));
-    var templateVariants = deriveVariantsForTemplateFile(templateFile, result[1], contents);
+    var templateVariants = deriveVariantsForTemplateFile(realm, templateFile, result[1], contents);
     Array.prototype.push.apply(variants, templateVariants);
   });
   if (realm.meta && realm.meta.variants) {
@@ -139,6 +141,7 @@ function Realm(pathOrMeta, parent) {
   calculateRealmAndName();
   self.variants = getVariants(self);
   self.realms = getRealms(self);
+  self.type = "realm";
   applyMetadata();
 }
 

@@ -19,7 +19,9 @@ function toYamlBuffer(value) {
 }
 
 //TODO: Tests for find.
-//TODO: Verify coverage for all variations of calculating name and realm
+//TODO: Verify coverage for all variations of calculating name and realm.
+//TODO: Tests to verify type property on variants and realms.
+//TODO: Tests to verify parent property of variants.
 
 describe("when applying custom metadata", function() {
   afterEach(function() {
