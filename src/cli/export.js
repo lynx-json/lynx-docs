@@ -1,5 +1,6 @@
 "use strict";
 
+var lynxDocs = require("../index");
 var streamUtils = require("./stream-utils");
 var exportVinyl = require("../lib/export-vinyl");
 var path = require("path");
@@ -35,7 +36,7 @@ function buildCommand(yargs) {
 var exportCli = function(options) {
   if (options.config) {
     var config = path.resolve(process.cwd(), options.config);
-    require(config);
+    require(config)(lynxDocs);
   }
 
   var input = options.input === "stdin" ? process.stdin : options.input;
@@ -48,9 +49,9 @@ var exportCli = function(options) {
     .pipe(dest);
 };
 
-module.exports = { 
-  command: "export", 
-  describe: "Exports Lynx YAML templates to another format", 
-  builder: buildCommand, 
-  handler: exportCli 
+module.exports = {
+  command: "export",
+  describe: "Exports Lynx YAML templates to another format",
+  builder: buildCommand,
+  handler: exportCli
 };

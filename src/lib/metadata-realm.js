@@ -106,11 +106,15 @@ function Realm(pathOrMeta, parent) {
 
     var parentRealm = parent && parent.realm || "/";
     var realm = self.meta && self.meta.realm;
-    if (realm) return url.resolve(parentRealm, realm);
+    if (!realm && !parent) realm = "/"; //not in metadata and no parent
+    if (realm) {
+      self.realm = url.resolve(parentRealm, realm)
+      return;
+    }
 
-    var dir = folder.dir ? "/" + folder.dir + "/" : "/";
-    realm = dir + folder.base + "/";
-    return url.resolve(parentRealm, realm);
+    //this case is realm folder with parent realm folder and no .meta.yml
+    realm = path.relative(parent.path, self.path) + "/";
+    self.realm = url.resolve(parentRealm, realm);
   }
 
   function applyMetadata() {
@@ -132,7 +136,7 @@ function Realm(pathOrMeta, parent) {
     self.meta = pathOrMeta;
   }
 
-  self.realm = calculateRealmAndName();
+  calculateRealmAndName();
   self.variants = getVariants(self);
   self.realms = getRealms(self);
   applyMetadata();
@@ -151,21 +155,16 @@ Realm.prototype.getDefaultVariant = function() {
   });
 };
 
-Realm.prototype.find = function(realmUri) {
-  var normalizedA = urijs(this.realm).normalize().toString();
-  var normalizedB = urijs(realmUri).normalize().toString();
-  if (normalizedA === normalizedB) return this;
+Realm.prototype.find = function(predicate) {
+  if (predicate(this)) return this;
 
-  if (normalizedB.indexOf(normalizedA) !== 0) return null;
+  var result = this.variants.find(predicate);
+  if (result) return result;
 
-  for (var i = 0; i < this.realms.length; i++) {
-    var match = this.realms[i].find(realmUri);
-    if (match) return match;
-  }
-
-  return null;
+  result = this.realms.find(predicate);
+  return result;
 };
 
 module.exports = exports = folderPath => {
-  return new Realm(folderPath);
+  return new Realm(path.normalize(folderPath));
 };

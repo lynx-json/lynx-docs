@@ -18,6 +18,9 @@ function toYamlBuffer(value) {
   return new Buffer(YAML.stringify(value, null));
 }
 
+//TODO: Tests for find.
+//TODO: Verify coverage for all variations of calculating name and realm
+
 describe("when applying custom metadata", function() {
   afterEach(function() {
     fs.readdirSync.restore();
@@ -88,9 +91,9 @@ describe("when applying custom metadata", function() {
       realm.variants[0].custom.should.equal(meta.variants[0].custom);
     });
   });
-  describe("a folder with .meta.yml with realms ['./y/']", function() {
+  describe("a folder with .meta.yml with realms ['/y/']", function() {
     var realm;
-    var meta = { realms: [{ name: "The Y Realm", realm: "./y/" }] };
+    var meta = { realms: [{ name: "The Y Realm", realm: "/y/" }] };
 
     beforeEach(function() {
       sinon.stub(fs, "readdirSync").returns([".meta.yml"]);
@@ -99,10 +102,10 @@ describe("when applying custom metadata", function() {
       realm = getFolderMetadata("x");
     });
 
-    it("should have realm ['/x/y/']", function() {
+    it("should have realm ['/y/']", function() {
       realm.realms.length.should.equal(1);
       realm.realms[0].name.should.equal(meta.realms[0].name);
-      realm.realms[0].realm.should.equal("/x/y/");
+      realm.realms[0].realm.should.equal("/y/");
     });
   });
   describe("a folder with child folders ['y'] and .meta.yml with realms ['y']", function() {
@@ -122,7 +125,7 @@ describe("when applying custom metadata", function() {
       realm.realms.length.should.equal(1);
       realm.realms[0].name.should.not.equal(meta.realms[0].name);
       realm.realms[0].name.should.equal('y');
-      realm.realms[0].realm.should.equal("/x/y/");
+      realm.realms[0].realm.should.equal("/y/");
     });
   });
   describe("a folder with .meta.yml with variants ['y'].", function() {
@@ -196,36 +199,6 @@ describe("when applying custom metadata", function() {
       variant.name.should.equal("default");
     });
   });
-  describe("a folder with .meta.yml with realms ['y', 'z']", function() {
-    var realm;
-    var meta = { realms: [{ realm: "./y/", name: "y" }, { realm: "./z/", name: "z" }] };
-
-    beforeEach(function() {
-      sinon.stub(fs, "readdirSync").returns([".meta.yml"]);
-      sinon.stub(fs, "readFileSync").returns(toYamlBuffer(meta));
-      sinon.stub(fs, "statSync").returns(statsFake(false));
-      realm = getFolderMetadata("x");
-    });
-
-    it("should resolve '/x/y/'", function() {
-      realm.realms.length.should.equal(2);
-      var resolved = realm.find("/x/y/");
-      should.exist(resolved);
-      resolved.name.should.equal("y");
-    });
-    it("should not resolve '/x/a/'", function() {
-      realm.realms.length.should.equal(2);
-      var resolved = realm.find("/x/a/");
-      should.not.exist(resolved);
-    });
-    it("should resolve '/x/'", function() {
-      realm.realms.length.should.equal(2);
-      var resolved = realm.find("/x/");
-      should.exist(resolved);
-      resolved.name.should.equal("x");
-    });
-  });
-
 });
 
 describe("when deriving metadata from a folder", function() {
@@ -243,8 +216,8 @@ describe("when deriving metadata from a folder", function() {
       realm = getFolderMetadata("x");
     });
 
-    it("should have a realm value of '/x/'", function() {
-      realm.realm.should.equal("/x/");
+    it("should have a realm value of '/'", function() {
+      realm.realm.should.equal("/");
     });
   });
 
@@ -260,17 +233,17 @@ describe("when deriving metadata from a folder", function() {
       realm = getFolderMetadata("x");
     });
 
-    it("should have a realm value of '/x/' and name ['x']", function() {
-      realm.realm.should.equal("/x/");
+    it("should have a realm value of '/' and name ['x']", function() {
+      realm.realm.should.equal("/");
       realm.name.should.equal("x");
     });
 
-    it("should have realms with value of ['/x/y/','/x/z/'] and name ['y', 'z']", function() {
+    it("should have realms with value of ['/y/','/z/'] and name ['y', 'z']", function() {
       var children = realm.realms;
       children.length.should.equal(2);
-      children[0].realm.should.equal("/x/y/");
+      children[0].realm.should.equal("/y/");
       children[0].name.should.equal("y");
-      children[1].realm.should.equal("/x/z/");
+      children[1].realm.should.equal("/z/");
       children[1].name.should.equal("z");
     });
   });
