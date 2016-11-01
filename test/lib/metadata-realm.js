@@ -400,11 +400,11 @@ describe("when deriving metadata from a folder", function() {
     });
   });
 
-  describe("a folder with template ['one.lynx.yml'] and data ['one.data.variant.yml']", function() {
+  describe("a folder with template ['one.lynx.yml'] and data ['one.variant.data.yml']", function() {
     var variants;
 
     beforeEach(function() {
-      sinon.stub(fs, "readdirSync").withArgs("x").returns(["one.lynx.yml", "one.data.variant.yml"]);
+      sinon.stub(fs, "readdirSync").withArgs("x").returns(["one.lynx.yml", "one.variant.data.yml"]);
       sinon.stub(fs, "statSync").returns(statsFake(false));
       variants = getFolderMetadata("x").variants;
     });

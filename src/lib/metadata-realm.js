@@ -8,7 +8,7 @@ const parseYaml = require("./parse-yaml");
 const metaPattern = /^.*\.meta.yml$/;
 const templatePattern = /^(.*)\.lynx\.yml$/;
 const dataFolderPattern = /^(.*)\.data$/;
-const dataFilePattern = /^(.*)\.data(\.(.*))?\.yml$/;
+const dataFilePattern = /^(.*?)(\.(.*?))?\.data\.yml$/;
 
 function createVariant(realm, name, templateFile, dataFile) {
   return {
