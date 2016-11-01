@@ -30,25 +30,25 @@ function realmOrVariantMatchesRequestUrl(requestUrl) {
 module.exports = exports = function createStaticHandler(options) {
   // try to find the static file or call next
   return function (req, res, next) {
-    var requestedRealmMetadata;
+    var realmOrVariantMetadata;
     for (let i = 0; i < req.realms.length; i++) {
       let match = req.realms[i].find(realmOrVariantMatchesRequestUrl(req.url));
       if (match) {
-        requestedRealmMetadata = match;
+        realmOrVariantMetadata = match;
         break;
       }
     }
     
-    if (!requestedRealmMetadata) return next();
+    if (!realmOrVariantMetadata) return next();
     
-    var variants = requestedRealmMetadata.variants;
-    var realms = requestedRealmMetadata.realms;
+    var variants = realmOrVariantMetadata.variants;
+    var realms = realmOrVariantMetadata.realms;
     
     function serveRealmIndex() {
       res.setHeader("Content-Type", "application/lynx+json");
       
       var data = {};
-      data.realm = requestedRealmMetadata.realm;
+      data.realm = realmOrVariantMetadata.realm;
       if (variants.length > 0) data.variants = variants;
       else data.realms = realms;
       
@@ -61,7 +61,7 @@ module.exports = exports = function createStaticHandler(options) {
     }
     
     var query = url.parse(req.url, true).query;
-    var variantName = query.variant || requestedRealmMetadata.getDefaultVariant() || "default";
+    var variantName = query.variant || realmOrVariantMetadata.getDefaultVariant() || "default";
     var variant = variants.find(v => v.name === variantName);
     
     if (query.variant && !variant) return next();
