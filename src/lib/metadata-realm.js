@@ -108,7 +108,7 @@ function Realm(pathOrMeta, parent) {
     var realm = self.meta && self.meta.realm;
     if (!realm && !parent) realm = "/"; //not in metadata and no parent
     if (realm) {
-      self.realm = url.resolve(parentRealm, realm)
+      self.realm = url.resolve(parentRealm, realm);
       return;
     }
 
