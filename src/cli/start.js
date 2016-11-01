@@ -1,4 +1,5 @@
 var path = require("path");
+var util = require("util");
 
 function buildCommand(yargs) {
   return yargs
@@ -7,6 +8,11 @@ function buildCommand(yargs) {
       alias: "p",
       describe: "Port to listen on.",
       default: 3000
+    })
+    .option("root", {
+      alias: "r",
+      describe: "Root folder for server.",
+      default: "."
     })
     .option("config", {
       alias: "c",
@@ -23,6 +29,8 @@ var startCli = function(options) {
     var config = path.resolve(process.cwd(), options.config);
     require(config);
   }
+  
+  if (!util.isArray(options.root)) options.root = [options.root];
   
   // start the server
   require("../server/index.js")(options);
