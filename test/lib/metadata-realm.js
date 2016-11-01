@@ -18,9 +18,6 @@ function toYamlBuffer(value) {
   return new Buffer(YAML.stringify(value, null));
 }
 
-//TODO: Verify coverage for all variations of calculating name and realm.
-//TODO: Tests to verify type property on variants and realms.
-//TODO: Tests to verify parent property of variants.
 describe("when finding a realm", function() {
   var realm;
   var meta = {
