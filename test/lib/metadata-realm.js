@@ -26,7 +26,11 @@ describe("when finding a realm", function() {
     variants: [{ name: "default", template: "default.lynx.yml" }],
     realms: [{
       realm: "/y/",
-      name: "child"
+      name: "child",
+      realms: [{
+        realm: "/y/z",
+        name: "grandchild"
+      }]
     }]
   };
 
@@ -48,7 +52,7 @@ describe("when finding a realm", function() {
 
     it("should call predicate for all items", function() {
       var result = realm.find(predicate);
-      expect(predicate.callCount).equals(3);
+      expect(predicate.callCount).equals(4);
     });
 
     it("should have a falsey result", function() {
@@ -65,14 +69,25 @@ describe("when finding a realm", function() {
       expect(result).equal(realm.variants[0]);
     });
   });
-  describe("having matching realm", function() {
-    var predicate = sinon.spy(function(item) { return item.type === "realm" && item.realm !== "/"; });
 
-    it("should result in realm", function() {
+  describe("having matching child realm", function() {
+    var predicate = sinon.spy(function(item) { return item.name === "child"; });
+
+    it("should result in ", function() {
       var result = realm.find(predicate);
       expect(result.realm).to.equal(realm.realms[0].realm);
     });
   });
+
+  describe("having matching descenant realm", function() {
+    var predicate = sinon.spy(function(item) { return item.name === "grandchild"; });
+
+    it("should result in ", function() {
+      var result = realm.find(predicate);
+      expect(result.realm).to.equal(realm.realms[0].realms[0].realm);
+    });
+  });
+
   describe("having matching variant and matching realm", function() {
     var predicate = sinon.spy(function(item) { return item.parent !== undefined; });
 

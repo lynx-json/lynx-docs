@@ -165,8 +165,12 @@ Realm.prototype.find = function(predicate) {
   var result = this.variants.find(predicate);
   if (result) return result;
 
-  result = this.realms.find(predicate);
-  return result;
+  for (var i = 0; i < this.realms.length; i++) {
+    result = this.realms[i].find(predicate);
+    if (result) return result;
+  }
+
+  return null;
 };
 
 module.exports = exports = folderPath => {
