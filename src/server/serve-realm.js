@@ -27,18 +27,20 @@ function realmOrVariantMatchesRequestUrl(requestUrl) {
   };
 }
 
+function findRealmOrVariantMetadata(req) {
+  for (let i = 0; i < req.realms.length; i++) {
+    let match = req.realms[i].find(realmOrVariantMatchesRequestUrl(req.url));
+    if (match) {
+      realmOrVariantMetadata = match;
+      break;
+    }
+  }
+}
+
 module.exports = exports = function createStaticHandler(options) {
   // try to find the static file or call next
   return function (req, res, next) {
-    var realmOrVariantMetadata;
-    for (let i = 0; i < req.realms.length; i++) {
-      let match = req.realms[i].find(realmOrVariantMatchesRequestUrl(req.url));
-      if (match) {
-        realmOrVariantMetadata = match;
-        break;
-      }
-    }
-    
+    var realmOrVariantMetadata = findRealmOrVariantMetadata(req);
     if (!realmOrVariantMetadata) return next();
     
     var variants = realmOrVariantMetadata.variants;
