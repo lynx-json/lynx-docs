@@ -105,7 +105,6 @@ module.exports = exports = function startServer(options) {
   }).listen(port);
 
   var address = server.address();
-
   if (address) console.log("Lynx Docs server is running at http://localhost:" + address.port);
   
   return server;
