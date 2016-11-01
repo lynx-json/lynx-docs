@@ -1,3 +1,5 @@
+"use strict";
+
 const url = require("url");
 const path = require("path");
 const exportYaml = require("../cli/export");
@@ -15,7 +17,6 @@ function generateRealmOrVariantUrl(realmOrVariant) {
 }
 
 function isRequestForRealmOrVariant(requestUrl, realmOrVariantUrl) {
-  console.log("REALM URL", realmOrVariantUrl);
   return url.parse(requestUrl).pathname === url.parse(realmOrVariantUrl).pathname;
 }
 
@@ -29,19 +30,25 @@ function realmOrVariantMatchesRequestUrl(requestUrl) {
 module.exports = exports = function createStaticHandler(options) {
   // try to find the static file or call next
   return function (req, res, next) {
-    var metadata = req.realms.find(realmOrVariantMatchesRequestUrl(req.url));
-    console.log("REQ URL", req.url);
-    console.log("META", metadata);
-    if (!metadata) return next();
+    var requestedRealmMetadata;
+    for (let i = 0; i < req.realms.length; i++) {
+      let match = req.realms[i].find(realmOrVariantMatchesRequestUrl(req.url));
+      if (match) {
+        requestedRealmMetadata = match;
+        break;
+      }
+    }
     
-    var variants = metadata.variants;
-    var realms = metadata.realms;
+    if (!requestedRealmMetadata) return next();
+    
+    var variants = requestedRealmMetadata.variants;
+    var realms = requestedRealmMetadata.realms;
     
     function serveRealmIndex() {
       res.setHeader("Content-Type", "application/lynx+json");
       
       var data = {};
-      data.realm = metadata.realm;
+      data.realm = requestedRealmMetadata.realm;
       if (variants.length > 0) data.variants = variants;
       else data.realms = realms;
       
@@ -54,7 +61,7 @@ module.exports = exports = function createStaticHandler(options) {
     }
     
     var query = url.parse(req.url, true).query;
-    var variantName = query.variant || metadata.getDefaultVariant() || "default";
+    var variantName = query.variant || requestedRealmMetadata.getDefaultVariant() || "default";
     var variant = variants.find(v => v.name === variantName);
     
     if (query.variant && !variant) return next();
