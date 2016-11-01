@@ -339,7 +339,7 @@ describe("when using additional finishing functions", function() {
       })
     });
   });
-  describe.only("for data properties", function() {
+  describe("for data properties", function() {
     var kvp;
     beforeEach(function() {
       kvp = {

@@ -4,7 +4,7 @@ var sinon = require("sinon");
 const partials = require("../../src/lib/partials-yaml");
 const YAML = require("yamljs");
 
-describe.only("when including partials", function () {
+describe("when including partials", function () {
   afterEach(function () { 
     if (partials.resolvePartial.restore) partials.resolvePartial.restore();
   });
