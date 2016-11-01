@@ -150,7 +150,7 @@ Realm.prototype.resolvePath = function(relative) {
 };
 
 Realm.prototype.getDefaultVariant = function() {
-  if (this.variants.length === 1) return this.variants[0];
+  if (this.variants.length === 1) return this.variants[0].name;
   var defaultName = this.default || "default";
   return this.variants.find(function(variant) {
     return variant.name === defaultName;

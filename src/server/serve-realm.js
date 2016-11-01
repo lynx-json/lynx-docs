@@ -15,6 +15,7 @@ function generateRealmOrVariantUrl(realmOrVariant) {
 }
 
 function isRequestForRealmOrVariant(requestUrl, realmOrVariantUrl) {
+  console.log("REALM URL", realmOrVariantUrl);
   return url.parse(requestUrl).pathname === url.parse(realmOrVariantUrl).pathname;
 }
 
@@ -29,6 +30,8 @@ module.exports = exports = function createStaticHandler(options) {
   // try to find the static file or call next
   return function (req, res, next) {
     var metadata = req.realms.find(realmOrVariantMatchesRequestUrl(req.url));
+    console.log("REQ URL", req.url);
+    console.log("META", metadata);
     if (!metadata) return next();
     
     var variants = metadata.variants;
