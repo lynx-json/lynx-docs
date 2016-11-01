@@ -49,9 +49,7 @@ var exportCli = function(options) {
     .pipe(dest);
 };
 
-module.exports = {
-  command: "export",
-  describe: "Exports Lynx YAML templates to another format",
-  builder: buildCommand,
-  handler: exportCli
-};
+exports.handler = exportCli;
+exports.builder = buildCommand;
+exports.describe = "Exports Lynx YAML templates to another format";
+exports.command = "export";
