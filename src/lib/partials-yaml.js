@@ -42,14 +42,18 @@ function getPartialValue(value, key) {
 
   // Replace simple parameters.
   var content = YAML.stringify(partial.value);
-  content = content.replace(new RegExp("{{{key}}}", "g"), key);
+
   for (var p in value) {
-    let mustachePattern = new RegExp("{{{" + p + "}}}", "g");
+    let mustachePattern = new RegExp("{{{" + p + "}}}", "gm");
     content = content.replace(mustachePattern, value[p]);
     
-    // key<:
-    let literalPattern = new RegExp("['\"]?" + p + "<" + "['\"]?" + ": null", "g");
+    // param<:
+    let literalPattern = new RegExp("^['\"]?" + p + "<" + "['\"]?" + ":.*$", "gm");
     content = content.replace(literalPattern, p + ": " + value[p]);
+    
+    // key<param:
+    let namedLiteralPattern = new RegExp("['\"]?.*<" + p + "['\"]?" + ":.*$", "gm");
+    content = content.replace(namedLiteralPattern, p + ": " + value[p]);
   }
 
   partial.value = YAML.parse(content);
@@ -71,7 +75,7 @@ function getPartial(value, key) {
   // Otherwise the partial name is assumed to be the key name: partial-name>
   key = key.replace(/>.*$/, "");
   if (!value.partial) value.partial = key;
-
+  
   return getPartialValue(value, key);
 }
 
