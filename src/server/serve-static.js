@@ -1,5 +1,6 @@
-module.exports = exports = function serveStatic(req, res, next) {
+module.exports = exports = function createStaticHandler(options) {
   // try to find the static file or call next
-  // convert previous impl to serve the static file or call next()
-  next();
+  return function (req, res, next) {
+    next();
+  };
 };
