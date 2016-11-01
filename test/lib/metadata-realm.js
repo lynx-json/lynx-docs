@@ -18,10 +18,73 @@ function toYamlBuffer(value) {
   return new Buffer(YAML.stringify(value, null));
 }
 
-//TODO: Tests for find.
 //TODO: Verify coverage for all variations of calculating name and realm.
 //TODO: Tests to verify type property on variants and realms.
 //TODO: Tests to verify parent property of variants.
+describe("when finding a realm", function() {
+  var realm;
+  var meta = {
+    realm: "/",
+    name: "Root",
+    variants: [{ name: "default", template: "default.lynx.yml" }],
+    realms: [{
+      realm: "/y/",
+      name: "child"
+    }]
+  };
+
+  beforeEach(function() {
+    sinon.stub(fs, "readdirSync").returns([".meta.yml"]);
+    sinon.stub(fs, "readFileSync").returns(toYamlBuffer(meta));
+    sinon.stub(fs, "statSync").returns(statsFake(false));
+    realm = getFolderMetadata("x");
+  });
+
+  afterEach(function() {
+    fs.readdirSync.restore();
+    fs.readFileSync.restore();
+    if (fs.statSync.restore) fs.statSync.restore();
+  });
+
+  describe("having no matching items", function() {
+    var predicate = sinon.spy(function(item) { return false; });
+
+    it("should call predicate for all items", function() {
+      var result = realm.find(predicate);
+      expect(predicate.callCount).equals(3);
+    });
+
+    it("should have a falsey result", function() {
+      var result = realm.find(predicate);
+      should.not.exist(result);
+    });
+
+  });
+  describe("having matching variant", function() {
+    var predicate = sinon.spy(function(item) { return item.type === "variant"; });
+
+    it("should result in variant", function() {
+      var result = realm.find(predicate);
+      expect(result).equal(realm.variants[0]);
+    });
+  });
+  describe("having matching realm", function() {
+    var predicate = sinon.spy(function(item) { return item.type === "realm" && item.realm !== "/"; });
+
+    it("should result in realm", function() {
+      var result = realm.find(predicate);
+      expect(result.realm).to.equal(realm.realms[0].realm);
+    });
+  });
+  describe("having matching variant and matching realm", function() {
+    var predicate = sinon.spy(function(item) { return item.parent !== undefined; });
+
+    it("should result in variant", function() {
+      var result = realm.find(predicate);
+      expect(result).eql(realm.variants[0]);
+    });
+  });
+});
 
 describe("when applying custom metadata", function() {
   afterEach(function() {

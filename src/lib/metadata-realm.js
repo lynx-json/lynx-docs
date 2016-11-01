@@ -63,6 +63,8 @@ function getVariants(realm) {
     realm.meta.variants.forEach(function(variant) {
       variant.template = realm.resolvePath(variant.template);
       if (variant.data) variant.data = realm.resolvePath(variant.data);
+      variant.type = "variant";
+      variant.parent = realm;
       var index = variants.findIndex(function(candidate) {
         return candidate.template === variant.template && candidate.data === variant.data;
       });
