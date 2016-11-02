@@ -60,8 +60,7 @@ module.exports = exports = function createStaticHandler(options) {
     }
     
     var query = url.parse(req.url, true).query;
-    var variantName = query.variant || realmOrVariantMetadata.getDefaultVariant() || "default";
-    var variant = variants.find(v => v.name === variantName);
+    var variant = query.variant ? variants.find(v => v.name === query.variant) : realmOrVariantMetadata.getDefaultVariant();
     
     if (query.variant && !variant) return next();
     
