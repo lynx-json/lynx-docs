@@ -17,6 +17,8 @@ function resolvePartial(kvp, options) {
   while (partialsFolder) {
     let partialFile = path.join(process.cwd(), partialsFolder, "_partials", value.partial + ".js");
     if (fs.existsSync(partialFile)) {
+      //TODO: Since we're using require, the js is cached, so a change requires restarting the
+      // the server. Consider using something like decache module.
       return require(partialFile)(kvp, options);
     }
     
@@ -64,22 +66,25 @@ function getPartialValue(kvp, options) {
   return partial;
 }
 
-function getPartial(kvp, options) {
-  var value = kvp.value, key = kvp.key;
-  var isExplicitValue = typeof value !== "object" || Array.isArray(value) || value === null;
-  if (isExplicitValue) {
-    let originalValue = value;
-    kvp.value = value = {};
-    if (originalValue) value.value = originalValue;
-  }
-
-  // If a partial name is specified like this: key>partial-name
-  var match = partialKeyPattern.exec(key);
-  if (match[1]) value.partial = match[1];
+function normalizeValueToObject(kvp) {
+  if (kvp.value === null || kvp.value === undefined) 
+    kvp.value = {};
+  else if (Array.isArray(kvp.value) || typeof kvp.value !== "object") 
+    kvp.value = { value: kvp.value };
   
-  // Otherwise the partial name is assumed to be the key name: partial-name>
-  kvp.key = key = key.replace(/>.*$/, "");
-  if (!value.partial) value.partial = key;
+  return kvp;
+}
+
+function getPartial(kvp, options) {
+  kvp = normalizeValueToObject(kvp);
+  
+  var match = partialKeyPattern.exec(kvp.key);
+  if (match && match[1]) kvp.value.partial = match[1];
+  
+  kvp.key = kvp.key.replace(/>.*$/, "");
+  
+  // partial-name>: (Just the key is specified. The partial name is assumed to be the same as the key.)
+  kvp.value.partial = kvp.value.partial || kvp.key;
   
   return getPartialValue(kvp, options);
 }

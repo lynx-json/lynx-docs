@@ -77,7 +77,6 @@ function expandNodeValue(node, options) {
 
       if (partials.isPartial(childKvp)) {
         childKvp = partials.getPartial(childKvp, options);
-        delete node[valueKey][childKey];
       }
 
       node[valueKey][childKey] = expandValue(childKvp, options).value;

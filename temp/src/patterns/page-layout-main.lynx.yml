@@ -1,0 +1,5 @@
+value>page-layout-main:
+  main:
+    spec:
+      hints: [ form ]
+    value: "Boom"

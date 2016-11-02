@@ -55,7 +55,8 @@ module.exports = exports = function createStaticHandler(options) {
         format: "lynx",
         input: path.join(__dirname, "realm-index.lynx.yml"),
         output: res,
-        data: data
+        data: data,
+        realm: data.realm
       });
     }
     
@@ -72,11 +73,15 @@ module.exports = exports = function createStaticHandler(options) {
     
     res.setHeader("Content-Type", "application/lynx+json");
     
+    console.log("v", variant.realm);
+    console.log("r", variant.parent.realm);
+    
     exportYaml.handler({
       format: "lynx",
       input: variant.template,
       output: res,
-      data: variant.data
+      data: variant.data,
+      realm: variant.realm || variant.parent.realm
     });
   };
 };

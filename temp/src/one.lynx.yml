@@ -1,5 +1,1 @@
-message>em: This has emphasis 1.
-alert>em:
-  level: 3
-  value: This has emphasis 3.
-strong>: This has emphasis 2.
+Hello

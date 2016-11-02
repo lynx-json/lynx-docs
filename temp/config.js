@@ -19,15 +19,13 @@ module.exports = exports = function(lynxDocs) {
   finishYaml.add(function addRealm(kvp, options) {
     // only do this for the root document kvp
     if (kvp.key) return;
-    if (!util.isObject(kvp.value) || !util.isObject(kvp.value.value)) return;
+    if (!util.isObject(kvp.value)) return;
     if (!options.realm) return;
-    
-    var node = kvp.value;
-    
-    if (node.value.realm) {
-      node.value.realm = url.resolve(options.realm, node.value.realm);
-    } else {
-      node.value.realm = options.realm;
+
+    if (kvp.value.realm) {
+      kvp.value.realm = url.resolve(options.realm, kvp.value.realm);
+    } else {  
+      kvp.value.realm = options.realm;
     }
   });
 };

@@ -1,0 +1,10 @@
+spec:
+  hints: [ header ]
+value:
+  icon:
+    info: ""
+  branding:
+    src: /images/bestbuy-logo.svg
+    type: image/png
+    width: 270.66
+    height: 48

@@ -1,12 +1,5 @@
 title: This is the index
-link:
-  href: http://example.com/foo/
-  title: Click Me
-  type: application/lynx+json
-# variants:
-#   - One
-#   - Two
-#   - Three
+variants@: "Here {{{name}}}"
 # realms@:
 #   label: Case
 #   realm: "{{{realm}}}"
