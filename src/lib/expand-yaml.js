@@ -54,10 +54,10 @@ function expandNode(node, options) {
 function expandNodeValue(node, options) {
   info("expandNodeValue", node.value);
   var valueKey = getValuePropertyName(node);
+  var kvp = { value: node[valueKey], key: valueKey};
 
-  //TODO: Review document-level partials.
-  if (partials.isPartial(node[valueKey], valueKey)) {
-    var partial = partials.getPartial(node[valueKey], valueKey);
+  if (partials.isPartial(kvp)) {
+    var partial = partials.getPartial(kvp, options);
     var replacement = expandValue({ value: partial.value, key: partial.key }, options).value;
     delete node[valueKey];
     node.value = replacement.value;
@@ -73,21 +73,21 @@ function expandNodeValue(node, options) {
   else if (util.isObject(node[valueKey])) {
     Object.getOwnPropertyNames(node[valueKey]).forEach(function (childKey) {
       var childValue = node[valueKey][childKey];
+      var childKvp = { value: childValue, key: childKey };
 
-      if (partials.isPartial(childValue, childKey)) {
-        var partial = partials.getPartial(childValue, childKey);
+      if (partials.isPartial(childKvp)) {
+        var partial = partials.getPartial(childKvp, options);
         delete node[valueKey][childKey];
         childKey = partial.key;
         childValue = partial.value;
       }
 
-      node[valueKey][childKey] = expandValue({ value: childValue, key: childKey }, options).value;
+      node[valueKey][childKey] = expandValue(childKvp, options).value;
     });
   }
 }
 
 function expandValue(kvp, options) {
-  console.log(options.input);
   info("expandValue", kvp);
   var node;
 

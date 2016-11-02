@@ -5,8 +5,8 @@ const YAML = require("yamljs");
 const path = require("path");
 const partialKeyPattern = /^.*>(.*)?$/;
 
-function isPartial(value, key) {
-  return partialKeyPattern.test(key);
+function isPartial(kvp) {
+  return partialKeyPattern.test(kvp.key);
 }
 
 function fileExists(location) {
@@ -17,7 +17,8 @@ function fileExists(location) {
   }
 }
 
-function resolvePartial(value, key) {
+function resolvePartial(kvp, options) {
+  var value = kvp.value, key = kvp.key;
   var location;
 
   // TODO: Figure out the real location and iterate up to source root until partial is found.
@@ -36,8 +37,9 @@ function resolvePartial(value, key) {
   }
 }
 
-function getPartialValue(value, key) {
-  var partial = exports.resolvePartial(value, key);
+function getPartialValue(kvp, options) {
+  var value = kvp.value, key = kvp.key;
+  var partial = exports.resolvePartial(kvp, options);
   if (!partial) throw new Error("Failed to find partial " + value.partial);
 
   // Replace simple parameters.
@@ -60,11 +62,12 @@ function getPartialValue(value, key) {
   return partial;
 }
 
-function getPartial(value, key) {
+function getPartial(kvp, options) {
+  var value = kvp.value, key = kvp.key;
   var isExplicitValue = typeof value !== "object" || Array.isArray(value) || value === null;
   if (isExplicitValue) {
     let originalValue = value;
-    value = {};
+    kvp.value = value = {};
     if (originalValue) value.value = originalValue;
   }
 
@@ -73,10 +76,10 @@ function getPartial(value, key) {
   if (match[1]) value.partial = match[1];
   
   // Otherwise the partial name is assumed to be the key name: partial-name>
-  key = key.replace(/>.*$/, "");
+  kvp.key = key = key.replace(/>.*$/, "");
   if (!value.partial) value.partial = key;
   
-  return getPartialValue(value, key);
+  return getPartialValue(kvp, options);
 }
 
 exports.isPartial = isPartial;
