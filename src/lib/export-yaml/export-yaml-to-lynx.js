@@ -14,7 +14,7 @@ function exportLynx(kvp, cb, options) {
   var buffer = "";
   exportToHandleBars(kvp, function(data) {
     buffer += data;
-  });
+  }, options);
   if (buffer.length > 0) buffer += "\n";
 
   options.state = options.state || "default";

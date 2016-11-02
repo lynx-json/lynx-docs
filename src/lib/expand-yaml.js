@@ -87,6 +87,7 @@ function expandNodeValue(node, options) {
 }
 
 function expandValue(kvp, options) {
+  console.log(options.input);
   info("expandValue", kvp);
   var node;
 

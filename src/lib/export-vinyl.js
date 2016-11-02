@@ -10,7 +10,8 @@ var exportYaml = require("./export-yaml");
 var exportVinyl = function(options) {
   return through2.obj(function(file, enc, cb) {
     var value = parseYaml(file.contents);
-    var result = finishYaml(expandYaml({ key: undefined, value: value }));
+    var expandedYaml = expandYaml({ key: undefined, value: value }, options);
+    var result = finishYaml(expandedYaml, options);
     options.origin = file;
 
     var buffer = "";

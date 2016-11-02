@@ -94,7 +94,7 @@ function exportSimpleValue(meta, cb) {
   cb(JSON.stringify(meta.src.value));
 }
 
-function exportYaml(kvp, cb) {
+function exportYaml(kvp, cb, options) {
   var meta = getMetadata(kvp);
 
   if (meta.template && meta.template.type === "array") {
