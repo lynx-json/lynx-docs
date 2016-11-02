@@ -1,7 +1,9 @@
 "use strict";
 
-var util = require("util");
-var getMetadata = require("../metadata-yaml");
+const util = require("util");
+const getMetadata = require("../metadata-yaml");
+const url = require("url");
+
 
 function isNode(meta) {
   return meta.children && meta.children.spec && meta.children.value;
@@ -30,7 +32,7 @@ function addHint(kvp, hint) {
 function toDataProperty(kvp, property) {
   if (!kvp.value || !kvp.value.value || !util.isObject(kvp.value.value)) return;
   if (property in kvp.value.value === false) return;
-  if ("value" in kvp.value.value[property] === false) return;
+  if (util.isObject(kvp.value.value[property]) && "value" in kvp.value.value[property] === false) return;
   kvp.value.value[property] = kvp.value.value[property].value;
 }
 
@@ -73,13 +75,6 @@ function headers(kvp, options) {
   }
 }
 
-// TODO: determine how to handle templates for hypermedia control references
-// this might just naturally be answered if we add support for string templates.
-// e.g. The following:
-// href#urls.orders.index:
-// might be interpreted as:
-// href: {{#urls.orders.index}}{{{urls.orders.index}}}{{/urls.orders.index}}
-//       {{^urls.orders.index}}null{{/urls.orders.index}}
 function links(kvp, options) {
   var meta = getMetadata(kvp);
   if (nodeHasProperty(kvp, meta, "href")) {
@@ -146,9 +141,11 @@ function markers(kvp, options) {
   var meta = getMetadata(kvp);
   if (nodeHasProperty(kvp, meta, "for")) {
     addHint(kvp, "marker");
-    // TODO: figure out what to do w/ the 'for' attribute value
-    // previously, we did this:
-    // valueSpecTuple.value.for = url.resolve(realmBaseURI, "." + valueSpecTuple.value.for);
+    
+    var node = kvp.value;
+    if (node.value.for.value && options && options.realm) {
+      node.value.for.value = url.resolve(options.realm, node.value.for.value);
+    }
   }
 }
 
@@ -176,6 +173,7 @@ module.exports = exports = function(finish) {
   finish.images = images;
   finish.text = text;
   finish.content = content;
+  finish.markers = markers;
   finish.containers = containers;
   finish.forms = forms;
   finish.submits = submits;

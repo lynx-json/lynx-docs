@@ -241,7 +241,7 @@ describe("when using additional finishing functions", function() {
         kvp.value.spec.hints.should.contain("container");
       });
 
-      it("should convert 'reaml' to a data property", function() {
+      it("should convert 'realm' to a data property", function() {
         var kvp = {
           value: vsp({
             realm: vsp("http://example.com/app-realm/doc-realm/")
@@ -298,7 +298,7 @@ describe("when using additional finishing functions", function() {
         };
 
         finishYaml.forms(kvp);
-      })
+      });
     });
   });
 
@@ -328,6 +328,7 @@ describe("when using additional finishing functions", function() {
         kvp.value.spec.hints.should.contain("section");
       });
     });
+    
     describe("for keys that are undefined", function() {
       it("should not fail", function() {
         var kvp = {
@@ -336,9 +337,10 @@ describe("when using additional finishing functions", function() {
         };
 
         finishYaml.sections(kvp);
-      })
+      });
     });
   });
+  
   describe("for data properties", function() {
     var kvp;
     beforeEach(function() {
@@ -352,5 +354,36 @@ describe("when using additional finishing functions", function() {
       finishYaml.dataProperties(kvp);
       kvp.value.value.should.equal("Some text");
     });
-  })
+  });
+  
+  describe("for markers", function() {
+    var kvp;
+    beforeEach(function() {
+      kvp = {
+        key: "marker",
+        value: vsp({ header: vsp("Marker"), for: vsp("/foo/bar/") })
+      };
+    });
+
+    it("should add a 'marker' hint", function() {
+      finishYaml.markers(kvp);
+      kvp.value.spec.hints.should.contain("marker");
+    });
+    
+    it("should resolve a relative 'for' property to an absolute URI", function() {
+      finishYaml.markers(kvp, { realm: "http://example.com"});
+      kvp.value.value.for.value.should.equal("http://example.com/foo/bar/");
+    });
+    
+    it("should not resolve an absolute 'for' property to an absolute URI", function() {
+      kvp.value.value.for.value = "http://other.com/a/b/";
+      finishYaml.markers(kvp, { realm: "http://example.com"});
+      kvp.value.value.for.value.should.equal("http://other.com/a/b/");
+    });
+
+    it("should convert 'for' to a data property", function() {
+      finishYaml.dataProperties(kvp);
+      assertDataProperty(kvp, "for", "/foo/bar/");
+    });
+  });
 });
