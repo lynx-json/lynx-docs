@@ -137,10 +137,18 @@ describe("when including partials", function () {
   });
   
   describe("a partial with a key parameter", function () {
+    var partial;
+    beforeEach(function () {
+      sinon.stub(partials, "resolvePartial").withArgs({ value: { partial: "partial" }, key: "firstName"}).returns({
+        key: "key",
+        value: YAML.parse("'{{{key}}}'")
+      });
+      
+      partial = partials.getPartial({ value: {}, key: "firstName>partial"});
+    });
     
-  });
-  
-  describe("a partial with a value parameter", function () {
-    
+    it("should replace the templated value with the parameter value", function () {
+      partial.value.should.equal("firstName");
+    });
   });
 });
