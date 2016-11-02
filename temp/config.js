@@ -1,4 +1,5 @@
-var util = require("util");
+const util = require("util");
+const url = require("url");
 
 module.exports = exports = function(lynxDocs) {
   var finishYaml = lynxDocs.lib.finish;
