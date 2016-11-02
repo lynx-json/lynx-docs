@@ -1,3 +1,5 @@
+"use strict";
+
 const util = require("util");
 const url = require("url");
 
@@ -39,9 +41,14 @@ module.exports = exports = function(lynxDocs) {
     if (!isNode(meta)) return;
     meta = lynxDocs.lib.meta({ key: "value", value: kvp.value.value });
     
-    for (var child in meta.children) {
+    for (let childKey in meta.children) {
+      // Filter out data properties.
+      let childValue = kvp.value.value[childKey];
+      let childMeta = lynxDocs.lib.meta({ key: childKey, value: childValue });
+      if (childValue && !isNode(childMeta)) continue;
+      
       kvp.value.spec.children = kvp.value.spec.children || [];
-      kvp.value.spec.children.push({ name: child });
+      kvp.value.spec.children.push({ name: childKey });
     }
   });
 };

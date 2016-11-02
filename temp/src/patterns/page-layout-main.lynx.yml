@@ -1,5 +1,4 @@
 value>page-layout-main:
   main:
-    spec:
-      hints: [ form ]
-    value: "Boom"
+    header: Boom
+    message: This is the main content.
