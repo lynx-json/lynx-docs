@@ -2,6 +2,7 @@ const chai = require("chai");
 const should = chai.should();
 var sinon = require("sinon");
 const partials = require("../../src/lib/partials-yaml");
+const meta = require("../../src/lib/metadata-yaml");
 const YAML = require("yamljs");
 
 describe("when including partials", function () {

@@ -4,10 +4,10 @@ const fs = require("fs");
 const parseYaml = require("./parse-yaml");
 const YAML = require("yamljs");
 const path = require("path");
-const partialKeyPattern = /^.*>(.*)?$/;
+const getMetadata = require("./metadata-yaml");
 
 function isPartial(kvp) {
-  return partialKeyPattern.test(kvp.key);
+  return getMetadata(kvp).partial !== undefined;
 }
 
 function resolvePartial(kvp, options) {
@@ -77,14 +77,10 @@ function normalizeValueToObject(kvp) {
 
 function getPartial(kvp, options) {
   kvp = normalizeValueToObject(kvp);
+  var meta = getMetadata(kvp);
   
-  var match = partialKeyPattern.exec(kvp.key);
-  if (match && match[1]) kvp.value.partial = match[1];
-  
-  kvp.key = kvp.key.replace(/>.*$/, "");
-  
-  // partial-name>: (Just the key is specified. The partial name is assumed to be the same as the key.)
-  kvp.value.partial = kvp.value.partial || kvp.key;
+  kvp.value.partial = meta.partial;
+  kvp.key = meta.key;
   
   return getPartialValue(kvp, options);
 }

@@ -147,18 +147,21 @@ describe("when expanding YAML", function () {
     
     it("should have the correct value", function () {
       should.exist(kvp.value["value@"]);
-      should.exist(kvp.value["value@"].greeting);
-      should.exist(kvp.value["value@"].greeting.value);
-      kvp.value["value@"].greeting.value.should.equal("Hi");
+      kvp.value["value@"].length.should.equal(1);
+      should.exist(kvp.value["value@"][0].value);
+      should.exist(kvp.value["value@"][0].value.greeting);
+      should.exist(kvp.value["value@"][0].value.greeting.value);
+      kvp.value["value@"][0].value.greeting.value.should.equal("Hi");
     });
     
     it("should have a spec and hints", function() {
       should.exist(kvp.value.spec);
       should.not.exist(kvp.value.spec.name);
       should.exist(kvp.value.spec.hints);
-      should.exist(kvp.value["value@"].greeting.spec);
-      kvp.value["value@"].greeting.spec.name.should.equal("greeting");
-      should.exist(kvp.value["value@"].greeting.spec.hints);
+      should.exist(kvp.value["value@"][0].spec);
+      should.exist(kvp.value["value@"][0].value.greeting.spec);
+      kvp.value["value@"][0].value.greeting.spec.name.should.equal("greeting");
+      should.exist(kvp.value["value@"][0].value.greeting.spec.hints);
     });
   });
 
@@ -202,18 +205,21 @@ describe("when expanding YAML", function () {
     
     it("should have the correct value", function () {
       should.exist(kvp.value["value@dataVariable"]);
-      should.exist(kvp.value["value@dataVariable"].greeting);
-      should.exist(kvp.value["value@dataVariable"].greeting.value);
-      kvp.value["value@dataVariable"].greeting.value.should.equal("Hi");
+      kvp.value["value@dataVariable"].length.should.equal(1);
+      should.exist(kvp.value["value@dataVariable"][0].value);
+      should.exist(kvp.value["value@dataVariable"][0].value.greeting);
+      should.exist(kvp.value["value@dataVariable"][0].value.greeting.value);
+      kvp.value["value@dataVariable"][0].value.greeting.value.should.equal("Hi");
     });
     
     it("should have a spec and hints", function() {
       should.exist(kvp.value.spec);
       should.not.exist(kvp.value.spec.name);
       should.exist(kvp.value.spec.hints);
-      should.exist(kvp.value["value@dataVariable"].greeting.spec);
-      kvp.value["value@dataVariable"].greeting.spec.name.should.equal("greeting");
-      should.exist(kvp.value["value@dataVariable"].greeting.spec.hints);
+      should.exist(kvp.value["value@dataVariable"][0].spec);
+      should.exist(kvp.value["value@dataVariable"][0].value.greeting.spec);
+      kvp.value["value@dataVariable"][0].value.greeting.spec.name.should.equal("greeting");
+      should.exist(kvp.value["value@dataVariable"][0].value.greeting.spec.hints);
     });
   });
 
@@ -257,8 +263,9 @@ describe("when expanding YAML", function () {
     
     it("should have the correct value", function () {
       should.exist(kvp.value.value["array@"]);
-      should.exist(kvp.value.value["array@"].value);
-      kvp.value.value["array@"].value.should.equal("Hi");
+      should.exist(kvp.value.value["array@"].value[0]);
+      should.exist(kvp.value.value["array@"].value[0].value);
+      kvp.value.value["array@"].value[0].value.should.equal("Hi");
     });
     
     it("should have a spec and hints", function() {
@@ -266,8 +273,10 @@ describe("when expanding YAML", function () {
       should.not.exist(kvp.value.spec.name);
       should.exist(kvp.value.spec.hints);
       should.exist(kvp.value.value["array@"].spec);
-      kvp.value.value["array@"].spec.name.should.equal("array");
       should.exist(kvp.value.value["array@"].spec.hints);
+      should.exist(kvp.value.value["array@"].value[0].spec);
+      should.not.exist(kvp.value.value["array@"].value[0].spec.name);
+      should.exist(kvp.value.value["array@"].value[0].spec.hints);
     });
   });
 

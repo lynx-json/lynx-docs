@@ -14,11 +14,18 @@ function applyKeyName(key, meta) {
   }
 }
 
-function getSectionName(key) {
+function getTemplateSectionName(key) {
   var keyPattern = /^([a-zA-Z]*)($|([@#\^<])(.*)$)/;
   var match = keyPattern.exec(key);
   if (!match) throw new Error("Unable to parse key: " + key);
   return match[3] + (match[4] || match[1]);
+}
+
+function getTemplateVariableName(key) {
+  var keyPattern = /^([a-zA-Z]*)($|([@#\^<])(.*)$)/;
+  var match = keyPattern.exec(key);
+  if (!match) throw new Error("Unable to parse key: " + key);
+  return match[4] || match[1];
 }
 
 var objectTemplatePattern = /#|\^/;
@@ -26,7 +33,7 @@ var arrayTemplatePattern = /@/;
 var simpleTemplatePattern = /</;
 
 function applyTemplateMeta(key, meta) {
-  if (!key) return;
+  if (!key || !util.isString(key)) return;
   
   if (key.match(objectTemplatePattern)) {
     meta.template = { type: "object" };
@@ -37,7 +44,8 @@ function applyTemplateMeta(key, meta) {
   }
 
   if (meta.template) {
-    meta.template.section = getSectionName(key);
+    meta.template.section = getTemplateSectionName(key);
+    meta.template.variable = getTemplateVariableName(key);
   }
 }
 
@@ -45,16 +53,29 @@ function applyObjectMeta(value, meta) {
   if (!util.isObject(value) || util.isArray(value)) return;
   
   meta.children = {};
+  meta.countOfChildren = 0;
   
   Object.getOwnPropertyNames(value).forEach(function (childKey) {
     var childMeta = getMetadata(childKey);
     
     if (!meta.children[childMeta.key]) {
-      meta.children[childMeta.key] = [];    
+      meta.children[childMeta.key] = [];
+      meta.countOfChildren++;
     }
+    
+    childMeta.more = function () {
+      return getMetadata({ key: childKey, value: value[childKey] });
+    };
     
     meta.children[childMeta.key].push(childMeta);
   });
+}
+
+function applyPartialMeta(key, meta) {
+  var keyPattern = /^.*>(.*)?$/;
+  var match = keyPattern.exec(key);
+  if (!match) return;
+  meta.partial = match[1] || meta.key;
 }
 
 function getMetadata(kvp) {
@@ -66,6 +87,7 @@ function getMetadata(kvp) {
   applyKeyName(kvp.key, meta);
   applyTemplateMeta(kvp.key, meta);
   applyObjectMeta(kvp.value, meta);
+  applyPartialMeta(kvp.key, meta);
   
   return meta;
 }

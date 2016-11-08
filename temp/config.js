@@ -37,8 +37,9 @@ module.exports = exports = function(lynxDocs) {
       return meta.children && meta.children.spec && meta.children.value;
     }
     
-    var meta = lynxDocs.lib.meta(kvp);
+    var meta = lynxDocs.lib.meta(kvp);  
     if (!isNode(meta)) return;
+    
     meta = lynxDocs.lib.meta({ key: "value", value: kvp.value.value });
     
     for (let childKey in meta.children) {

@@ -105,7 +105,9 @@ describe("when getting metadata for a key/value pair", function () {
       var meta = getMetadata({ key: undefined, value: { greeting: "Hi" } });
       should.exist(meta.children);
       should.exist(meta.children.greeting);
-      meta.children.greeting[0].should.deep.equal({ src: { key: "greeting" }, key: "greeting" });
+      meta.children.greeting.length.should.equal(1);
+      meta.children.greeting[0].src.key.should.equal("greeting");
+      meta.children.greeting[0].key.should.equal("greeting");
     });
   });
 
@@ -114,16 +116,11 @@ describe("when getting metadata for a key/value pair", function () {
       var meta = getMetadata({ key: undefined, value: { "greeting#": { message: "{{{message}}}" } } });
       should.exist(meta.children);
       should.exist(meta.children.greeting);
-      meta.children.greeting[0].should.deep.equal({ 
-        src: { 
-          key: "greeting#"
-        }, 
-        key: "greeting", 
-        template: { 
-          type: "object", 
-          section: "#greeting" 
-        } 
-      });
+      meta.children.greeting.length.should.equal(1);
+      meta.children.greeting[0].src.key.should.equal("greeting#");
+      meta.children.greeting[0].key.should.equal("greeting");
+      meta.children.greeting[0].template.type.should.equal("object");
+      meta.children.greeting[0].template.section.should.equal("#greeting");
     });
   });
 
@@ -132,7 +129,11 @@ describe("when getting metadata for a key/value pair", function () {
       var meta = getMetadata({ key: undefined, value: { "greeting^": { message: "{{{message}}}" } } });
       should.exist(meta.children);
       should.exist(meta.children.greeting);
-      meta.children.greeting[0].should.deep.equal({ src: { key: "greeting^" }, key: "greeting", template: { type: "object", section: "^greeting" } });
+      meta.children.greeting.length.should.equal(1);
+      meta.children.greeting[0].src.key.should.equal("greeting^");
+      meta.children.greeting[0].key.should.equal("greeting");
+      meta.children.greeting[0].template.type.should.equal("object");
+      meta.children.greeting[0].template.section.should.equal("^greeting");
     });
   });
 
@@ -141,7 +142,10 @@ describe("when getting metadata for a key/value pair", function () {
       var meta = getMetadata({ key: undefined, value: { "greetings@": "{{{message}}}" } });
       should.exist(meta.children);
       should.exist(meta.children.greetings);
-      meta.children.greetings[0].should.deep.equal({ src: { key: "greetings@" }, key: "greetings", template: { type: "array", section: "@greetings" } });
+      meta.children.greetings[0].src.key.should.equal("greetings@");
+      meta.children.greetings[0].key.should.equal("greetings");
+      meta.children.greetings[0].template.type.should.equal("array");
+      meta.children.greetings[0].template.section.should.equal("@greetings");
     });
   });
 
@@ -150,7 +154,11 @@ describe("when getting metadata for a key/value pair", function () {
       var meta = getMetadata({ key: undefined, value: { "greeting#dataVariable": { message: "{{{message}}}" } } });
       should.exist(meta.children);
       should.exist(meta.children.greeting);
-      meta.children.greeting[0].should.deep.equal({ src: { key: "greeting#dataVariable" }, key: "greeting", template: { type: "object", section: "#dataVariable" } });
+      meta.children.greeting.length.should.equal(1);
+      meta.children.greeting[0].src.key.should.equal("greeting#dataVariable");
+      meta.children.greeting[0].key.should.equal("greeting");
+      meta.children.greeting[0].template.type.should.equal("object");
+      meta.children.greeting[0].template.section.should.equal("#dataVariable");
     });
   });
 
@@ -159,7 +167,11 @@ describe("when getting metadata for a key/value pair", function () {
       var meta = getMetadata({ key: undefined, value: { "greeting^dataVariable": { message: "{{{message}}}" } } });
       should.exist(meta.children);
       should.exist(meta.children.greeting);
-      meta.children.greeting[0].should.deep.equal({ src: { key: "greeting^dataVariable" }, key: "greeting", template: { type: "object", section: "^dataVariable" } });
+      meta.children.greeting.length.should.equal(1);
+      meta.children.greeting[0].src.key.should.equal("greeting^dataVariable");
+      meta.children.greeting[0].key.should.equal("greeting");
+      meta.children.greeting[0].template.type.should.equal("object");
+      meta.children.greeting[0].template.section.should.equal("^dataVariable");
     });
   });
   
@@ -168,8 +180,15 @@ describe("when getting metadata for a key/value pair", function () {
       var meta = getMetadata({ key: undefined, value: { "greeting#dataVariable": { message: "{{{message}}}" }, "greeting^dataVariable": { message: "{{{message}}}" } } });
       should.exist(meta.children);
       should.exist(meta.children.greeting);
-      meta.children.greeting[0].should.deep.equal({ src: { key: "greeting#dataVariable" }, key: "greeting", template: { type: "object", section: "#dataVariable" } });
-      meta.children.greeting[1].should.deep.equal({ src: { key: "greeting^dataVariable" }, key: "greeting", template: { type: "object", section: "^dataVariable" } });
+      meta.children.greeting.length.should.equal(2);
+      meta.children.greeting[0].src.key.should.equal("greeting#dataVariable");
+      meta.children.greeting[0].key.should.equal("greeting");
+      meta.children.greeting[0].template.type.should.equal("object");
+      meta.children.greeting[0].template.section.should.equal("#dataVariable");
+      meta.children.greeting[1].src.key.should.equal("greeting^dataVariable");
+      meta.children.greeting[1].key.should.equal("greeting");
+      meta.children.greeting[1].template.type.should.equal("object");
+      meta.children.greeting[1].template.section.should.equal("^dataVariable");
     });
   });
 
@@ -178,7 +197,10 @@ describe("when getting metadata for a key/value pair", function () {
       var meta = getMetadata({ key: undefined, value: { "greetings@dataVariable": "{{{message}}}" } });
       should.exist(meta.children);
       should.exist(meta.children.greetings);
-      meta.children.greetings[0].should.deep.equal({ src: { key: "greetings@dataVariable" }, key: "greetings", template: { type: "array", section: "@dataVariable" } });
+      meta.children.greetings[0].src.key.should.equal("greetings@dataVariable");
+      meta.children.greetings[0].key.should.equal("greetings");
+      meta.children.greetings[0].template.type.should.equal("array");
+      meta.children.greetings[0].template.section.should.equal("@dataVariable");
     });
   });
 });

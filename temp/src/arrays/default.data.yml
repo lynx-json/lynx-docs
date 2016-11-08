@@ -1,3 +1,3 @@
 items:
-  - name: Apple
-  - name: Banana
+  - name: '"Apple"'
+  - name: '"Banana"'

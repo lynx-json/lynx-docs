@@ -1,113 +1,76 @@
 "use strict";
 
-var YAML = require("yamljs");
 var util = require("util");
 var partials = require("./partials-yaml");
 var getMetadata = require("./metadata-yaml");
 
-function info() {
-  // console.log(arguments);
+function ensureSpec(kvp) {
+  var meta = getMetadata(kvp);
+  kvp.value.spec = kvp.value.spec || {};
+  kvp.value.spec.hints = kvp.value.spec.hints || [];
+  if (!util.isArray(kvp.value.spec.hints)) kvp.value.spec.hints = [kvp.value.spec.hints];
 }
 
-function isValuePropertyName(key) {
-  return getMetadata(key).key === "value";
+function expandArrayItem(val, idx, arr) {
+  return expandKvp({ key: idx, value: val }).value;
 }
 
-function hasValueProperty(obj) {
-  if (!obj || util.isArray(obj)) return false;
-  return Object.getOwnPropertyNames(obj).some(isValuePropertyName);
+function expandObject(obj, options) {
+  Object.getOwnPropertyNames(obj).forEach(function (key) {
+    var kvp = { key: key, value: obj[key] };
+    kvp = expandKvp(kvp, options);
+    delete obj[key];
+    obj[kvp.key] = kvp.value;
+  });
+  return obj;
 }
 
-function getValuePropertyName(obj) {
-  // this is arbitrary right now - allowing only one value property
-  // it might be valid to have two value keys - value#dataProperty and value^dataProperty
-  // and, if so, both should be expanded
-  var propertyNames = Object.getOwnPropertyNames(obj);
-  var valuePropertyNames = propertyNames.filter(isValuePropertyName);
-  if (valuePropertyNames.length > 1) throw new Error("More than one 'value' property found.");
-  if (valuePropertyNames.length === 0 ) throw new Error("No 'value' property found.");
-  return valuePropertyNames[0];
-}
-
-function isNodeLike(value) {
-  info("isNodeLike");
-  return util.isObject(value) && ("spec" in value || hasValueProperty(value));
-}
-
-function convertValueToNode(value) {
-  info("convertValueToNode");
-  return {
-    spec: { hints: [] },
-    value: value
-  };
-}
-
-function expandNode(node, options) {
-  info("expandNode");
-  if (!hasValueProperty(node)) node.value = null;
-  if (!node.spec) node.spec = { hints: [] };
-  if (!node.spec.hints) node.spec.hints = [];
-  if (!util.isArray(node.spec.hints)) node.spec.hints = [node.spec.hints];
-  return node;
-}
-
-function expandNodeValue(node, options) {
-  info("expandNodeValue", node.value);
-  var valueKey = getValuePropertyName(node);
-  var kvp = { value: node[valueKey], key: valueKey};
-
-  if (partials.isPartial(kvp)) {
-    var partial = partials.getPartial(kvp, options);
-    var replacement = expandValue({ value: partial.value, key: partial.key }, options).value;
-    delete node[valueKey];
-    node.value = replacement.value;
-    node.spec = replacement.spec;
-    return;
-  }
-
-  if (util.isArray(node[valueKey])) {
-    node[valueKey] = node[valueKey].map(function (childValue, childKey) {
-      return expandValue({ value: childValue, key: childKey }, options).value;
-    });
-  }
-  else if (util.isObject(node[valueKey])) {
-    Object.getOwnPropertyNames(node[valueKey]).forEach(function (childKey) {
-      var childValue = node[valueKey][childKey];
-      var childKvp = { value: childValue, key: childKey };
-
-      if (partials.isPartial(childKvp)) {
-        childKvp = partials.getPartial(childKvp, options);
-      }
-
-      node[valueKey][childKey] = expandValue(childKvp, options).value;
-    });
-  }
-}
-
-function expandValue(kvp, options) {
-  info("expandValue", kvp);
-  var node;
-
-  if (isNodeLike(kvp.value)) {
-    node = expandNode(kvp.value, options);
-  }
-  else {
-    node = convertValueToNode(kvp.value, options);
+function expandKvp(kvp, options) {
+  var meta = getMetadata(kvp);
+  
+  if (meta.partial) {
+    kvp = partials.getPartial(kvp, options);
+    meta = getMetadata(kvp);
   }
   
-  if (kvp.key) {
-    var metadata = getMetadata(kvp.key);
-    node.spec.name = metadata.key;
+  if (meta.children && meta.children.value) {
+    ensureSpec(kvp);
+  } else if (meta.children && meta.children.spec) {
+    ensureSpec(kvp);
+    kvp.value.value = null;
+  } else {
+    kvp.value = {
+      spec: {
+        hints: []
+      },
+      value: kvp.value
+    };
   }
   
-  expandNodeValue(node, options);
-
-  var result = {
-    key: kvp.key,
-    value: node || kvp.value
-  };
-
-  return result;
+  meta = getMetadata(kvp);
+  
+  if (meta.template && meta.template.type === "array" && !util.isArray(kvp.value.value)) {
+    kvp.value.value = [ kvp.value.value ];
+  }
+  
+  meta.children.value.forEach(function (valueMeta) {
+    if (valueMeta.template && 
+        valueMeta.template.type === "array" && 
+        !util.isArray(kvp.value[valueMeta.src.key])) {
+      kvp.value[valueMeta.src.key] = [kvp.value[valueMeta.src.key]];
+    }
+    
+    valueMeta = valueMeta.more();
+    let value = kvp.value[valueMeta.src.key];
+    
+    if (util.isArray(value)) {
+      kvp.value[valueMeta.src.key] = value.map(expandArrayItem);
+    } else if (util.isObject(value)) {
+      kvp.value[valueMeta.src.key] = expandObject(value, options);
+    }
+  });
+  
+  return kvp;
 }
 
-module.exports = exports = expandValue;
+module.exports = exports = expandKvp;

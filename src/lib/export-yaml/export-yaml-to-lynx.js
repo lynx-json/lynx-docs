@@ -5,7 +5,7 @@ var templateData = require("../template-data");
 var handlebars = require("handlebars");
 
 function bindData(contents, data) {
-  var template = handlebars.compile(contents); //TODO: Review adding { compat: true } as option
+  var template = handlebars.compile(contents, { noEscape: true }); //TODO: Review adding { compat: true } as option
   return template(data);
 }
 
