@@ -3,211 +3,182 @@
 var should = require("chai").should();
 var exportYaml = require("../../src/lib/export-yaml");
 
-function runTest(yaml, expected) {
+function runTest(test) {
   var output = [];
   function captureOutput(content) {
     output.push(content);
   }
   
-  exportYaml("handlebars", { value: yaml }, captureOutput);
+  exportYaml("handlebars", { key: test.key, value: test.value }, captureOutput);
   
   var actual = output.join("");
-  actual.should.equal(expected);
+  actual.should.equal(test.expected);
 }
 
-describe("when exporting YAML", function () {
-  describe("YAML with a string value", function () {
-    it("should return the correct template", function () {
-      var yaml = {
-        spec: {},
-        value: "foo"
-      };
-      
-      var expected = JSON.stringify(yaml);
-      
-      runTest(yaml, expected);
-    });
-  });
+var tests = [
+  {
+    key: undefined,
+    value: "String",
+    expected: '"String"',
+    should: "a string value should export a JSON string"
+  },
+  {
+    key: "key",
+    value: "String",
+    expected: '"key":"String"',
+    should: "a kvp with a string value should export a JSON string kvp"
+  },
+  {
+    key: undefined,
+    value: 42,
+    expected: "42",
+    should: "a number value should export a JSON number"
+  },
+  {
+    key: "key",
+    value: 42,
+    expected: '"key":42',
+    should: "a kvp with a number value should export a JSON number kvp"
+  },
+  {
+    key: undefined,
+    value: {
+      name: "String"
+    },
+    expected: '{"name":"String" }',
+    should: "an object value should export a JSON object"
+  },
+  {
+    key: "key",
+    value: {
+      name: "String"
+    },
+    expected: '"key":{"name":"String" }',
+    should: "a kvp with an object value should export a JSON object kvp"
+  },
+  {
+    key: undefined,
+    value: [ "String", "String" ],
+    expected: '["String","String"]',
+    should: "an array value should export a JSON array"
+  },
+  {
+    key: "key",
+    value: [ "String", "String" ],
+    expected: '"key":["String","String"]',
+    should: "a kvp with an array value should export a JSON array kvp"
+  },
+  {
+    key: "name<",
+    value: null,
+    expected: '"name":{{#if name}}"{{name}}"{{else}}null{{/if}}',
+    should: "a kvp with a single value template should export a kvp with a value template and a null fallback value"
+  },
+  {
+    key: "name<",
+    value: "default",
+    expected: '"name":{{#if name}}"{{name}}"{{else}}"default"{{/if}}',
+    should: "a kvp with a single value template should export a kvp with a value template and a default value"
+  },
+  {
+    key: undefined,
+    value: {
+      "name<": "default"
+    },
+    expected: '{"name":{{#if name}}"{{name}}"{{else}}"default"{{/if}} }',
+    should: "a nested kvp with a single value template should export a kvp with a value template and a default value"
+  },
+  {
+    key: undefined,
+    value: {
+      parent: {
+        "name<": "default"
+      }
+    },
+    expected: '{"parent":{"name":{{#if name}}"{{name}}"{{else}}"default"{{/if}} } }',
+    should: "a deeply nested kvp with a single value template should export a kvp with a value template and a default value"
+  },
+  {
+    key: "key#",
+    value: {
+      greeting: "Hi"
+    },
+    expected: '"key":{{#with key}}{"greeting":"Hi" }{{/with}}{{^with key}}null{{/with}}',
+    should: "a kvp with a single object template should export a kvp with an object value template and a null fallback value"
+  },
+  {
+    key: "key#",
+    value: {
+      "greeting<": "Hi"
+    },
+    expected: '"key":{{#with key}}{"greeting":{{#if greeting}}"{{greeting}}"{{else}}"Hi"{{/if}} }{{/with}}{{^with key}}null{{/with}}',
+    should: "a kvp with a single object template with a single value template should export correctly"
+  },
+  {
+    key: "key#",
+    value: {
+      "greeting<": null,
+      "greeting<alternateGreeting": null
+    },
+    expected: '"key":{{#with key}}{"greeting":{{#if greeting}}"{{greeting}}"{{/if}}{{#if alternateGreeting}}"{{alternateGreeting}}"{{/if}} }{{/with}}{{^with key}}null{{/with}}',
+    should: "a kvp with a single object template with multiple value templates should export correctly without a value template fallback/default value"
+  },
+  {
+    key: "key^",
+    value: {
+      greeting: "Hi"
+    },
+    expected: '"key":{{^with key}}{"greeting":"Hi" }{{/with}}{{#with key}}null{{/with}}',
+    should: "a kvp with a single negative object template should export a kvp with an object value template and a null fallback value"
+  },
+  {
+    key: undefined,
+    value: {
+      "contact#isPrimary": {
+        label: "Primary Contact"
+      },
+      "contact#isSecondary": {
+        label: "Secondary Contact"
+      }
+    },
+    expected: '{"contact":{{#with isPrimary}}{"label":"Primary Contact" }{{/with}}{{#with isSecondary}}{"label":"Secondary Contact" }{{/with}} }',
+    should: "a kvp with a multiple object templates should export a kvp with multiple object templates"
+  },
+  {
+    key: undefined,
+    value: {
+      "contact#isPrimary": {
+        label: "Primary Contact"
+      },
+      "contact^isPrimary": {
+        label: "Secondary Contact"
+      }
+    },
+    expected: '{"contact":{{#with isPrimary}}{"label":"Primary Contact" }{{/with}}{{^with isPrimary}}{"label":"Secondary Contact" }{{/with}} }',
+    should: "a kvp with a multiple object templates should export a kvp with multiple object templates"
+  },
+  {
+    key: "items@",
+    value: [
+      { label: "Hi" }
+    ],
+    expected: '"items":[{{#each items}}{"label":"Hi" }{{#unless @last}},{{/unless}}{{/each}}]',
+    should: "a kvp with a single array item template for an object value should export a kvp with an array item template for an object value"
+  },
+  {
+    key: "items@",
+    value: [
+      "{{foo}}"
+    ],
+    expected: '"items":[{{#each items}}"{{foo}}"{{#unless @last}},{{/unless}}{{/each}}]',
+    should: "a kvp with a single array item template for a string value should export a kvp with an array item template for a string value"
+  }
+];
 
-  describe("YAML with an array value", function () {
-    it("should return the correct template", function () {
-      var yaml = {
-        spec: {},
-        value: [
-          "foo",
-          "bar"
-        ]
-      };
-      
-      var expected = JSON.stringify(yaml);
-      
-      runTest(yaml, expected);
-    });
-  });
-
-  describe("YAML with an object value", function () {
-    it("should return the correct template", function () {
-      var yaml = {
-        spec: {},
-        value: {
-          foo: "bar"
-        }
-      };
-      
-      var expected = JSON.stringify(yaml);
-      
-      runTest(yaml, expected);
-    });
-  });
-
-  describe("YAML with a string value template", function () {
-    it("should return the correct template", function () {
-      var yaml = {
-        spec: {},
-        value: "{{{foo}}}"
-      };
-      
-      var expected = JSON.stringify(yaml);
-      
-      runTest(yaml, expected);
-    });
-  });
-  
-  describe("YAML with an null object template value", function () {
-    it("should return a template for an empty object", function () {
-      var yaml = {
-        spec: {},
-        "value#": null
-      };
-      
-      var expected = '{"spec":{},"value": {{#value}} {} {{/value}} }';
-      
-      runTest(yaml, expected);
-    });
-  });
-
-  describe("YAML with an object template value", function () {
-    it("should return the correct template", function () {
-      var yaml = {
-        spec: {},
-        "value#": {
-          greeting: "Hi"
-        }
-      };
-      
-      var expected = '{"spec":{},"value": {{#value}} {"greeting":"Hi"} {{/value}} }';
-      
-      runTest(yaml, expected);
-    });
-  });
-
-  describe("YAML with two object value templates", function () {
-    it("should return the correct template", function () {
-      var yaml = {
-        spec: {},
-        "value#foo": {
-          greeting: "Hi",
-          name: "Dan"
-        },
-        "value#bar": {
-          greeting: "Yo",
-          name: "John"
-        }
-      };
-      
-      var expected = '{"spec":{},"value": {{#foo}} {"greeting":"Hi","name":"Dan"} {{/foo}}  {{#bar}} {"greeting":"Yo","name":"John"} {{/bar}} }';
-      
-      runTest(yaml, expected);
-    });
-  });
-
-  describe("YAML with an array item string template", function () {
-    it("should return the correct template", function () {
-      var yaml = {
-        spec: {},
-        "value@": "{{{greeting}}}"
-      };
-      
-      var expected = '{"spec":{},"value":[ {{#value}} "{{{greeting}}}"{{#unless @last}},{{/unless}} {{/value}} ]}';
-      
-      runTest(yaml, expected);
-    });
-  });
-
-  describe("YAML with an array item object template", function () {
-    it("should return the correct template", function () {
-      var yaml = {
-        spec: {},
-        "value@": {
-          greeting: "{{{greeting}}}"
-        }
-      };
-      
-      var expected = '{"spec":{},"value":[ {{#value}} {"greeting":"{{{greeting}}}"}{{#unless @last}},{{/unless}} {{/value}} ]}';
-      
-      runTest(yaml, expected);
-    });
-  });
-
-  describe("YAML with two array item string templates", function () {
-    it("should return the correct template", function () {
-      var yaml = {
-        spec: {},
-        "value@foo": "{{{foo-greeting}}}",
-        "value@bar": "{{{bar-greeting}}}",
-      };
-      
-      var expected = '{"spec":{},"value":[ {{#foo}} "{{{foo-greeting}}}"{{#unless @last}},{{/unless}} {{/foo}}  {{#bar}} "{{{bar-greeting}}}"{{#unless @last}},{{/unless}} {{/bar}} ]}';
-      
-      runTest(yaml, expected);
-    });
-  });
-
-  describe("YAML with two array item object templates", function () {
-    it("should return the correct template", function () {
-      var yaml = {
-        spec: {},
-        "value@foo": {
-          greeting: "{{{foo-greeting}}}"
-        },
-        "value@bar": {
-          greeting: "{{{bar-greeting}}}"
-        }
-      };
-      
-      var expected = '{"spec":{},"value":[ {{#foo}} {"greeting":"{{{foo-greeting}}}"}{{#unless @last}},{{/unless}} {{/foo}}  {{#bar}} {"greeting":"{{{bar-greeting}}}"}{{#unless @last}},{{/unless}} {{/bar}} ]}';
-      
-      runTest(yaml, expected);
-    });
-  });
-
-  describe("YAML with an array item object template with inner template", function () {
-    it("should return the correct template", function () {
-      var yaml = {
-        spec: {},
-        "value@": {
-          "greeting#": {
-            message: "{{{message}}}"
-          }
-        }
-      };
-      
-      var expected = '{"spec":{},"value":[ {{#value}} {"greeting": {{#greeting}} {"message":"{{{message}}}"} {{/greeting}} }{{#unless @last}},{{/unless}} {{/value}} ]}';
-      
-      runTest(yaml, expected);
-    });
-  });
-  
-  describe("YAML with a simple template value", function () {
-    it("should return the correct template", function () {
-      var yaml = {
-        spec: {},
-        "value<": null
-      };
-      
-      var expected = '{"spec":{},"value": {{#value}} {{{value}}} {{/value}} }';
-      
-      runTest(yaml, expected);
+describe("when exporting YAML to Handlebars", function () {
+  tests.forEach(function (test) {
+    it(test.should, function () {
+      runTest(test);
     });
   });
 });
