@@ -35,6 +35,7 @@ function isBaseHint(hint) {
 
 function addHint(kvp, hint) {
   if (!kvp.value || !kvp.value.spec) return;
+  if (!kvp.value.spec.hints) return;
   if (kvp.value.spec.hints.indexOf(hint) !== -1) return;
   if (isBaseHint(hint) && kvp.value.spec.hints.some(isBaseHint)) return;
   kvp.value.spec.hints.push(hint);

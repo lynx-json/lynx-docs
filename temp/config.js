@@ -43,8 +43,9 @@ module.exports = exports = function(lynxDocs) {
     
     function isArray(meta) {
       var firstMeta = meta.children.value[0];
-      return firstMeta.template && 
-             firstMeta.template.type === "array";
+      if (firstMeta.template && firstMeta.template.type === "array") return true;
+      if (util.isArray(firstMeta.more().src.value)) return true;
+      return false;
     }
     
     var meta = lynxDocs.lib.meta(kvp);  

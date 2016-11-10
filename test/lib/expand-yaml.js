@@ -81,7 +81,7 @@ var tests = [
     should: "should expand correctly"
   },
   {
-    kvp: { value: { "value@": { greeting: "Hi" } } },
+    kvp: { value: { "value@": [{ greeting: "Hi" }] } },
     expected: { value: { 
       spec: { hints: [] },
       "value@": [ vsp({ greeting: vsp("Hi") }) ]
@@ -108,7 +108,7 @@ var tests = [
     should: "should expand correctly"
   },
   {
-    kvp: { value: { "value@dataVariable": { greeting: "Hi" } } },
+    kvp: { value: { "value@dataVariable": [{ greeting: "Hi" }] } },
     expected: { value: { 
       spec: { hints: [] },
       "value@dataVariable": [ vsp({ greeting: vsp("Hi") }) ]
@@ -135,7 +135,7 @@ var tests = [
     should: "should expand correctly"
   },
   {
-    kvp: { value: { "array@": "Hi" } },
+    kvp: { value: { "array@": ["Hi"] } },
     expected: { value: vsp({ "array": vsp([ vsp("Hi") ], { valueKey: "value@array" }) }) },
     description: "an expanded array template kvp",
     should: "should expand correctly"

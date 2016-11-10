@@ -34,9 +34,22 @@ function isBlacklisted(meta) {
 
 function ensureSpec(kvp) {
   var meta = getMetadata(kvp);
-  kvp.value.spec = kvp.value.spec || {};
-  kvp.value.spec.hints = kvp.value.spec.hints || [];
-  if (!util.isArray(kvp.value.spec.hints)) kvp.value.spec.hints = [kvp.value.spec.hints];
+  if (!meta.children || !meta.children.spec) {
+    kvp.value.spec = {};
+  }
+  
+  var specMeta = getMetadata({ key: "spec", value: kvp.value.spec });
+  if (!specMeta.children || !specMeta.children.hints) {
+    kvp.value.spec.hints = [];
+  }
+  
+  specMeta = getMetadata({ key: "spec", value: kvp.value.spec });
+  if (specMeta.children && 
+    specMeta.children.hints && 
+    !specMeta.children.hints[0].template && 
+    !util.isArray(kvp.value.spec.hints)) {
+      kvp.value.spec.hints = [kvp.value.spec.hints];
+  }
 }
 
 function expandArrayItem(val, idx, arr) {
@@ -95,12 +108,6 @@ function expandKvp(kvp, options) {
   }
   
   meta.children.value.forEach(function (valueMeta) {
-    if (valueMeta.template && 
-        valueMeta.template.type === "array" && 
-        !util.isArray(kvp.value[valueMeta.src.key])) {
-      kvp.value[valueMeta.src.key] = [kvp.value[valueMeta.src.key]];
-    }
-    
     valueMeta = valueMeta.more();
     let value = kvp.value[valueMeta.src.key];
     
