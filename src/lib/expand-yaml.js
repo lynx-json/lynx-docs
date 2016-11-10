@@ -44,13 +44,13 @@ function expandArrayItem(val, idx, arr) {
 }
 
 function expandObject(obj, options) {
+  var expanded = {};
   Object.getOwnPropertyNames(obj).forEach(function (key) {
     var kvp = { key: key, value: obj[key] };
     kvp = expandKvp(kvp, options);
-    delete obj[key];
-    obj[kvp.key] = kvp.value;
+    expanded[kvp.key] = kvp.value;
   });
-  return obj;
+  return expanded;
 }
 
 function expandKvp(kvp, options) {
