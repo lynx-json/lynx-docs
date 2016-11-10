@@ -4,25 +4,31 @@ var util = require("util");
 var partials = require("./partials-yaml");
 var getMetadata = require("./metadata-yaml");
 
+function keyMatches(regex) {
+  return function (meta) {
+    return regex.test(meta.key);
+  };
+}
+
 var blacklist = [
-  /^href/,
-  /^src/,
-  /^action/,
-  /^method/,
-  /^type/,
-  /^enctype/,
-  /^height/,
-  /^width/,
-  /^realm/,
-  /^scope/,
-  /^context/,
-  /^alt/,
-  /^for/
+  keyMatches(/^href$/),
+  keyMatches(/^src$/),
+  keyMatches(/^action$/),
+  keyMatches(/^method$/),
+  keyMatches(/^type$/),
+  keyMatches(/^enctype$/),
+  keyMatches(/^height$/),
+  keyMatches(/^width$/),
+  keyMatches(/^realm$/),
+  keyMatches(/^scope$/),
+  keyMatches(/^context$/),
+  keyMatches(/^alt$/),
+  keyMatches(/^for$/)
 ];
 
 function isBlacklisted(meta) {
-  return blacklist.some(function (regex) {
-    return regex.test(meta.key);
+  return blacklist.some(function (predicate) {
+    return predicate(meta);
   });
 }
 

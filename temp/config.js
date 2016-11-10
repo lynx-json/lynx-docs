@@ -31,24 +31,45 @@ module.exports = exports = function(lynxDocs) {
     }
   });
   
+  function expandMeta(meta) {
+    if ("more" in meta) return meta.more();
+    throw new Error("Unable to expand meta");
+  }
+  
   finishYaml.add(function addSpecChildren(kvp) {
     function isNode(meta) {
       return meta.children && meta.children.spec && meta.children.value;
     }
     
-    var meta = lynxDocs.lib.meta(kvp);  
-    if (!isNode(meta)) return;
-    
-    meta = lynxDocs.lib.meta({ key: "value", value: kvp.value.value });
-    
-    for (let childKey in meta.children) {
-      // Filter out data properties.
-      let childValue = kvp.value.value[childKey];
-      let childMeta = lynxDocs.lib.meta({ key: childKey, value: childValue });
-      if (childValue && !isNode(childMeta)) continue;
-      
-      kvp.value.spec.children = kvp.value.spec.children || [];
-      kvp.value.spec.children.push({ name: childKey });
+    function isArray(meta) {
+      var firstMeta = meta.children.value[0];
+      return firstMeta.template && 
+             firstMeta.template.type === "array";
     }
+    
+    var meta = lynxDocs.lib.meta(kvp);  
+    if (!isNode(meta) || isArray(meta)) return;
+    
+    var node = kvp.value;
+    node.spec.children = node.spec.children || [];
+    
+    function addChildNode(childMeta) {
+      function match(childSpec) {
+        return childSpec.name === childMeta.key;
+      }
+      
+      if (!isNode(childMeta)) return;
+      if (node.spec.children.some(match)) return;
+      if (childMeta.key === "href") {
+        console.log(JSON.stringify(childMeta));
+      }
+      node.spec.children.push({ name: childMeta.key });
+    }
+    
+    meta.children.value.map(expandMeta).forEach(function (valueMeta) {
+      for (let childKey in valueMeta.children) {
+        valueMeta.children[childKey].map(expandMeta).forEach(addChildNode);
+      }
+    });
   });
 };

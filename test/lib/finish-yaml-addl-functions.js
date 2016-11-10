@@ -101,6 +101,21 @@ describe("when using additional finishing functions", function() {
         kvp.value.spec.hints.should.contain("text");
       });
     });
+    
+    describe("for quoted literal templates", function() {
+      it("should add a 'text' hint", function() {
+        var kvp = {
+          key: "text",
+          value: {
+            spec: { hints: [] },
+            "value<": null
+          }
+        };
+
+        finishYaml.text(kvp);
+        kvp.value.spec.hints.should.contain("text");
+      });
+    });
   });
 
   describe("for content", function() {

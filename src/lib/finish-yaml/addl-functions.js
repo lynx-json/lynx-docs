@@ -23,24 +23,33 @@ function mapExpandedChildMetadata(value) {
   };
 }
 
+var baseHints = ["text","content","container","link","submit","form"];
+
+function isBaseHint(hint) {
+  function match(baseHint) {
+    return baseHint === hint;
+  }
+  
+  return baseHints.some(match);
+}
+
 function addHint(kvp, hint) {
   if (!kvp.value || !kvp.value.spec) return;
   if (kvp.value.spec.hints.indexOf(hint) !== -1) return;
+  if (isBaseHint(hint) && kvp.value.spec.hints.some(isBaseHint)) return;
   kvp.value.spec.hints.push(hint);
-}
-
-function toDataProperty(kvp, property) {
-  if (!kvp.value || !kvp.value.value || !util.isObject(kvp.value.value)) return;
-  if (property in kvp.value.value === false) return;
-  if (util.isObject(kvp.value.value[property]) && "value" in kvp.value.value[property] === false) return;
-  kvp.value.value[property] = kvp.value.value[property].value;
 }
 
 function text(kvp, options) {
   var meta = getMetadata(kvp);
-  if (meta.template && meta.template.type === "simple") {
+  if (meta.template && meta.template.type === "literal") {
     addHint(kvp, "text");
-  } else if (isNode(meta) && util.isString(kvp.value.value)) {
+  } else if (isNode(meta) && 
+    meta.children.value[0].template &&
+    meta.children.value[0].template.type === "literal") {
+    addHint(kvp, "text");
+  }
+  else if (isNode(meta) && util.isString(kvp.value.value)) {
     addHint(kvp, "text");
   }
 }
@@ -116,6 +125,11 @@ function containers(kvp, options) {
   if (meta.template &&
     (meta.template.type === "object" || meta.template.type === "array")) {
     addHint(kvp, "container");
+  } else if (isNode(meta) &&
+    meta.children.value && 
+    meta.children.value[0].template &&
+    meta.children.value[0].template.type === "array") {
+    addHint(kvp, "container");        
   } else if (isNode(meta) && util.isObject(kvp.value.value)) {
     addHint(kvp, "container");
   }
