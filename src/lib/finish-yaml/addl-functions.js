@@ -50,7 +50,7 @@ function text(kvp, options) {
     meta.children.value[0].template.type === "literal") {
     addHint(kvp, "text");
   }
-  else if (isNode(meta) && util.isString(kvp.value.value)) {
+  else if (isNode(meta) && kvp.value.value !== null && util.isPrimitive(kvp.value.value)) {
     addHint(kvp, "text");
   }
 }
