@@ -17,7 +17,6 @@ module.exports = exports = function(lynxDocs) {
   finishYaml.add(finishYaml.markers);
   finishYaml.add(finishYaml.containers);
   finishYaml.add(finishYaml.text);
-  finishYaml.add(finishYaml.dataProperties);
   
   finishYaml.add(function addRealm(kvp, options) {
     // only do this for the root document kvp

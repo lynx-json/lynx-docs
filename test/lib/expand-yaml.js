@@ -143,6 +143,24 @@ var tests = [
   }
 ];
 
+var reserveKeywords = [
+  "href",
+  "src",
+  "action",
+  "method",
+  "type",
+  "enctype",
+  "height",
+  "width",
+  "realm",
+  "scope",
+  "context",
+  "alt",
+  "for",
+  "href<",
+  "href="
+];
+
 describe("when expanding YAML", function () {
   tests.forEach(function (test) {
     describe(test.description, function () {
@@ -151,4 +169,28 @@ describe("when expanding YAML", function () {
       });
     });  
   });
+  reserveKeywords.forEach(function (keyword) {
+    var test = {
+      kvp: null,
+      expected: null,
+      description: "reserved keyword '" + keyword + "'",
+      should: "should not be expanded"
+    };
+    
+    // actual
+    test.kvp = { value: {} };
+    test.kvp.value[keyword] = "";
+    
+    // expected
+    test.expected = { value: null };
+    var obj = {};
+    obj[keyword] = "";
+    test.expected.value = vsp(obj);
+    
+    describe(test.description, function () {
+      it(test.should, function () {
+        runTest(test);
+      });
+    });  
+  })
 });

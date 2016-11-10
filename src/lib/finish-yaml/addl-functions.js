@@ -149,23 +149,6 @@ function markers(kvp, options) {
   }
 }
 
-function dataProperties(kvp, options) {
-  var meta = getMetadata(kvp);
-  if (!isNode(meta)) return;
-  toDataProperty(kvp, "href");
-  toDataProperty(kvp, "src");
-  toDataProperty(kvp, "action");
-  toDataProperty(kvp, "method");
-  toDataProperty(kvp, "type");
-  toDataProperty(kvp, "enctype");
-  toDataProperty(kvp, "height");
-  toDataProperty(kvp, "width");
-  toDataProperty(kvp, "realm");
-  toDataProperty(kvp, "scope");
-  toDataProperty(kvp, "alt");
-  toDataProperty(kvp, "for");
-}
-
 module.exports = exports = function(finish) {
   finish.titles = titles;
   finish.labels = labels;
@@ -178,5 +161,4 @@ module.exports = exports = function(finish) {
   finish.forms = forms;
   finish.submits = submits;
   finish.sections = sections;
-  finish.dataProperties = dataProperties;
 };

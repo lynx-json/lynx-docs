@@ -4,6 +4,28 @@ var util = require("util");
 var partials = require("./partials-yaml");
 var getMetadata = require("./metadata-yaml");
 
+var blacklist = [
+  /^href/,
+  /^src/,
+  /^action/,
+  /^method/,
+  /^type/,
+  /^enctype/,
+  /^height/,
+  /^width/,
+  /^realm/,
+  /^scope/,
+  /^context/,
+  /^alt/,
+  /^for/
+];
+
+function isBlacklisted(meta) {
+  return blacklist.some(function (regex) {
+    return regex.test(meta.key);
+  });
+}
+
 function ensureSpec(kvp) {
   var meta = getMetadata(kvp);
   kvp.value.spec = kvp.value.spec || {};
@@ -32,6 +54,8 @@ function expandKvp(kvp, options) {
     kvp = partials.getPartial(kvp, options);
     meta = getMetadata(kvp);
   }
+  
+  if (isBlacklisted(meta)) return kvp;
   
   if (meta.children && meta.children.value) {
     ensureSpec(kvp);
@@ -72,5 +96,7 @@ function expandKvp(kvp, options) {
   
   return kvp;
 }
+
+expandKvp.blacklist = blacklist;
 
 module.exports = exports = expandKvp;

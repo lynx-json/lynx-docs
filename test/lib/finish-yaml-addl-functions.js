@@ -6,12 +6,6 @@ var expect = chai.expect;
 var sinon = require("sinon");
 var finishYaml = require("../../src/lib/finish-yaml");
 
-function assertDataProperty(kvp, property, value) {
-  should.not.exist(kvp.value.value[property].value);
-  should.not.exist(kvp.value.value[property].spec);
-  kvp.value.value[property].should.equal(value);
-}
-
 function vsp(value) {
   return {
     spec: { hints: [] },
@@ -93,12 +87,6 @@ describe("when using additional finishing functions", function() {
       var fn = function() { finishYaml.links(kvp); };
       should.throw(fn);
     });
-
-    it("should convert 'href' and 'type' to data properties", function() {
-      finishYaml.dataProperties(kvp);
-      assertDataProperty(kvp, "href", ".");
-      assertDataProperty(kvp, "type", "application/lynx+json");
-    });
   });
 
   describe("for text", function() {
@@ -137,12 +125,6 @@ describe("when using additional finishing functions", function() {
       var fn = function() { finishYaml.content(kvp); };
       should.throw(fn);
     });
-
-    it("should convert 'src' and 'type' to data properties", function() {
-      finishYaml.dataProperties(kvp);
-      assertDataProperty(kvp, "src", ".");
-      assertDataProperty(kvp, "type", "image/png");
-    });
   });
 
   describe("for images", function() {
@@ -169,14 +151,6 @@ describe("when using additional finishing functions", function() {
       var fn = function() { finishYaml.images(kvp); };
       should.throw(fn);
     });
-
-    it("should convert 'src', 'height', 'width', and 'type' to data properties", function() {
-      finishYaml.dataProperties(kvp);
-      assertDataProperty(kvp, "src", ".");
-      assertDataProperty(kvp, "type", "image/png");
-      assertDataProperty(kvp, "height", 40);
-      assertDataProperty(kvp, "width", 40);
-    });
   });
 
   describe("for submits", function() {
@@ -195,13 +169,6 @@ describe("when using additional finishing functions", function() {
     it("should add a 'submit' hint", function() {
       finishYaml.submits(kvp);
       kvp.value.spec.hints.should.contain("submit");
-    });
-
-    it("should convert 'action', 'method', and 'enctype' to data properties", function() {
-      finishYaml.dataProperties(kvp);
-      assertDataProperty(kvp, "action", ".");
-      assertDataProperty(kvp, "method", "GET");
-      assertDataProperty(kvp, "enctype", "multipart/form-data");
     });
   });
 
@@ -239,17 +206,6 @@ describe("when using additional finishing functions", function() {
 
         finishYaml.containers(kvp);
         kvp.value.spec.hints.should.contain("container");
-      });
-
-      it("should convert 'realm' to a data property", function() {
-        var kvp = {
-          value: vsp({
-            realm: vsp("http://example.com/app-realm/doc-realm/")
-          })
-        };
-
-        finishYaml.dataProperties(kvp);
-        assertDataProperty(kvp, "realm", "http://example.com/app-realm/doc-realm/");
       });
     });
 
@@ -351,7 +307,6 @@ describe("when using additional finishing functions", function() {
     });
 
     it("should ignore values that are not objects", function() {
-      finishYaml.dataProperties(kvp);
       kvp.value.value.should.equal("Some text");
     });
   });
@@ -379,11 +334,6 @@ describe("when using additional finishing functions", function() {
       kvp.value.value.for.value = "http://other.com/a/b/";
       finishYaml.markers(kvp, { realm: "http://example.com"});
       kvp.value.value.for.value.should.equal("http://other.com/a/b/");
-    });
-
-    it("should convert 'for' to a data property", function() {
-      finishYaml.dataProperties(kvp);
-      assertDataProperty(kvp, "for", "/foo/bar/");
     });
   });
 });
