@@ -10,8 +10,19 @@ function runTest(test) {
   actual.should.deep.equal(test.expected);
 }
 
-function vsp(value, hints) {
-  return { spec: { hints: hints || [] }, value: value };
+function vsp(value, options) {
+  var vsp = { spec: { hints: [] }, value: value };
+  
+  if (options && options.hints) {
+    vsp.spec.hints = options.hints;
+  }
+  
+  if (options && options.valueKey) {
+    vsp[options.valueKey] = vsp.value;
+    delete vsp.value;
+  }
+  
+  return vsp;
 }
 
 var tests = [
@@ -59,13 +70,13 @@ var tests = [
   },
   {
     kvp: { value: { spec: { hints: [ "text" ] } } },
-    expected: { value: vsp(null, ["text"]) },
+    expected: { value: vsp(null, { hints: ["text"] }) },
     description: "an expanded partial node (spec)",
     should: "should expand correctly"
   },
   {
     kvp: { value: { spec: { hints: "text" } } },
-    expected: { value: vsp(null, ["text"]) },
+    expected: { value: vsp(null, { hints: ["text"] }) },
     description: "an expanded partial node (spec) with a hints string",
     should: "should expand correctly"
   },
@@ -125,19 +136,19 @@ var tests = [
   },
   {
     kvp: { value: { "array@": "Hi" } },
-    expected: { value: vsp({ "array@": vsp([ vsp("Hi") ]) }) },
+    expected: { value: vsp({ "array": vsp([ vsp("Hi") ], { valueKey: "value@array" }) }) },
     description: "an expanded array template kvp",
     should: "should expand correctly"
   },
   {
     kvp: { value: { "object#": { greeting: "Hi" } } },
-    expected: { value: vsp({ "object#": vsp({ greeting: vsp("Hi") }) }) },
+    expected: { value: vsp({ "object": vsp({ greeting: vsp("Hi") }, { valueKey: "value#object"}) }) },
     description: "an expanded object template kvp",
     should: "should expand correctly"
   },
   {
     kvp: { value: { "foo<": null } },
-    expected: { value: vsp({ "foo<": vsp(null) }) },
+    expected: { value: vsp({ "foo": vsp(null, { valueKey: "value<foo" }) }) },
     description: "an expanded simple template kvp",
     should: "should expand correctly"
   }

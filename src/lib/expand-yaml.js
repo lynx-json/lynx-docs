@@ -63,12 +63,23 @@ function expandKvp(kvp, options) {
     ensureSpec(kvp);
     kvp.value.value = null;
   } else {
-    kvp.value = {
-      spec: {
-        hints: []
-      },
-      value: kvp.value
-    };
+    if (meta.template) {
+      kvp.key = meta.key;
+      var newValue = {
+        spec: {
+          hints: []
+        }
+      };
+      newValue["value" + meta.template.section] = kvp.value;
+      kvp.value = newValue;
+    } else {
+      kvp.value = {
+        spec: {
+          hints: []
+        },
+        value: kvp.value
+      };  
+    }
   }
   
   meta = getMetadata(kvp);
