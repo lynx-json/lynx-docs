@@ -5,7 +5,7 @@ var util = require("util");
 function applyKeyName(key, meta) {
   if (!key) return;
   // key, key@, key#, key^, key<, key@foo, key#foo, key^foo, key<foo, should all yield 'key'
-  var keyPattern = /^([a-zA-Z]*)($|[@#\^><](.*)$)/;
+  var keyPattern = /^([a-zA-Z]*)($|[@#\^><=](.*)$)/;
   var match = keyPattern.exec(key);
   if (match && match[1]) {
     meta.key = match[1];
@@ -15,14 +15,14 @@ function applyKeyName(key, meta) {
 }
 
 function getTemplateSectionName(key) {
-  var keyPattern = /^([a-zA-Z]*)($|([@#\^<])(.*)$)/;
+  var keyPattern = /^([a-zA-Z]*)($|([@#\^<=])(.*)$)/;
   var match = keyPattern.exec(key);
   if (!match) throw new Error("Unable to parse key: " + key);
   return match[3] + (match[4] || match[1]);
 }
 
 function getTemplateVariableName(key) {
-  var keyPattern = /^([a-zA-Z]*)($|([@#\^<])(.*)$)/;
+  var keyPattern = /^([a-zA-Z]*)($|([@#\^<=])(.*)$)/;
   var match = keyPattern.exec(key);
   if (!match) throw new Error("Unable to parse key: " + key);
   return match[4] || match[1];
@@ -30,7 +30,8 @@ function getTemplateVariableName(key) {
 
 var objectTemplatePattern = /#|\^/;
 var arrayTemplatePattern = /@/;
-var simpleTemplatePattern = /</;
+var literalTemplatePattern = /=/;
+var literalQuotedTemplatePattern = /</;
 
 function applyTemplateMeta(key, meta) {
   if (!key || !util.isString(key)) return;
@@ -39,8 +40,10 @@ function applyTemplateMeta(key, meta) {
     meta.template = { type: "object" };
   } else if (key.match(arrayTemplatePattern)) {
     meta.template = { type: "array" };
-  } else if (key.match(simpleTemplatePattern)) {
-    meta.template = { type: "simple" };
+  } else if (key.match(literalTemplatePattern)) {
+    meta.template = { type: "literal" };
+  } else if (key.match(literalQuotedTemplatePattern)) {
+    meta.template = { type: "literal", quoted: true };
   }
 
   if (meta.template) {

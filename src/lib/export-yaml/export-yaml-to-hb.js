@@ -4,7 +4,7 @@ const util = require("util");
 const getMetadata = require("../metadata-yaml");
 
 var templateExporters = {
-  simple: exportSimpleTemplate,
+  literal: exportLiteralTemplate,
   object: exportObjectTemplate,
   array: exportArrayTemplate
 };
@@ -13,10 +13,12 @@ function resolveValue(kvmp) {
   return kvmp.value !== undefined ? kvmp.value : kvmp.metas[0].src.value;
 }
 
-function exportSimpleTemplate(kvmp, cb, options) {
+function exportLiteralTemplate(kvmp, cb, options) {
   function exportTemplate(meta, defaultValue) {
     cb("{{#if " + meta.template.variable + "}}");
-    cb("\"{{" + meta.template.variable + "}}\"");
+    if (meta.template.quoted) cb('"');
+    cb("{{" + meta.template.variable + "}}");
+    if (meta.template.quoted) cb('"');
     if (defaultValue !== undefined) {
       cb("{{else}}");
       cb(JSON.stringify(defaultValue));  

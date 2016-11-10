@@ -81,6 +81,24 @@ var tests = [
     should: "a kvp with a single value template should export a kvp with a value template and a default value"
   },
   {
+    key: "name=",
+    value: null,
+    expected: '"name":{{#if name}}{{name}}{{else}}null{{/if}}',
+    should: "a kvp with a single value template should export a kvp with a value template and a null fallback value"
+  },
+  {
+    key: "name=",
+    value: "default",
+    expected: '"name":{{#if name}}{{name}}{{else}}"default"{{/if}}',
+    should: "a kvp with a single value template should export a kvp with a value template and a default value"
+  },
+  {
+    key: "name=",
+    value: 42,
+    expected: '"name":{{#if name}}{{name}}{{else}}42{{/if}}',
+    should: "a kvp with a single value template should export a kvp with a value template and a default value"
+  },
+  {
     key: undefined,
     value: {
       "name<": "default"

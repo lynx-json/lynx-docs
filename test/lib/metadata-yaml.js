@@ -3,103 +3,110 @@
 var should = require("chai").should();
 var getMetadata = require("../../src/lib/metadata-yaml");
 
+function runTest(test) {
+  var actual = getMetadata(test.actual);
+  test.expected.src = actual.src;
+  actual.should.deep.equal(test.expected);
+}
+
+function ot(variable, inverse) {
+  var tag = inverse ? "^" : "#";
+  return {
+    section: tag + variable,
+    type: "object",
+    variable: variable
+  };
+}
+
+function at(variable, inverse) {
+  return {
+    section: "@" + variable,
+    type: "array",
+    variable: variable
+  };
+}
+
+function lt(variable, quoted) {
+  var tag = quoted ? "<" : "=";
+  var lt = {
+    section: tag + variable,
+    type: "literal",
+    variable: variable
+  };
+  if (tag === "<") lt.quoted = true;
+  return lt;
+}
+
+var tests = [
+  {
+    actual: "bareKey",
+    expected: { key: "bareKey" },
+    description: "a bare key",
+    should: "should return correct metadata"
+  },
+  {
+    actual: { key: "normal" },
+    expected: { key: "normal" },
+    description: "a key without templates/partials",
+    should: "should return correct metadata"
+  },
+  {
+    actual: { key: "objectTemplate#" },
+    expected: { key: "objectTemplate", template: ot("objectTemplate") },
+    description: "an object template key without a name",
+    should: "should return correct metadata"
+  },
+  {
+    actual: { key: "inverseObjectTemplate^" },
+    expected: { key: "inverseObjectTemplate", template: ot("inverseObjectTemplate", true) },
+    description: "an inverse object template key without a name",
+    should: "should return correct metadata"
+  },
+  {
+    actual: { key: "arrayTemplate@" },
+    expected: { key: "arrayTemplate", template: at("arrayTemplate") },
+    description: "an array template key without a name",
+    should: "should return correct metadata"
+  },
+  {
+    actual: { key: "literalTemplate<" },
+    expected: { key: "literalTemplate", template: lt("literalTemplate", true) },
+    description: "a quoted literal value template key without a name",
+    should: "should return correct metadata"
+  },
+  {
+    actual: { key: "objectTemplate#dataVariable" },
+    expected: { key: "objectTemplate", template: ot("dataVariable") },
+    description: "an object template key with a name",
+    should: "should return correct metadata"
+  },
+  {
+    actual: { key: "inverseObjectTemplate^dataVariable" },
+    expected: { key: "inverseObjectTemplate", template: ot("dataVariable", true) },
+    description: "an inverse object template key with a name",
+    should: "should return correct metadata"
+  },
+  {
+    actual: { key: "arrayTemplate@dataVariable" },
+    expected: { key: "arrayTemplate", template: at("dataVariable") },
+    description: "an array template key with a name",
+    should: "should return correct metadata"
+  },
+  {
+    actual: { key: "simpleTemplate<dataVariable" },
+    expected: { key: "simpleTemplate", template: lt("dataVariable", true) },
+    description: "a quoted literal value template key with a name",
+    should: "should return correct metadata"
+  }
+];
+
 describe("when getting metadata for a key/value pair", function () {
-  describe("a bare key", function () {
-    it("should return correct metadata", function () {
-      var meta = getMetadata("bareKey");
-      meta.key.should.equal("bareKey");
-      should.not.exist(meta.template);
-    });
-  });
-
-  describe("a key without templates/partials", function () {
-    it("should return correct metadata", function () {
-      var meta = getMetadata({ key: "normal" });
-      meta.key.should.equal("normal");
-      should.not.exist(meta.template);
-    });
-  });
-
-  describe("an object template key without a name", function () {
-    it("should return correct metadata", function () {
-      var meta = getMetadata({ key: "objectTemplate#" });
-      meta.key.should.equal("objectTemplate");
-      should.exist(meta.template);
-      meta.template.type.should.equal("object");
-      meta.template.section.should.equal("#objectTemplate");
-    });
-  });
-
-  describe("an inverse object template key without a name", function () {
-    it("should return correct metadata", function () {
-      var meta = getMetadata({ key: "inverseObjectTemplate^" });
-      meta.key.should.equal("inverseObjectTemplate");
-      should.exist(meta.template);
-      meta.template.type.should.equal("object");
-      meta.template.section.should.equal("^inverseObjectTemplate");
-    });
-  });
-
-  describe("an array template key without a name", function () {
-    it("should return correct metadata", function () {
-      var meta = getMetadata({ key: "arrayTemplate@" });
-      meta.key.should.equal("arrayTemplate");
-      should.exist(meta.template);
-      meta.template.type.should.equal("array");
-      meta.template.section.should.equal("@arrayTemplate");
+  tests.forEach(function (test) {
+    it(test.description, function () {
+      runTest(test);
     });
   });
   
-  describe("a simple value template key without a name", function () {
-    it("should return correct metadata", function () {
-      var meta = getMetadata({ key: "simpleTemplate<" });
-      meta.key.should.equal("simpleTemplate");
-      should.exist(meta.template);
-      meta.template.type.should.equal("simple");
-      meta.template.section.should.equal("<simpleTemplate");
-    });
-  });
-
-  describe("an object template key with a name", function () {
-    it("should return correct metadata", function () {
-      var meta = getMetadata({ key: "objectTemplate#dataVariable" });
-      meta.key.should.equal("objectTemplate");
-      should.exist(meta.template);
-      meta.template.type.should.equal("object");
-      meta.template.section.should.equal("#dataVariable");
-    });
-  });
-
-  describe("an inverse object template key with a name", function () {
-    it("should return correct metadata", function () {
-      var meta = getMetadata({ key: "inverseObjectTemplate^dataVariable" });
-      meta.key.should.equal("inverseObjectTemplate");
-      should.exist(meta.template);
-      meta.template.type.should.equal("object");
-      meta.template.section.should.equal("^dataVariable");
-    });
-  });
-
-  describe("an array template key with a name", function () {
-    it("should return correct metadata", function () {
-      var meta = getMetadata({ key: "arrayTemplate@dataVariable" });
-      meta.key.should.equal("arrayTemplate");
-      should.exist(meta.template);
-      meta.template.type.should.equal("array");
-      meta.template.section.should.equal("@dataVariable");
-    });
-  });
-  
-  describe("a simple value template key with a name", function () {
-    it("should return correct metadata", function () {
-      var meta = getMetadata({ key: "simpleTemplate<dataVariable" });
-      meta.key.should.equal("simpleTemplate");
-      should.exist(meta.template);
-      meta.template.type.should.equal("simple");
-      meta.template.section.should.equal("<dataVariable");
-    });
-  });
-
   describe("child key without templates/partials", function () {
     it("should return correct metadata", function () {
       var meta = getMetadata({ key: undefined, value: { greeting: "Hi" } });
@@ -110,7 +117,7 @@ describe("when getting metadata for a key/value pair", function () {
       meta.children.greeting[0].key.should.equal("greeting");
     });
   });
-
+  
   describe("child object template key without a name", function () {
     it("should return correct metadata", function () {
       var meta = getMetadata({ key: undefined, value: { "greeting#": { message: "{{{message}}}" } } });
@@ -123,7 +130,7 @@ describe("when getting metadata for a key/value pair", function () {
       meta.children.greeting[0].template.section.should.equal("#greeting");
     });
   });
-
+  
   describe("child inverse object template key without a name", function () {
     it("should return correct metadata", function () {
       var meta = getMetadata({ key: undefined, value: { "greeting^": { message: "{{{message}}}" } } });
@@ -136,7 +143,7 @@ describe("when getting metadata for a key/value pair", function () {
       meta.children.greeting[0].template.section.should.equal("^greeting");
     });
   });
-
+  
   describe("child array template key without a name", function () {
     it("should return correct metadata", function () {
       var meta = getMetadata({ key: undefined, value: { "greetings@": "{{{message}}}" } });
@@ -148,7 +155,7 @@ describe("when getting metadata for a key/value pair", function () {
       meta.children.greetings[0].template.section.should.equal("@greetings");
     });
   });
-
+  
   describe("child object template key with a name", function () {
     it("should return correct metadata", function () {
       var meta = getMetadata({ key: undefined, value: { "greeting#dataVariable": { message: "{{{message}}}" } } });
@@ -161,7 +168,7 @@ describe("when getting metadata for a key/value pair", function () {
       meta.children.greeting[0].template.section.should.equal("#dataVariable");
     });
   });
-
+  
   describe("child inverse object template key with a name", function () {
     it("should return correct metadata", function () {
       var meta = getMetadata({ key: undefined, value: { "greeting^dataVariable": { message: "{{{message}}}" } } });
@@ -191,7 +198,7 @@ describe("when getting metadata for a key/value pair", function () {
       meta.children.greeting[1].template.section.should.equal("^dataVariable");
     });
   });
-
+  
   describe("child array template key with a name", function () {
     it("should return correct metadata", function () {
       var meta = getMetadata({ key: undefined, value: { "greetings@dataVariable": "{{{message}}}" } });
