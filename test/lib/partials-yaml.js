@@ -15,7 +15,7 @@ describe("when including partials", function () {
     beforeEach(function () {
       sinon.stub(partials, "resolvePartial").withArgs({ value: { partial: "key"}, key: "key"}).returns({
         key: "key",
-        value: YAML.parse("")
+        value: ""
       });
       isPartial = partials.isPartial({ value: null, key: "key>" });
       partial = partials.getPartial({ value: null, key: "key>" });
@@ -32,7 +32,7 @@ describe("when including partials", function () {
     beforeEach(function () {
       sinon.stub(partials, "resolvePartial").withArgs({ value: { partial: "partial"}, key: "key"}).returns({
         key: "key",
-        value: YAML.parse("")
+        value: ""
       });
       isPartial = partials.isPartial({ value: null, key: "key>partial" });
       partial = partials.getPartial({ value: null, key: "key>partial" });
@@ -49,7 +49,7 @@ describe("when including partials", function () {
     beforeEach(function () {
       sinon.stub(partials, "resolvePartial").withArgs({ value: { partial: "partial", foo: "bar" }, key: "key"}).returns({
         key: "key",
-        value: YAML.parse("")
+        value: ""
       });
       partial = partials.getPartial({value: { foo: "bar" }, key: "key>partial"});
     });
@@ -64,7 +64,7 @@ describe("when including partials", function () {
     beforeEach(function () {
       sinon.stub(partials, "resolvePartial").withArgs({ value: { partial: "partial", value: "text"}, key: "key"}).returns({
         key: "key",
-        value: YAML.parse("")
+        value: ""
       });
       partial = partials.getPartial({ value: "text", key: "key>partial"});
     });
@@ -137,19 +137,37 @@ describe("when including partials", function () {
     });
   });
   
-  describe("a partial with a key parameter", function () {
-    var partial;
+  describe("a partial with a literal object parameter 'param=:' or 'key=param:'", function () {
+    var partial, param;
     beforeEach(function () {
-      sinon.stub(partials, "resolvePartial").withArgs({ value: { partial: "partial" }, key: "firstName"}).returns({
+      param = { message: "Hello" };
+      
+      sinon.stub(partials, "resolvePartial").withArgs({ value: { partial: "partial", param: param}, key: "key"}).returns({
         key: "key",
-        value: YAML.parse("'{{{key}}}'")
+        value: YAML.parse("param=:")
       });
       
-      partial = partials.getPartial({ value: {}, key: "firstName>partial"});
+      partial = partials.getPartial({ value: { param: param }, key: "key>partial"});
     });
     
     it("should replace the templated value with the parameter value", function () {
-      partial.value.should.equal("firstName");
+      partial.value.param.should.equal(param);
+    });
+  });
+  
+  describe("a partial with a key parameter", function () {
+    var partial, name;
+    beforeEach(function () {
+      name = "foo";
+      sinon.stub(partials, "resolvePartial").withArgs({ value: { partial: "partial", name: name } }).returns({
+        value: YAML.parse("'{{{name}}}'")
+      });
+      
+      partial = partials.getPartial({ value: { name: name }, key: ">partial"});
+    });
+    
+    it("should replace the templated value with the parameter value", function () {
+      partial.value.should.equal(name);
     });
   });
 });

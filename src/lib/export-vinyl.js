@@ -6,11 +6,30 @@ var parseYaml = require("./parse-yaml");
 var expandYaml = require("./expand-yaml");
 var finishYaml = require("./finish-yaml");
 var exportYaml = require("./export-yaml");
+var util = require("util");
+var getMetadata = require("./metadata-yaml");
+
+function getKVP(yaml) {
+  if (!util.isObject(yaml)) return { key: undefined, value: yaml };
+  
+  var props = Object.getOwnPropertyNames(yaml);
+  
+  if (props.length === 1 && getMetadata(props[0]).key === undefined) {
+    return {
+      key: props[0],
+      value: yaml[props[0]]
+    };
+  } 
+  
+  return { key: undefined, value: yaml };
+}
 
 var exportVinyl = function(options) {
   return through2.obj(function(file, enc, cb) {
-    var value = parseYaml(file.contents);
-    var expandedYaml = expandYaml({ key: undefined, value: value }, options);
+    var yaml = parseYaml(file.contents);
+    var kvp = getKVP(yaml);
+    
+    var expandedYaml = expandYaml(kvp, options);
     var result = finishYaml(expandedYaml, options);
     options.origin = file;
 

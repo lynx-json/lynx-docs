@@ -165,6 +165,8 @@ function markers(kvp, options) {
 }
 
 module.exports = exports = function(finish) {
+  finish.addHint = addHint;
+  
   finish.titles = titles;
   finish.labels = labels;
   finish.links = links;

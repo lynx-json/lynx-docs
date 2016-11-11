@@ -18,7 +18,7 @@ function ot(variable, inverse) {
   };
 }
 
-function at(variable, inverse) {
+function at(variable) {
   return {
     section: "@" + variable,
     type: "array",
@@ -96,6 +96,42 @@ var tests = [
     actual: { key: "simpleTemplate<dataVariable" },
     expected: { key: "simpleTemplate", template: lt("dataVariable", true) },
     description: "a quoted literal value template key with a name",
+    should: "should return correct metadata"
+  },
+  {
+    actual: { key: ">partial" },
+    expected: { partial: "partial" },
+    description: "a partial key without a key name",
+    should: "should return correct metadata"
+  },
+  {
+    actual: { key: "<dataVariable" },
+    expected: { template: lt("dataVariable", true) },
+    description: "a quoted literal key without a key name",
+    should: "should return correct metadata"
+  },
+  {
+    actual: { key: "=dataVariable" },
+    expected: { template: lt("dataVariable", false) },
+    description: "a literal key without a key name",
+    should: "should return correct metadata"
+  },
+  {
+    actual: { key: "#dataVariable" },
+    expected: { template: ot("dataVariable", false) },
+    description: "an object template key key without a key name",
+    should: "should return correct metadata"
+  },
+  {
+    actual: { key: "^dataVariable" },
+    expected: { template: ot("dataVariable", true) },
+    description: "an inverse object template key key without a key name",
+    should: "should return correct metadata"
+  },
+  {
+    actual: { key: "@dataVariable" },
+    expected: { template: at("dataVariable") },
+    description: "an array template key key without a key name",
     should: "should return correct metadata"
   }
 ];

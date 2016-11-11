@@ -9,8 +9,6 @@ function applyKeyName(key, meta) {
   var match = keyPattern.exec(key);
   if (match && match[1]) {
     meta.key = match[1];
-  } else {
-    meta.key = key.toString();
   }
 }
 

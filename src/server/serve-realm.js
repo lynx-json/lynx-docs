@@ -73,9 +73,6 @@ module.exports = exports = function createStaticHandler(options) {
     
     res.setHeader("Content-Type", "application/lynx+json");
     
-    console.log("v", variant.realm);
-    console.log("r", variant.parent.realm);
-    
     exportYaml.handler({
       format: "lynx",
       input: variant.template,
