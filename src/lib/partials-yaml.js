@@ -37,7 +37,7 @@ function resolvePartial(kvp, options) {
 function applySimpleParameter(partialKVP, param) {
   // TODO: Convert to using metadata?
   // {{{}}} or {{}}
-  var mustachePattern = new RegExp("{{{?" + param.key + "}}}?", "gm");
+  var mustachePattern = new RegExp("{{{?" + param.key + "}}}?", "g");
   if (partialKVP.key) {
     partialKVP.key = partialKVP.key.replace(mustachePattern, param.value);
   }
@@ -70,11 +70,11 @@ function applySimpleParameter(partialKVP, param) {
 function applySimpleParameters(partialKVP, params) {
   params.forEach(param => applySimpleParameter(partialKVP, param));
   
-  if (partialKVP.value && (typeof partialKVP.value === "object") && !Array.isArray(partialKVP.vallue)) {
+  if (partialKVP.value && (typeof partialKVP.value === "object") && !Array.isArray(partialKVP.value)) {
     let objectValue = {};
     for (var p in partialKVP.value) {
       var childKVP = { key: p, value: partialKVP.value[p]};
-      params.forEach(param => applySimpleParameter(childKVP, param));
+      applySimpleParameters(childKVP, params);
       objectValue[childKVP.key] = childKVP.value;
     }
     partialKVP.value = objectValue;

@@ -13,6 +13,21 @@ function resolveValue(kvmp) {
   return kvmp.value !== undefined ? kvmp.value : kvmp.metas[0].src.value;
 }
 
+function getKVP(yaml) {
+  if (!util.isObject(yaml)) return { key: undefined, value: yaml };
+  
+  var props = Object.getOwnPropertyNames(yaml);
+  
+  if (props.length === 1 && getMetadata(props[0]).key === undefined) {
+    return {
+      key: props[0],
+      value: yaml[props[0]]
+    };
+  } 
+  
+  return { key: undefined, value: yaml };
+}
+
 function exportLiteralTemplate(kvmp, cb, options) {
   function exportTemplate(meta, defaultValue) {
     cb("{{#if " + meta.template.variable + "}}");
@@ -58,7 +73,10 @@ function exportArrayTemplate(kvmp, cb, options) {
   var meta = kvmp.metas[0];
   cb("[");
   cb("{{#each " + meta.template.variable + "}}");
-  exportHandlebars({ value: meta.src.value[0] }, cb, options);
+  meta.src.value.forEach(function (itemTemplate) {
+    var itemTemplateKVP = getKVP(itemTemplate);
+    exportHandlebars(itemTemplateKVP, cb, options);
+  });
   cb("{{#unless @last}},{{/unless}}");
   cb("{{/each}}");
   cb("]");
@@ -90,13 +108,28 @@ function exportObject(kvmp, cb, options) {
   cb(" }");
 }
 
+function exportArray(kvmp, cb, options) {
+  var meta = kvmp.metas[0];
+  
+  cb("[");
+  
+  var length = meta.src.value.length;
+  meta.src.value.forEach((child, index) => {
+    let childKvmp = getKVP(child);
+    exportHandlebars(childKvmp, cb, options);
+    if (index + 1 !== length) cb(",");
+  });
+  
+  cb("]");
+}
+
 function exportHandlebars(kvmp, cb, options) {
   if (!kvmp.metas) {
     var meta = getMetadata(kvmp);
     kvmp.metas = [meta];
   }
   
-  if (kvmp.key) {
+  if (kvmp.metas[0].key) {
     cb(JSON.stringify(kvmp.metas[0].key) + ":");
   }
   
@@ -106,8 +139,10 @@ function exportHandlebars(kvmp, cb, options) {
     exportTemplate(kvmp, cb, options);
   } else if (util.isObject(value) && !util.isArray(value)) {
     exportObject(kvmp, cb, options);
+  } else if (util.isArray(value)) {
+    exportArray(kvmp, cb, options);
   } else {
-    cb(JSON.stringify(value));  
+    cb(JSON.stringify(value));
   }
 }
 
