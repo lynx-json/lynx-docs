@@ -123,6 +123,7 @@ function content(kvp, options) {
 
 function containers(kvp, options) {
   var meta = getMetadata(kvp);
+  
   if (meta.template &&
     (meta.template.type === "object" || meta.template.type === "array")) {
     addHint(kvp, "container");
@@ -133,6 +134,15 @@ function containers(kvp, options) {
     addHint(kvp, "container");        
   } else if (isNode(meta) && util.isObject(kvp.value.value)) {
     addHint(kvp, "container");
+  }
+  
+  if (nodeHasProperty(kvp, meta, "scope")) {
+    var node = kvp.value;
+    console.log("kvp", kvp);
+    console.log("meta", meta);
+    if (node.value.scope && options && options.realm) {
+      node.value.scope = url.resolve(options.realm, node.value.scope);
+    }
   }
 }
 
@@ -158,8 +168,8 @@ function markers(kvp, options) {
     addHint(kvp, "marker");
     
     var node = kvp.value;
-    if (node.value.for.value && options && options.realm) {
-      node.value.for.value = url.resolve(options.realm, node.value.for.value);
+    if (node.value.for && options && options.realm) {
+      node.value.for = url.resolve(options.realm, node.value.for);
     }
   }
 }
