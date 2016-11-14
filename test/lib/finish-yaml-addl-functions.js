@@ -331,7 +331,7 @@ describe("when using additional finishing functions", function() {
     beforeEach(function() {
       kvp = {
         key: "marker",
-        value: vsp({ header: vsp("Marker"), for: vsp("/foo/bar/") })
+        value: vsp({ header: vsp("Marker"), for: "/foo/bar/" })
       };
     });
 
@@ -342,13 +342,13 @@ describe("when using additional finishing functions", function() {
     
     it("should resolve a relative 'for' property to an absolute URI", function() {
       finishYaml.markers(kvp, { realm: "http://example.com"});
-      kvp.value.value.for.value.should.equal("http://example.com/foo/bar/");
+      kvp.value.value.for.should.equal("http://example.com/foo/bar/");
     });
     
     it("should not resolve an absolute 'for' property to an absolute URI", function() {
-      kvp.value.value.for.value = "http://other.com/a/b/";
+      kvp.value.value.for = "http://other.com/a/b/";
       finishYaml.markers(kvp, { realm: "http://example.com"});
-      kvp.value.value.for.value.should.equal("http://other.com/a/b/");
+      kvp.value.value.for.should.equal("http://other.com/a/b/");
     });
   });
 });
