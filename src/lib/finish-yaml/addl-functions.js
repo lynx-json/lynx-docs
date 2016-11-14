@@ -88,14 +88,24 @@ function headers(kvp, options) {
 function links(kvp, options) {
   var meta = getMetadata(kvp);
   if (nodeHasProperty(kvp, meta, "href")) {
+    var node = kvp.value;
+    
+    if (!nodeHasProperty(kvp, meta, "type") || 
+      node.value.type === null || 
+      node.value.type === "") throw new Error("Missing 'type' attribute in link.");
+      
+    if (node.value.href === null || node.value.href === "") throw new Error("'href' cannot be null/empty");
+    
     addHint(kvp, "link");
-    if (!nodeHasProperty(kvp, meta, "type")) throw new Error("Missing 'type' attribute in link.");
   }
 }
 
 function submits(kvp, options) {
   var meta = getMetadata(kvp);
   if (nodeHasProperty(kvp, meta, "action")) {
+    var node = kvp.value;
+    console.log(kvp);
+    if (node.value.action === null || node.value.action === "") throw new Error("'action' cannot be null/empty");
     addHint(kvp, "submit");
   }
 }
@@ -116,8 +126,10 @@ function images(kvp, options) {
 function content(kvp, options) {
   var meta = getMetadata(kvp);
   if (nodeHasProperty(kvp, meta, "src") && !hasImageProperties(kvp, meta)) {
-    addHint(kvp, "content");
+    var node = kvp.value;
+    if (node.value.src === null || node.value.src === "") throw new Error("'src' cannot be null/empty");
     if (!nodeHasProperty(kvp, meta, "type")) throw new Error("Missing 'type' attribute in content.");
+    addHint(kvp, "content");
   }
 }
 
