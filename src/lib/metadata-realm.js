@@ -34,8 +34,6 @@ function deriveVariantsForTemplateFile(realm, templateFile, templateName, conten
     var result = dataFolderPattern.exec(item);
     if (!result || result[1] !== templateName) return;
 
-    console.log(path.join(templateFile.dir, item));
-
     fs.readdirSync(path.join(templateFile.dir, item)).forEach(function(data) {
       var dataFilePath = path.join(templateFile.dir, item, data);
       var dataName = path.parse(data).name;
