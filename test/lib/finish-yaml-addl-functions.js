@@ -140,6 +140,32 @@ describe("when using additional finishing functions", function() {
         kvp.value.spec.hints.should.contain("text");
       });
     });
+    
+    describe("for object templates containing a literal 'value' template", function () {
+      var kvp;
+      
+      beforeEach(function () {
+        kvp = {
+          key: "greeting#",
+          value: {
+            "value<": "Hello",
+            "spec": {
+              "visibility<": "visible",
+              hints: []
+            }
+          }
+        };
+        finishYaml.text(kvp);
+      });
+      
+      it("should add a 'text' hint", function () {
+        kvp.value.spec.hints.should.contain("text");
+      });
+      
+      it("should not add a 'container' hint", function () {
+        kvp.value.spec.hints.should.not.contain("container");
+      });
+    });
   });
 
   describe("for content", function() {

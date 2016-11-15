@@ -33,6 +33,18 @@ function isBaseHint(hint) {
   return baseHints.some(match);
 }
 
+function isObjectTemplate(meta) {
+  return meta.template && meta.template.type === "object";
+}
+
+function isArrayTemplate(meta) {
+  return meta.template && meta.template.type === "array";
+}
+
+function isLiteralTemplate(meta) {
+  return meta.template && meta.template.type === "literal";
+}
+
 function addHint(kvp, hint) {
   if (!kvp.value || !kvp.value.spec) return;
   if (!kvp.value.spec.hints) return;
@@ -44,15 +56,21 @@ function addHint(kvp, hint) {
 
 function text(kvp, options) {
   var meta = getMetadata(kvp);
-  if (meta.template && meta.template.type === "literal") {
-    addHint(kvp, "text");
-  } else if (isNode(meta) &&
-    meta.children.value[0].template &&
-    meta.children.value[0].template.type === "literal") {
+  if (!isNode(meta)) return;
+
+  var valueMetas = meta.children.value.map(cm => cm.more());
+  var firstValueMeta = valueMetas[0];
+
+  if (isLiteralTemplate(firstValueMeta)) {
     addHint(kvp, "text");
   }
-  else if (isNode(meta) && kvp.value.value !== null && util.isPrimitive(kvp.value.value)) {
-    addHint(kvp, "text");
+
+  if (isLiteralTemplate(firstValueMeta)) {
+        addHint(kvp, "text");
+  } else if (firstValueMeta.src.value !== undefined &&
+      firstValueMeta.src.value !== null &&
+      util.isPrimitive(firstValueMeta.src.value)) {
+        addHint(kvp, "text");
   }
 }
 
@@ -62,7 +80,12 @@ function addLabeledBy(kvp, labelProperty) {
 
 function labels(kvp, options) {
   var meta = getMetadata(kvp);
-  if (meta.key === "label" && util.isString(kvp.value.value)) {
+  if (!isNode(meta)) return;
+
+  var valueMetas = meta.children.value.map(cm => cm.more());
+  var firstValueMeta = valueMetas[0];
+
+  if (meta.key === "label" && util.isString(firstValueMeta.src.value)) {
     addHint(kvp, "label");
   } else if (nodeHasProperty(kvp, meta, "title")) {
     addLabeledBy(kvp, "title");
@@ -105,7 +128,6 @@ function submits(kvp, options) {
   var meta = getMetadata(kvp);
   if (nodeHasProperty(kvp, meta, "action")) {
     var node = kvp.value;
-    console.log(kvp);
     if (node.value.action === null || node.value.action === "") throw new Error("'action' cannot be null/empty for '" + meta.key + "'");
     addHint(kvp, "submit");
   }
@@ -136,17 +158,15 @@ function content(kvp, options) {
 
 function containers(kvp, options) {
   var meta = getMetadata(kvp);
+  if (!isNode(meta)) return;
 
-  if (meta.template &&
-    (meta.template.type === "object" || meta.template.type === "array")) {
-    addHint(kvp, "container");
-  } else if (isNode(meta) &&
-    meta.children.value &&
-    meta.children.value[0].template &&
-    meta.children.value[0].template.type === "array") {
-    addHint(kvp, "container");
-  } else if (isNode(meta) && util.isObject(kvp.value.value)) {
-    addHint(kvp, "container");
+  var valueMetas = meta.children.value.map(cm => cm.more());
+  var firstValueMeta = valueMetas[0];
+
+  if (isObjectTemplate(firstValueMeta) || isArrayTemplate(firstValueMeta)) {
+        addHint(kvp, "container");
+  } else if (util.isObject(firstValueMeta.src.value)) {
+        addHint(kvp, "container");
   }
 
   if (nodeHasProperty(kvp, meta, "scope")) {

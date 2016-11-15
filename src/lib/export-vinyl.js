@@ -29,8 +29,25 @@ var exportVinyl = function(options) {
     var yaml = parseYaml(file.contents);
     var kvp = getKVP(yaml);
     
+    if (options.log) {
+      console.log("### Options");
+      console.log(JSON.stringify(options), "\n");
+    }
+    
     var expandedYaml = expandYaml(kvp, options);
+    
+    if (options.log) {
+      console.log("### Expanded");
+      console.log(JSON.stringify(expandedYaml), "\n");
+    }
+    
     var result = finishYaml(expandedYaml, options);
+    
+    if (options.log) {
+      console.log("### Finished");
+      console.log(JSON.stringify(result), "\n");
+    }
+    
     options.origin = file;
 
     var buffer = "";
