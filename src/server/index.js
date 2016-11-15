@@ -12,16 +12,30 @@ function serveNotFound(req, res) {
   res.end();
 }
 
+function serveError(req, res) {
+  res.writeHead(500, { "Content-Type": "text/plain" });
+  res.write("500 Server Error");
+  if (req.error) {
+    res.write("\n\n" + req.error.stack);
+  }
+  res.end();
+}
+
 function startServer(options) {
   var port = options.port || 0;
   
   var handler = function (req, res) {
-    req.realms = options.root.map(getRealmMetadata);
-    serveRealm(options)(req, res, function () {
-      serveStatic(options)(req, res, function () {
-        serveNotFound(req, res);
+    try {
+      req.realms = options.root.map(getRealmMetadata);
+      serveRealm(options)(req, res, function () {
+        serveStatic(options)(req, res, function () {
+          serveNotFound(req, res);
+        });
       });
-    });
+    } catch (e) {
+      req.error = e;
+      serveError(req, res);
+    }
   };
   
   var server = http.createServer(handler).listen(port);

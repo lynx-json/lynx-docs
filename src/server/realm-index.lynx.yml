@@ -1,5 +1,6 @@
 title: This is the index
-variants@: "Here {{{name}}}"
+variants@: 
+  - "Here {{{name}}}"
 # realms@:
 #   label: Case
 #   realm: "{{{realm}}}"

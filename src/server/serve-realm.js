@@ -1,8 +1,19 @@
 "use strict";
 
+const fs = require("fs");
 const url = require("url");
 const path = require("path");
-const exportYaml = require("../cli/export");
+const exportYaml = require("../lib/export-vinyl");
+
+exportYaml.handler = function(options) {
+  function onData(data) {
+    options.output.write(data);
+  }
+  
+  var buffer = fs.readFileSync(options.input);
+  exportYaml.exportBuffer(buffer, onData, options);
+  options.output.end();
+};
 
 function generateRealmOrVariantUrl(realmOrVariant) {
   // create an address for the realm or variant object
@@ -39,7 +50,7 @@ function redirectToRealmIndex(req, res, next) {
 
   var location = url.parse(realm.realm);
 
-  var headers = { "Content-Type": "text/plain", "Location": location.pathname }
+  var headers = { "Content-Type": "text/plain", "Location": location.pathname };
   res.writeHead(301, headers);
   res.end("Redirecting to realm index");
 }
