@@ -150,8 +150,6 @@ function containers(kvp, options) {
   
   if (nodeHasProperty(kvp, meta, "scope")) {
     var node = kvp.value;
-    console.log("kvp", kvp);
-    console.log("meta", meta);
     if (node.value.scope && options && options.realm) {
       node.value.scope = url.resolve(options.realm, node.value.scope);
     }

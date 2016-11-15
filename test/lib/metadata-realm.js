@@ -59,7 +59,6 @@ describe("when finding a realm", function() {
 
   describe("having no matching items", function() {
     var predicate = sinon.spy(function(item) {
-      console.log(item);
       return false;
     });
 
