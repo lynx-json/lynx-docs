@@ -29,7 +29,7 @@ function isBaseHint(hint) {
   function match(baseHint) {
     return baseHint === hint;
   }
-  
+
   return baseHints.some(match);
 }
 
@@ -49,6 +49,7 @@ function addHint(kvp, hint) {
   if (!kvp.value || !kvp.value.spec) return;
   if (!kvp.value.spec.hints) return;
   if (kvp.value.spec.hints.indexOf(hint) !== -1) return;
+  if(typeof kvp.value.spec.hints.some !== "function") console.log(kvp);
   if (isBaseHint(hint) && kvp.value.spec.hints.some(isBaseHint)) return;
   kvp.value.spec.hints.push(hint);
 }
@@ -56,18 +57,18 @@ function addHint(kvp, hint) {
 function text(kvp, options) {
   var meta = getMetadata(kvp);
   if (!isNode(meta)) return;
-  
+
   var valueMetas = meta.children.value.map(cm => cm.more());
   var firstValueMeta = valueMetas[0];
-  
+
   if (isLiteralTemplate(firstValueMeta)) {
     addHint(kvp, "text");
   }
-  
+
   if (isLiteralTemplate(firstValueMeta)) {
         addHint(kvp, "text");
-  } else if (firstValueMeta.src.value !== undefined && 
-      firstValueMeta.src.value !== null && 
+  } else if (firstValueMeta.src.value !== undefined &&
+      firstValueMeta.src.value !== null &&
       util.isPrimitive(firstValueMeta.src.value)) {
         addHint(kvp, "text");
   }
@@ -78,12 +79,12 @@ function addLabeledBy(kvp, labelProperty) {
 }
 
 function labels(kvp, options) {
-  var meta = getMetadata(kvp);  
+  var meta = getMetadata(kvp);
   if (!isNode(meta)) return;
-  
+
   var valueMetas = meta.children.value.map(cm => cm.more());
   var firstValueMeta = valueMetas[0];
-  
+
   if (meta.key === "label" && util.isString(firstValueMeta.src.value)) {
     addHint(kvp, "label");
   } else if (nodeHasProperty(kvp, meta, "title")) {
@@ -112,13 +113,13 @@ function links(kvp, options) {
   var meta = getMetadata(kvp);
   if (nodeHasProperty(kvp, meta, "href")) {
     var node = kvp.value;
-    
-    if (!nodeHasProperty(kvp, meta, "type") || 
-      node.value.type === null || 
-      node.value.type === "") throw new Error("Missing 'type' attribute in link.");
-      
-    if (node.value.href === null || node.value.href === "") throw new Error("'href' cannot be null/empty");
-    
+
+    if (!nodeHasProperty(kvp, meta, "type") ||
+      node.value.type === null ||
+      node.value.type === "") throw new Error("Missing 'type' attribute for '" + meta.key + "'");
+
+    if (node.value.href === null || node.value.href === "") throw new Error("'href' cannot be null/empty for '" + meta.key + "'");
+
     addHint(kvp, "link");
   }
 }
@@ -127,7 +128,7 @@ function submits(kvp, options) {
   var meta = getMetadata(kvp);
   if (nodeHasProperty(kvp, meta, "action")) {
     var node = kvp.value;
-    if (node.value.action === null || node.value.action === "") throw new Error("'action' cannot be null/empty");
+    if (node.value.action === null || node.value.action === "") throw new Error("'action' cannot be null/empty for '" + meta.key + "'");
     addHint(kvp, "submit");
   }
 }
@@ -141,7 +142,7 @@ function images(kvp, options) {
   var meta = getMetadata(kvp);
   if (hasImageProperties(kvp, meta)) {
     addHint(kvp, "image");
-    if (!nodeHasProperty(kvp, meta, "type")) throw new Error("Missing 'type' attribute in image.");
+    if (!nodeHasProperty(kvp, meta, "type")) throw new Error("Missing 'type' attribute for '" + meta.key + "'");
   }
 }
 
@@ -149,26 +150,25 @@ function content(kvp, options) {
   var meta = getMetadata(kvp);
   if (nodeHasProperty(kvp, meta, "src") && !hasImageProperties(kvp, meta)) {
     var node = kvp.value;
-    if (node.value.src === null || node.value.src === "") throw new Error("'src' cannot be null/empty");
-    if (!nodeHasProperty(kvp, meta, "type")) throw new Error("Missing 'type' attribute in content.");
+    if (node.value.src === null || node.value.src === "") throw new Error("'src' cannot be null/empty for '" + meta.key + "'");
+    if (!nodeHasProperty(kvp, meta, "type")) throw new Error("Missing 'type' attribute for '" + meta.key + "'");
     addHint(kvp, "content");
   }
 }
 
 function containers(kvp, options) {
   var meta = getMetadata(kvp);
-  
   if (!isNode(meta)) return;
-  
+
   var valueMetas = meta.children.value.map(cm => cm.more());
   var firstValueMeta = valueMetas[0];
-  
+
   if (isObjectTemplate(firstValueMeta) || isArrayTemplate(firstValueMeta)) {
         addHint(kvp, "container");
   } else if (util.isObject(firstValueMeta.src.value)) {
         addHint(kvp, "container");
   }
-  
+
   if (nodeHasProperty(kvp, meta, "scope")) {
     var node = kvp.value;
     if (node.value.scope && options && options.realm) {
@@ -197,7 +197,7 @@ function markers(kvp, options) {
   var meta = getMetadata(kvp);
   if (nodeHasProperty(kvp, meta, "for")) {
     addHint(kvp, "marker");
-    
+
     var node = kvp.value;
     if (node.value.for && options && options.realm) {
       node.value.for = url.resolve(options.realm, node.value.for);
@@ -207,7 +207,7 @@ function markers(kvp, options) {
 
 module.exports = exports = function(finish) {
   finish.addHint = addHint;
-  
+
   finish.titles = titles;
   finish.labels = labels;
   finish.links = links;
