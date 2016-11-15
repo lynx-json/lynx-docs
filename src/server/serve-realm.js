@@ -7,11 +7,10 @@ const exportYaml = require("../cli/export");
 function generateRealmOrVariantUrl(realmOrVariant) {
   // create an address for the realm or variant object
   if (realmOrVariant.type === "variant") {
-    var realmUrl = generateRealmOrVariantUrl( realmOrVariant.parent );
+    var realmUrl = generateRealmOrVariantUrl(realmOrVariant.parent);
     var variantUrl = url.parse(realmUrl).pathname + "?variant=" + encodeURIComponent(realmOrVariant.name);
     return variantUrl;
-  }
-  else {
+  } else {
     return url.parse(realmOrVariant.realm).pathname;
   }
 }
@@ -21,7 +20,7 @@ function isRequestForRealmOrVariant(requestUrl, realmOrVariantUrl) {
 }
 
 function realmOrVariantMatchesRequestUrl(requestUrl) {
-  return function (realmOrVariant) {
+  return function(realmOrVariant) {
     var realmOrVariantUrl = generateRealmOrVariantUrl(realmOrVariant);
     return isRequestForRealmOrVariant(requestUrl, realmOrVariantUrl);
   };
@@ -34,23 +33,38 @@ function findRealmOrVariantMetadata(req) {
   }
 }
 
+function redirectToRealmIndex(req, res, next) {
+  var realm = req.realms[0];
+  if(!realm) return next();
+
+  var location = url.parse(realm.realm);
+
+  var headers = { "Content-Type": "text/plain", "Location": location.pathname }
+  res.writeHead(301, headers);
+  res.end("Redirecting to realm index");
+}
+
 module.exports = exports = function createStaticHandler(options) {
   // try to find the static file or call next
-  return function (req, res, next) {
+  return function(req, res, next) {
+
     var realmOrVariantMetadata = findRealmOrVariantMetadata(req);
-    if (!realmOrVariantMetadata) return next();
-    
+    if (!realmOrVariantMetadata) {
+      if(req.url === "/" || req.url === "") return redirectToRealmIndex(req, res, next);
+      return next();
+    }
+
     var variants = realmOrVariantMetadata.variants;
     var realms = realmOrVariantMetadata.realms;
-    
+
     function serveRealmIndex() {
       res.setHeader("Content-Type", "application/lynx+json");
-      
+
       var data = {};
       data.realm = realmOrVariantMetadata.realm;
       if (variants.length > 0) data.variants = variants;
       else data.realms = realms;
-      
+
       exportYaml.handler({
         format: "lynx",
         input: path.join(__dirname, "realm-index.lynx.yml"),
@@ -59,20 +73,23 @@ module.exports = exports = function createStaticHandler(options) {
         realm: data.realm
       });
     }
-    
+
     var query = url.parse(req.url, true).query;
     var variant = query.variant ? variants.find(v => v.name === query.variant) : realmOrVariantMetadata.getDefaultVariant();
-    
+
     if (query.variant && !variant) return next();
-    
-    if (!variant && (variants.length > 0 || realms.length > 0))  {
+
+    if (!variant && (variants.length > 0 || realms.length > 0)) {
       return serveRealmIndex(req, res);
     }
-    
-    if (!variant) return next();
-    
+
+    if (!variant || variant.content) {
+      if (variant && variant.content) req.filename = variant.content;
+      return next();
+    }
+
     res.setHeader("Content-Type", "application/lynx+json");
-    
+
     exportYaml.handler({
       format: "lynx",
       input: variant.template,

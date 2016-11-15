@@ -32,6 +32,21 @@ function isBlacklisted(meta) {
   });
 }
 
+function getKVP(yaml) {
+  if (!util.isObject(yaml)) return { key: undefined, value: yaml };
+  
+  var props = Object.getOwnPropertyNames(yaml);
+  
+  if (props.length === 1 && getMetadata(props[0]).key === undefined) {
+    return {
+      key: props[0],
+      value: yaml[props[0]]
+    };
+  } 
+  
+  return { key: undefined, value: yaml };
+}
+
 function ensureSpec(kvp) {
   var meta = getMetadata(kvp);
   if (!meta.children || !meta.children.spec) {
@@ -52,8 +67,11 @@ function ensureSpec(kvp) {
   }
 }
 
-function expandArrayItem(val, idx, arr) {
-  return expandKvp({ key: idx, value: val }).value;
+function expandArrayItem(options) {
+  return function (val, idx, arr) {
+    var kvp = getKVP(val);
+    return expandKvp(kvp, options).value;
+  };
 }
 
 function expandObject(obj, options) {
@@ -112,7 +130,7 @@ function expandKvp(kvp, options) {
     let value = kvp.value[valueMeta.src.key];
     
     if (util.isArray(value)) {
-      kvp.value[valueMeta.src.key] = value.map(expandArrayItem);
+      kvp.value[valueMeta.src.key] = value.map(expandArrayItem(options));
     } else if (util.isObject(value)) {
       kvp.value[valueMeta.src.key] = expandObject(value, options);
     }

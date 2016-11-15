@@ -137,24 +137,6 @@ describe("when including partials", function () {
     });
   });
   
-  describe("a partial with a literal object parameter 'param=:' or 'key=param:'", function () {
-    var partial, param;
-    beforeEach(function () {
-      param = { message: "Hello" };
-      
-      sinon.stub(partials, "resolvePartial").withArgs({ value: { partial: "partial", param: param}, key: "key"}).returns({
-        key: "key",
-        value: YAML.parse("param=:")
-      });
-      
-      partial = partials.getPartial({ value: { param: param }, key: "key>partial"});
-    });
-    
-    it("should replace the templated value with the parameter value", function () {
-      partial.value.param.should.equal(param);
-    });
-  });
-  
   describe("a partial with a key parameter", function () {
     var partial, name;
     beforeEach(function () {
