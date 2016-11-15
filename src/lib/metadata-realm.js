@@ -20,17 +20,17 @@ function createVariant(realm, name, templateFile, dataFile) {
   };
 }
 
-function deriveVariantsForTemplateFile(realm, templateFile, templateName, contents) {
+function deriveVariantsForTemplateFile(realm, templateFile, templateName) {
   var templateVariants = [];
   //add data files for the template
-  contents.forEach(function(item) {
+  realm.contents.forEach(function(item) {
     var result = dataFilePattern.exec(item);
     if (!result || result[1] !== templateName) return;
     var name = result[3] || templateName;
     templateVariants.push(createVariant(realm, name, templateFile, path.join(templateFile.dir, item)));
   });
   //add files from data folders for the template
-  contents.forEach(function(item) {
+  realm.contents.forEach(function(item) {
     var result = dataFolderPattern.exec(item);
     if (!result || result[1] !== templateName) return;
 
@@ -49,13 +49,22 @@ function deriveVariantsForTemplateFile(realm, templateFile, templateName, conten
 
 function getVariants(realm) {
   var variants = [];
-  var contents = realm.path ? fs.readdirSync(realm.path) : []; //if no path then it's a 'virtual' realm
-  contents.forEach(function(item) {
+
+  if(!realm.isContainer() && !realm.isVirtual()) {
+    variants.push({
+        parent: realm,
+        name: realm.name,
+        content: realm.path,
+        type: "variant"
+      });
+  }
+  realm.contents.forEach(function(item) {
     var result = templatePattern.exec(item);
     if (!result) return;
     var templateFile = path.parse(path.join(realm.path, item));
-    var templateVariants = deriveVariantsForTemplateFile(realm, templateFile, result[1], contents);
+    var templateVariants = deriveVariantsForTemplateFile(realm, templateFile, result[1]);
     Array.prototype.push.apply(variants, templateVariants);
+    return;
   });
   if (realm.meta && realm.meta.variants) {
     realm.meta.variants.forEach(function(variant) {
@@ -74,13 +83,15 @@ function getVariants(realm) {
 }
 
 function getRealms(realm) {
-  var realms = realm.path ? fs.readdirSync(realm.path).filter(function(item) {
-      var stats = fs.statSync(path.join(realm.path, item));
-      return stats.isDirectory() && !dataFolderPattern.test(item);
-    })
-    .map(function(item) {
-      return new Realm(path.join(realm.path, item), realm);
-    }) : []; //if no path then it's a 'virtual' realm
+
+  function isRealm(item) {
+    return !(metaPattern.test(item) || templatePattern.test(item) || dataFolderPattern.test(item) || dataFilePattern.test(item));
+  }
+
+  var realms = realm.contents.filter(isRealm).map(function(item) {
+    return new Realm(path.join(realm.path, item), realm);
+  });
+
   if (realm.meta && realm.meta.realms) {
     realm.meta.realms.forEach(function(child) {
       var newRealm = new Realm(child, realm);
@@ -91,8 +102,9 @@ function getRealms(realm) {
   return realms;
 }
 
-function getFolderMeta(realm) {
-  var metaFile = fs.readdirSync(realm.path).find(function(item) { return metaPattern.test(item); });
+function getMetadataFromFileSystem(realm) {
+
+  var metaFile = realm.contents.find(function(item) { return metaPattern.test(item); });
   if (!metaFile) return null;
 
   return parseYaml(fs.readFileSync(path.join(realm.path, metaFile)));
@@ -102,19 +114,19 @@ function Realm(pathOrMeta, parent) {
   var self = this;
 
   function calculateRealmAndName() {
-    var folder = self.path ? path.parse(self.path) : { base: "unknown" };
-    self.name = self.meta && self.meta.name || folder.base;
+    var parsed = self.path ? path.parse(self.path) : { base: "unknown" };
+    self.name = self.meta && self.meta.name || parsed.base;
 
     var parentRealm = parent && parent.realm || "/";
-    var realm = self.meta && self.meta.realm;
+    var realm = self.meta && self.meta.realm ;
     if (!realm && !parent) realm = "/"; //not in metadata and no parent
     if (realm) {
       self.realm = url.resolve(parentRealm, realm);
       return;
     }
 
-    //this case is realm folder with parent realm folder and no .meta.yml
-    realm = path.relative(parent.path, self.path) + "/";
+    //this case is realm parsed with parent realm parsed and no .meta.yml
+    realm = path.relative(parent.path, self.path) + (self.isContainer() ? "/" : "");
     self.realm = url.resolve(parentRealm, realm);
   }
 
@@ -129,12 +141,28 @@ function Realm(pathOrMeta, parent) {
   }
 
   self.parent = parent;
+  var stats;
   if (util.isString(pathOrMeta)) {
     self.path = pathOrMeta;
-    self.meta = getFolderMeta(self);
+    stats = fs.statSync(self.path);
+    if (stats.isDirectory()) {
+      self.contents = fs.readdirSync(self.path);
+      self.meta = getMetadataFromFileSystem(self);
+    } else {
+      self.contents = [];
+    }
   } else {
     self.path = null;
     self.meta = pathOrMeta;
+    self.contents = [];
+  }
+
+  self.isVirtual = function() {
+    return !stats;
+  }
+
+  self.isContainer = function() {
+    return stats && stats.isDirectory();
   }
 
   calculateRealmAndName();

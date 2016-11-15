@@ -73,7 +73,7 @@ describe("when using additional finishing functions", function() {
     beforeEach(function() {
       kvp = {
         key: "hyperlink",
-        value: vsp({ href: vsp("."), type: vsp("application/lynx+json") })
+        value: vsp({ href: ".", type: "application/lynx+json" })
       };
     });
 
@@ -81,9 +81,33 @@ describe("when using additional finishing functions", function() {
       finishYaml.links(kvp);
       kvp.value.spec.hints.should.contain("link");
     });
+    
+    it("should throw if 'href' property is null", function() {
+      kvp.value.value.href = null;
+      var fn = function() { finishYaml.links(kvp); };
+      should.throw(fn);
+    });
+    
+    it("should throw if 'href' property is empty", function() {
+      kvp.value.value.href = "";
+      var fn = function() { finishYaml.links(kvp); };
+      should.throw(fn);
+    });
 
     it("should throw if 'type' property is undefined", function() {
       delete kvp.value.value.type;
+      var fn = function() { finishYaml.links(kvp); };
+      should.throw(fn);
+    });
+    
+    it("should throw if 'type' property is null", function() {
+      kvp.value.value.type = null;
+      var fn = function() { finishYaml.links(kvp); };
+      should.throw(fn);
+    });
+    
+    it("should throw if 'type' property is empty", function() {
+      kvp.value.value.type = "";
       var fn = function() { finishYaml.links(kvp); };
       should.throw(fn);
     });
@@ -124,8 +148,8 @@ describe("when using additional finishing functions", function() {
       kvp = {
         key: "content",
         value: vsp({
-          src: vsp("."),
-          type: vsp("image/png")
+          src: ".",
+          type: "image/png"
         })
       };
     });
@@ -133,6 +157,18 @@ describe("when using additional finishing functions", function() {
     it("should add an 'content' hint", function() {
       finishYaml.content(kvp);
       kvp.value.spec.hints.should.contain("content");
+    });
+    
+    it("should throw if 'src' property is null", function() {
+      kvp.value.value.src = null;
+      var fn = function() { finishYaml.content(kvp); };
+      should.throw(fn);
+    });
+    
+    it("should throw if 'src' property is empty", function() {
+      kvp.value.value.src = "";
+      var fn = function() { finishYaml.content(kvp); };
+      should.throw(fn);
     });
 
     it("should throw if 'type' property is undefined", function() {
@@ -174,9 +210,9 @@ describe("when using additional finishing functions", function() {
       kvp = {
         key: "submit",
         value: vsp({
-          action: vsp("."),
-          method: vsp("GET"),
-          enctype: vsp("multipart/form-data")
+          action: ".",
+          method: "GET",
+          enctype: "multipart/form-data"
         })
       };
     });
@@ -184,6 +220,18 @@ describe("when using additional finishing functions", function() {
     it("should add a 'submit' hint", function() {
       finishYaml.submits(kvp);
       kvp.value.spec.hints.should.contain("submit");
+    });
+    
+    it("should throw if 'action' property is null", function() {
+      kvp.value.value.action = null;
+      var fn = function() { finishYaml.submits(kvp); };
+      should.throw(fn);
+    });
+    
+    it("should throw if 'action' property is empty", function() {
+      kvp.value.value.action = "";
+      var fn = function() { finishYaml.submits(kvp); };
+      should.throw(fn);
     });
   });
 
