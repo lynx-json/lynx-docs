@@ -29,7 +29,7 @@ function isBaseHint(hint) {
   function match(baseHint) {
     return baseHint === hint;
   }
-  
+
   return baseHints.some(match);
 }
 
@@ -37,6 +37,7 @@ function addHint(kvp, hint) {
   if (!kvp.value || !kvp.value.spec) return;
   if (!kvp.value.spec.hints) return;
   if (kvp.value.spec.hints.indexOf(hint) !== -1) return;
+  if(typeof kvp.value.spec.hints.some !== "function") console.log(kvp);
   if (isBaseHint(hint) && kvp.value.spec.hints.some(isBaseHint)) return;
   kvp.value.spec.hints.push(hint);
 }
@@ -45,7 +46,7 @@ function text(kvp, options) {
   var meta = getMetadata(kvp);
   if (meta.template && meta.template.type === "literal") {
     addHint(kvp, "text");
-  } else if (isNode(meta) && 
+  } else if (isNode(meta) &&
     meta.children.value[0].template &&
     meta.children.value[0].template.type === "literal") {
     addHint(kvp, "text");
@@ -89,13 +90,13 @@ function links(kvp, options) {
   var meta = getMetadata(kvp);
   if (nodeHasProperty(kvp, meta, "href")) {
     var node = kvp.value;
-    
-    if (!nodeHasProperty(kvp, meta, "type") || 
-      node.value.type === null || 
-      node.value.type === "") throw new Error("Missing 'type' attribute in link.");
-      
-    if (node.value.href === null || node.value.href === "") throw new Error("'href' cannot be null/empty");
-    
+
+    if (!nodeHasProperty(kvp, meta, "type") ||
+      node.value.type === null ||
+      node.value.type === "") throw new Error("Missing 'type' attribute for '" + meta.key + "'");
+
+    if (node.value.href === null || node.value.href === "") throw new Error("'href' cannot be null/empty for '" + meta.key + "'");
+
     addHint(kvp, "link");
   }
 }
@@ -105,7 +106,7 @@ function submits(kvp, options) {
   if (nodeHasProperty(kvp, meta, "action")) {
     var node = kvp.value;
     console.log(kvp);
-    if (node.value.action === null || node.value.action === "") throw new Error("'action' cannot be null/empty");
+    if (node.value.action === null || node.value.action === "") throw new Error("'action' cannot be null/empty for '" + meta.key + "'");
     addHint(kvp, "submit");
   }
 }
@@ -119,7 +120,7 @@ function images(kvp, options) {
   var meta = getMetadata(kvp);
   if (hasImageProperties(kvp, meta)) {
     addHint(kvp, "image");
-    if (!nodeHasProperty(kvp, meta, "type")) throw new Error("Missing 'type' attribute in image.");
+    if (!nodeHasProperty(kvp, meta, "type")) throw new Error("Missing 'type' attribute for '" + meta.key + "'");
   }
 }
 
@@ -127,27 +128,27 @@ function content(kvp, options) {
   var meta = getMetadata(kvp);
   if (nodeHasProperty(kvp, meta, "src") && !hasImageProperties(kvp, meta)) {
     var node = kvp.value;
-    if (node.value.src === null || node.value.src === "") throw new Error("'src' cannot be null/empty");
-    if (!nodeHasProperty(kvp, meta, "type")) throw new Error("Missing 'type' attribute in content.");
+    if (node.value.src === null || node.value.src === "") throw new Error("'src' cannot be null/empty for '" + meta.key + "'");
+    if (!nodeHasProperty(kvp, meta, "type")) throw new Error("Missing 'type' attribute for '" + meta.key + "'");
     addHint(kvp, "content");
   }
 }
 
 function containers(kvp, options) {
   var meta = getMetadata(kvp);
-  
+
   if (meta.template &&
     (meta.template.type === "object" || meta.template.type === "array")) {
     addHint(kvp, "container");
   } else if (isNode(meta) &&
-    meta.children.value && 
+    meta.children.value &&
     meta.children.value[0].template &&
     meta.children.value[0].template.type === "array") {
-    addHint(kvp, "container");        
+    addHint(kvp, "container");
   } else if (isNode(meta) && util.isObject(kvp.value.value)) {
     addHint(kvp, "container");
   }
-  
+
   if (nodeHasProperty(kvp, meta, "scope")) {
     var node = kvp.value;
     if (node.value.scope && options && options.realm) {
@@ -176,7 +177,7 @@ function markers(kvp, options) {
   var meta = getMetadata(kvp);
   if (nodeHasProperty(kvp, meta, "for")) {
     addHint(kvp, "marker");
-    
+
     var node = kvp.value;
     if (node.value.for && options && options.realm) {
       node.value.for = url.resolve(options.realm, node.value.for);
@@ -186,7 +187,7 @@ function markers(kvp, options) {
 
 module.exports = exports = function(finish) {
   finish.addHint = addHint;
-  
+
   finish.titles = titles;
   finish.labels = labels;
   finish.links = links;
