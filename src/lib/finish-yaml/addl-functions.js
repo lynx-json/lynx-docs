@@ -49,7 +49,7 @@ function addHint(kvp, hint) {
   if (!kvp.value || !kvp.value.spec) return;
   if (!kvp.value.spec.hints) return;
   if (kvp.value.spec.hints.indexOf(hint) !== -1) return;
-  if(typeof kvp.value.spec.hints.some !== "function") console.log(kvp);
+  if(!util.isArray(kvp.value.spec.hints)) throw new Error("The 'hints' property of a spec must be an array.");
   if (isBaseHint(hint) && kvp.value.spec.hints.some(isBaseHint)) return;
   kvp.value.spec.hints.push(hint);
 }
