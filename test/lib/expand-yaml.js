@@ -75,12 +75,6 @@ var tests = [
     should: "should expand correctly"
   },
   {
-    kvp: { value: { spec: { hints: "text" } } },
-    expected: { value: vsp(null, { hints: ["text"] }) },
-    description: "an expanded partial node (spec) with a hints string",
-    should: "should expand correctly"
-  },
-  {
     kvp: { value: { "value@": [{ greeting: "Hi" }] } },
     expected: { value: { 
       spec: { hints: [] },

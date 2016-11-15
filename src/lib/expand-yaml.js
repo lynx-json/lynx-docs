@@ -50,21 +50,15 @@ function getKVP(yaml) {
 function ensureSpec(kvp) {
   var meta = getMetadata(kvp);
   if (!meta.children || !meta.children.spec) {
-    kvp.value.spec = {};
+    kvp.value.spec = { hints: [] };
+    return;
   }
   
-  var specMeta = getMetadata({ key: "spec", value: kvp.value.spec });
-  if (!specMeta.children || !specMeta.children.hints) {
-    kvp.value.spec.hints = [];
-  }
-  
-  specMeta = getMetadata({ key: "spec", value: kvp.value.spec });
-  if (specMeta.children && 
-    specMeta.children.hints && 
-    !specMeta.children.hints[0].template && 
-    !util.isArray(kvp.value.spec.hints)) {
-      kvp.value.spec.hints = [kvp.value.spec.hints];
-  }
+  var specMetas = meta.children.spec;
+  specMetas.map(sm => sm.more()).forEach(function (specMeta) {
+    if (specMeta.children && specMeta.children.hints) return;
+    specMeta.src.value.hints = [];
+  });
 }
 
 function expandArrayItem(options) {
