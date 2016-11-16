@@ -49,7 +49,10 @@ function addHint(kvp, hint) {
   if (!kvp.value || !kvp.value.spec) return;
   if (!kvp.value.spec.hints) return;
   if (kvp.value.spec.hints.indexOf(hint) !== -1) return;
-  if(!util.isArray(kvp.value.spec.hints)) throw new Error("The 'hints' property of a spec must be an array.");
+  if(!util.isArray(kvp.value.spec.hints)) {
+    var meta = getMetadata(kvp);
+    throw new Error("The 'hints' property of a spec must be an array for '" + meta.key + "'.");
+  }
   if (isBaseHint(hint) && kvp.value.spec.hints.some(isBaseHint)) return;
   kvp.value.spec.hints.push(hint);
 }
