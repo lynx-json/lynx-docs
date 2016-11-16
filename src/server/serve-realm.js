@@ -9,7 +9,7 @@ exportYaml.handler = function(options) {
   function onData(data) {
     options.output.write(data);
   }
-  
+
   var buffer = fs.readFileSync(options.input);
   exportYaml.exportBuffer(buffer, onData, options);
   options.output.end();
@@ -50,7 +50,7 @@ function redirectToRealmIndex(req, res, next) {
 
   var location = url.parse(realm.realm);
 
-  var headers = { "Content-Type": "text/plain", "Location": location.pathname };
+  var headers = { "Content-Type": "text/plain", "Location": location.pathname, "Cache-control": "no-cache" };
   res.writeHead(301, headers);
   res.end("Redirecting to realm index");
 }
@@ -70,6 +70,7 @@ module.exports = exports = function createStaticHandler(options) {
 
     function serveRealmIndex() {
       res.setHeader("Content-Type", "application/lynx+json");
+      res.setHeader("Cache-control", "no-cache");
 
       var data = {};
       data.realm = realmOrVariantMetadata.realm;
@@ -100,6 +101,7 @@ module.exports = exports = function createStaticHandler(options) {
     }
 
     res.setHeader("Content-Type", "application/lynx+json");
+    res.setHeader("Cache-control", "no-cache");
 
     exportYaml.handler({
       format: "lynx",
