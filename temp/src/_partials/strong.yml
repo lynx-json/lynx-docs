@@ -1,4 +1,3 @@
-value>em:
-  level: 2
-  value: "{{{value}}}"
-  # Not sure why value<: doesn't work here. Investigate.
+spec:
+  emphasis: 2
+value<: 

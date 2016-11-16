@@ -1,0 +1,20 @@
+>page:
+  globalNav>:
+  localNav>:
+  search:
+    spec:
+      hints: [ http://uncategorized/search, form ]
+    value:
+      phone>input:
+        label: Phone Number
+      email>input:
+        label: Email
+      submit:
+        action: ./
+        method: GET
+        title: Search
+  main:
+    header: Search
+    description:
+      src: ./description.md
+      type: text/markdown

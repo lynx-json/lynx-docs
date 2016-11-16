@@ -94,6 +94,8 @@ function labels(kvp, options) {
     addLabeledBy(kvp, "title");
   } else if (nodeHasProperty(kvp, meta, "header")) {
     addLabeledBy(kvp, "header");
+  } else if (nodeHasProperty(kvp, meta, "label")) {
+    addLabeledBy(kvp, "label");
   }
 }
 

@@ -1,0 +1,15 @@
+>page:
+  globalNav>:
+  localNav>:
+  main:
+    header: Regions
+    description:
+      src: ./description.md
+      type: text/markdown
+    examples>list:
+      value@examples:
+        - symbol: ⁌
+          href<url: ./lists/
+          type: application/lynx+json
+          content:
+            header<: Example

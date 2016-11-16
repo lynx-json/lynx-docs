@@ -1,0 +1,7 @@
+patterns:
+  - header: Regions
+    url: ./regions/
+  - header: Lists
+    url: ./lists/
+  - header: Modals
+    url: ./modals/

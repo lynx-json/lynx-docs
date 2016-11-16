@@ -1,0 +1,8 @@
+>page:
+  globalNav>:
+  localNav>:
+  main:
+    header: Search
+    description:
+      src: ./description.md
+      type: text/markdown

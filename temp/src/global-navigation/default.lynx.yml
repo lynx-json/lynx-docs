@@ -1,0 +1,9 @@
+spec:
+  hints: [ http://uncategorized/global-navigation ]
+value:
+  - title: Lynx Docs
+    href: ../lynx-docs/
+    type: application/lynx+json
+  - title: Patterns
+    href: ../patterns/
+    type: application/lynx+json

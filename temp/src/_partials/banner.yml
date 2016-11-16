@@ -1,10 +1,17 @@
 spec:
-  hints: [ header ]
+  hints: [ http://uncategorized/banner, header ]
 value:
-  icon:
-    info: ""
-  branding:
-    src: /images/bestbuy-logo.svg
-    type: image/png
-    width: 270.66
-    height: 48
+  clock: ""
+  title: Lynx Pattern Library
+  utilities:
+    spec:
+      hints: [ http://uncategorized/banner/utilities ]
+    value:
+      - ">image":
+          type: image/jpeg
+          width: 50
+          height: 50
+      - ">image":
+          type: image/jpeg
+          width: 50
+          height: 50

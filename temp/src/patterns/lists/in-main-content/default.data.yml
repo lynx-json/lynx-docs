@@ -1,0 +1,11 @@
+items:
+  - name: Lorem ipsum dolor sit amet, consectetur
+    description: Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod 
+    other: Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod
+    children:
+      - name: Lorem ipsum dolor sit amet, consectetur
+        description: Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod 
+        other: Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod
+  - name: Lorem ipsum dolor sit amet, consectetur
+    description: Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod 
+    other: Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod 

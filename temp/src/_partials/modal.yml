@@ -1,0 +1,4 @@
+spec:
+  hints: [ "http://bestbuy.com/retail/modal-container" ]
+value:
+  scope=:

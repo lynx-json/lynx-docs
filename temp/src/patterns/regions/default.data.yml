@@ -1,0 +1,7 @@
+patterns:
+  - header: Banner
+    url: ./banner/
+  - header: Global Navigation
+    url: ./global-navigation/
+  - header: Search
+    url: ./search/

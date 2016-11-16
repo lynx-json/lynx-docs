@@ -1,0 +1,13 @@
+patterns:
+  - header: Main Content
+    url: ../main-content/
+  - header: Banner
+    url: ../banner/
+  - header: Global Navigation
+    url: ../global-navigation/
+  - header: Local Navigation
+    url: ../local-navigation/
+  - header: Search
+    url: ../search/
+  - header: Context
+    url: ../context/
