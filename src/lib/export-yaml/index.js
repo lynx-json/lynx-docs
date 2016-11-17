@@ -1,17 +1,21 @@
 "use strict";
 
 var formats = {
-  handlebars: require("./export-yaml-to-hb"),
-  lynx: require("./export-yaml-to-lynx")
+  handlebars: { fn: require("./export-yaml-to-hb"), ext: ".handlebars" },
+  lynx: { fn: require("./export-yaml-to-lynx"), ext: ".lnx" }
 };
 
 function exportYaml(format, kvp, callback, options) {
   if (!formats[format]) throw new Error("Unsupported format: " + format);
-  formats[format](kvp, callback, options);
+  formats[format].fn(kvp, callback, options);
 }
 
-exportYaml.add = function addExportFn(format, exportFn) {
-  formats[format] = exportFn;
+exportYaml.add = function addExportFn(format, exportFn, ext) {
+  formats[format] = { fn: exportFn, ext: ext };
 };
+
+exportYaml.getExtension = function getExtensionForFormat(format) {
+  return formats[format] && formats[format].ext;
+}
 
 module.exports = exports = exportYaml;
