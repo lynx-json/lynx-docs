@@ -13,6 +13,7 @@ function isPartial(kvp) {
 function resolvePartial(kvp, options) {
   var value = kvp.value, key = kvp.key;
   var partialsFolder = path.dirname(options.input);
+  partialsFolder = path.relative(process.cwd(), partialsFolder);
   
   while (partialsFolder) {
     let partialFile = path.join(process.cwd(), partialsFolder, "_partials", value.partial + ".js");

@@ -46,7 +46,7 @@ function aggregateRealms(folder, root, parentRealm, realms) {
   });
   
   subfolders.forEach(function (subfolder) {
-    aggregateRealms(subfolder, root, defaultRealm.realm, realms);
+    aggregateRealms(subfolder, folder, defaultRealm.realm, realms);
   });
 }
 
@@ -115,6 +115,7 @@ function ensureVariantName(variantObj) {
 
 function resolveRealm(realmObj, parentRealm) {
   realmObj.realm = url.resolve(parentRealm, realmObj.realm);
+  if (!realmObj.realm.match(/\/$/)) realmObj.realm += "/";
 }
 
 function resolvePaths(realmObj, folder) {
