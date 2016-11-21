@@ -108,6 +108,7 @@ function titles(kvp, options) {
 
 function headers(kvp, options) {
   var meta = getMetadata(kvp);
+  
   if (meta.key === "header") {
     addHint(kvp, "header");
     addHint(kvp, "label");
@@ -213,6 +214,7 @@ function markers(kvp, options) {
 module.exports = exports = function(finish) {
   finish.addHint = addHint;
 
+  finish.headers = headers;
   finish.titles = titles;
   finish.labels = labels;
   finish.links = links;

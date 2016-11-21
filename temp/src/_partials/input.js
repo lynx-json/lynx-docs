@@ -86,6 +86,19 @@ module.exports = exports = function (kvp) {
     "value<": ""
   };
   
+  var hintsParam = param(kvp, "hints");
+  if (hintsParam) {
+    delete input.spec.hints;
+    input.spec[hintsParam.src.key] = hintsParam.src.value;
+  }
+  
+  var optionsParam = param(kvp, "options");
+  if (optionsParam) {
+    value[optionsParam.src.key] = optionsParam.src.value;
+    input.spec.options = optionsParam.key;
+    input.spec.visibility = "hidden";
+  }
+  
   addRequiredValidation(value, kvp);
   addValidation(value, kvp, "text", "minLength");
   addValidation(value, kvp, "text", "maxLength");

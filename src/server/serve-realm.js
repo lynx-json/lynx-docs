@@ -66,7 +66,6 @@ module.exports = exports = function createStaticHandler(options) {
     }
 
     var variants = realmOrVariantMetadata.variants;
-    var realms = realmOrVariantMetadata.realms;
 
     function serveRealmIndex() {
       res.setHeader("Content-Type", "application/lynx+json");
@@ -74,9 +73,12 @@ module.exports = exports = function createStaticHandler(options) {
 
       var data = {};
       data.realm = realmOrVariantMetadata.realm;
-      if (variants.length > 0) data.variants = variants;
-      else data.realms = realms;
-
+      data.variants = variants;
+      
+      data.variants.forEach(variant => {
+        variant.url = generateRealmOrVariantUrl(variant);
+      });
+      
       exportYaml.handler({
         format: "lynx",
         input: path.join(__dirname, "realm-index.lynx.yml"),

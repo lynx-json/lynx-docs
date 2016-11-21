@@ -8,7 +8,7 @@ const params = partials.params;
 const param = partials.param;
 
 module.exports = exports = function (kvp) {
-  kvp.value.hints = [ "http://uncategorized/listing", "container" ];
+  kvp.value.hints = [ "http://uncategorized/listing" ];
   var result = lynxPartial(kvp);
   
   var valueParam = param(result, "value");

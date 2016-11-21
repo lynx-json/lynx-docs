@@ -1,4 +1,5 @@
->page:
-  globalNav>:
-  main:
-    header: Welcome
+>base:
+  header: Hello
+  message: Good Bye
+  visibility: visible
+  hints: [ section, container ]

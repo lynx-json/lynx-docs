@@ -6,6 +6,7 @@ const url = require("url");
 module.exports = exports = function(lynxDocs) {
   var finishYaml = lynxDocs.lib.finish;
   
+  finishYaml.add(finishYaml.headers);
   finishYaml.add(finishYaml.titles);
   finishYaml.add(finishYaml.labels);
   finishYaml.add(finishYaml.links);

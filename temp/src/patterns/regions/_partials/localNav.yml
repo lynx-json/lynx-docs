@@ -1,2 +1,7 @@
-src: /retail/library/patterns/regions/menu/
-type: application/lynx+json
+spec:
+  hints: [ http://uncategorized/local-navigation, section ]
+value:
+  header: Regions
+  list:
+    src: /retail/library/patterns/regions/menu/
+    type: application/lynx+json

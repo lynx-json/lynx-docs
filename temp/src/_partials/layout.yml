@@ -1,0 +1,23 @@
+# A catchall
+# A placeholder 
+# A default value
+# [A conditional value]
+# Must merge spec/value
+# Allow #databound>page: or firstName#>input:
+
+# layout
+banner>~:
+globalNav~~: This is required.
+main~: 
+~*: All unknown parameters go here. After processing. This will be removed.
+
+# input.yml
+
+spec~:
+  hints~: []
+  validation~:
+    required~~:
+      invalid~requiredMessage: requiredMessage
+    text~~pattern~~format~~minLength~~maxLength:
+      
+# ~~ is conditional. Delete the key if it's not provided.

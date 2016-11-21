@@ -1,11 +1,8 @@
-spec:
-  hints: [ http://uncategorized/local-navigation ]
-value:
-  list>:
-    value@patterns:
-      - symbol: ⁌
-        href<url: ./lists/
-        for: ./lists/
-        type: application/lynx+json
-        content:
-          header<: Lists
+>list:
+  value@patterns:
+    - symbol: ⁌
+      href<url: ./lists/
+      for: ./lists/
+      type: application/lynx+json
+      content:
+        header<: Lists

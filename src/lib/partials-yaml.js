@@ -1,5 +1,6 @@
 "use strict";
 
+const util = require("util");
 const fs = require("fs");
 const parseYaml = require("./parse-yaml");
 const YAML = require("yamljs");
@@ -34,68 +35,109 @@ function resolvePartial(kvp, options) {
   }
 }
 
-function applySimpleParameter(partialKVP, param) {
-  // TODO: Convert to using metadata?
-  // {{{}}} or {{}}
-  var mustachePattern = new RegExp("{{{?" + param.key + "}}}?", "g");
-  if (partialKVP.key) {
-    partialKVP.key = partialKVP.key.replace(mustachePattern, param.value);
-  }
+function* params(kvp) {
+  yield getMetadata({
+    key: "key",
+    value: kvp.key
+  });
   
-  if (typeof partialKVP.value === "string") {
-    partialKVP.value = partialKVP.value.replace(mustachePattern, param.value);
-  }
-  
-  // param<: or param=:
-  if (partialKVP.key) {
-    let literalKeyPattern = new RegExp("^" + param.key + "[<=]$");
-    
-    if (literalKeyPattern.test(partialKVP.key)) {
-      partialKVP.value = param.value;
-      partialKVP.key = param.key;
-    }
-  }
-  
-  // key<param: or key=param:
-  if (partialKVP.key) {
-    let literalKeyPattern = new RegExp("^.*[<=]" + param.key + "$");
-    
-    if (literalKeyPattern.test(partialKVP.key)) {
-      partialKVP.value = param.value;
-      partialKVP.key = param.key;
+  if (kvp.value && util.isObject(kvp.value)) {
+    for (let p in kvp.value) {
+      yield getMetadata({
+        key: p,
+        value: kvp.value[p]
+      });
     }
   }
 }
 
-function applySimpleParameters(partialKVP, params) {
-  params.forEach(param => applySimpleParameter(partialKVP, param));
-  
-  if (partialKVP.value && (typeof partialKVP.value === "object") && !Array.isArray(partialKVP.value)) {
-    let objectValue = {};
-    for (var p in partialKVP.value) {
-      var childKVP = { key: p, value: partialKVP.value[p]};
-      applySimpleParameters(childKVP, params);
-      objectValue[childKVP.key] = childKVP.value;
-    }
-    partialKVP.value = objectValue;
+function getParam(kvp, name) {
+  for (let p of params(kvp)) {
+    if (p.key === name) return p;
   }
 }
 
-function getPartialValue(kvp, options) {
+function isObjectValue(value) {
+  return util.isObject(value) && !util.isArray(value);
+}
+
+function collectKnownParameters(partialValue) {
+  var paramPattern = /(\w*)?~(\w*|\*)?/g;
+  var partialContent = YAML.stringify(partialValue);
+  var result = [], match;
+  while (match = paramPattern.exec(partialContent)) {
+    let paramName = match[2] || match[1];
+    paramName = getMetadata({ key: paramName}).key;
+    if (result.indexOf(paramName) === -1) result.push(paramName);
+  }
+  
+  return result;
+}
+
+function applyWildcardParameters(inputKVP, outputKVP, knownParameters) {
+  for (let p in inputKVP.value) {
+    if (p === "partial" || p === "value" || p === "key") continue;
+    let param = getMetadata({
+      key: p,
+      value: inputKVP.value[p]
+    });
+    
+    if (knownParameters.indexOf(param.key) === -1) {
+      outputKVP[param.src.key] = param.src.value;
+    }
+  }
+}
+
+function applyParameters(partialValue, kvp, knownParameters) {
+  if (!util.isObject(partialValue)) return partialValue;
+  if (!kvp.value) return partialValue;
+  
+  if (!knownParameters) knownParameters = collectKnownParameters(partialValue);
+  
+  var result = {};
+  
+  for (let p in partialValue) {
+    let paramPattern = /(\w*)?~(\w*|\*)?/;
+    let match = paramPattern.exec(p);
+    
+    let partialChildValue = partialValue[p];
+    if (match) {
+      let paramName = match[2] || match[1];
+      
+      if (paramName === "*") {
+        applyWildcardParameters(kvp, result, knownParameters);
+        continue;
+      }
+      
+      // Apply explicit parameter
+      let param = getParam(kvp, paramName);
+      
+      if (param) {
+        delete result[param.src.key]; // If it was added to the catchall
+        result[param.src.key] = param.src.value;
+        continue;
+      }
+    } else if (isObjectValue(partialChildValue)) {
+      result[p] = applyParameters(partialChildValue, kvp, knownParameters);
+      continue;
+    }
+    
+    let key = p.replace(/~.*$/, "");
+    if (partialChildValue !== null && partialChildValue !== undefined) {
+      result[key] = partialChildValue;
+    } 
+    
+    let meta = getMetadata(key);
+    if (meta.template) result[key] = partialChildValue;
+  }
+  
+  return result;
+}
+
+function getPartialKVP(kvp, options) {
   var partial = exports.resolvePartial(kvp, options);
-  if (!partial) throw new Error("Failed to find partial " + kvp.value.partial);
-
-  var params = [];
-  params.push({ key: "key", value: kvp.key });
+  partial.value = applyParameters(partial.value, kvp);
   
-  for (let p in kvp.value) {
-    params.push({ key: p, value: kvp.value[p] });
-  }
-  
-  var partialKVP = { key: undefined, value: partial.value };
-  applySimpleParameters(partialKVP, params);
-  partial.value = partialKVP.value;
-
   return partial;
 }
 
@@ -113,10 +155,11 @@ function getPartial(kvp, options) {
   var meta = getMetadata(kvp);
   
   kvp.value.partial = meta.partial;
+  kvp.value.key = meta.src.key.replace(/>.*/, "");
   kvp.key = meta.key;
   if (kvp.key === undefined) delete kvp.key;
   
-  return getPartialValue(kvp, options);
+  return getPartialKVP(kvp, options);
 }
 
 exports.isPartial = isPartial;

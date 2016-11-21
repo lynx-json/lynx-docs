@@ -5,3 +5,7 @@ patterns:
     url: ./lists/
   - header: Modals
     url: ./modals/
+  - header: Cards
+    url: ./cards/
+  - header: Options
+    url: ./options/

@@ -1,6 +1,16 @@
-title: This is the index
-variants@:
-  - "Here {{{name}}}"
-# realms@:
-#   label: Case
-#   realm: "{{{realm}}}"
+title: 
+variants:
+  spec:
+    hints: [ http://uncategorized/listing ]
+  value@variants: 
+    - spec:
+        hints: [ http://uncategorized/listing/item ]
+      value:
+        symbol: 
+          spec:
+            hints: [ http://uncategorized/listing/item/symbol ]
+          value: ◆
+        content:
+          title<name:
+          href<url:
+          type<: application/lynx+json

@@ -2,7 +2,7 @@
   globalNav>:
   localNav>:
   main:
-    header: Search
+    header: Local Navigation
     description:
       src: ./description.md
       type: text/markdown
