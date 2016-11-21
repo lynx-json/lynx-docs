@@ -5,200 +5,322 @@ const path = require("path");
 const url = require("url");
 const util = require("util");
 const parseYaml = require("./parse-yaml");
-const metaPattern = /^.*\.meta.yml$/;
-const templatePattern = /^(.*)\.lynx\.yml$/;
-const dataFolderPattern = /^(.*)\.data$/;
+const templateFilePattern = /^(.*)\.lynx\.yml$/;
 const dataFilePattern = /^(.*?)(\.(.*?))?\.data\.yml$/;
 
-function createVariant(realm, name, templateFile, dataFile) {
-  return {
-    parent: realm,
-    name: name,
-    template: path.format(templateFile),
-    data: dataFile,
-    type: "variant"
-  };
-}
-
-function deriveVariantsForTemplateFile(realm, templateFile, templateName) {
-  var templateVariants = [];
-  //add data files for the template
-  realm.contents.forEach(function(item) {
-    var result = dataFilePattern.exec(item);
-    if (!result || result[1] !== templateName) return;
-    var name = result[3] || templateName;
-    templateVariants.push(createVariant(realm, name, templateFile, path.join(templateFile.dir, item)));
-  });
-  //add files from data folders for the template
-  realm.contents.forEach(function(item) {
-    var result = dataFolderPattern.exec(item);
-    if (!result || result[1] !== templateName) return;
-
-    fs.readdirSync(path.join(templateFile.dir, item)).forEach(function(data) {
-      var dataFilePath = path.join(templateFile.dir, item, data);
-      var dataName = path.parse(data).name;
-      var name = dataName === "default" ? templateName : dataName;
-      templateVariants.push(createVariant(realm, name, templateFile, dataFilePath));
-    });
-  });
-  //if there are no variants, then the template itself is the variant
-  if (templateVariants.length === 0) templateVariants.push(createVariant(realm, templateName, templateFile));
-
-  return templateVariants;
-}
-
-function getVariants(realm) {
-  var variants = [];
-
-  if(!realm.isContainer() && !realm.isVirtual()) {
-    variants.push({
-        parent: realm,
-        name: realm.name,
-        content: realm.path,
-        type: "variant"
-      });
-  }
-  realm.contents.forEach(function(item) {
-    var result = templatePattern.exec(item);
-    if (!result) return;
-    var templateFile = path.parse(path.join(realm.path, item));
-    var templateVariants = deriveVariantsForTemplateFile(realm, templateFile, result[1]);
-    Array.prototype.push.apply(variants, templateVariants);
-    return;
-  });
-  if (realm.meta && realm.meta.variants) {
-    realm.meta.variants.forEach(function(variant) {
-      variant.template = realm.resolvePath(variant.template);
-      if (variant.data) variant.data = realm.resolvePath(variant.data);
-      variant.type = "variant";
-      variant.parent = realm;
-      var index = variants.findIndex(function(candidate) {
-        return candidate.template === variant.template && candidate.data === variant.data;
-      });
-      if (index >= 0) variants.splice(index, 1, variant);
-      else variants.push(variant);
-    });
-  }
-  return variants;
-}
-
-function getRealms(realm) {
-
-  function isRealm(item) {
-    return !(metaPattern.test(item) || templatePattern.test(item) || dataFolderPattern.test(item) || dataFilePattern.test(item));
-  }
-
-  var realms = realm.contents.filter(isRealm).map(function(item) {
-    return new Realm(path.join(realm.path, item), realm);
-  });
-
-  if (realm.meta && realm.meta.realms) {
-    realm.meta.realms.forEach(function(child) {
-      var newRealm = new Realm(child, realm);
-      if (realms.find(function(existing) { return existing.realm === newRealm.realm; })) return; //realms from file system win
-      realms.push(newRealm);
-    });
-  }
+function getRealms(root, realm) {
+  root = path.normalize(root);
+  var realms = [];
+  aggregateRealms(root, root, realm || "/", realms);
   return realms;
 }
 
-function getMetadataFromFileSystem(realm) {
-
-  var metaFile = realm.contents.find(function(item) { return metaPattern.test(item); });
-  if (!metaFile) return null;
-
-  return parseYaml(fs.readFileSync(path.join(realm.path, metaFile)));
-}
-
-function Realm(pathOrMeta, parent) {
-  var self = this;
-
-  function calculateRealmAndName() {
-    var parsed = self.path ? path.parse(self.path) : { base: "unknown" };
-    self.name = self.meta && self.meta.name || parsed.base;
-
-    var parentRealm = parent && parent.realm || "/";
-    var realm = self.meta && self.meta.realm ;
-    if (!realm && !parent) realm = "/"; //not in metadata and no parent
-    if (realm) {
-      self.realm = url.resolve(parentRealm, realm);
-      return;
-    }
-
-    //this case is realm parsed with parent realm parsed and no .meta.yml
-    realm = path.relative(parent.path, self.path) + (self.isContainer() ? "/" : "");
-    self.realm = url.resolve(parentRealm, realm);
-  }
-
-  function applyMetadata() {
-    var meta = self.meta;
-    delete self.meta;
-
-    if (!meta) return;
-    for (var k in meta) {
-      if (meta.hasOwnProperty(k) && !self.hasOwnProperty(k)) { self[k] = meta[k]; }
-    }
-  }
-
-  self.parent = parent;
-  var stats;
-  if (util.isString(pathOrMeta)) {
-    self.path = pathOrMeta;
-    stats = fs.statSync(self.path);
+function aggregateRealms(folder, root, parentRealm, realms) {
+  var realmsForFolder = getRealmsForFolder(folder, root, parentRealm);
+  var defaultRealm = realmsForFolder[0];
+  
+  var subfolders = [];
+  var templateFiles = [];
+  var contentFiles = [];
+  
+  fs.readdirSync(folder).forEach(function (child) {
+    var pathToChild = path.resolve(folder, child);
+    var stats = fs.statSync(pathToChild);
+    
     if (stats.isDirectory()) {
-      self.contents = fs.readdirSync(self.path);
-      self.meta = getMetadataFromFileSystem(self);
+       if (!isDataDir(pathToChild)) subfolders.push(pathToChild);
     } else {
-      self.contents = [];
+      if (isTemplateFile(pathToChild)) {
+        templateFiles.push(pathToChild);
+      } else if (isContentFile(pathToChild)) {
+        contentFiles.push(pathToChild);
+      }
     }
-  } else {
-    self.path = null;
-    self.meta = pathOrMeta;
-    self.contents = [];
-  }
-
-  self.isVirtual = function() {
-    return !stats;
-  }
-
-  self.isContainer = function() {
-    return stats && stats.isDirectory();
-  }
-
-  calculateRealmAndName();
-  self.variants = getVariants(self);
-  self.realms = getRealms(self);
-  self.type = "realm";
-  applyMetadata();
+  });
+  
+  aggregateTemplateFiles(templateFiles, realmsForFolder);
+  aggregateContentFiles(contentFiles, realmsForFolder);
+  
+  realmsForFolder.forEach(function (realmObj) {
+    realms.push(realmObj);
+  });
+  
+  subfolders.forEach(function (subfolder) {
+    aggregateRealms(subfolder, folder, defaultRealm.realm, realms);
+  });
 }
 
-Realm.prototype.resolvePath = function(relative) {
-  if (!this.path) return this.parent.resolvePath(relative);
-  return path.join(this.path, relative);
-};
-
-Realm.prototype.getDefaultVariant = function() {
-  if (this.variants.length === 1) return this.variants[0];
-  var defaultName = this.default || "default";
-  return this.variants.find(function(variant) {
-    return variant.name === defaultName;
-  });
-};
-
-Realm.prototype.find = function(predicate) {
-  if (predicate(this)) return this;
-
-  var result = this.variants.find(predicate);
-  if (result) return result;
-
-  for (var i = 0; i < this.realms.length; i++) {
-    result = this.realms[i].find(predicate);
-    if (result) return result;
+function getRealmsForFolder(folder, root, parentRealm) {
+  var defaultRealm = deriveRealmFromFolder(folder, root);
+  var realmsForFolder = getMetaForFolder(folder);
+  
+  if (realmsForFolder.length) {
+    copyObject(realmsForFolder[0], defaultRealm);
+    realmsForFolder.splice(0, 1, defaultRealm);
+  } else {
+    realmsForFolder.push(defaultRealm);
   }
+  
+  realmsForFolder.forEach(function (realmObj) {
+    ensureStructure(realmObj);
+    resolveRealm(realmObj, parentRealm);
+    resolvePaths(realmObj, folder);
+  });
+  
+  return realmsForFolder;
+}
 
-  return null;
-};
+function deriveRealmFromFolder(folder, root) {
+  var pathToFolder = path.relative(root, folder);
+  return createRealm(pathToFolder);
+}
 
-module.exports = exports = folderPath => {
-  return new Realm(path.normalize(folderPath));
-};
+function createRealm(realm, variants) {
+  return {
+    realm: realm,
+    templates: [],
+    variants: variants || []
+  };
+}
+
+function getMetaForFolder(folder) {
+  var pathToMeta = path.resolve(folder, "./.meta.yml");
+  if (!fs.existsSync(pathToMeta)) return [];
+  
+  var meta = parseYaml(fs.readFileSync(pathToMeta));
+  if (!meta) {
+    console.log("Empty metadata file was ignored: '" + pathToMeta + "'");
+    return [];
+  }
+  
+  if (!Array.isArray(meta)) meta = [meta];
+  return meta;
+}
+
+function copyObject(src, dest) {
+  Object.getOwnPropertyNames(src).forEach(function (prop) {
+    dest[prop] = src[prop];
+  });
+}
+
+function ensureStructure(realmObj) {
+  realmObj.variants = realmObj.variants || [];
+  realmObj.variants.forEach(ensureVariantName);
+  realmObj.templates = realmObj.templates || [];
+}
+
+function ensureVariantName(variantObj) {
+  if (!variantObj.name) variantObj.name = getVariantName(variantObj);
+}
+
+function resolveRealm(realmObj, parentRealm) {
+  realmObj.realm = url.resolve(parentRealm, realmObj.realm);
+  if (!realmObj.realm.match(/\/$/)) realmObj.realm += "/";
+}
+
+function resolvePaths(realmObj, folder) {
+  realmObj.templates.forEach(function (val, idx, arr) {
+    arr[idx] = path.resolve(folder, val);
+  });
+  
+  realmObj.variants.forEach(function (val) {
+    if (val.template) val.template = path.resolve(folder, val.template);
+    if (val.data) val.data = path.resolve(folder, val.data);
+    if (val.content) val.content = path.resolve(folder, val.content);
+  });
+}
+
+function isTemplateFile(pathToFile) {
+  return pathToFile.match(/\.lynx\.yml$/);
+}
+
+function isDataFile(pathToFile) {
+  return pathToFile.match(/\.data\.yml$/);
+}
+
+function isMetaFile(pathToFile) {
+  return pathToFile.match(/^.*\.meta.yml$/);
+}
+
+function isDataDir(pathToDir) {
+  return pathToDir.match(/\.data$/);
+}
+
+function isContentFile(pathToFile) {
+  return !isTemplateFile(pathToFile) && 
+    !isDataFile(pathToFile) && 
+    !isMetaFile(pathToFile);
+}
+
+function aggregateTemplateFiles(templateFiles, realmsForFolder) {
+  function equals(a) {
+    return function (b) {
+      return a === b;
+    };
+  }
+  
+  function hasTemplate(templateFile) {
+    return function (realm) {
+      return realm.templates && realm.templates.some(equals(templateFile));
+    };
+  }
+  
+  var defaultRealm = realmsForFolder[0];
+  
+  templateFiles.forEach(function (templateFile) {
+    var realmForTemplate = realmsForFolder.filter(hasTemplate(templateFile));
+    if (realmForTemplate.length === 0) defaultRealm.templates.push(templateFile);
+  });
+  
+  realmsForFolder.forEach(function (realm) {
+    aggregateVariants(realm.templates, realm);
+  });
+}
+
+function aggregateVariants(templateFiles, realm) {
+  templateFiles.forEach(function (templateFile) {
+    var dataFiles = getDataFilesForTemplate(templateFile);
+    
+    dataFiles.forEach(function (dataFile) {
+      if (realm.variants.some(v => templateFile === v.template && dataFile === v.data)) return;
+      realm.variants.push(createVariant(templateFile, dataFile));
+    });
+    
+    if (dataFiles.length > 0) return;
+    if (realm.variants.some(v => v.template === templateFile)) return;
+    
+    // if there are no data files for this template
+    // and if there are no variants already defined for this template
+    // then the template is the only variant
+    realm.variants.push(createVariant(templateFile));
+  });
+}
+
+function getDataFilesForTemplate(templateFile) {
+  var folder = path.dirname(templateFile);
+  var dataFiles = [];
+  
+  fs.readdirSync(folder).forEach(function (child) {
+    var pathToChild = path.resolve(folder, child);
+    
+    if (isDataDirForTemplate(pathToChild, templateFile)) {
+      aggregateDataFiles(pathToChild, dataFiles);
+    } else if (isDataFileForTemplate(pathToChild, templateFile)) {
+      dataFiles.push(pathToChild);
+    }
+  });
+  
+  return dataFiles;
+}
+
+function isDataDirForTemplate(pathToDir, templateFile) {
+  return pathToDir === getDataDirForTemplate(templateFile);
+}
+
+function getDataDirForTemplate(templateFile) {
+  var matches = templateFilePattern.exec(templateFile);
+  if (!matches) return "";
+  var dataDir = matches[1] + ".data";
+  return dataDir;
+}
+
+function aggregateDataFiles(pathToDir, dataFiles) {
+  fs.readdirSync(pathToDir).forEach(function (dataFile) {
+    dataFiles.push(path.resolve(pathToDir, dataFile));
+  });
+}
+
+function isDataFileForTemplate(dataFile, templateFile) {
+  var matches;
+  matches = templateFilePattern.exec(templateFile);
+  if (!matches) return false;
+  
+  var templateFileBase = matches[1];
+  matches = dataFilePattern.exec(dataFile);
+  if (!matches) return false;
+  
+  var dataFileBase = matches[1];
+  return templateFileBase === dataFileBase;
+}
+
+function createVariant(templateFile, dataFile) {
+  var variantObj = {
+    template: templateFile,
+    data: dataFile
+  };
+  
+  variantObj.name = getVariantName(variantObj);
+  
+  return variantObj;
+}
+
+function getVariantName(variantObj) {
+  var dataName = getDataFileName(variantObj.data);
+  var templateName = getTemplateFileName(variantObj.template);
+  var contentName = getContentFileName(variantObj.content);
+  
+  if (dataName) {
+    if (dataName === templateName) return dataName;
+    return templateName + "-" + dataName;
+  } else if (templateName) {
+    return templateName;
+  } else if (contentName) {
+    return contentName;
+  }
+  
+  return "unknown";
+}
+
+function getDataFileName(pathToFile) {
+  if (!pathToFile) return;
+  
+  var dataFileObj = path.parse(pathToFile);
+  var dataFileNameParts = dataFileObj.name.split(".");
+  
+  if (dataFileNameParts.length === 1) {
+    // variant.ext
+    return dataFileObj.name;
+  } else if (dataFileNameParts.length === 2) {
+    // template.data.ext
+    return dataFileNameParts[0];
+  } else if (dataFileNameParts.length === 3) {
+    // template.variant.data.ext
+    return dataFileNameParts[1];
+  }
+}
+
+function getTemplateFileName(pathToFile) {
+  if (!pathToFile) return;
+  var templateFileObj = path.parse(pathToFile);
+  var templateFileNameParts = templateFileObj.name.split(".");
+  return templateFileNameParts[0];
+}
+
+function getContentFileName(pathToFile) {
+  if (!pathToFile) return;
+  var contentFileObj = path.parse(pathToFile);
+  return contentFileObj.base;
+}
+
+function aggregateContentFiles(contentFiles, realmsForFolder) {
+  var defaultRealm = realmsForFolder[0];
+  
+  contentFiles.forEach(function (contentFile) {
+    var realm = url.resolve(defaultRealm.realm, path.parse(contentFile).base);
+    var variants = [ createContentVariant(contentFile) ];
+    var realmObj = createRealm(realm, variants);
+    realmsForFolder.push(realmObj);
+  });
+}
+
+function createContentVariant(contentFile) {
+  var variant = {
+    content: contentFile
+  };
+  
+  variant.name = getVariantName(variant);
+  
+  return variant;
+}
+
+module.exports = exports = getRealms;

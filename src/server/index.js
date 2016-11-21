@@ -26,7 +26,7 @@ function startServer(options) {
   
   var handler = function (req, res) {
     try {
-      req.realms = options.root.map(getRealmMetadata);
+      req.realms = getRealms(options);
       serveRealm(options)(req, res, function () {
         serveStatic(options)(req, res, function () {
           serveNotFound(req, res);
@@ -42,6 +42,22 @@ function startServer(options) {
   console.log("Lynx Docs server is running at http://localhost:" + port);
   
   return server;
+}
+
+function getRealms(options) {
+  var realms = [];
+  
+  options.root.forEach(function (root) {
+    realms = realms.concat(getRealmMetadata(root, options.realm));
+  });
+  
+  realms = realms.sort(function (a,b) { 
+    if (a.realm === b.realm) return 0; 
+    if (a.realm.indexOf(b.realm) === 0) return 1; 
+    if (b.realm.indexOf(a.realm) === 0) return -1; 
+  });
+  
+  return realms;
 }
 
 module.exports = exports = startServer;

@@ -2,8 +2,9 @@ var chai = require("chai");
 var should = chai.should();
 var expect = chai.expect;
 var sinon = require("sinon");
-var getFolderMetadata = require("../../src/lib/metadata-realm");
 var fs = require("fs");
+var util = require("util");
+var getRealms = require("../../src/lib/metadata-realm");
 var path = require("path");
 var YAML = require("yamljs");
 
@@ -22,622 +23,459 @@ function toYamlBuffer(value) {
   return new Buffer(YAML.stringify(value, null));
 }
 
-describe("when finding a realm", function() {
-  var realm;
-  var meta = {
-    realm: "/",
-    name: "Root",
-    variants: [{
-      name: "default",
-      template: "default.lynx.yml"
-    }],
-    realms: [{
-      realm: "/y/",
-      name: "child",
-      realms: [{
-        realm: "/y/z",
-        name: "grandchild"
-      }]
-    }]
-  };
-
-  beforeEach(function() {
-    sinon.stub(fs, "readdirSync").returns([".meta.yml"]);
-    sinon.stub(fs, "readFileSync").returns(toYamlBuffer(meta));
-    var statsStub = sinon.stub(fs, "statSync");
-    statsStub.withArgs("x").returns(statsFake(true));
-    statsStub.returns(statsFake(false));
-
-    realm = getFolderMetadata("x");
-  });
-
-  afterEach(function() {
-    fs.readdirSync.restore();
-    fs.readFileSync.restore();
-    if (fs.statSync.restore) fs.statSync.restore();
-  });
-
-  describe("having no matching items", function() {
-    var predicate = sinon.spy(function(item) {
-      return false;
-    });
-
-    it("should call predicate for all items", function() {
-      var result = realm.find(predicate);
-      expect(predicate.callCount).equals(4);
-    });
-
-    it("should have a falsey result", function() {
-      var result = realm.find(predicate);
-      should.not.exist(result);
-    });
-
-  });
-  describe("having matching variant", function() {
-    var predicate = sinon.spy(function(item) {
-      return item.type === "variant";
-    });
-
-    it("should result in variant", function() {
-      var result = realm.find(predicate);
-      expect(result).equal(realm.variants[0]);
-    });
-  });
-
-  describe("having matching child realm", function() {
-    var predicate = sinon.spy(function(item) {
-      return item.name === "child";
-    });
-
-    it("should result in ", function() {
-      var result = realm.find(predicate);
-      expect(result.realm).to.equal(realm.realms[0].realm);
-    });
-  });
-
-  describe("having matching descenant realm", function() {
-    var predicate = sinon.spy(function(item) {
-      return item.name === "grandchild";
-    });
-
-    it("should result in ", function() {
-      var result = realm.find(predicate);
-      expect(result.realm).to.equal(realm.realms[0].realms[0].realm);
-    });
-  });
-
-  describe("having matching variant and matching realm", function() {
-    var predicate = sinon.spy(function(item) {
-      return item.parent !== undefined;
-    });
-
-    it("should result in variant", function() {
-      var result = realm.find(predicate);
-      expect(result).eql(realm.variants[0]);
-    });
-  });
-});
-
-describe("when applying custom metadata", function() {
-  afterEach(function() {
-    fs.readdirSync.restore();
-    fs.readFileSync.restore();
-    if (fs.statSync.restore) fs.statSync.restore();
-  });
-
-  describe("a folder with .meta.yml with standard and custom keys", function() {
-    var realm;
-    var meta = {
-      realm: "/desktop/",
-      name: "Desktop",
-      custom: "My Value",
-      arr: ['One', 'Tow'],
-      obj: {
-        one: "One"
+var tests = [
+  {
+    description: "an empty folder",
+    root: "/root",
+    fs: {
+      dirs: {
+        "/root": []
+      },
+      files: {}
+    },
+    assertions: [
+      countOf(1), 
+      containsRealm("/")
+    ]
+  },
+  {
+    description: "an empty folder with a base realm",
+    root: "/root",
+    realm: "http://example.com",
+    fs: {
+      dirs: {
+        "/root": []
+      },
+      files: {}
+    },
+    assertions: [
+      countOf(1), 
+      containsRealm("http://example.com/")
+    ]
+  },
+  {
+    description: "a folder with one template",
+    root: "/root",
+    fs: {
+      dirs: {
+        "/root": [ "default.lynx.yml" ]
+      },
+      files: {
+        "/root/default.lynx.yml": null
       }
-    };
+    },
+    assertions: [
+      countOf(1),
+      containsRealm("/"),
+      containsVariant("/", "default", "/root/default.lynx.yml")
+    ]
+  },
+  {
+    description: "a folder with one template and one data file",
+    root: "/root",
+    fs: {
+      dirs: {
+        "/root": [ "default.lynx.yml", "default.data.yml" ]
+      },
+      files: {
+        "/root/default.lynx.yml": null,
+        "/root/default.data.yml": null
+      }
+    },
+    assertions: [
+      countOf(1),
+      containsRealm("/"),
+      containsVariant("/", "default", "/root/default.lynx.yml", "/root/default.data.yml")
+    ]
+  },
+  {
+    description: "a folder with one template and two data files",
+    root: "/root",
+    fs: {
+      dirs: {
+        "/root": [ "default.lynx.yml", "default.data.yml", "default.other.data.yml" ]
+      },
+      files: {
+        "/root/default.lynx.yml": null,
+        "/root/default.data.yml": null,
+        "/root/default.other.data.yml": null
+      }
+    },
+    assertions: [
+      countOf(1),
+      containsRealm("/"),
+      containsVariant("/", "default", "/root/default.lynx.yml", "/root/default.data.yml"),
+      containsVariant("/", "default-other", "/root/default.lynx.yml", "/root/default.other.data.yml")
+    ]
+  },
+  {
+    description: "a folder with one template and a data folder with one data file",
+    root: "/root",
+    fs: {
+      dirs: {
+        "/root": [ "default.lynx.yml", "default.data" ],
+        "/root/default.data": [ "default.yml" ]
+      },
+      files: {
+        "/root/default.lynx.yml": null,
+        "/root/default.data/default.yml": null
+      }
+    },
+    assertions: [
+      countOf(1),
+      containsRealm("/"),
+      containsVariant("/", "default", "/root/default.lynx.yml", "/root/default.data/default.yml")
+    ]
+  },
+  {
+    description: "a folder with one template and a data folder with two data files",
+    root: "/root",
+    fs: {
+      dirs: {
+        "/root": [ "default.lynx.yml", "default.data" ],
+        "/root/default.data": [ "default.yml", "other.yml" ]
+      },
+      files: {
+        "/root/default.lynx.yml": null,
+        "/root/default.data/default.yml": null,
+        "/root/default.data/other.yml": null
+      }
+    },
+    assertions: [
+      countOf(1),
+      containsRealm("/"),
+      containsVariant("/", "default", "/root/default.lynx.yml", "/root/default.data/default.yml"),
+      containsVariant("/", "default-other", "/root/default.lynx.yml", "/root/default.data/other.yml")
+    ]
+  },
+  {
+    description: "a folder with two templates",
+    root: "/root",
+    fs: {
+      dirs: {
+        "/root": [ "a.lynx.yml", "b.lynx.yml" ]
+      },
+      files: {
+        "/root/a.lynx.yml": null,
+        "/root/b.lynx.yml": null
+      }
+    },
+    assertions: [
+      countOf(1),
+      containsRealm("/"),
+      containsVariant("/", "a", "/root/a.lynx.yml"),
+      containsVariant("/", "b", "/root/b.lynx.yml")
+    ]
+  },
+  {
+    description: "a folder with two templates each with one data file",
+    root: "/root",
+    fs: {
+      dirs: {
+        "/root": [ "a.lynx.yml", "a.data.yml", "b.lynx.yml", "b.data.yml" ]
+      },
+      files: {
+        "/root/a.lynx.yml": null,
+        "/root/b.lynx.yml": null,
+        "/root/a.data.yml": null,
+        "/root/b.data.yml": null
+      }
+    },
+    assertions: [
+      countOf(1),
+      containsRealm("/"),
+      containsVariant("/", "a", "/root/a.lynx.yml", "/root/a.data.yml"),
+      containsVariant("/", "b", "/root/b.lynx.yml", "/root/b.data.yml")
+    ]
+  },
+  {
+    description: "a folder with two templates each with two data files",
+    root: "/root",
+    fs: {
+      dirs: {
+        "/root": [ "a.lynx.yml", "a.data.yml", "a.2.data.yml", 
+          "b.lynx.yml", "b.data.yml", "b.2.data.yml" ]
+      },
+      files: {
+        "/root/a.lynx.yml": null,
+        "/root/b.lynx.yml": null,
+        "/root/a.data.yml": null,
+        "/root/b.data.yml": null,
+        "/root/b.2.data.yml": null,
+        "/root/a.2.data.yml": null
+      }
+    },
+    assertions: [
+      countOf(1),
+      containsRealm("/"),
+      containsVariant("/", "a", "/root/a.lynx.yml", "/root/a.data.yml"),
+      containsVariant("/", "b", "/root/b.lynx.yml", "/root/b.data.yml"),
+      containsVariant("/", "a-2", "/root/a.lynx.yml", "/root/a.2.data.yml"),
+      containsVariant("/", "b-2", "/root/b.lynx.yml", "/root/b.2.data.yml")
+    ]
+  },
+  {
+    description: "a content file",
+    root: "/root",
+    fs: {
+      dirs: {
+        "/root": [ "funny-cat.gif" ]
+      },
+      files: {
+        "/root/funny-cat.gif": null
+      }
+    },
+    assertions: [
+      countOf(2), 
+      containsRealm("/"),
+      containsRealm("/funny-cat.gif"),
+      containsContentVariant("/funny-cat.gif", "funny-cat.gif", "/root/funny-cat.gif")
+    ]
+  },
+  {
+    description: "a content file with a base realm",
+    root: "/root",
+    realm: "http://example.com/",
+    fs: {
+      dirs: {
+        "/root": [ "funny-cat.gif" ]
+      },
+      files: {
+        "/root/funny-cat.gif": null
+      }
+    },
+    assertions: [
+      countOf(2), 
+      containsRealm("http://example.com/"),
+      containsRealm("http://example.com/funny-cat.gif"),
+      containsContentVariant("http://example.com/funny-cat.gif", "funny-cat.gif", "/root/funny-cat.gif")
+    ]
+  },
+  {
+    description: "a meta file with one realm",
+    root: "/root",
+    fs: {
+      dirs: {
+        "/root": [ ".meta.yml" ]
+      },
+      files: {
+        "/root/.meta.yml": realmObject("/foo")
+      }
+    },
+    assertions: [
+      countOf(1), 
+      containsRealm("/foo")
+    ]
+  },
+  {
+    description: "a meta file with two realms",
+    root: "/root",
+    fs: {
+      dirs: {
+        "/root": [ ".meta.yml" ]
+      },
+      files: {
+        "/root/.meta.yml": toYamlBuffer([
+          { realm: "/foo" },
+          { realm: "/bar" }
+        ])
+      }
+    },
+    assertions: [
+      countOf(2), 
+      containsRealm("/foo"),
+      containsRealm("/bar"),
+    ]
+  },
+  {
+    description: "a meta file with one realm",
+    root: "/root",
+    fs: {
+      dirs: {
+        "/root": [ ".meta.yml" ]
+      },
+      files: {
+        "/root/.meta.yml": realmObject("/foo", 
+          variant("a", "/root/a.lynx.yml"))
+      }
+    },
+    assertions: [
+      countOf(1), 
+      containsRealm("/foo"),
+      containsVariant("/foo", "a", "/root/a.lynx.yml")
+    ]
+  },
+  {
+    description: "a meta with a variant using a template from another folder",
+    root: "/root",
+    fs: {
+      dirs: {
+        "/root": [ "form" ],
+        "/root/form": [ "default.lynx.yml", "processor" ],
+        "/root/form/processor": [ ".meta.yml", "invalid.data.yml" ]
+      },
+      files: {
+        "/root/form/default.lynx.yml": null,
+        "/root/form/processor/invalid.data.yml": null,
+        "/root/form/processor/.meta.yml": realmObject(null, 
+          variant(null, "/root/form/default.lynx.yml", "/root/form/processor/invalid.data.yml"))
+      }
+    },
+    assertions: [
+      countOf(3), 
+      containsRealm("/"),
+      containsRealm("/form"),
+      containsRealm("/form/processor"),
+      containsVariant("/form", "default", "/root/form/default.lynx.yml"),
+      containsVariant("/form/processor", "default-invalid", "/root/form/default.lynx.yml", "/root/form/processor/invalid.data.yml")
+    ]
+  },
+  {
+    description: "a meta file with two realms with a template in second realm",
+    root: "/root",
+    fs: {
+      dirs: {
+        "/root": [ ".meta.yml", "bar.lynx.yml", "bar.data.yml", "bar.2.data.yml" ]
+      },
+      files: {
+        "/root/.meta.yml": toYamlBuffer([
+          { realm: "/" },
+          { realm: "/bar", templates: ["bar.lynx.yml"] }
+        ]),
+        "/root/bar.lynx.yml": null,
+        "/root/bar.data.yml": null,
+        "/root/bar.2.data.yml": null
+      }
+    },
+    assertions: [
+      countOf(2), 
+      containsRealm("/"),
+      containsRealm("/bar"),
+      containsVariant("/bar", "bar", "/root/bar.lynx.yml", "/root/bar.data.yml"),
+      containsVariant("/bar", "bar-2", "/root/bar.lynx.yml", "/root/bar.2.data.yml")
+    ]
+  }
+];
 
-    beforeEach(function() {
-      sinon.stub(fs, "readdirSync").returns([".meta.yml"]);
-      sinon.stub(fs, "readFileSync").returns(toYamlBuffer(meta));
-      var statsStub = sinon.stub(fs, "statSync");
-      statsStub.withArgs("x").returns(statsFake(true));
-      statsStub.returns(statsFake(false));
-      realm = getFolderMetadata("x");
-    });
+function realmObject(realm, variants) {
+  if (variants && !util.isArray(variants)) {
+    variants = [variants];
+  }
+  
+  var realmObj = {};
+  if (realm) realmObj.realm = realm;
+  realmObj.variants = variants || [];
+  
+  return toYamlBuffer(realmObj);
+}
 
-    it("should have copied meta properties to realm", function() {
-      realm.realm.should.equal(meta.realm);
-      realm.name.should.equal(meta.name);
-      realm.custom.should.equal(meta.custom);
-      expect(meta.arr).to.eql(realm.arr);
-      expect(meta.obj).to.eql(realm.obj);
-    });
+function variant(name, pathToTemplateFile, pathToDataFile) {
+  var variant = {};
+  if (name) variant.name = name;
+  if (pathToTemplateFile) variant.template = pathToTemplateFile;
+  if (pathToDataFile) variant.data = pathToDataFile;
+  return variant;
+}
 
-    it("should have removed meta key", function() {
-      should.not.exist(realm.meta);
-    });
-  });
+function countOf(n) {
+  var assertion = function (realms) {
+      realms.length.should.equal(n);
+  };
+  assertion.should = "should have a count of " + n.toString();
+  return assertion;
+}
 
-  describe("a folder with variants ['default'] and .meta.yml with variants ['y','z'].", function() {
-    var realm;
-    var meta = {
-      variants: [{
-        name: "y",
-        template: "t-y"
-      }, {
-        name: "z",
-        template: "t-z"
-      }]
-    };
+function containsRealm(realmUri) {
+  var assertion = function (realms) {
+    var result = realms.some(realm => realm.realm === realmUri);
+    result.should.equal(true);
+  };
+  assertion.should = "should contain realm '" + realmUri + "'";
+  return assertion;
+}
 
-    beforeEach(function() {
-      sinon.stub(fs, "readdirSync").returns([".meta.yml", "default.lynx.yml"]);
-      sinon.stub(fs, "readFileSync").returns(toYamlBuffer(meta));
-      var statsStub = sinon.stub(fs, "statSync");
-      statsStub.withArgs("x").returns(statsFake(true));
-      statsStub.returns(statsFake(false));
-      realm = getFolderMetadata("x");
-    });
+function containsVariant(realmUri, name, pathToTemplateFile, pathToDataFile) {
+  var assertion = function (realms) {
+    var result = realms.some(
+      r => r.variants.some(
+        v => r.realm === realmUri &&
+          v.name === name && 
+          v.template === pathToTemplateFile && 
+          (!pathToDataFile || v.data === pathToDataFile)));
+        
+    result.should.equal(true);
+  };
+  
+  var desc = "should contain a variant in realm '" + realmUri + "'";
+  desc += ", with name '" + name + "'";
+  desc += ", with template '" + pathToTemplateFile + "'";
+  
+  if (pathToDataFile) {
+    desc += ", with data '" + pathToDataFile + "'";
+  }
+  
+  assertion.should = desc;
+  
+  return assertion;
+}
 
-    it("should have variants ['default', 'y', 'z']", function() {
-      realm.variants.length.should.equal(3);
-      realm.variants[0].name.should.equal("default");
-      realm.variants[1].name.should.equal("y");
-      realm.variants[2].name.should.equal("z");
-    });
-  });
-  describe("a folder with variants ['default'] and .meta.yml with variants ['default'].", function() {
-    var realm;
-    var meta = {
-      variants: [{
-        name: "default",
-        template: "default.lynx.yml",
-        custom: "One"
-      }]
-    };
+function containsContentVariant(realmUri, name, pathToContentFile) {
+  var assertion = function (realms) {
+    var result = realms.some(
+      r => r.variants.some(
+        v => r.realm === realmUri &&
+          v.name === name && 
+          v.content === pathToContentFile));
+          
+    result.should.equal(true);
+  };
+  
+  var desc = "should contain a content variant in realm '" + realmUri + "'";
+  desc += ", with name '" + name + "'";
+  desc += ", with content file '" + pathToContentFile + "'";
+  
+  assertion.should = desc;
+  
+  return assertion;
+}
 
-    beforeEach(function() {
-      sinon.stub(fs, "readdirSync").returns([".meta.yml", "default.lynx.yml"]);
-      sinon.stub(fs, "readFileSync").returns(toYamlBuffer(meta));
-      var statsStub = sinon.stub(fs, "statSync");
-      statsStub.withArgs("x").returns(statsFake(true));
-      statsStub.returns(statsFake(false));
-      realm = getFolderMetadata("x");
-    });
-
-    it("should have variants ['default']", function() {
-      realm.variants.length.should.equal(1);
-      realm.variants[0].name.should.equal("default");
-    });
-
-    it("should use variant from .meta.yml", function() {
-      should.exist(realm.variants[0].custom);
-      realm.variants[0].custom.should.equal(meta.variants[0].custom);
-    });
-  });
-  describe("a folder with .meta.yml with realms ['/y/']", function() {
-    var realm;
-    var meta = {
-      realms: [{
-        name: "The Y Realm",
-        realm: "/y/"
-      }]
-    };
-
-    beforeEach(function() {
-      sinon.stub(fs, "readdirSync").returns([".meta.yml"]);
-      sinon.stub(fs, "readFileSync").returns(toYamlBuffer(meta));
-      var statsStub = sinon.stub(fs, "statSync");
-      statsStub.withArgs("x").returns(statsFake(true));
-      statsStub.returns(statsFake(false));
-      realm = getFolderMetadata("x");
-    });
-
-    it("should have realm ['/y/']", function() {
-      realm.realms.length.should.equal(1);
-      realm.realms[0].name.should.equal(meta.realms[0].name);
-      realm.realms[0].realm.should.equal("/y/");
-    });
-  });
-  describe("a folder with child folders ['y'] and .meta.yml with realms ['y']", function() {
-    var realm;
-    var meta = {
-      realms: [{
-        name: "The Y Realm",
-        realm: "./y/"
-      }]
-    };
-
-    beforeEach(function() {
-      var readdirStub = sinon.stub(fs, "readdirSync");
-      readdirStub.withArgs("x").returns([".meta.yml", "y"]);
-      readdirStub.withArgs(path.join("x", "y")).returns([]);
-
-      sinon.stub(fs, "readFileSync").returns(toYamlBuffer(meta));
-      var statStub = sinon.stub(fs, "statSync");
-      statStub.withArgs("x").returns(statsFake(true));
-      statStub.withArgs(path.join("x", "y")).returns(statsFake(true));
-      statStub.returns(statsFake(false));
-      realm = getFolderMetadata("x");
-    });
-
-    it("should use realm from filesystem and not .meta.yml", function() {
-      realm.realms.length.should.equal(1);
-      realm.realms[0].name.should.not.equal(meta.realms[0].name);
-      realm.realms[0].name.should.equal('y');
-      realm.realms[0].realm.should.equal("/y/");
-    });
-  });
-  describe("a folder with .meta.yml with variants ['y'].", function() {
-    var realm;
-    var meta = {
-      variants: [{
-        name: "y",
-        template: "t-y"
-      }]
-    };
-
-    beforeEach(function() {
-      sinon.stub(fs, "readdirSync").returns([".meta.yml"]);
-      sinon.stub(fs, "readFileSync").returns(toYamlBuffer(meta));
-      var statsStub = sinon.stub(fs, "statSync");
-      statsStub.withArgs("x").returns(statsFake(true));
-      statsStub.returns(statsFake(false));
-      realm = getFolderMetadata("x");
-    });
-
-    it("should have default 'y'", function() {
-      realm.variants.length.should.equal(1);
-      var variant = realm.getDefaultVariant();
-      should.exist(variant);
-      variant.name.should.equal("y");
-    });
-  });
-  describe("a folder with .meta.yml with variants ['y', 'z'] and no default.", function() {
-    var realm;
-    var meta = {
-      variants: [{
-        name: "y",
-        template: "t-y"
-      }, {
-        name: "z",
-        template: "t-z"
-      }]
-    };
-
-    beforeEach(function() {
-      sinon.stub(fs, "readdirSync").returns([".meta.yml"]);
-      sinon.stub(fs, "readFileSync").returns(toYamlBuffer(meta));
-      var statsStub = sinon.stub(fs, "statSync");
-      statsStub.withArgs("x").returns(statsFake(true));
-      statsStub.returns(statsFake(false));
-      realm = getFolderMetadata("x");
-    });
-
-    it("should not have default", function() {
-      realm.variants.length.should.equal(2);
-      var variant = realm.getDefaultVariant();
-      should.not.exist(variant);
-    });
-  });
-  describe("a folder with .meta.yml with variants ['y', 'z'] and default 'z'", function() {
-    var realm;
-    var meta = {
-      "default": "z",
-      variants: [{
-        name: "y",
-        template: "t-y"
-      }, {
-        name: "z",
-        template: "t-z"
-      }]
-    };
-
-    beforeEach(function() {
-      sinon.stub(fs, "readdirSync").returns([".meta.yml"]);
-      sinon.stub(fs, "readFileSync").returns(toYamlBuffer(meta));
-      var statsStub = sinon.stub(fs, "statSync");
-      statsStub.withArgs("x").returns(statsFake(true));
-      statsStub.returns(statsFake(false));
-      realm = getFolderMetadata("x");
-    });
-
-    it("should have default 'z'", function() {
-      realm.variants.length.should.equal(2);
-      var variant = realm.getDefaultVariant();
-      should.exist(variant);
-      variant.name.should.equal("z");
-    });
-  });
-  describe("a folder with .meta.yml with variants ['default', 'z'] and no default.", function() {
-    var realm;
-    var meta = {
-      variants: [{
-        name: "default",
-        template: "t-default"
-      }, {
-        name: "z",
-        template: "t-z"
-      }]
-    };
-
-    beforeEach(function() {
-      sinon.stub(fs, "readdirSync").returns([".meta.yml"]);
-      sinon.stub(fs, "readFileSync").returns(toYamlBuffer(meta));
-      var statsStub = sinon.stub(fs, "statSync");
-      statsStub.withArgs("x").returns(statsFake(true));
-      statsStub.returns(statsFake(false));
-      realm = getFolderMetadata("x");
-    });
-
-    it("should have default 'default'", function() {
-      realm.variants.length.should.equal(2);
-      var variant = realm.getDefaultVariant();
-      should.exist(variant);
-      variant.name.should.equal("default");
-    });
-  });
-});
-
-describe("when deriving metadata from a folder", function() {
-
-  afterEach(function() {
-    fs.readdirSync.restore();
-    if (fs.statSync.restore) fs.statSync.restore();
-  });
-
-  describe("a folder with name 'x'", function() {
-    var realm;
-
-    beforeEach(function() {
-      sinon.stub(fs, "readdirSync").returns([]);
-      var statsStub = sinon.stub(fs, "statSync");
-      statsStub.withArgs("x").returns(statsFake(true));
-      statsStub.returns(statsFake(false));
-      realm = getFolderMetadata("x");
-    });
-
-    it("should have a realm value of '/'", function() {
-      realm.realm.should.equal("/");
-    });
-  });
-
-  describe("a folder with name 'x' and sub folders ['y', 'z']", function() {
-    var realm;
-
-    beforeEach(function() {
-      var readdirStub = sinon.stub(fs, "readdirSync");
-      readdirStub.withArgs("x").returns(["y", "z"]);
-      readdirStub.returns([]);
-
-      var statsStub = sinon.stub(fs, "statSync");
-      statsStub.returns(statsFake(true));
-      realm = getFolderMetadata("x");
-    });
-
-    it("should have a realm value of '/' and name ['x']", function() {
-      realm.realm.should.equal("/");
-      realm.name.should.equal("x");
-    });
-
-    it("should have realms with value of ['/y/','/z/'] and name ['y', 'z']", function() {
-      var children = realm.realms;
-      children.length.should.equal(2);
-      children[0].realm.should.equal("/y/");
-      children[0].name.should.equal("y");
-      children[1].realm.should.equal("/z/");
-      children[1].name.should.equal("z");
-    });
-  });
-
-  describe("a folder with name 'x' and sub folders ['y'] and content file z.wtf", function() {
-    var realm;
-
-    beforeEach(function() {
-      var readdirStub = sinon.stub(fs, "readdirSync");
-      readdirStub.withArgs("x").returns(["y", "z.wtf"]);
-      readdirStub.returns([]);
-
-      var statsStub = sinon.stub(fs, "statSync");
-      statsStub.withArgs(path.join("x", "z.wtf")).returns(statsFake(false));
-      statsStub.returns(statsFake(true));
-      realm = getFolderMetadata("x");
-    });
-
-    it("should have a realm value of '/' and name ['x']", function() {
-      realm.realm.should.equal("/");
-      realm.name.should.equal("x");
-    });
-
-    it("should have realms with value of ['/y/','/z.wtf'] and name ['y', 'z.wtf']", function() {
-      var children = realm.realms;
-      children.length.should.equal(2);
-      children[0].realm.should.equal("/y/");
-      children[0].name.should.equal("y");
-      children[1].realm.should.equal("/z.wtf");
-      children[1].name.should.equal("z.wtf");
-    });
-
-    it("should have one variant for realm with value '/z.wtf'", function() {
-      var children = realm.realms;
-      children[1].realm.should.equal("/z.wtf");
-      children[1].variants[0].content.should.equal("x/z.wtf");
-      children[1].getDefaultVariant().should.equal(children[1].variants[0]);
-    });
-  });
-
-  describe("a folder with template ['one.lynx.yml']", function() {
-    var variants;
-
-    beforeEach(function() {
-      sinon.stub(fs, "readdirSync").withArgs("x").returns(["one.lynx.yml"]);
-      var statsStub = sinon.stub(fs, "statSync");
-      statsStub.withArgs("x").returns(statsFake(true));
-      statsStub.returns(statsFake(false));
-      variants = getFolderMetadata("x").variants;
-    });
-
-    it("should have a variants ['one']", function() {
-      variants.length.should.equal(1);
-      variants[0].name.should.equal("one");
-    });
-
-    it("should have a value for template only", function() {
-      should.exist(variants[0].template);
-      should.not.exist(variants[0].data);
-    });
-  });
-
-  describe("a folder with templates ['default.lynx.yml', 'two.lynx.yml']", function() {
-    var variants;
-
-    beforeEach(function() {
-      sinon.stub(fs, "readdirSync").withArgs("x").returns(["default.lynx.yml", "two.lynx.yml"]);
-      var statsStub = sinon.stub(fs, "statSync");
-      statsStub.withArgs("x").returns(statsFake(true));
-      statsStub.returns(statsFake(false));
-      variants = getFolderMetadata("x").variants;
-    });
-
-    it("should have variants ['default', 'two']", function() {
-      variants.length.should.equal(2);
-      variants[0].name.should.equal("default");
-      variants[1].name.should.equal("two");
-    });
-
-    it("should have a value for template only", function() {
-      variants.forEach(function(variant) {
-        should.exist(variant.template);
-        should.not.exist(variant.data);
+describe("when getting realm metadata", function () {
+  tests.forEach(function (test) {
+    describe(test.description, function () {
+      var realms;
+      
+      beforeEach(function () {  
+        var readdirStub = sinon.stub(fs, "readdirSync");
+        var readFileStub = sinon.stub(fs, "readFileSync");
+        var existsSyncStub = sinon.stub(fs, "existsSync");      
+        var statStub = sinon.stub(fs, "statSync");
+        
+        Object.getOwnPropertyNames(test.fs.dirs).forEach(function (dir) {
+          existsSyncStub.withArgs(dir).returns(true);
+          readdirStub.withArgs(dir).returns(test.fs.dirs[dir]);
+          statStub.withArgs(dir).returns(statsFake(true));
+        });
+        
+        Object.getOwnPropertyNames(test.fs.files).forEach(function (file) {
+          existsSyncStub.withArgs(file).returns(true);
+          readFileStub.withArgs(file).returns(test.fs.files[file]);
+          statStub.withArgs(file).returns(statsFake(false));
+        });
+        
+        realms = getRealms(test.root, test.realm);
       });
-    });
-
-  });
-
-  describe("a folder with templates ['default.lynx.yml', 'two.lynx.yml'] and data ['default.data.yml']", function() {
-    var variants;
-
-    beforeEach(function() {
-      sinon.stub(fs, "readdirSync").withArgs("x").returns(["default.lynx.yml", "two.lynx.yml", "default.data.yml"]);
-      var statsStub = sinon.stub(fs, "statSync");
-      statsStub.withArgs("x").returns(statsFake(true));
-      statsStub.returns(statsFake(false));
-      variants = getFolderMetadata("x").variants;
-    });
-
-    it("should have variants ['default', 'two']", function() {
-      variants.length.should.equal(2);
-      variants[0].name.should.equal("default");
-      variants[1].name.should.equal("two");
-    });
-
-    it("'default' should have a value for template and data", function() {
-      should.exist(variants[0].template);
-      should.exist(variants[0].data);
-    });
-
-    it("'two' should have a value for template only", function() {
-      should.exist(variants[1].template);
-      should.not.exist(variants[1].data);
-    });
-  });
-
-  describe("a folder with template ['one.lynx.yml'] and data ['one.data.yml']", function() {
-    var variants;
-
-    beforeEach(function() {
-      sinon.stub(fs, "readdirSync").withArgs("x").returns(["one.lynx.yml", "one.data.yml"]);
-      var statsStub = sinon.stub(fs, "statSync");
-      statsStub.withArgs("x").returns(statsFake(true));
-      statsStub.returns(statsFake(false));
-      variants = getFolderMetadata("x").variants;
-    });
-
-    it("should have variants ['one']", function() {
-      variants.length.should.equal(1);
-      variants[0].name.should.equal("one");
-    });
-
-    it("should have a value for template and data", function() {
-      should.exist(variants[0].template);
-      should.exist(variants[0].data);
-    });
-  });
-
-  describe("a folder with template ['one.lynx.yml'] and data ['one.variant.data.yml']", function() {
-    var variants;
-
-    beforeEach(function() {
-      sinon.stub(fs, "readdirSync").withArgs("x").returns(["one.lynx.yml", "one.variant.data.yml"]);
-      var statsStub = sinon.stub(fs, "statSync");
-      statsStub.withArgs("x").returns(statsFake(true));
-      statsStub.returns(statsFake(false));
-      variants = getFolderMetadata("x").variants;
-    });
-
-    it("should have variants ['variant']", function() {
-      variants.length.should.equal(1);
-      variants[0].name.should.equal("variant");
-    });
-
-    it("should have a value for template and data", function() {
-      should.exist(variants[0].template);
-      should.exist(variants[0].data);
-    });
-  });
-
-  describe("a folder with template ['default.lynx.yml'] and data ['default.data'] that contains ['default.yml']", function() {
-    var variants;
-    var realm;
-
-    beforeEach(function() {
-      var readDirStub = sinon.stub(fs, "readdirSync");
-      readDirStub.withArgs("x").returns(["default.lynx.yml", "default.data"]);
-      readDirStub.withArgs(path.join("x", "default.data")).returns(["default.yml"]);
-      var statStub = sinon.stub(fs, "statSync");
-      statStub.withArgs("x").returns(statsFake(true));
-      statStub.withArgs(path.join("x", "default.data")).returns(statsFake(true));
-      statStub.returns(statsFake(false));
-      realm = getFolderMetadata("x");
-      variants = realm.variants;
-    });
-
-    it("should have variants ['default']", function() {
-      variants.length.should.equal(1);
-      variants[0].name.should.equal("default");
-    });
-
-    it("should have a value for template and data", function() {
-      should.exist(variants[0].template);
-      should.exist(variants[0].data);
-    });
-  });
-
-  describe("a folder with template ['one.lynx.yml'] and data ['one.data'] that contains ['default.yml', 'invalid.yml']", function() {
-    var variants;
-
-    beforeEach(function() {
-      var readDirStub = sinon.stub(fs, "readdirSync");
-      readDirStub.withArgs("x").returns(["one.lynx.yml", "one.data"]);
-      readDirStub.withArgs(path.join("x", "one.data")).returns(["default.yml", "invalid.yml"]);
-      var statStub = sinon.stub(fs, "statSync");
-      statStub.withArgs("x").returns(statsFake(true));
-      statStub.withArgs(path.join("x", "one.data")).returns(statsFake(true));
-      statStub.returns(statsFake(false));
-      variants = getFolderMetadata("x").variants;
-    });
-
-    it("should have variants ['one', 'invalid']", function() {
-      variants.length.should.equal(2);
-      variants[0].name.should.equal("one");
-      variants[1].name.should.equal("invalid");
-    });
-
-    it("should have a value for template and data", function() {
-      variants.forEach(function(variant) {
-        should.exist(variant.template);
-        should.exist(variant.data);
+      
+      afterEach(function() {
+        fs.readdirSync.restore();
+        fs.readFileSync.restore();
+        fs.existsSync.restore();
+        if (fs.statSync.restore) fs.statSync.restore();
+      });
+      
+      test.assertions.forEach(function (assertion) {
+        it(assertion.should, function () {
+          assertion(realms);
+        });
       });
     });
   });

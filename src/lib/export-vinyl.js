@@ -32,7 +32,7 @@ function exportBuffer(buffer, cb, options) {
     console.log("### Options");
     console.log(JSON.stringify(options), "\n");
   }
-
+  
   var expandedYaml = expandYaml(kvp, options);
 
   if (options.log) {
