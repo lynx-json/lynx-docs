@@ -16,6 +16,6 @@ exportYaml.add = function addExportFn(format, exportFn, ext) {
 
 exportYaml.getExtension = function getExtensionForFormat(format) {
   return formats[format] && formats[format].ext;
-}
+};
 
 module.exports = exports = exportYaml;

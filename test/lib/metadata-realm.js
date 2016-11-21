@@ -439,7 +439,7 @@ function containsContentVariant(realmUri, name, pathToContentFile) {
   return assertion;
 }
 
-describe.only("when getting realm metadata", function() {
+describe("when getting realm metadata", function() {
   tests.forEach(function(test) {
     describe(test.description, function() {
       var realms;
