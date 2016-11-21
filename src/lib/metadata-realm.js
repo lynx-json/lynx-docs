@@ -1,7 +1,7 @@
 "use strict";
 
 const fs = require("fs");
-const path = require("path");
+const path = require("path").posix;
 const url = require("url");
 const util = require("util");
 const parseYaml = require("./parse-yaml");
@@ -18,17 +18,17 @@ function getRealms(root, realm) {
 function aggregateRealms(folder, root, parentRealm, realms) {
   var realmsForFolder = getRealmsForFolder(folder, root, parentRealm);
   var defaultRealm = realmsForFolder[0];
-  
+
   var subfolders = [];
   var templateFiles = [];
   var contentFiles = [];
-  
-  fs.readdirSync(folder).forEach(function (child) {
+
+  fs.readdirSync(folder).forEach(function(child) {
     var pathToChild = path.resolve(folder, child);
     var stats = fs.statSync(pathToChild);
-    
+
     if (stats.isDirectory()) {
-       if (!isDataDir(pathToChild)) subfolders.push(pathToChild);
+      if (!isDataDir(pathToChild)) subfolders.push(pathToChild);
     } else {
       if (isTemplateFile(pathToChild)) {
         templateFiles.push(pathToChild);
@@ -37,15 +37,15 @@ function aggregateRealms(folder, root, parentRealm, realms) {
       }
     }
   });
-  
+
   aggregateTemplateFiles(templateFiles, realmsForFolder);
   aggregateContentFiles(contentFiles, realmsForFolder);
-  
-  realmsForFolder.forEach(function (realmObj) {
+
+  realmsForFolder.forEach(function(realmObj) {
     realms.push(realmObj);
   });
-  
-  subfolders.forEach(function (subfolder) {
+
+  subfolders.forEach(function(subfolder) {
     aggregateRealms(subfolder, folder, defaultRealm.realm, realms);
   });
 }
@@ -53,20 +53,20 @@ function aggregateRealms(folder, root, parentRealm, realms) {
 function getRealmsForFolder(folder, root, parentRealm) {
   var defaultRealm = deriveRealmFromFolder(folder, root);
   var realmsForFolder = getMetaForFolder(folder);
-  
+
   if (realmsForFolder.length) {
     copyObject(realmsForFolder[0], defaultRealm);
     realmsForFolder.splice(0, 1, defaultRealm);
   } else {
     realmsForFolder.push(defaultRealm);
   }
-  
-  realmsForFolder.forEach(function (realmObj) {
+
+  realmsForFolder.forEach(function(realmObj) {
     ensureStructure(realmObj);
     resolveRealm(realmObj, parentRealm);
     resolvePaths(realmObj, folder);
   });
-  
+
   return realmsForFolder;
 }
 
@@ -86,19 +86,19 @@ function createRealm(realm, variants) {
 function getMetaForFolder(folder) {
   var pathToMeta = path.resolve(folder, "./.meta.yml");
   if (!fs.existsSync(pathToMeta)) return [];
-  
+
   var meta = parseYaml(fs.readFileSync(pathToMeta));
   if (!meta) {
     console.log("Empty metadata file was ignored: '" + pathToMeta + "'");
     return [];
   }
-  
+
   if (!Array.isArray(meta)) meta = [meta];
   return meta;
 }
 
 function copyObject(src, dest) {
-  Object.getOwnPropertyNames(src).forEach(function (prop) {
+  Object.getOwnPropertyNames(src).forEach(function(prop) {
     dest[prop] = src[prop];
   });
 }
@@ -119,11 +119,11 @@ function resolveRealm(realmObj, parentRealm) {
 }
 
 function resolvePaths(realmObj, folder) {
-  realmObj.templates.forEach(function (val, idx, arr) {
+  realmObj.templates.forEach(function(val, idx, arr) {
     arr[idx] = path.resolve(folder, val);
   });
-  
-  realmObj.variants.forEach(function (val) {
+
+  realmObj.variants.forEach(function(val) {
     if (val.template) val.template = path.resolve(folder, val.template);
     if (val.data) val.data = path.resolve(folder, val.data);
     if (val.content) val.content = path.resolve(folder, val.content);
@@ -147,48 +147,48 @@ function isDataDir(pathToDir) {
 }
 
 function isContentFile(pathToFile) {
-  return !isTemplateFile(pathToFile) && 
-    !isDataFile(pathToFile) && 
+  return !isTemplateFile(pathToFile) &&
+    !isDataFile(pathToFile) &&
     !isMetaFile(pathToFile);
 }
 
 function aggregateTemplateFiles(templateFiles, realmsForFolder) {
   function equals(a) {
-    return function (b) {
+    return function(b) {
       return a === b;
     };
   }
-  
+
   function hasTemplate(templateFile) {
-    return function (realm) {
+    return function(realm) {
       return realm.templates && realm.templates.some(equals(templateFile));
     };
   }
-  
+
   var defaultRealm = realmsForFolder[0];
-  
-  templateFiles.forEach(function (templateFile) {
+
+  templateFiles.forEach(function(templateFile) {
     var realmForTemplate = realmsForFolder.filter(hasTemplate(templateFile));
     if (realmForTemplate.length === 0) defaultRealm.templates.push(templateFile);
   });
-  
-  realmsForFolder.forEach(function (realm) {
+
+  realmsForFolder.forEach(function(realm) {
     aggregateVariants(realm.templates, realm);
   });
 }
 
 function aggregateVariants(templateFiles, realm) {
-  templateFiles.forEach(function (templateFile) {
+  templateFiles.forEach(function(templateFile) {
     var dataFiles = getDataFilesForTemplate(templateFile);
-    
-    dataFiles.forEach(function (dataFile) {
+
+    dataFiles.forEach(function(dataFile) {
       if (realm.variants.some(v => templateFile === v.template && dataFile === v.data)) return;
       realm.variants.push(createVariant(templateFile, dataFile));
     });
-    
+
     if (dataFiles.length > 0) return;
     if (realm.variants.some(v => v.template === templateFile)) return;
-    
+
     // if there are no data files for this template
     // and if there are no variants already defined for this template
     // then the template is the only variant
@@ -199,17 +199,17 @@ function aggregateVariants(templateFiles, realm) {
 function getDataFilesForTemplate(templateFile) {
   var folder = path.dirname(templateFile);
   var dataFiles = [];
-  
-  fs.readdirSync(folder).forEach(function (child) {
+
+  fs.readdirSync(folder).forEach(function(child) {
     var pathToChild = path.resolve(folder, child);
-    
+
     if (isDataDirForTemplate(pathToChild, templateFile)) {
       aggregateDataFiles(pathToChild, dataFiles);
     } else if (isDataFileForTemplate(pathToChild, templateFile)) {
       dataFiles.push(pathToChild);
     }
   });
-  
+
   return dataFiles;
 }
 
@@ -225,7 +225,7 @@ function getDataDirForTemplate(templateFile) {
 }
 
 function aggregateDataFiles(pathToDir, dataFiles) {
-  fs.readdirSync(pathToDir).forEach(function (dataFile) {
+  fs.readdirSync(pathToDir).forEach(function(dataFile) {
     dataFiles.push(path.resolve(pathToDir, dataFile));
   });
 }
@@ -234,11 +234,11 @@ function isDataFileForTemplate(dataFile, templateFile) {
   var matches;
   matches = templateFilePattern.exec(templateFile);
   if (!matches) return false;
-  
+
   var templateFileBase = matches[1];
   matches = dataFilePattern.exec(dataFile);
   if (!matches) return false;
-  
+
   var dataFileBase = matches[1];
   return templateFileBase === dataFileBase;
 }
@@ -248,9 +248,9 @@ function createVariant(templateFile, dataFile) {
     template: templateFile,
     data: dataFile
   };
-  
+
   variantObj.name = getVariantName(variantObj);
-  
+
   return variantObj;
 }
 
@@ -258,7 +258,7 @@ function getVariantName(variantObj) {
   var dataName = getDataFileName(variantObj.data);
   var templateName = getTemplateFileName(variantObj.template);
   var contentName = getContentFileName(variantObj.content);
-  
+
   if (dataName) {
     if (dataName === templateName) return dataName;
     return templateName + "-" + dataName;
@@ -267,16 +267,16 @@ function getVariantName(variantObj) {
   } else if (contentName) {
     return contentName;
   }
-  
+
   return "unknown";
 }
 
 function getDataFileName(pathToFile) {
   if (!pathToFile) return;
-  
+
   var dataFileObj = path.parse(pathToFile);
   var dataFileNameParts = dataFileObj.name.split(".");
-  
+
   if (dataFileNameParts.length === 1) {
     // variant.ext
     return dataFileObj.name;
@@ -304,10 +304,10 @@ function getContentFileName(pathToFile) {
 
 function aggregateContentFiles(contentFiles, realmsForFolder) {
   var defaultRealm = realmsForFolder[0];
-  
-  contentFiles.forEach(function (contentFile) {
+
+  contentFiles.forEach(function(contentFile) {
     var realm = url.resolve(defaultRealm.realm, path.parse(contentFile).base);
-    var variants = [ createContentVariant(contentFile) ];
+    var variants = [createContentVariant(contentFile)];
     var realmObj = createRealm(realm, variants);
     realmsForFolder.push(realmObj);
   });
@@ -317,9 +317,9 @@ function createContentVariant(contentFile) {
   var variant = {
     content: contentFile
   };
-  
+
   variant.name = getVariantName(variant);
-  
+
   return variant;
 }
 
