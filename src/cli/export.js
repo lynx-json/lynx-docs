@@ -86,9 +86,7 @@ function getRealms(options) {
   var realms = [];
 
   options.root.forEach(function (root) {
-    var realmsForRoot = getRealmMetadata(root, options.realm);
-    realmsForRoot.forEach(realm => realm.root = root);
-    realms = realms.concat(realmsForRoot);
+    realms = realms.concat(getRealmMetadata(root, options.realm));
   });
 
   realms = realms.sort(function (a, b) {
