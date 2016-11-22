@@ -4,8 +4,10 @@ var lynxDocs = require("../index");
 var path = require("path");
 var util = require("util");
 var fs = require("fs");
+var Vinyl = require("vinyl");
 var exportVinyl = require("../lib/export-vinyl");
 var streamUtils = require("./stream-utils");
+var streamFromArray = require("stream-from-array");
 
 const getRealmMetadata = require("../lib/metadata-realm");
 
@@ -38,6 +40,7 @@ function buildCommand(yargs) {
 }
 
 var exportCli = function(options) {
+
   if (options.config) {
     var config = path.resolve(process.cwd(), options.config);
     require(config)(lynxDocs);
@@ -47,43 +50,49 @@ var exportCli = function(options) {
   options.root = options.root.map(r => path.resolve(r));
   options.output = options.output !== "stdout" ? path.resolve(options.output) : options.output;
   options.realms = getRealms(options);
-  
+
+  var templates = [];
+
   options.realms.forEach(function (realm) {
     realm.templates.forEach(function (pathToTemplateFile, idx) {
       if (idx !== 0) return;
-      
+
       var templateOptions = {
-        root: options.root,
         format: options.format,
         input: pathToTemplateFile,
         output: options.output,
         realm: realm.realm
       };
-      
-      var source = streamUtils.createSourceStream(templateOptions.input);
 
-      var output = templateOptions.output === "stdout" ? process.stdout : templateOptions.output;
-      var dest = streamUtils.createDestinationStream(output);
-
-      source.pipe(exportVinyl(templateOptions))
-        .pipe(dest);
+      templates.push(
+        new Vinyl({ path: pathToTemplateFile,
+          options: templateOptions,
+          contents: fs.readFileSync(pathToTemplateFile) }));
     });
   });
+
+  var source = streamFromArray.obj(templates);
+
+  var output = options.output === "stdout" ? process.stdout : options.output;
+  var dest = streamUtils.createDestinationStream(output);
+
+  source.pipe(exportVinyl())
+    .pipe(dest);
 };
 
 function getRealms(options) {
   var realms = [];
-  
+
   options.root.forEach(function (root) {
     realms = realms.concat(getRealmMetadata(root, options.realm));
   });
-  
-  realms = realms.sort(function (a,b) { 
-    if (a.realm === b.realm) return 0; 
-    if (a.realm.indexOf(b.realm) === 0) return 1; 
-    if (b.realm.indexOf(a.realm) === 0) return -1; 
+
+  realms = realms.sort(function (a,b) {
+    if (a.realm === b.realm) return 0;
+    if (a.realm.indexOf(b.realm) === 0) return 1;
+    if (b.realm.indexOf(a.realm) === 0) return -1;
   });
-  
+
   return realms;
 }
 
