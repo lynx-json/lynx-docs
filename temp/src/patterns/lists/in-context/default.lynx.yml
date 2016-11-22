@@ -1,0 +1,19 @@
+>page:
+  ctx>context:
+    header: Context
+    list>:
+      value@items:
+        - symbol<: ◉
+          content:
+            header<name: ""
+            description<: ""
+            other<: ""
+          children>list:
+            value@children:
+              - symbol<: ●
+                content:
+                  header<name: ""
+                  description<: ""
+                  other<: ""
+  main>:
+    header: List in Context

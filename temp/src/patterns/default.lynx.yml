@@ -1,6 +1,5 @@
 >page:
-  globalNav>:
-  main:
+  main>:
     header: Patterns
     list>:
       value@patterns:

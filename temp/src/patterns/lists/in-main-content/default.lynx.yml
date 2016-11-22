@@ -1,17 +1,16 @@
 >page:
-  globalNav>:
-  main:
-    header: A List in Main Content
+  main>:
+    header: List in Main Content
     list>:
       value@items:
-        - symbol: ◉
+        - symbol<: ◉
           content:
             header<name: ""
             description<: ""
             other<: ""
           children>list:
             value@children:
-              - symbol: ●
+              - symbol<: ●
                 content:
                   header<name: ""
                   description<: ""

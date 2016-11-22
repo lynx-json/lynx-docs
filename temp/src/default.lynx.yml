@@ -1,4 +1,17 @@
 >page:
-  globalNav>:
-  main:
-    header: Welcome
+  main>:
+    header: Hello
+    message>em: Good Bye
+    strong>em:
+      emphasis: 2
+      value: Good Bye!
+    some>markdown: |
+      Heading 1
+      ================================================
+      
+      Heading 2
+      ------------------------------------------------
+        
+      ### Heading 3
+      
+      #### Heading 4

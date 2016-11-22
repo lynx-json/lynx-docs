@@ -1,0 +1,8 @@
+header<realm: ""
+variants>list:
+  value@variants: 
+    - >list-item:
+        symbol: "#"
+        header<name: ""
+        href<url: ""
+        type<: application/lynx+json

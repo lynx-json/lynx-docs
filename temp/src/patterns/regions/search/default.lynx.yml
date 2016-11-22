@@ -7,6 +7,7 @@
     value:
       phone>input:
         label: Phone Number
+        required: true
       email>input:
         label: Email
       submit:

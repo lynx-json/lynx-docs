@@ -1,0 +1,9 @@
+>page:
+  main>:
+    header: Main Content
+    examples>list:
+      - href: ./centered/
+        type: application/lynx+json
+        symbol: 😀
+        content:
+          header: Centered

@@ -1,0 +1,9 @@
+color:
+  value: red
+  colors:
+    - color: red
+      title: Red
+    - color: green
+      title: Green
+    - color: blue
+      title: Blue

@@ -13,6 +13,7 @@ function keyMatches(regex) {
 var blacklist = [
   keyMatches(/^href$/),
   keyMatches(/^src$/),
+  keyMatches(/^data$/),
   keyMatches(/^action$/),
   keyMatches(/^method$/),
   keyMatches(/^type$/),
@@ -33,27 +34,35 @@ function isBlacklisted(meta) {
 }
 
 function getKVP(yaml) {
-  if (!util.isObject(yaml)) return { key: undefined, value: yaml };
-  
+  if (!util.isObject(yaml)) return {
+    key: undefined,
+    value: yaml
+  };
+
   var props = Object.getOwnPropertyNames(yaml);
-  
+
   if (props.length === 1 && getMetadata(props[0]).key === undefined) {
     return {
       key: props[0],
       value: yaml[props[0]]
     };
-  } 
-  
-  return { key: undefined, value: yaml };
+  }
+
+  return {
+    key: undefined,
+    value: yaml
+  };
 }
 
 function ensureSpec(kvp) {
   var meta = getMetadata(kvp);
   if (!meta.children || !meta.children.spec) {
-    kvp.value.spec = { hints: [] };
+    kvp.value.spec = {
+      hints: []
+    };
     return;
   }
-  
+
   var specMetas = meta.children.spec;
   specMetas.map(sm => sm.more()).forEach(function (specMeta) {
     if (specMeta.children && specMeta.children.hints) return;
@@ -71,7 +80,10 @@ function expandArrayItem(options) {
 function expandObject(obj, options) {
   var expanded = {};
   Object.getOwnPropertyNames(obj).forEach(function (key) {
-    var kvp = { key: key, value: obj[key] };
+    var kvp = {
+      key: key,
+      value: obj[key]
+    };
     kvp = expandKvp(kvp, options);
     expanded[kvp.key] = kvp.value;
   });
@@ -80,14 +92,14 @@ function expandObject(obj, options) {
 
 function expandKvp(kvp, options) {
   var meta = getMetadata(kvp);
-  
+
   if (meta.partial) {
     kvp = partials.getPartial(kvp, options);
     meta = getMetadata(kvp);
   }
-  
+
   if (isBlacklisted(meta)) return kvp;
-  
+
   if (meta.children && meta.children.value) {
     ensureSpec(kvp);
   } else if (meta.children && meta.children.spec) {
@@ -109,27 +121,27 @@ function expandKvp(kvp, options) {
           hints: []
         },
         value: kvp.value
-      };  
+      };
     }
   }
-  
+
   meta = getMetadata(kvp);
-  
+
   if (meta.template && meta.template.type === "array" && !util.isArray(kvp.value.value)) {
-    kvp.value.value = [ kvp.value.value ];
+    kvp.value.value = [kvp.value.value];
   }
-  
+
   meta.children.value.forEach(function (valueMeta) {
     valueMeta = valueMeta.more();
     let value = kvp.value[valueMeta.src.key];
-    
+
     if (util.isArray(value)) {
       kvp.value[valueMeta.src.key] = value.map(expandArrayItem(options));
     } else if (util.isObject(value)) {
       kvp.value[valueMeta.src.key] = expandObject(value, options);
     }
   });
-  
+
   return kvp;
 }
 

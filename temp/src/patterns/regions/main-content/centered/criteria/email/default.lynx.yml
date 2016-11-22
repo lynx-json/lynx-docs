@@ -1,0 +1,9 @@
+spec:
+  hints: [ section ]
+value:
+  label: Email
+  email:
+    spec:
+      hints: [ line, text ]
+      input: true
+    value: ""

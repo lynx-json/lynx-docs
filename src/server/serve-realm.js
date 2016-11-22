@@ -5,7 +5,7 @@ const url = require("url");
 const path = require("path");
 const exportYaml = require("../lib/export-vinyl");
 
-exportYaml.handler = function(options) {
+exportYaml.handler = function (options) {
   function onData(data) {
     options.output.write(data);
   }
@@ -17,11 +17,15 @@ exportYaml.handler = function(options) {
 
 function redirectToRealmIndex(req, res, next) {
   var realm = req.realms[0];
-  if(!realm) return next();
+  if (!realm) return next();
 
   var location = url.parse(realm.realm).pathname;
-  
-  var headers = { "Content-Type": "text/plain", "Location": location, "Cache-control": "no-cache" };
+
+  var headers = {
+    "Content-Type": "text/plain",
+    "Location": location,
+    "Cache-control": "no-cache"
+  };
   res.writeHead(301, headers);
   res.end("Redirecting to realm index");
 }
@@ -36,11 +40,11 @@ function isChildOfRealm(realmUri) {
 }
 
 module.exports = exports = function createStaticHandler(options) {
-  return function(req, res, next) {
+  return function (req, res, next) {
     var realm = req.realms.find(r => url.parse(r.realm).pathname === url.parse(req.url).pathname);
-    
+
     if (!realm) {
-      if(req.url === "/" || req.url === "") return redirectToRealmIndex(req, res, next);
+      if (req.url === "/" || req.url === "") return redirectToRealmIndex(req, res, next);
       return next();
     }
 
@@ -51,14 +55,19 @@ module.exports = exports = function createStaticHandler(options) {
       res.setHeader("Content-Type", "application/lynx+json");
       res.setHeader("Cache-control", "no-cache");
 
-      var data = {};
-      data.realm = realm.realm;
-      if (variants.length > 0) data.variants = variants;
-      else data.realms = childRealms;
+      var data = realm;
+      data.realms = childRealms;
+
+      console.log("INDEX FOR " + realm.realm, realm.foo);
+
+      data.variants.forEach(variant => {
+        variant.url = url.parse(req.url).pathname + "?variant=" + encodeURIComponent(variant.name)
+      });
 
       exportYaml.handler({
         format: "lynx",
         input: path.join(__dirname, "realm-index.lynx.yml"),
+        context: realm.folder,
         output: res,
         data: data,
         realm: data.realm
@@ -68,14 +77,14 @@ module.exports = exports = function createStaticHandler(options) {
     var query = url.parse(req.url, true).query;
     var variantName = query.variant || "default";
     var variant = variants.find(v => v.name === variantName || v.content !== undefined);
-    
+
     // if we have a variant to render, then render it
     if (variant) {
       if (variant.content) {
         req.filename = variant.content;
         return next();
       }
-      
+
       res.setHeader("Content-Type", "application/lynx+json");
       res.setHeader("Cache-control", "no-cache");
 
@@ -91,7 +100,7 @@ module.exports = exports = function createStaticHandler(options) {
     if (variants.length > 0 || childRealms.length > 0) {
       return serveRealmIndex(req, res);
     }
-    
+
     next();
   };
 };

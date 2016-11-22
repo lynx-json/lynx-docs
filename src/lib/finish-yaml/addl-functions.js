@@ -108,6 +108,7 @@ function titles(kvp, options) {
 
 function headers(kvp, options) {
   var meta = getMetadata(kvp);
+  
   if (meta.key === "header") {
     addHint(kvp, "header");
     addHint(kvp, "label");
