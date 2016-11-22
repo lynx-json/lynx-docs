@@ -57,6 +57,8 @@ function applyObjectMeta(value, meta) {
   meta.countOfChildren = 0;
   
   Object.getOwnPropertyNames(value).forEach(function (childKey) {
+    if (!childKey) return; //TODO: Figure out why we're getting an empty key and blowing up.
+    
     var childMeta = getMetadata(childKey);
     
     if (!meta.children[childMeta.key]) {

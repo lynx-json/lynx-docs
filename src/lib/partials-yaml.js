@@ -21,8 +21,6 @@ function resolvePartial(kvp, options) {
   var value = kvp.value,
     key = kvp.key;
   if(!options.input) throw new Error("Expected 'options' param to have 'input' key.");
-  var partialsFolder = path.dirname(options.input);
-  partialsFolder = path.relative(process.cwd(), partialsFolder);
 
   while(partialsFolder) {
     let partialFile = path.join(partialsFolder, value.partial + ".js");

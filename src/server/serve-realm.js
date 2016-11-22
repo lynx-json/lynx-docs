@@ -4,6 +4,7 @@ const fs = require("fs");
 const url = require("url");
 const path = require("path");
 const exportYaml = require("../lib/export-vinyl");
+const titleCase = require("to-title-case");
 
 exportYaml.handler = function (options) {
   function onData(data) {
@@ -17,7 +18,7 @@ exportYaml.handler = function (options) {
 
 function redirectToRealmIndex(req, res, next) {
   var realm = req.realms[0];
-  if (!realm) return next();
+  if(!realm) return next();
 
   var location = url.parse(realm.realm).pathname;
 
@@ -32,8 +33,8 @@ function redirectToRealmIndex(req, res, next) {
 
 function isChildOfRealm(realmUri) {
   return function (realm) {
-    if (realm.realm === realmUri) return false;
-    if (realm.realm.indexOf(realmUri) === -1) return false;
+    if(realm.realm === realmUri) return false;
+    if(realm.realm.indexOf(realmUri) === -1) return false;
     return url.parse(realm.realm).pathname.split("/").length -
       url.parse(realmUri).pathname.split("/").length === 1;
   };
@@ -43,8 +44,8 @@ module.exports = exports = function createStaticHandler(options) {
   return function (req, res, next) {
     var realm = req.realms.find(r => url.parse(r.realm).pathname === url.parse(req.url).pathname);
 
-    if (!realm) {
-      if (req.url === "/" || req.url === "") return redirectToRealmIndex(req, res, next);
+    if(!realm) {
+      if(req.url === "/" || req.url === "") return redirectToRealmIndex(req, res, next);
       return next();
     }
 
@@ -55,13 +56,9 @@ module.exports = exports = function createStaticHandler(options) {
       res.setHeader("Content-Type", "application/lynx+json");
       res.setHeader("Cache-control", "no-cache");
 
-      var data = realm;
-      data.realms = childRealms;
-
-      console.log("INDEX FOR " + realm.realm, realm.foo);
-
-      data.variants.forEach(variant => {
-        variant.url = url.parse(req.url).pathname + "?variant=" + encodeURIComponent(variant.name)
+      realm.variants.forEach(variant => {
+        variant.title = variant.title || titleCase(variant.name);
+        variant.url = url.parse(req.url).pathname + "?variant=" + encodeURIComponent(variant.name);
       });
 
       exportYaml.handler({
@@ -69,8 +66,8 @@ module.exports = exports = function createStaticHandler(options) {
         input: path.join(__dirname, "realm-index.lynx.yml"),
         context: realm.folder,
         output: res,
-        data: data,
-        realm: data.realm
+        data: realm,
+        realm: realm.realm
       });
     }
 
@@ -79,8 +76,8 @@ module.exports = exports = function createStaticHandler(options) {
     var variant = variants.find(v => v.name === variantName || v.content !== undefined);
 
     // if we have a variant to render, then render it
-    if (variant) {
-      if (variant.content) {
+    if(variant) {
+      if(variant.content) {
         req.filename = variant.content;
         return next();
       }
@@ -97,7 +94,7 @@ module.exports = exports = function createStaticHandler(options) {
       });
     }
 
-    if (variants.length > 0 || childRealms.length > 0) {
+    if(variants.length > 0 || childRealms.length > 0) {
       return serveRealmIndex(req, res);
     }
 

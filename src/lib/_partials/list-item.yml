@@ -1,6 +1,6 @@
 spec:
   hints: [ "http://uncategorized/listing/item", card, section ]
-  labeledBy: header # Make this more flexible
+  labeledBy: header
 value:
   symbol:
     spec:
