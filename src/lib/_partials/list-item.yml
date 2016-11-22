@@ -1,10 +1,17 @@
 spec:
-  hints: [ "http://uncategorized/listing/item" ]
+  hints: [ "http://uncategorized/listing/item", card, section ]
+  labeledBy: header # Make this more flexible
 value:
   symbol:
     spec:
       hints: [ "http://uncategorized/listing/item/symbol"]
     value~symbol: ●
+  href~:
+  action~:
+  type~:
+  scope~:
+  for~:
   content: 
+    header~:
     ~*:
   children~:

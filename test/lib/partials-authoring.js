@@ -296,7 +296,7 @@ var tests = [{
   should: "should add all unknown parameters in place of the wildcard"
 }];
 
-describe.only("when authoring partials", function () {
+describe("when authoring partials", function () {
   tests.forEach(function (test) {
     describe(test.description, function () {
       beforeEach(function () {

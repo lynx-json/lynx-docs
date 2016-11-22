@@ -23,8 +23,7 @@ function toYamlBuffer(value) {
   return new Buffer(YAML.stringify(value, null));
 }
 
-var tests = [
-  {
+var tests = [{
     description: "an empty folder",
     root: "/root",
     fs: {
@@ -34,7 +33,7 @@ var tests = [
       files: {}
     },
     assertions: [
-      countOf(1), 
+      countOf(1),
       containsRealm("/")
     ]
   },
@@ -49,7 +48,7 @@ var tests = [
       files: {}
     },
     assertions: [
-      countOf(1), 
+      countOf(1),
       containsRealm("http://example.com/")
     ]
   },
@@ -58,7 +57,7 @@ var tests = [
     root: "/root",
     fs: {
       dirs: {
-        "/root": [ "default.lynx.yml" ]
+        "/root": ["default.lynx.yml"]
       },
       files: {
         "/root/default.lynx.yml": null
@@ -75,7 +74,7 @@ var tests = [
     root: "/root",
     fs: {
       dirs: {
-        "/root": [ "default.lynx.yml", "default.data.yml" ]
+        "/root": ["default.lynx.yml", "default.data.yml"]
       },
       files: {
         "/root/default.lynx.yml": null,
@@ -93,7 +92,7 @@ var tests = [
     root: "/root",
     fs: {
       dirs: {
-        "/root": [ "default.lynx.yml", "default.data.yml", "default.other.data.yml" ]
+        "/root": ["default.lynx.yml", "default.data.yml", "default.other.data.yml"]
       },
       files: {
         "/root/default.lynx.yml": null,
@@ -113,8 +112,8 @@ var tests = [
     root: "/root",
     fs: {
       dirs: {
-        "/root": [ "default.lynx.yml", "default.data" ],
-        "/root/default.data": [ "default.yml" ]
+        "/root": ["default.lynx.yml", "default.data"],
+        "/root/default.data": ["default.yml"]
       },
       files: {
         "/root/default.lynx.yml": null,
@@ -132,8 +131,8 @@ var tests = [
     root: "/root",
     fs: {
       dirs: {
-        "/root": [ "default.lynx.yml", "default.data" ],
-        "/root/default.data": [ "default.yml", "other.yml" ]
+        "/root": ["default.lynx.yml", "default.data"],
+        "/root/default.data": ["default.yml", "other.yml"]
       },
       files: {
         "/root/default.lynx.yml": null,
@@ -153,7 +152,7 @@ var tests = [
     root: "/root",
     fs: {
       dirs: {
-        "/root": [ "a.lynx.yml", "b.lynx.yml" ]
+        "/root": ["a.lynx.yml", "b.lynx.yml"]
       },
       files: {
         "/root/a.lynx.yml": null,
@@ -172,7 +171,7 @@ var tests = [
     root: "/root",
     fs: {
       dirs: {
-        "/root": [ "a.lynx.yml", "a.data.yml", "b.lynx.yml", "b.data.yml" ]
+        "/root": ["a.lynx.yml", "a.data.yml", "b.lynx.yml", "b.data.yml"]
       },
       files: {
         "/root/a.lynx.yml": null,
@@ -193,8 +192,9 @@ var tests = [
     root: "/root",
     fs: {
       dirs: {
-        "/root": [ "a.lynx.yml", "a.data.yml", "a.2.data.yml", 
-          "b.lynx.yml", "b.data.yml", "b.2.data.yml" ]
+        "/root": ["a.lynx.yml", "a.data.yml", "a.2.data.yml",
+          "b.lynx.yml", "b.data.yml", "b.2.data.yml"
+        ]
       },
       files: {
         "/root/a.lynx.yml": null,
@@ -219,14 +219,14 @@ var tests = [
     root: "/root",
     fs: {
       dirs: {
-        "/root": [ "funny-cat.gif" ]
+        "/root": ["funny-cat.gif"]
       },
       files: {
         "/root/funny-cat.gif": null
       }
     },
     assertions: [
-      countOf(2), 
+      countOf(2),
       containsRealm("/"),
       containsRealm("/funny-cat.gif"),
       containsContentVariant("/funny-cat.gif", "funny-cat.gif", "/root/funny-cat.gif")
@@ -238,14 +238,14 @@ var tests = [
     realm: "http://example.com/",
     fs: {
       dirs: {
-        "/root": [ "funny-cat.gif" ]
+        "/root": ["funny-cat.gif"]
       },
       files: {
         "/root/funny-cat.gif": null
       }
     },
     assertions: [
-      countOf(2), 
+      countOf(2),
       containsRealm("http://example.com/"),
       containsRealm("http://example.com/funny-cat.gif"),
       containsContentVariant("http://example.com/funny-cat.gif", "funny-cat.gif", "/root/funny-cat.gif")
@@ -256,15 +256,15 @@ var tests = [
     root: "/root",
     fs: {
       dirs: {
-        "/root": [ ".meta.yml" ]
+        "/root": [".meta.yml"]
       },
       files: {
         "/root/.meta.yml": realmObject("/foo")
       }
     },
     assertions: [
-      countOf(1), 
-      containsRealm("/foo")
+      countOf(1),
+      containsRealm("/foo/")
     ]
   },
   {
@@ -272,7 +272,7 @@ var tests = [
     root: "/root",
     fs: {
       dirs: {
-        "/root": [ ".meta.yml" ]
+        "/root": [".meta.yml"]
       },
       files: {
         "/root/.meta.yml": toYamlBuffer([
@@ -282,9 +282,9 @@ var tests = [
       }
     },
     assertions: [
-      countOf(2), 
-      containsRealm("/foo"),
-      containsRealm("/bar"),
+      countOf(2),
+      containsRealm("/foo/"),
+      containsRealm("/bar/"),
     ]
   },
   {
@@ -292,17 +292,17 @@ var tests = [
     root: "/root",
     fs: {
       dirs: {
-        "/root": [ ".meta.yml" ]
+        "/root": [".meta.yml"]
       },
       files: {
-        "/root/.meta.yml": realmObject("/foo", 
+        "/root/.meta.yml": realmObject("/foo",
           variant("a", "/root/a.lynx.yml"))
       }
     },
     assertions: [
-      countOf(1), 
-      containsRealm("/foo"),
-      containsVariant("/foo", "a", "/root/a.lynx.yml")
+      countOf(1),
+      containsRealm("/foo/"),
+      containsVariant("/foo/", "a", "/root/a.lynx.yml")
     ]
   },
   {
@@ -310,24 +310,24 @@ var tests = [
     root: "/root",
     fs: {
       dirs: {
-        "/root": [ "form" ],
-        "/root/form": [ "default.lynx.yml", "processor" ],
-        "/root/form/processor": [ ".meta.yml", "invalid.data.yml" ]
+        "/root": ["form"],
+        "/root/form": ["default.lynx.yml", "processor"],
+        "/root/form/processor": [".meta.yml", "invalid.data.yml"]
       },
       files: {
         "/root/form/default.lynx.yml": null,
         "/root/form/processor/invalid.data.yml": null,
-        "/root/form/processor/.meta.yml": realmObject(null, 
+        "/root/form/processor/.meta.yml": realmObject(null,
           variant(null, "/root/form/default.lynx.yml", "/root/form/processor/invalid.data.yml"))
       }
     },
     assertions: [
-      countOf(3), 
+      countOf(3),
       containsRealm("/"),
-      containsRealm("/form"),
-      containsRealm("/form/processor"),
-      containsVariant("/form", "default", "/root/form/default.lynx.yml"),
-      containsVariant("/form/processor", "default-invalid", "/root/form/default.lynx.yml", "/root/form/processor/invalid.data.yml")
+      containsRealm("/form/"),
+      containsRealm("/form/processor/"),
+      containsVariant("/form/", "default", "/root/form/default.lynx.yml"),
+      containsVariant("/form/processor/", "default-invalid", "/root/form/default.lynx.yml", "/root/form/processor/invalid.data.yml")
     ]
   },
   {
@@ -335,7 +335,7 @@ var tests = [
     root: "/root",
     fs: {
       dirs: {
-        "/root": [ ".meta.yml", "bar.lynx.yml", "bar.data.yml", "bar.2.data.yml" ]
+        "/root": [".meta.yml", "bar.lynx.yml", "bar.data.yml", "bar.2.data.yml"]
       },
       files: {
         "/root/.meta.yml": toYamlBuffer([
@@ -348,11 +348,11 @@ var tests = [
       }
     },
     assertions: [
-      countOf(2), 
+      countOf(2),
       containsRealm("/"),
-      containsRealm("/bar"),
-      containsVariant("/bar", "bar", "/root/bar.lynx.yml", "/root/bar.data.yml"),
-      containsVariant("/bar", "bar-2", "/root/bar.lynx.yml", "/root/bar.2.data.yml")
+      containsRealm("/bar/"),
+      containsVariant("/bar/", "bar", "/root/bar.lynx.yml", "/root/bar.data.yml"),
+      containsVariant("/bar/", "bar-2", "/root/bar.lynx.yml", "/root/bar.2.data.yml")
     ]
   }
 ];
@@ -361,11 +361,11 @@ function realmObject(realm, variants) {
   if (variants && !util.isArray(variants)) {
     variants = [variants];
   }
-  
+
   var realmObj = {};
   if (realm) realmObj.realm = realm;
   realmObj.variants = variants || [];
-  
+
   return toYamlBuffer(realmObj);
 }
 
@@ -378,15 +378,15 @@ function variant(name, pathToTemplateFile, pathToDataFile) {
 }
 
 function countOf(n) {
-  var assertion = function (realms) {
-      realms.length.should.equal(n);
+  var assertion = function(realms) {
+    realms.length.should.equal(n);
   };
   assertion.should = "should have a count of " + n.toString();
   return assertion;
 }
 
 function containsRealm(realmUri) {
-  var assertion = function (realms) {
+  var assertion = function(realms) {
     var result = realms.some(realm => realm.realm === realmUri);
     result.should.equal(true);
   };
@@ -395,85 +395,85 @@ function containsRealm(realmUri) {
 }
 
 function containsVariant(realmUri, name, pathToTemplateFile, pathToDataFile) {
-  var assertion = function (realms) {
+  var assertion = function(realms) {
     var result = realms.some(
       r => r.variants.some(
         v => r.realm === realmUri &&
-          v.name === name && 
-          v.template === pathToTemplateFile && 
-          (!pathToDataFile || v.data === pathToDataFile)));
-        
+        v.name === name &&
+        v.template === pathToTemplateFile &&
+        (!pathToDataFile || v.data === pathToDataFile)));
+
     result.should.equal(true);
   };
-  
+
   var desc = "should contain a variant in realm '" + realmUri + "'";
   desc += ", with name '" + name + "'";
   desc += ", with template '" + pathToTemplateFile + "'";
-  
+
   if (pathToDataFile) {
     desc += ", with data '" + pathToDataFile + "'";
   }
-  
+
   assertion.should = desc;
-  
+
   return assertion;
 }
 
 function containsContentVariant(realmUri, name, pathToContentFile) {
-  var assertion = function (realms) {
+  var assertion = function(realms) {
     var result = realms.some(
       r => r.variants.some(
         v => r.realm === realmUri &&
-          v.name === name && 
-          v.content === pathToContentFile));
-          
+        v.name === name &&
+        v.content === pathToContentFile));
+
     result.should.equal(true);
   };
-  
+
   var desc = "should contain a content variant in realm '" + realmUri + "'";
   desc += ", with name '" + name + "'";
   desc += ", with content file '" + pathToContentFile + "'";
-  
+
   assertion.should = desc;
-  
+
   return assertion;
 }
 
-describe("when getting realm metadata", function () {
-  tests.forEach(function (test) {
-    describe(test.description, function () {
+describe("when getting realm metadata", function() {
+  tests.forEach(function(test) {
+    describe(test.description, function() {
       var realms;
-      
-      beforeEach(function () {  
+
+      beforeEach(function() {
         var readdirStub = sinon.stub(fs, "readdirSync");
         var readFileStub = sinon.stub(fs, "readFileSync");
-        var existsSyncStub = sinon.stub(fs, "existsSync");      
+        var existsSyncStub = sinon.stub(fs, "existsSync");
         var statStub = sinon.stub(fs, "statSync");
-        
-        Object.getOwnPropertyNames(test.fs.dirs).forEach(function (dir) {
+
+        Object.getOwnPropertyNames(test.fs.dirs).forEach(function(dir) {
           existsSyncStub.withArgs(dir).returns(true);
           readdirStub.withArgs(dir).returns(test.fs.dirs[dir]);
           statStub.withArgs(dir).returns(statsFake(true));
         });
-        
-        Object.getOwnPropertyNames(test.fs.files).forEach(function (file) {
+
+        Object.getOwnPropertyNames(test.fs.files).forEach(function(file) {
           existsSyncStub.withArgs(file).returns(true);
           readFileStub.withArgs(file).returns(test.fs.files[file]);
           statStub.withArgs(file).returns(statsFake(false));
         });
-        
+
         realms = getRealms(test.root, test.realm);
       });
-      
+
       afterEach(function() {
         fs.readdirSync.restore();
         fs.readFileSync.restore();
         fs.existsSync.restore();
         if (fs.statSync.restore) fs.statSync.restore();
       });
-      
-      test.assertions.forEach(function (assertion) {
-        it(assertion.should, function () {
+
+      test.assertions.forEach(function(assertion) {
+        it(assertion.should, function() {
           assertion(realms);
         });
       });
