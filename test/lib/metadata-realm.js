@@ -451,15 +451,17 @@ describe("when getting realm metadata", function() {
         var statStub = sinon.stub(fs, "statSync");
 
         Object.getOwnPropertyNames(test.fs.dirs).forEach(function(dir) {
-          existsSyncStub.withArgs(dir).returns(true);
-          readdirStub.withArgs(dir).returns(test.fs.dirs[dir]);
-          statStub.withArgs(dir).returns(statsFake(true));
+          var rdir = path.resolve(dir);
+          existsSyncStub.withArgs(rdir).returns(true);
+          readdirStub.withArgs(rdir).returns(test.fs.dirs[dir]);
+          statStub.withArgs(rdir).returns(statsFake(true));
         });
 
         Object.getOwnPropertyNames(test.fs.files).forEach(function(file) {
-          existsSyncStub.withArgs(file).returns(true);
-          readFileStub.withArgs(file).returns(test.fs.files[file]);
-          statStub.withArgs(file).returns(statsFake(false));
+          var rfile = path.resolve(file);
+          existsSyncStub.withArgs(rfile).returns(true);
+          readFileStub.withArgs(rfile).returns(test.fs.files[file]);
+          statStub.withArgs(rfile).returns(statsFake(false));
         });
 
         realms = getRealms(test.root, test.realm);
