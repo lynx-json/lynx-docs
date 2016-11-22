@@ -5,7 +5,6 @@ const path = require("path");
 const url = require("url");
 const util = require("util");
 const parseYaml = require("./parse-yaml");
-const templateFilePattern = /^(.*)\.lynx\.yml$/;
 
 function getRealms(root, realm) {
   root = path.resolve(root);
@@ -223,9 +222,9 @@ function isDataDirForTemplate(pathToDir, templateFile) {
 }
 
 function getDataDirForTemplate(templateFile) {
-  var matches = templateFilePattern.exec(templateFile);
-  if(!matches) return "";
-  var dataDir = matches[1] + ".data";
+  var templateDir = path.dirname(templateFile);
+  var templateName = getTemplateFileName(templateFile);
+  var dataDir = path.resolve(templateDir, templateName + ".data");
   return dataDir;
 }
 
