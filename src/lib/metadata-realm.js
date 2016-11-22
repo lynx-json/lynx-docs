@@ -6,7 +6,6 @@ const url = require("url");
 const util = require("util");
 const parseYaml = require("./parse-yaml");
 const templateFilePattern = /^(.*)\.lynx\.yml$/;
-const dataFilePattern = /^(.*?)(\.(.*?))?\.data\.yml$/;
 
 function getRealms(root, realm) {
   root = path.resolve(root);
