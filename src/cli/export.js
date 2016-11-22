@@ -39,14 +39,14 @@ function buildCommand(yargs) {
     .argv;
 }
 
-var exportCli = function(options) {
+var exportCli = function (options) {
 
-  if (options.config) {
+  if(options.config) {
     var config = path.resolve(process.cwd(), options.config);
     require(config)(lynxDocs);
   }
 
-  if (!util.isArray(options.root)) options.root = [options.root];
+  if(!util.isArray(options.root)) options.root = [options.root];
   options.root = options.root.map(r => path.resolve(r));
   options.output = options.output !== "stdout" ? path.resolve(options.output) : options.output;
   options.realms = getRealms(options);
@@ -55,7 +55,7 @@ var exportCli = function(options) {
 
   options.realms.forEach(function (realm) {
     realm.templates.forEach(function (pathToTemplateFile, idx) {
-      if (idx !== 0) return;
+      if(idx !== 0) return;
 
       var templateOptions = {
         format: options.format,
@@ -65,9 +65,11 @@ var exportCli = function(options) {
       };
 
       templates.push(
-        new Vinyl({ path: pathToTemplateFile,
+        new Vinyl({
+          path: path.relative(realm.root, pathToTemplateFile),
           options: templateOptions,
-          contents: fs.readFileSync(pathToTemplateFile) }));
+          contents: fs.readFileSync(pathToTemplateFile)
+        }));
     });
   });
 
@@ -84,13 +86,15 @@ function getRealms(options) {
   var realms = [];
 
   options.root.forEach(function (root) {
-    realms = realms.concat(getRealmMetadata(root, options.realm));
+    var realmsForRoot = getRealmMetadata(root, options.realm);
+    realmsForRoot.forEach(realm => realm.root = root);
+    realms = realms.concat(realmsForRoot);
   });
 
-  realms = realms.sort(function (a,b) {
-    if (a.realm === b.realm) return 0;
-    if (a.realm.indexOf(b.realm) === 0) return 1;
-    if (b.realm.indexOf(a.realm) === 0) return -1;
+  realms = realms.sort(function (a, b) {
+    if(a.realm === b.realm) return 0;
+    if(a.realm.indexOf(b.realm) === 0) return 1;
+    if(b.realm.indexOf(a.realm) === 0) return -1;
   });
 
   return realms;
