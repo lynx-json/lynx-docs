@@ -9,7 +9,7 @@ const templateFilePattern = /^(.*)\.lynx\.yml$/;
 const dataFilePattern = /^(.*?)(\.(.*?))?\.data\.yml$/;
 
 function getRealms(root, realm) {
-  root = path.normalize(root);
+  root = path.resolve(root);
   var realms = [];
   aggregateRealms(root, root, realm || "/", realms);
   return realms;

@@ -400,8 +400,8 @@ function containsVariant(realmUri, name, pathToTemplateFile, pathToDataFile) {
       r => r.variants.some(
         v => r.realm === realmUri &&
         v.name === name &&
-        v.template === pathToTemplateFile &&
-        (!pathToDataFile || v.data === pathToDataFile)));
+        v.template === path.resolve(pathToTemplateFile) &&
+        (!pathToDataFile || v.data === path.resolve(pathToDataFile))));
 
     result.should.equal(true);
   };
@@ -425,7 +425,7 @@ function containsContentVariant(realmUri, name, pathToContentFile) {
       r => r.variants.some(
         v => r.realm === realmUri &&
         v.name === name &&
-        v.content === pathToContentFile));
+        v.content === path.resolve(pathToContentFile)));
 
     result.should.equal(true);
   };
