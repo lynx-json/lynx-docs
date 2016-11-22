@@ -32,7 +32,7 @@ function exportBuffer(buffer, cb, options) {
     console.log("### Options");
     console.log(JSON.stringify(options), "\n");
   }
-  
+
   var expandedYaml = expandYaml(kvp, options);
 
   if (options.log) {
@@ -62,7 +62,7 @@ var exportVinyl = function(options) {
     options.origin = file;
     if (buffer.length > 0) buffer += "\n";
     var ext = exportYaml.getExtension(options.format);
-    if(ext) file.extname = ext;
+    if (ext) file.extname = ext;
 
     this.push(new Vinyl({ cwd: file.cwd, base: file.base, path: file.path, contents: new Buffer(buffer) }));
     cb(); //signal completion
