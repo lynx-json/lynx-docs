@@ -12,7 +12,7 @@ function buildCommand(yargs) {
     })
     .option("root", {
       alias: "r",
-      describe: "Root folder for server.",
+      describe: "Root(s) for the web site.",
       default: "."
     })
     .option("config", {
