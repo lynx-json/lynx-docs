@@ -237,16 +237,7 @@ function aggregateDataFiles(pathToDir, dataFiles) {
 }
 
 function isDataFileForTemplate(dataFile, templateFile) {
-  var matches;
-  matches = templateFilePattern.exec(templateFile);
-  if(!matches) return false;
-
-  var templateFileBase = matches[1];
-  matches = dataFilePattern.exec(dataFile);
-  if(!matches) return false;
-
-  var dataFileBase = matches[1];
-  return templateFileBase === dataFileBase;
+  return getTemplateFileName(dataFile) === getTemplateFileName(templateFile);
 }
 
 function createVariant(templateFile, dataFile) {
