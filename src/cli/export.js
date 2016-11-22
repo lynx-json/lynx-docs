@@ -14,8 +14,8 @@ function buildCommand(yargs) {
     .usage("$0 export [--root] [--output] [--format] [--config]")
     .option("root", {
       alias: "r",
-      demand: true,
       describe: "Root(s) for the web site.",
+      default: "."
     })
     .option("output", {
       alias: "o",
