@@ -1,6 +1,5 @@
 >page:
-  globalNav>:
-  ctx:
+  ctx>context:
     header: Context
     list>:
       value@items:
@@ -16,5 +15,5 @@
                   header<name: ""
                   description<: ""
                   other<: ""
-  main:
+  main>:
     header: List in Context

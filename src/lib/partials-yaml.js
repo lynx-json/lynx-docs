@@ -11,29 +11,37 @@ function isPartial(kvp) {
   return getMetadata(kvp).partial !== undefined;
 }
 
+const fallbackPartialsFolder = path.join(__dirname, "_partials");
+
 function resolvePartial(kvp, options) {
-  var value = kvp.value, key = kvp.key;
-  var partialsFolder = path.dirname(options.input);
-  partialsFolder = path.relative(process.cwd(), partialsFolder);
-  
+  var value = kvp.value,
+    key = kvp.key;
+  var partialsFolder = path.join(path.dirname(options.context || options.input), "_partials");
+
   while (partialsFolder) {
-    let partialFile = path.join(process.cwd(), partialsFolder, "_partials", value.partial + ".js");
+    let partialFile = path.join(partialsFolder, value.partial + ".js");
     if (fs.existsSync(partialFile)) {
       //TODO: Since we're using require, the js is cached, so a change requires restarting the
       // the server. Consider using something like decache module.
       return require(partialFile)(kvp, options);
     }
-    
-    partialFile = path.join(process.cwd(), partialsFolder, "_partials", value.partial + ".yml");
-    
+
+    partialFile = path.join(partialsFolder, value.partial + ".yml");
+
     if (fs.existsSync(partialFile)) {
       let content = fs.readFileSync(partialFile);
-      return { key: key, value: parseYaml(content) };
+      return {
+        key: key,
+        value: parseYaml(content)
+      };
     }
-    
-    if (partialsFolder !== ".") partialsFolder = path.dirname(partialsFolder);
-    else partialsFolder = null;
+
+    if (path.dirname(partialsFolder) === process.cwd()) partialsFolder = fallbackPartialsFolder;
+    else if (partialsFolder === fallbackPartialsFolder) partialsFolder = null;
+    else partialsFolder = path.join(path.dirname(path.dirname(partialsFolder)), "_partials");
   }
+
+  throw new Error("Failed to resolve partial " + value.partial);
 }
 
 function* params(kvp) {
@@ -41,7 +49,7 @@ function* params(kvp) {
     key: "key",
     value: kvp.key
   });
-  
+
   if (kvp.value && util.isObject(kvp.value)) {
     for (let p in kvp.value) {
       yield getMetadata({
@@ -58,20 +66,19 @@ function getParam(kvp, name) {
   }
 }
 
-function isObjectValue(value) {
-  return util.isObject(value) && !util.isArray(value);
-}
-
 function collectKnownParameters(partialValue) {
   var paramPattern = /(\w*)?~(\w*|\*)?/g;
   var partialContent = YAML.stringify(partialValue);
-  var result = [], match;
+  var result = [],
+    match;
   while (match = paramPattern.exec(partialContent)) {
     let paramName = match[2] || match[1];
-    paramName = getMetadata({ key: paramName}).key;
+    paramName = getMetadata({
+      key: paramName
+    }).key;
     if (result.indexOf(paramName) === -1) result.push(paramName);
   }
-  
+
   return result;
 }
 
@@ -82,7 +89,7 @@ function applyWildcardParameters(inputKVP, outputKVP, knownParameters) {
       key: p,
       value: inputKVP.value[p]
     });
-    
+
     if (knownParameters.indexOf(param.key) === -1) {
       outputKVP[param.src.key] = param.src.value;
     }
@@ -92,75 +99,95 @@ function applyWildcardParameters(inputKVP, outputKVP, knownParameters) {
 function applyParameters(partialValue, kvp, knownParameters) {
   if (!util.isObject(partialValue)) return partialValue;
   if (!kvp.value) return partialValue;
-  
+
   if (!knownParameters) knownParameters = collectKnownParameters(partialValue);
-  
+
+  if (util.isArray(partialValue)) {
+    return partialValue.map(item => applyParameters(item, kvp, knownParameters));
+  }
+
   var result = {};
-  
+
   for (let p in partialValue) {
     let paramPattern = /(\w*)?~(\w*|\*)?/;
     let match = paramPattern.exec(p);
-    
+
     let partialChildValue = partialValue[p];
     if (match) {
       let paramName = match[2] || match[1];
-      
+
       if (paramName === "*") {
         applyWildcardParameters(kvp, result, knownParameters);
         continue;
       }
-      
+
       // Apply explicit parameter
       let param = getParam(kvp, paramName);
-      
+
       if (param) {
-        delete result[param.src.key]; // If it was added to the catchall
-        result[param.src.key] = param.src.value;
+        let pMeta = getMetadata({
+          key: p.replace(/~.*$/, "")
+        });
+
+        // Case: data~value: data should be the output key.
+        let key = param.src.key;
+        if (param.key !== pMeta.key) {
+          key = pMeta.key;
+          if (param.template) key += param.template.section;
+          if (param.partial) key += ">" + param.partial;
+        }
+        result[key] = param.src.value;
+
         continue;
       }
-    } else if (isObjectValue(partialChildValue)) {
+    } else if (util.isObject(partialChildValue)) {
       result[p] = applyParameters(partialChildValue, kvp, knownParameters);
       continue;
     }
-    
+
+    // If the value is not null or undefined, include it
+    // even if there was no match.
     let key = p.replace(/~.*$/, "");
     if (partialChildValue !== null && partialChildValue !== undefined) {
       result[key] = partialChildValue;
-    } 
-    
+    }
+
+    // Or if the value is a template or partial reference, include it.
     let meta = getMetadata(key);
-    if (meta.template) result[key] = partialChildValue;
+    if (meta.template || meta.partial) result[key] = partialChildValue;
   }
-  
+
   return result;
 }
 
 function getPartialKVP(kvp, options) {
   var partial = exports.resolvePartial(kvp, options);
   partial.value = applyParameters(partial.value, kvp);
-  
+
   return partial;
 }
 
 function normalizeValueToObject(kvp) {
-  if (kvp.value === null || kvp.value === undefined) 
+  if (kvp.value === null || kvp.value === undefined)
     kvp.value = {};
-  else if (Array.isArray(kvp.value) || typeof kvp.value !== "object") 
-    kvp.value = { value: kvp.value };
-  
+  else if (Array.isArray(kvp.value) || typeof kvp.value !== "object")
+    kvp.value = {
+      value: kvp.value
+    };
+
   return kvp;
 }
 
 function getPartial(kvp, options) {
   kvp = normalizeValueToObject(kvp);
   var meta = getMetadata(kvp);
-  
+
   kvp.value.partial = meta.partial;
   kvp.value.key = meta.src.key.replace(/>.*/, "");
-  kvp.key = meta.key;
-  if (kvp.key === undefined) delete kvp.key;
-  
-  return getPartialKVP(kvp, options);
+  kvp.key = kvp.value.key;
+
+  var result = getPartialKVP(kvp, options);
+  return result;
 }
 
 exports.isPartial = isPartial;

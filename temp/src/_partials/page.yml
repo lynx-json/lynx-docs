@@ -1,5 +1,5 @@
-banner>:
-globalNav=:
-search=:
-ctx=: 
-main=:
+banner>~:
+globalNav>~:
+search~:
+ctx~: 
+~*:

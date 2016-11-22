@@ -1,6 +1,6 @@
 >page:
   globalNav>:
-  main:
+  main>:
     header: Regions
     description:
       src: ./description.md

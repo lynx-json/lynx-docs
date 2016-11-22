@@ -1,6 +1,5 @@
 >page:
-  globalNav>:
-  main:
+  main>:
     header: List in Main Content
     list>:
       value@items:

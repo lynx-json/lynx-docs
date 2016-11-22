@@ -1,0 +1,10 @@
+spec:
+  hints: [ "http://uncategorized/listing/item" ]
+value:
+  symbol:
+    spec:
+      hints: [ "http://uncategorized/listing/item/symbol"]
+    value~symbol: ●
+  content: 
+    ~*:
+  children~:

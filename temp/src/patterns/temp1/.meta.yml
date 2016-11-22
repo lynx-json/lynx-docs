@@ -1,0 +1,6 @@
+checklist:
+  - symbol: ☒
+    desc: Do Stuff
+  - symbol: ◻︎
+    desc: Do other stuff.
+  - desc: What about this?

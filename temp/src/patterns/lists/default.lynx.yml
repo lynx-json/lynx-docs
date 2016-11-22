@@ -1,6 +1,6 @@
 >page:
   globalNav>:
-  main:
+  main>:
     header: Lists
     description:
       src: ./description.md

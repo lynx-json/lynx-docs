@@ -1,5 +1,17 @@
->base:
-  header: Hello
-  message: Good Bye
-  visibility: visible
-  hints: [ section, container ]
+>page:
+  main>:
+    header: Hello
+    message>em: Good Bye
+    strong>em:
+      emphasis: 2
+      value: Good Bye!
+    some>markdown: |
+      Heading 1
+      ================================================
+      
+      Heading 2
+      ------------------------------------------------
+        
+      ### Heading 3
+      
+      #### Heading 4
