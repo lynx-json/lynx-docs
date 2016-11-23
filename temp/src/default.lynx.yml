@@ -1,6 +1,9 @@
 >page:
   main>:
     header: Hello
+    image>:
+      width: 25
+      height: 25
     message>em: Good Bye
     strong>em:
       emphasis: 2

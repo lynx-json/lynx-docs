@@ -3,15 +3,15 @@
     header: List in Main Content
     list>:
       value@items:
-        - symbol<: ◉
-          content:
+        - >list-item:
+            symbol<: ◉
             header<name: ""
             description<: ""
             other<: ""
-          children>list:
-            value@children:
-              - symbol<: ●
-                content:
-                  header<name: ""
-                  description<: ""
-                  other<: ""
+            children>list:
+              value@children:
+                - >list-item:
+                    symbol<: ●
+                    header<name: ""
+                    description<: ""
+                    other<: ""

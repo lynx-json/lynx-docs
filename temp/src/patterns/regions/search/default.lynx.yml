@@ -1,5 +1,4 @@
 >page:
-  globalNav>:
   localNav>:
   search:
     spec:
@@ -14,7 +13,7 @@
         action: ./
         method: GET
         title: Search
-  main:
+  main>:
     header: Search
     description:
       src: ./description.md

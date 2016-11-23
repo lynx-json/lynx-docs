@@ -1,6 +1,6 @@
 "use strict";
 
-const sectionPartial = require("./section");
+const sectionPartial = require("./lynx-node");
 const partials = require("./partials");
 const params = partials.params;
 const param = partials.param;

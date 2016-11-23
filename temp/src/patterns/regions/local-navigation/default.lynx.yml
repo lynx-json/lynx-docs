@@ -1,7 +1,6 @@
 >page:
-  globalNav>:
   localNav>:
-  main:
+  main>:
     header: Local Navigation
     description:
       src: ./description.md

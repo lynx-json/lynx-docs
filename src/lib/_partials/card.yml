@@ -1,0 +1,9 @@
+spec:
+  hints~: [ card, section ]
+  labeledBy~: header
+value:
+  header~:
+    spec:
+      visibility: hidden
+    value: ""
+  ~*:

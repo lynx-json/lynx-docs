@@ -1,0 +1,9 @@
+spec:
+  hints~: [ http://uncategorized/local-navigation, complement, section ]
+  labeledBy~: header
+value:
+  header~:
+    spec:
+      visibility: hidden
+    value: ""
+  ~*:

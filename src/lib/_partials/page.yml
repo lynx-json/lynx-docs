@@ -1,5 +1,9 @@
-banner~:
-globalNav~:
-search~:
-ctx~: 
-~*:
+spec:
+  hints: [ http://uncategorized/page, section ]
+value:
+  banner~:
+  globalNav~:
+  search~:
+  localNav~:
+  ctx~: 
+  ~*:

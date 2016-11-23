@@ -3,8 +3,8 @@
     header: Patterns
     list>:
       value@patterns:
-        - symbol: ⁌
-          href<url: ./lists/
-          type: application/lynx+json
-          content:
+        - >list-item:
+            symbol: ⁌
+            href<url: ./lists/
+            type: application/lynx+json
             header<: Lists

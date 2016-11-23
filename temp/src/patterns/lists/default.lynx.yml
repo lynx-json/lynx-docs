@@ -7,8 +7,8 @@
       type: text/markdown
     examples>list:
       value@examples:
-        - symbol: ⁌
-          href<url: ./lists/
-          type: application/lynx+json
-          content:
+        - >list-item:
+            symbol: ⁌
+            href<url: ./lists/
+            type: application/lynx+json
             header<: Example

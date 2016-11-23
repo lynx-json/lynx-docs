@@ -1,0 +1,4 @@
+spec:
+  hints~: [ http://uncategorized/global-navigation, complement, section ]
+value:
+  ~*:

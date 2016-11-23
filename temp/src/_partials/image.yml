@@ -1,4 +1,0 @@
-src=: "http://placehold.it/{{{width}}}/{{{height}}}"
-width=: 50
-height=: 50
-type: image/jpeg
