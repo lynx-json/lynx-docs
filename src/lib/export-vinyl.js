@@ -50,7 +50,7 @@ function exportBuffer(buffer, cb, options) {
   exportYaml(options.format, finishedYaml, cb, options);
 }
 
-var exportVinyl = function(options) {
+var exportVinyl = function() {
   return through2.obj(function(file, enc, cb) {
 
     var buffer = "";
@@ -58,10 +58,9 @@ var exportVinyl = function(options) {
       buffer += data;
     }
 
-    exportBuffer(file.contents, onData, options);
-    options.origin = file;
+    exportBuffer(file.contents, onData, file.options);
     if (buffer.length > 0) buffer += "\n";
-    var ext = exportYaml.getExtension(options.format);
+    var ext = exportYaml.getExtension(file.options.format);
     if (ext) file.extname = ext;
 
     this.push(new Vinyl({ cwd: file.cwd, base: file.base, path: file.path, contents: new Buffer(buffer) }));
