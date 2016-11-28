@@ -1,0 +1,13 @@
+spec:
+  hints: [ http://lynx-json.org/docs/variant-with-alternate-index, content ]
+value:
+  # TODO: Review. This is not really a good idea, because all child realms will now be 
+  # displayed in this subwindow as well. Just experimenting for now.
+  scope<realm: 
+  src<variantURL:
+  type: application/lynx+json
+  alt: Realm Default 
+  index:
+    src<indexURL:
+    alt: Realm Index
+    type: application/lynx+json

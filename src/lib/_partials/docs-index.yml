@@ -1,11 +1,12 @@
-header:
-  primary<title: Realm
-  secondary<realm: ""
-variants:
-  header: Variants
-  items>list:
+spec:
+  hints: [ http://lynx-json.org/docs/realm-index ]
+value:
+  header:
+    primary<title: Realm
+    secondary<realm: ""
+  variants>list:
     value@variants: 
-      - >list-item:
+      - ">list-item":
           symbol<: _
           header<title: ""
           href<url: ""

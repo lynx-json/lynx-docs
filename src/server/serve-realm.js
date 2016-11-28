@@ -60,10 +60,27 @@ module.exports = exports = function createStaticHandler(options) {
         variant.title = variant.title || titleCase(variant.name);
         variant.url = url.parse(req.url).pathname + "?variant=" + encodeURIComponent(variant.name);
       });
-
+      
       exportYaml.handler({
         format: "lynx",
         input: path.join(__dirname, "realm-index.lynx.yml"),
+        context: realm.folder,
+        output: res,
+        data: realm,
+        realm: realm.realm
+      });
+    }
+    
+    function serveVariantWithAlternateIndex(variantName) {
+      res.setHeader("Content-Type", "application/lynx+json");
+      res.setHeader("Cache-control", "no-cache");
+      
+      realm.variantURL = url.parse(req.url).pathname + "?variant=" + variantName + "&direct=true";
+      realm.indexURL = url.parse(req.url).pathname + "?variant=index";
+      
+      exportYaml.handler({
+        format: "lynx",
+        input: path.join(__dirname, "variant-with-alternate-index.lynx.yml"),
         context: realm.folder,
         output: res,
         data: realm,
@@ -74,30 +91,31 @@ module.exports = exports = function createStaticHandler(options) {
     var query = url.parse(req.url, true).query;
     var variantName = query.variant || "default";
     var variant = variants.find(v => v.name === variantName || v.content !== undefined);
-
-    // if we have a variant to render, then render it
-    if(variant) {
-      if(variant.content) {
-        req.filename = variant.content;
-        return next();
-      }
-
-      res.setHeader("Content-Type", "application/lynx+json");
-      res.setHeader("Cache-control", "no-cache");
-
-      return exportYaml.handler({
-        format: "lynx",
-        input: variant.template,
-        output: res,
-        data: variant.data,
-        realm: realm.realm
-      });
+    
+    if (variantName === "index" || !variant) {
+      return serveRealmIndex();
+    }
+    
+    if (!query.direct) {
+      return serveVariantWithAlternateIndex(variantName);
+    }
+    
+    if (variant.content) {
+      req.filename = variant.content;
+      return next();
     }
 
-    if(variants.length > 0 || childRealms.length > 0) {
-      return serveRealmIndex(req, res);
-    }
+    res.setHeader("Content-Type", "application/lynx+json");
+    res.setHeader("Cache-control", "no-cache");
 
+    return exportYaml.handler({
+      format: "lynx",
+      input: variant.template,
+      output: res,
+      data: variant.data,
+      realm: realm.realm
+    });
+    
     next();
   };
 };

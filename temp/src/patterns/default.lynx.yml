@@ -8,3 +8,7 @@
             href<url: ./lists/
             type: application/lynx+json
             header<: Lists
+    temp:
+      src: ./temp1/
+      type: application/lynx+json
+      alt: Temp
