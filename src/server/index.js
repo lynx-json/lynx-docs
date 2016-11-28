@@ -16,14 +16,15 @@ function serveError(req, res) {
   res.writeHead(500, { "Content-Type": "text/plain" });
   res.write("500 Server Error");
   if (req.error) {
-    res.write("\n\n" + req.error.stack);
+    if(req.error.stack) res.write("\n\n" + req.error.stack);
+    else res.write("\n\n" + JSON.stringify(req.error, null, 2));
   }
   res.end();
 }
 
 function startServer(options) {
   var port = options.port || 0;
-  
+
   var handler = function (req, res) {
     try {
       req.realms = getRealms(options);
@@ -37,26 +38,26 @@ function startServer(options) {
       serveError(req, res);
     }
   };
-  
+
   var server = http.createServer(handler).listen(port);
   console.log("Lynx Docs server is running at http://localhost:" + port);
-  
+
   return server;
 }
 
 function getRealms(options) {
   var realms = [];
-  
+
   options.root.forEach(function (root) {
     realms = realms.concat(getRealmMetadata(root, options.realm));
   });
-  
-  realms = realms.sort(function (a,b) { 
-    if (a.realm === b.realm) return 0; 
-    if (a.realm.indexOf(b.realm) === 0) return 1; 
-    if (b.realm.indexOf(a.realm) === 0) return -1; 
+
+  realms = realms.sort(function (a,b) {
+    if (a.realm === b.realm) return 0;
+    if (a.realm.indexOf(b.realm) === 0) return 1;
+    if (b.realm.indexOf(a.realm) === 0) return -1;
   });
-  
+
   return realms;
 }
 
