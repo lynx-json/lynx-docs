@@ -18,8 +18,6 @@ function resolvePartial(kvp, options) {
     key = kvp.key;
   var partialsFolder = path.join(path.dirname(options.context || options.input), "_partials");
 
-  var value = kvp.value,
-    key = kvp.key;
   if(!options.input) throw new Error("Expected 'options' param to have 'input' key.");
 
   while(partialsFolder) {
@@ -75,6 +73,7 @@ function collectKnownParameters(partialValue) {
   var partialContent = YAML.stringify(partialValue);
   var result = [],
     match;
+  /*jshint ignore:start */
   while(match = paramPattern.exec(partialContent)) {
     let paramName = match[2] || match[1];
     paramName = getMetadata({
@@ -82,6 +81,7 @@ function collectKnownParameters(partialValue) {
     }).key;
     if(result.indexOf(paramName) === -1) result.push(paramName);
   }
+  /*jshint ignore:end */
 
   return result;
 }

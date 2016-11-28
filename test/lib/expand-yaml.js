@@ -331,5 +331,5 @@ describe("when expanding YAML", function () {
         runTest(test);
       });
     });
-  })
+  });
 });

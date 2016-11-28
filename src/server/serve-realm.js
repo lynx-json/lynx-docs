@@ -115,7 +115,5 @@ module.exports = exports = function createStaticHandler(options) {
       data: variant.data,
       realm: realm.realm
     });
-    
-    next();
   };
 };
