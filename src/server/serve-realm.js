@@ -96,15 +96,15 @@ module.exports = exports = function createStaticHandler(options) {
       return serveRealmIndex();
     }
     
-    if (!query.direct) {
-      return serveVariantWithAlternateIndex(variantName);
-    }
-    
     if (variant.content) {
       req.filename = variant.content;
       return next();
     }
-
+    
+    if (!query.direct) {
+      return serveVariantWithAlternateIndex(variantName);
+    }
+    
     res.setHeader("Content-Type", "application/lynx+json");
     res.setHeader("Cache-control", "no-cache");
 
