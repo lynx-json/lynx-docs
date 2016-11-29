@@ -56,7 +56,7 @@ function getKVP(yaml) {
 
 function ensureSpec(kvp) {
   var meta = getMetadata(kvp);
-  if (!meta.children || !meta.children.spec) {
+  if (!meta.children || !meta.children.spec || kvp.value.spec === null) {
     kvp.value.spec = {
       hints: []
     };
