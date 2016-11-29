@@ -1,5 +1,5 @@
 # lynx-docs
-The `lynx-docs` repo contains tools for writing Lynx templates in YAML and converting them to other template formats. These tools enable you to model a web server before writing a single line of code in your web server application.
+The `lynx-docs` repository contains tools for writing Lynx templates in YAML and converting them to other template formats. These tools enable you to model a web server before writing a single line of code in your web server application.
 
 The benefit of modeling your web server before you begin to write the web server application is that you can save a significant amount of time and money by quickly fleshing out your resources and the relationships between them without being required to make changes to every layer of your application architecture.
 
