@@ -55,7 +55,6 @@ var exportCli = function (options) {
 
   options.realms.forEach(function (realm) {
     realm.templates.forEach(function (pathToTemplateFile, idx) {
-      if(idx !== 0) return;
 
       var templateOptions = {
         format: options.format,
