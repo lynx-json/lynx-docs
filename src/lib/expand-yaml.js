@@ -93,8 +93,9 @@ function expandObject(obj, options) {
 function expandKvp(kvp, options) {
   var meta = getMetadata(kvp);
 
-  if (meta.partial) {
+  if (meta.partial) {    
     kvp = partials.getPartial(kvp, options);
+    options.partialContext = kvp.partialContext;
     meta = getMetadata(kvp);
   }
 

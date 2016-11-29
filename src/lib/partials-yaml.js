@@ -17,7 +17,15 @@ function resolvePartial(kvp, options) {
   var value = kvp.value,
     key = kvp.key;
   var partialsFolder = path.join(path.dirname(options.context || options.input), "_partials");
-
+  
+  if (value.partial.startsWith("+")) {
+    if (!options.partialContext) throw new Error("Expected a partialContext for resolution of global partial.");
+    partialsFolder = path.join(path.dirname(path.dirname(path.dirname(options.partialContext))), "_partials");
+    if (partialsFolder.indexOf(process.cwd()) !== 0) partialsFolder = fallbackPartialsFolder;
+    
+    value.partial = value.partial.replace(/^\+/, "");
+  }
+  
   if(!options.input) throw new Error("Expected 'options' param to have 'input' key.");
 
   while(partialsFolder) {
@@ -25,16 +33,33 @@ function resolvePartial(kvp, options) {
     if(fs.existsSync(partialFile)) {
       //TODO: Since we're using require, the js is cached, so a change requires restarting the
       // the server. Consider using something like decache module.
-      return require(partialFile)(kvp, options);
+      let result = require(partialFile)(kvp, options);
+      result.partialContext = partialFile;
+      return result;
     }
 
     partialFile = path.join(partialsFolder, value.partial + ".yml");
 
     if(fs.existsSync(partialFile)) {
       let content = fs.readFileSync(partialFile);
+      
+      let yaml = parseYaml(content);
+      let props = Object.getOwnPropertyNames(yaml);
+
+      // Allow YAML partial to redefine the key.
+      // This is necessary in order to allow a document-level partial to call another document-level partial.
+      if (!key && props.length === 1 && getMetadata(props[0]).key === undefined) {
+        return {
+          key: props[0],
+          value: yaml[props[0]],
+          partialContext: partialFile
+        };
+      }
+      
       return {
         key: key,
-        value: parseYaml(content)
+        value: yaml,
+        partialContext: partialFile
       };
     }
 
@@ -183,6 +208,7 @@ function normalizeValueToObject(kvp) {
 }
 
 function getPartial(kvp, options) {
+  options = options || {};
   kvp = normalizeValueToObject(kvp);
   var meta = getMetadata(kvp);
 
@@ -191,6 +217,12 @@ function getPartial(kvp, options) {
   kvp.key = kvp.value.key;
 
   var result = getPartialKVP(kvp, options);
+  
+  if (isPartial(result)) {
+    options.partialContext = result.partialContext;
+    return getPartial(result, options);
+  }
+  
   return result;
 }
 
