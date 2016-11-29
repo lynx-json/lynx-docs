@@ -11,7 +11,7 @@ var mime = require("mime");
 
 var serveStatic = require("../../src/server/serve-static");
 
-describe.only("serve static module", function () {
+describe("serve static module", function () {
   describe("handler creation", function () {
     var handler = serveStatic({});
 
