@@ -71,15 +71,15 @@ function getRealmsForFolder(folder, root, parentRealm) {
 }
 
 function deriveRealmFromFolder(folder, root) {
-  var pathToFolder = path.relative(root, folder);
-  var realm = createRealm(pathToFolder);
-  realm.folder = folder;
+  var realmPath = path.relative(root, folder);
+  var realm = createRealm(realmPath, folder);
   return realm;
 }
 
-function createRealm(realm, variants) {
+function createRealm(realm, folder, variants) {
   return {
     realm: realm,
+    folder: folder,
     templates: [],
     variants: variants || []
   };
@@ -307,7 +307,8 @@ function aggregateContentFiles(contentFiles, realmsForFolder) {
   contentFiles.forEach(function (contentFile) {
     var realm = url.resolve(defaultRealm.realm, path.parse(contentFile).base);
     var variants = [createContentVariant(contentFile)];
-    var realmObj = createRealm(realm, variants);
+    var folder = path.dirname(contentFile);
+    var realmObj = createRealm(realm, folder, variants);
     realmsForFolder.push(realmObj);
   });
 }
