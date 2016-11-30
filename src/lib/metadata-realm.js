@@ -139,7 +139,7 @@ function isTemplateFile(pathToFile) {
 }
 
 function isDataFile(pathToFile) {
-  return pathToFile.match(/\.data\.yml$/);
+  return pathToFile.match(/\.data\.(yml|js|json)$/);
 }
 
 function isMetaFile(pathToFile) {
