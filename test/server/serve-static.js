@@ -32,7 +32,7 @@ describe("serve static module", function () {
 
       handler(req, {}, function () {});
       expect(parseSpy.called).to.be.false;
-    })
+    });
   });
 
   describe("when path is resolved from url", function () {
@@ -42,7 +42,7 @@ describe("serve static module", function () {
       if(fs.existsSync.restore) fs.existsSync.restore();
       if(path.extname.restore) path.extname.restore();
       if(fs.stat.restore) fs.stat.restore();
-    })
+    });
 
     it("should call next if path has no extension", function () {
       var req = { url: "test" };
@@ -81,7 +81,7 @@ describe("serve static module", function () {
     afterEach(function () {
       fs.stat.restore();
       if(fs.readFile.restore) fs.readFile.restore();
-    })
+    });
 
     it("should check file system stats", function () {
       var spy = sinon.spy(fs, "stat");
@@ -130,7 +130,7 @@ describe("serve static module", function () {
       var req = { filename: "test.txt" };
       var contents = "Test data";
 
-      var res = { end: function () {}, write: function () {}, writeHead: function () {} }
+      var res = { end: function () {}, write: function () {}, writeHead: function () {} };
       var endSpy = sinon.spy(res, "end");
       var writeSpy = sinon.spy(res, "write");
       var writeHeadSpy = sinon.spy(res, "writeHead");
