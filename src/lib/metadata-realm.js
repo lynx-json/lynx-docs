@@ -4,6 +4,7 @@ const fs = require("fs");
 const path = require("path");
 const url = require("url");
 const util = require("util");
+const mime = require("mime");
 const parseYaml = require("./parse-yaml");
 
 function getRealms(root, realm) {
@@ -243,7 +244,8 @@ function isDataFileForTemplate(dataFile, templateFile) {
 function createVariant(templateFile, dataFile) {
   var variantObj = {
     template: templateFile,
-    data: dataFile
+    data: dataFile,
+    type: "application/lynx+json"
   };
 
   variantObj.name = getVariantName(variantObj);
@@ -312,7 +314,8 @@ function aggregateContentFiles(contentFiles, realmsForFolder) {
 
 function createContentVariant(contentFile) {
   var variant = {
-    content: contentFile
+    content: contentFile,
+    type: mime.lookup(contentFile)
   };
 
   variant.name = getVariantName(variant);

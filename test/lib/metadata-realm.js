@@ -1,12 +1,13 @@
-var chai = require("chai");
-var should = chai.should();
-var expect = chai.expect;
-var sinon = require("sinon");
-var fs = require("fs");
-var util = require("util");
-var getRealms = require("../../src/lib/metadata-realm");
-var path = require("path");
-var YAML = require("yamljs");
+const mime = require("mime");
+const chai = require("chai");
+const should = chai.should();
+const expect = chai.expect;
+const sinon = require("sinon");
+const fs = require("fs");
+const util = require("util");
+const getRealms = require("../../src/lib/metadata-realm");
+const path = require("path");
+const YAML = require("yamljs");
 
 function statsFake(isDirectory) {
   return {
@@ -370,7 +371,7 @@ function realmObject(realm, variants) {
 }
 
 function variant(name, pathToTemplateFile, pathToDataFile) {
-  var variant = {};
+  var variant = { type: "application/lynx+json" };
   if (name) variant.name = name;
   if (pathToTemplateFile) variant.template = pathToTemplateFile;
   if (pathToDataFile) variant.data = pathToDataFile;
@@ -401,6 +402,7 @@ function containsVariant(realmUri, name, pathToTemplateFile, pathToDataFile) {
         v => r.realm === realmUri &&
         v.name === name &&
         v.template === path.resolve(pathToTemplateFile) &&
+        v.type === "application/lynx+json" &&
         (!pathToDataFile || v.data === path.resolve(pathToDataFile))));
 
     result.should.equal(true);
@@ -413,6 +415,8 @@ function containsVariant(realmUri, name, pathToTemplateFile, pathToDataFile) {
   if (pathToDataFile) {
     desc += ", with data '" + pathToDataFile + "'";
   }
+  
+  desc += ", with type 'application/lynx+json'";
 
   assertion.should = desc;
 
@@ -420,12 +424,15 @@ function containsVariant(realmUri, name, pathToTemplateFile, pathToDataFile) {
 }
 
 function containsContentVariant(realmUri, name, pathToContentFile) {
+  var contentType = mime.lookup(pathToContentFile);
+  
   var assertion = function(realms) {
     var result = realms.some(
       r => r.variants.some(
         v => r.realm === realmUri &&
         v.name === name &&
-        v.content === path.resolve(pathToContentFile)));
+        v.content === path.resolve(pathToContentFile) && 
+        v.type === contentType));
 
     result.should.equal(true);
   };
@@ -433,6 +440,7 @@ function containsContentVariant(realmUri, name, pathToContentFile) {
   var desc = "should contain a content variant in realm '" + realmUri + "'";
   desc += ", with name '" + name + "'";
   desc += ", with content file '" + pathToContentFile + "'";
+  desc += ", with type '" + contentType + "'";
 
   assertion.should = desc;
 
