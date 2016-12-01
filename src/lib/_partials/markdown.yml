@@ -1,0 +1,7 @@
+spec:
+  hints~: [ content ]
+value:
+  data~value:
+  data~:
+  src~:
+  type: text/markdown

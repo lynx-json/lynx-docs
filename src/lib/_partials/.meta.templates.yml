@@ -1,0 +1,6 @@
+spec:
+  hints: [ section ]
+value:
+  header: Templates
+  templates@:
+    - "{{.}}"

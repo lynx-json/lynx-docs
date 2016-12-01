@@ -16,11 +16,11 @@ const fallbackPartialsFolder = path.join(__dirname, "_partials");
 function resolvePartial(kvp, options) {
   var value = kvp.value,
     key = kvp.key;
-  var partialsFolder = path.join(path.dirname(options.context || options.input), "_partials");
+  var partialsFolder = path.join(path.dirname(options.realm.folder), "_partials");
   
   if (value.partial.startsWith("+")) {
-    if (!options.partialContext) throw new Error("Expected a partialContext for resolution of global partial.");
-    partialsFolder = path.join(path.dirname(path.dirname(path.dirname(options.partialContext))), "_partials");
+    if (!options.partials.contextFolder) throw new Error("Expected a partials.contextFolder for resolution of global partial.");
+    partialsFolder = path.join(path.dirname(path.dirname(path.dirname(options.partials.contextFolder))), "_partials");
     if (partialsFolder.indexOf(process.cwd()) !== 0) partialsFolder = fallbackPartialsFolder;
     
     value.partial = value.partial.replace(/^\+/, "");
@@ -34,7 +34,10 @@ function resolvePartial(kvp, options) {
       //TODO: Since we're using require, the js is cached, so a change requires restarting the
       // the server. Consider using something like decache module.
       let result = require(partialFile)(kvp, options);
-      result.partialContext = partialFile;
+      result.partialOptions = {
+        contextFolder: partialFile
+      };
+      
       return result;
     }
 
@@ -52,14 +55,18 @@ function resolvePartial(kvp, options) {
         return {
           key: props[0],
           value: yaml[props[0]],
-          partialContext: partialFile
+          partialOptions: {
+            contextFolder: partialFile
+          }
         };
       }
       
       return {
         key: key,
         value: yaml,
-        partialContext: partialFile
+        partialOptions: {
+          contextFolder: partialFile
+        }
       };
     }
 
@@ -67,8 +74,6 @@ function resolvePartial(kvp, options) {
     else if(partialsFolder === fallbackPartialsFolder) partialsFolder = null;
     else partialsFolder = path.join(path.dirname(path.dirname(partialsFolder)), "_partials");
   }
-
-  throw new Error("Failed to resolve partial " + value.partial);
 }
 
 function* params(kvp) {
@@ -191,6 +196,8 @@ function applyParameters(partialValue, kvp, knownParameters) {
 
 function getPartialKVP(kvp, options) {
   var partial = exports.resolvePartial(kvp, options);
+  if (!partial) return;
+  
   partial.value = applyParameters(partial.value, kvp);
 
   return partial;
@@ -217,15 +224,17 @@ function getPartial(kvp, options) {
   kvp.key = kvp.value.key;
 
   var result = getPartialKVP(kvp, options);
+  if (!result) return;
   
   if (isPartial(result)) {
-    options.partialContext = result.partialContext;
+    options.partials = result.partialOptions;
     return getPartial(result, options);
   }
   
   return result;
 }
 
+exports.getParam = getParam;
 exports.isPartial = isPartial;
 exports.getPartial = getPartial;
 exports.resolvePartial = resolvePartial;

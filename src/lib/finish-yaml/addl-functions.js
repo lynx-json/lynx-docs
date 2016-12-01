@@ -178,7 +178,7 @@ function containers(kvp, options) {
   if (nodeHasProperty(kvp, meta, "scope")) {
     var node = kvp.value;
     if (node.value.scope && options && options.realm) {
-      node.value.scope = url.resolve(options.realm, node.value.scope);
+      node.value.scope = url.resolve(options.realm.realm, node.value.scope);
     }
   }
 }
@@ -206,7 +206,7 @@ function markers(kvp, options) {
 
     var node = kvp.value;
     if (node.value.for && options && options.realm) {
-      node.value.for = url.resolve(options.realm, node.value.for);
+      node.value.for = url.resolve(options.realm.realm, node.value.for);
     }
   }
 }

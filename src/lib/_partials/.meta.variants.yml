@@ -1,0 +1,8 @@
+spec:
+  hints: [ section ]
+value:
+  header: Variants
+  variants@:
+    - href<url: 
+      title<name:
+      type<: application/lynx+json

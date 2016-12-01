@@ -415,13 +415,13 @@ describe("when using additional finishing functions", function() {
     });
     
     it("should resolve a relative 'for' property to an absolute URI", function() {
-      finishYaml.markers(kvp, { realm: "http://example.com"});
+      finishYaml.markers(kvp, { realm: { realm: "http://example.com"}});
       kvp.value.value.for.should.equal("http://example.com/foo/bar/");
     });
     
     it("should not resolve an absolute 'for' property to an absolute URI", function() {
       kvp.value.value.for = "http://other.com/a/b/";
-      finishYaml.markers(kvp, { realm: "http://example.com"});
+      finishYaml.markers(kvp, { realm: { realm: "http://example.com"}});
       kvp.value.value.for.should.equal("http://other.com/a/b/");
     });
   });
