@@ -16,7 +16,7 @@ const fallbackPartialsFolder = path.join(__dirname, "_partials");
 function resolvePartial(kvp, options) {
   var value = kvp.value,
     key = kvp.key;
-  var partialsFolder = path.join(path.dirname(options.realm.folder), "_partials");
+  var partialsFolder = path.join(options.realm.folder, "_partials");
   
   if (value.partial.startsWith("+")) {
     if (!options.partials.contextFolder) throw new Error("Expected a partials.contextFolder for resolution of global partial.");

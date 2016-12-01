@@ -60,7 +60,7 @@ var exportCli = function (options) {
         format: options.format,
         input: pathToTemplateFile,
         output: options.output,
-        realm: realm.realm
+        realm: realm && realm.realm
       };
 
       templates.push(
