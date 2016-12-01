@@ -7,7 +7,7 @@ const exportYaml = require("../lib/export-vinyl");
 const titleCase = require("to-title-case");
 
 exportYaml.handler = function (options) {
-  var buffer = fs.readFileSync(options.input);
+  var buffer = fs.readFileSync(options.template);
   exportYaml.exportBuffer(buffer, data => options.output.write(data), options);
   options.output.end();
 };
@@ -59,7 +59,7 @@ module.exports = exports = function createRealmHandler(options) {
 
       exportYaml.handler({
         format: "lynx",
-        input: path.join(__dirname, "realm-index.lynx.yml"),
+        template: path.join(__dirname, "realm-index.lynx.yml"),
         output: res,
         data: realm,
         realm: realm
@@ -75,7 +75,7 @@ module.exports = exports = function createRealmHandler(options) {
 
       exportYaml.handler({
         format: "lynx",
-        input: path.join(__dirname, "variant-with-alternate-index.lynx.yml"),
+        template: path.join(__dirname, "variant-with-alternate-index.lynx.yml"),
         output: res,
         data: realm,
         realm: realm
@@ -101,10 +101,10 @@ module.exports = exports = function createRealmHandler(options) {
 
     res.setHeader("Content-Type", "application/lynx+json");
     res.setHeader("Cache-control", "no-cache");
-    
+
     return exportYaml.handler({
       format: "lynx",
-      input: variant.template,
+      template: variant.template,
       output: res,
       data: variant.data,
       realm: realm

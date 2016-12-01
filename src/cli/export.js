@@ -55,7 +55,7 @@ var exportCli = function (options) {
   realms.forEach(realm => realm.templates.forEach(function (pathToTemplateFile) {
     templates.push(new Vinyl({
       path: path.relative(realm.root, pathToTemplateFile),
-      options: { realm: realm },
+      options: { realm: realm, template: pathToTemplateFile },
       contents: fs.readFileSync(pathToTemplateFile)
     }));
   }));
@@ -73,7 +73,7 @@ function getRealms(options) {
   var realms = [];
 
   options.root.forEach(function (root) {
-    realms = realms.concat(getRealmMetadata(root, options.realm.realm));
+    realms = realms.concat(getRealmMetadata(root));
   });
 
   realms = realms.sort(function (a, b) {
