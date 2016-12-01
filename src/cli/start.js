@@ -29,6 +29,8 @@ var startCli = function(options) {
   if (options.config) {
     var config = path.resolve(process.cwd(), options.config);
     require(config)(lynxDocs);
+  } else {
+    require("../config")(lynxDocs);
   }
   
   if (!util.isArray(options.root)) options.root = [options.root];
