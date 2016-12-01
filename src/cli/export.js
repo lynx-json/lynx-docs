@@ -48,36 +48,24 @@ var exportCli = function (options) {
 
   if(!util.isArray(options.root)) options.root = [options.root];
   options.root = options.root.map(r => path.resolve(r));
-  options.output = options.output !== "stdout" ? path.resolve(options.output) : options.output;
-  options.realms = getRealms(options);
+  var realms = getRealms(options);
 
   var templates = [];
 
-  options.realms.forEach(function (realm) {
-    realm.templates.forEach(function (pathToTemplateFile, idx) {
-
-      var templateOptions = {
-        format: options.format,
-        input: pathToTemplateFile,
-        output: options.output,
-        realm: realm.realm
-      };
-
-      templates.push(
-        new Vinyl({
-          path: path.relative(realm.root, pathToTemplateFile),
-          options: templateOptions,
-          contents: fs.readFileSync(pathToTemplateFile)
-        }));
-    });
-  });
+  realms.forEach(realm => realm.templates.forEach(function (pathToTemplateFile) {
+    templates.push(new Vinyl({
+      path: path.relative(realm.root, pathToTemplateFile),
+      options: { realm: realm },
+      contents: fs.readFileSync(pathToTemplateFile)
+    }));
+  }));
 
   var source = streamFromArray.obj(templates);
 
   var output = options.output === "stdout" ? process.stdout : options.output;
   var dest = streamUtils.createDestinationStream(output);
 
-  source.pipe(exportVinyl())
+  source.pipe(exportVinyl(options))
     .pipe(dest);
 };
 

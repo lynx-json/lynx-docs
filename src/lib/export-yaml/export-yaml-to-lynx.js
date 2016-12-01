@@ -12,21 +12,19 @@ function bindData(contents, data) {
 function exportLynx(kvp, cb, options) {
 
   var buffer = "";
-  exportToHandleBars(kvp, function(data) {
-    buffer += data;
-  }, options);
+  exportToHandleBars(kvp, data => buffer += data);
   if (buffer.length > 0) buffer += "\n";
 
   options.state = options.state || "default";
 
   var data;
-  
+
   if ((typeof options.data) === "string") {
     data = templateData(options.data);
   } else {
     data = options.data;
   }
-  
+
   cb(bindData(buffer, data));
 }
 
