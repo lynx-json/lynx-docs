@@ -19,7 +19,7 @@ module.exports = exports = (kvp, options) => {
   }
   
   return {
-    key: kvp.key + ">page",
+    key: kvp.key + ">main",
     value: result
   };
 };

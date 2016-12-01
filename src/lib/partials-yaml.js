@@ -25,8 +25,6 @@ function resolvePartial(kvp, options) {
     
     value.partial = value.partial.replace(/^\+/, "");
   }
-  
-  if(!options.input) throw new Error("Expected 'options' param to have 'input' key.");
 
   while(partialsFolder) {
     let partialFile = path.join(partialsFolder, value.partial + ".js");
