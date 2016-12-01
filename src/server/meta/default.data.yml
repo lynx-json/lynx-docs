@@ -1,0 +1,11 @@
+realm: http://bestbuy.com/retail/oms/hd/
+templates:
+  - /Users/johnhowes/lynx-json-org/lynx-docs/src/server/meta/default.lynx.yml
+  - /Users/johnhowes/lynx-json-org/lynx-docs/src/server/meta/default.lynx.yml
+variants:
+  - url: http://localhost:3001/retail/library/?variant=default
+    name: default
+notes:
+  - One
+  - Two
+  - Three

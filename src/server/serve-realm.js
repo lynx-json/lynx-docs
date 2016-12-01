@@ -36,7 +36,7 @@ function isChildOfRealm(realmUri) {
   };
 }
 
-module.exports = exports = function createStaticHandler(options) {
+module.exports = exports = function createRealmHandler(options) {
   return function (req, res, next) {
     var realm = req.realms.find(r => url.parse(r.realm).pathname === url.parse(req.url).pathname);
 
@@ -60,10 +60,9 @@ module.exports = exports = function createStaticHandler(options) {
       exportYaml.handler({
         format: "lynx",
         input: path.join(__dirname, "realm-index.lynx.yml"),
-        context: realm.folder,
         output: res,
         data: realm,
-        realm: realm.realm
+        realm: realm
       });
     }
 
@@ -77,10 +76,9 @@ module.exports = exports = function createStaticHandler(options) {
       exportYaml.handler({
         format: "lynx",
         input: path.join(__dirname, "variant-with-alternate-index.lynx.yml"),
-        context: realm.folder,
         output: res,
         data: realm,
-        realm: realm.realm
+        realm: realm
       });
     }
 
@@ -103,13 +101,13 @@ module.exports = exports = function createStaticHandler(options) {
 
     res.setHeader("Content-Type", "application/lynx+json");
     res.setHeader("Cache-control", "no-cache");
-
+    
     return exportYaml.handler({
       format: "lynx",
       input: variant.template,
       output: res,
       data: variant.data,
-      realm: realm.realm
+      realm: realm
     });
   };
 };

@@ -1,0 +1,13 @@
+>.meta.realm-details:
+  realm: http://bestbuy.com/retail/meta/
+  folder: /Users/johnhowes/lynx-json-org/lynx-docs/src/server/meta
+  templates:
+    - src/default.lynx.yml
+    - src/variant-2.lynx.yml
+  variants:
+    - name: default
+      template: src/default.lynx.yml
+  notes:
+    - One
+    - Two
+    - Three

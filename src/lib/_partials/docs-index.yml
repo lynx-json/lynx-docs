@@ -1,13 +1,14 @@
 spec:
   hints: [ http://lynx-json.org/docs/realm-index ]
 value:
+  scope<realm:
   header:
     primary<title: Realm
     secondary<realm: ""
   variants>list:
     value@variants: 
       - ">list-item":
-          symbol<: _
+          symbol<: □
           header<title: ""
           href<url: ""
           type<: application/lynx+json
