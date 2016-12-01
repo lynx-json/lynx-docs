@@ -5,6 +5,7 @@ const url = require("url");
 const getRealmMetadata = require("../lib/metadata-realm");
 const serveStatic = require("./serve-static");
 const serveRealm = require("./serve-realm");
+const titleCase = require("to-title-case");
 
 function serveNotFound(req, res) {
   res.writeHead(404, { "Content-Type": "text/plain" });
@@ -57,8 +58,20 @@ function getRealms(options) {
     if (a.realm.indexOf(b.realm) === 0) return 1;
     if (b.realm.indexOf(a.realm) === 0) return -1;
   });
+  
+  realms.forEach(realm => {
+    realm.url = realm.url || url.parse(realm.realm).pathname;
+    realm.variants.forEach(variant => {
+      variant.title = variant.title || titleCase(variant.name);
+      variant.url = variant.url || urlForVariant(realm, variant);
+    });
+  });
 
   return realms;
+}
+
+function urlForVariant(realm, variant) {
+  return realm.url + "?variant=" + encodeURIComponent(variant.name);
 }
 
 module.exports = exports = startServer;

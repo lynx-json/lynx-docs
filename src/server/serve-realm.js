@@ -4,7 +4,6 @@ const fs = require("fs");
 const url = require("url");
 const path = require("path");
 const exportYaml = require("../lib/export-vinyl");
-const titleCase = require("to-title-case");
 
 exportYaml.handler = function (options) {
   var buffer = fs.readFileSync(options.template);
@@ -16,23 +15,21 @@ function redirectToRealmIndex(req, res, next) {
   var realm = req.realms[0];
   if(!realm) return next();
 
-  var location = url.parse(realm.realm).pathname;
-
   var headers = {
     "Content-Type": "text/plain",
-    "Location": location,
+    "Location": realm.url,
     "Cache-control": "no-cache"
   };
   res.writeHead(301, headers);
   res.end("Redirecting to realm index");
 }
 
-function isChildOfRealm(realmUri) {
-  return function (realm) {
-    if(realm.realm === realmUri) return false;
-    if(realm.realm.indexOf(realmUri) === -1) return false;
-    return url.parse(realm.realm).pathname.split("/").length -
-      url.parse(realmUri).pathname.split("/").length === 1;
+function isChildOfRealm(parentRealm) {
+  return function (otherRealm) {
+    if(otherRealm.realm === parentRealm.realm) return false;
+    if(otherRealm.realm.indexOf(parentRealm.realm) === -1) return false;
+    return otherRealm.realm.split("/").length -
+      parentRealm.realm.split("/").length === 1;
   };
 }
 
@@ -46,17 +43,12 @@ module.exports = exports = function createRealmHandler(options) {
     }
 
     var variants = realm.variants;
-    var childRealms = req.realms.filter(isChildOfRealm(realm.realm));
+    var childRealms = req.realms.filter(isChildOfRealm(realm));
 
     function serveRealmIndex() {
       res.setHeader("Content-Type", "application/lynx+json");
       res.setHeader("Cache-control", "no-cache");
-
-      realm.variants.forEach(variant => {
-        variant.title = variant.title || titleCase(variant.name);
-        variant.url = url.parse(req.url).pathname + "?variant=" + encodeURIComponent(variant.name);
-      });
-
+      
       exportYaml.handler({
         format: "lynx",
         template: path.join(__dirname, "realm-index.lynx.yml"),
