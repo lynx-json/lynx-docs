@@ -19,8 +19,8 @@ function resolvePartial(kvp, options) {
   var partialsFolder = path.join(options.realm.folder, "_partials");
   
   if (value.partial.startsWith("+")) {
-    if (!options.partials.contextFolder) throw new Error("Expected a partials.contextFolder for resolution of global partial.");
-    partialsFolder = path.join(path.dirname(path.dirname(path.dirname(options.partials.contextFolder))), "_partials");
+    if (!options.partials.context) throw new Error("Expected a partials.context for resolution of global partial.");
+    partialsFolder = path.join(path.dirname(path.dirname(path.dirname(options.partials.context))), "_partials");
     if (partialsFolder.indexOf(process.cwd()) !== 0) partialsFolder = fallbackPartialsFolder;
     
     value.partial = value.partial.replace(/^\+/, "");
@@ -32,9 +32,7 @@ function resolvePartial(kvp, options) {
       //TODO: Since we're using require, the js is cached, so a change requires restarting the
       // the server. Consider using something like decache module.
       let result = require(partialFile)(kvp, options);
-      result.partialOptions = {
-        contextFolder: partialFile
-      };
+      result.location = partialFile;
       
       return result;
     }
@@ -53,18 +51,14 @@ function resolvePartial(kvp, options) {
         return {
           key: props[0],
           value: yaml[props[0]],
-          partialOptions: {
-            contextFolder: partialFile
-          }
+          location: partialFile
         };
       }
       
       return {
         key: key,
         value: yaml,
-        partialOptions: {
-          contextFolder: partialFile
-        }
+        location: partialFile
       };
     }
 
@@ -225,7 +219,9 @@ function getPartial(kvp, options) {
   if (!result) return;
   
   if (isPartial(result)) {
-    options.partials = result.partialOptions;
+    options.partials = {
+      context: result.location
+    }
     return getPartial(result, options);
   }
   

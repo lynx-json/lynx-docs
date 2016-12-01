@@ -50,28 +50,30 @@ function exportBuffer(buffer, cb, options) {
   exportYaml(options.format, finishedYaml, cb, options);
 }
 
-var exportVinyl = function () {
+var exportVinyl = function (options) {
   return through2.obj(function (file, enc, cb) {
 
-    var buffer = "";
-
-    function onData(data) {
-      buffer += data;
-    }
+    var exportOptions = Object.assign({}, options, file.options);
 
     try {
-      exportBuffer(file.contents, onData, file.options);
+      var buffer = "";
+      exportBuffer(file.contents, data => buffer += data, exportOptions);
       if(buffer.length > 0) buffer += "\n";
-      var ext = exportYaml.getExtension(file.options.format);
+      var ext = exportYaml.getExtension(exportOptions.format);
       if(ext) file.extname = ext;
 
-      this.push(new Vinyl({ cwd: file.cwd, base: file.base, path: file.path, contents: new Buffer(buffer) }));
+      this.push(new Vinyl({
+        cwd: file.cwd,
+        base: file.base,
+        path: file.path,
+        contents: new Buffer(buffer)
+      }));
+
       cb(); //signal completion
     } catch(err) {
-      err.message = "Error processing '" + file.path + "'. " + err.message;
+      err.message += "\nExport options:\n" + JSON.stringify(exportOptions, null, 2);
       throw err;
     }
-
   });
 };
 

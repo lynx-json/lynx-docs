@@ -96,8 +96,6 @@ function expandKvp(kvp, options) {
   if (meta.partial) {    
     kvp = partials.getPartial(kvp, options);
     if (!kvp) throw new Error("Failed to locate partial '" + meta.partial + "'. Realm folder: " + options.realm.folder + ".");
-    
-    options.partials = kvp.partialOptions;
     meta = getMetadata(kvp);
   }
 
