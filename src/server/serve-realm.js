@@ -43,7 +43,8 @@ module.exports = exports = function createRealmHandler(options) {
     }
 
     var variants = realm.variants;
-    var childRealms = req.realms.filter(isChildOfRealm(realm));
+    realm.children = req.realms.filter(isChildOfRealm(realm));
+    realm.metaURL = "/meta/?realm=" + realm.realm;
 
     function serveRealmIndex() {
       res.setHeader("Content-Type", "application/lynx+json");
@@ -74,8 +75,7 @@ module.exports = exports = function createRealmHandler(options) {
       });
     }
 
-    var query = url.parse(req.url, true).query;
-    var variantName = query.variant || "default";
+    var variantName = req.query.variant || "default";
     var variant = variants.find(v => v.name === variantName || v.content !== undefined);
 
     if (variantName === "index" || !variant) {
@@ -87,7 +87,7 @@ module.exports = exports = function createRealmHandler(options) {
       return next();
     }
 
-    if (!query.direct) {
+    if (!req.query.direct) {
       return serveVariantWithAlternateIndex(variantName);
     }
 

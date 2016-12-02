@@ -2,4 +2,5 @@ header: Notes
 notes>list:
   value@notes:
     - ">list-item":
+        symbol: ✎
         text: "{{.}}"

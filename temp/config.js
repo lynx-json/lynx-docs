@@ -26,9 +26,9 @@ module.exports = exports = function(lynxDocs) {
     if (!options || !options.realm) return;
 
     if (kvp.value.realm) {
-      kvp.value.realm = url.resolve(options.realm, kvp.value.realm);
+      kvp.value.realm = url.resolve(options.realm.realm, kvp.value.realm);
     } else {  
-      kvp.value.realm = options.realm;
+      kvp.value.realm = options.realm.realm;
     }
   });
   
