@@ -1,22 +1,14 @@
 "use strict";
 
 var should = require("chai").should();
-var exportYaml = require("../../src/lib/export-yaml");
+var kvpToHandlebars = require("../../src/lib/kvp-to-handlebars");
 
 function runTest(test) {
-  var output = [];
-  function captureOutput(content) {
-    output.push(content);
-  }
-  
-  exportYaml("handlebars", { key: test.key, value: test.value }, captureOutput);
-  
-  var actual = output.join("");
+  var actual = kvpToHandlebars({ key: test.key, value: test.value });
   actual.should.equal(test.expected);
 }
 
-var tests = [
-  {
+var tests = [{
     key: undefined,
     value: "String",
     expected: '"String"',
@@ -58,13 +50,13 @@ var tests = [
   },
   {
     key: undefined,
-    value: [ "String", "String" ],
+    value: ["String", "String"],
     expected: '["String","String"]',
     should: "an array value should export a JSON array"
   },
   {
     key: "key",
-    value: [ "String", "String" ],
+    value: ["String", "String"],
     expected: '"key":["String","String"]',
     should: "a kvp with an array value should export a JSON array kvp"
   },

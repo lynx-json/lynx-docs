@@ -3,13 +3,12 @@
 const fs = require("fs");
 const url = require("url");
 const path = require("path");
-const exportYaml = require("../lib/export-vinyl");
+const variantToLynx = require("../lib/export/variants-to-lynx").one;
 
-exportYaml.handler = function (options) {
-  var buffer = fs.readFileSync(options.template);
-  exportYaml.exportBuffer(buffer, data => options.output.write(data), options);
+function handleVariant(variant, options) {
+  options.output.write(variantToLynx(variant, options));
   options.output.end();
-};
+}
 
 function redirectToRealmIndex(req, res, next) {
   var realm = req.realms[0];
@@ -48,12 +47,14 @@ module.exports = exports = function createRealmHandler(options) {
     function serveRealmIndex() {
       res.setHeader("Content-Type", "application/lynx+json");
       res.setHeader("Cache-control", "no-cache");
-      
-      exportYaml.handler({
-        format: "lynx",
+
+      handleVariant({
         template: path.join(__dirname, "realm-index.lynx.yml"),
-        output: res,
         data: realm,
+        realm: realm
+      }, {
+        format: "lynx",
+        output: res,
         realm: realm
       });
     }
@@ -65,11 +66,13 @@ module.exports = exports = function createRealmHandler(options) {
       realm.variantURL = url.parse(req.url).pathname + "?variant=" + variantName + "&direct=true";
       realm.indexURL = url.parse(req.url).pathname + "?variant=index";
 
-      exportYaml.handler({
-        format: "lynx",
+      handleVariant({
         template: path.join(__dirname, "variant-with-alternate-index.lynx.yml"),
-        output: res,
         data: realm,
+        realm: realm
+      }, {
+        format: "lynx",
+        output: res,
         realm: realm
       });
     }
@@ -78,27 +81,25 @@ module.exports = exports = function createRealmHandler(options) {
     var variantName = query.variant || "default";
     var variant = variants.find(v => v.name === variantName || v.content !== undefined);
 
-    if (variantName === "index" || !variant) {
+    if(variantName === "index" || !variant) {
       return serveRealmIndex();
     }
 
-    if (variant.content) {
+    if(variant.content) {
       req.filename = variant.content;
       return next();
     }
 
-    if (!query.direct) {
+    if(!query.direct) {
       return serveVariantWithAlternateIndex(variantName);
     }
 
     res.setHeader("Content-Type", "application/lynx+json");
     res.setHeader("Cache-control", "no-cache");
 
-    return exportYaml.handler({
+    return handleVariant(variant, {
       format: "lynx",
-      template: variant.template,
       output: res,
-      data: variant.data,
       realm: realm
     });
   };
