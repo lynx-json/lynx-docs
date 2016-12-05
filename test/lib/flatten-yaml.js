@@ -112,7 +112,7 @@ function runTest(test) {
   actual.value.should.deep.equal(test.case.flattened);
 }
 
-describe.only("when flattening YAML", function () {
+describe("when flattening YAML", function () {
   tests.forEach(function (test) {
     describe(test.description, function () {
       it(test.should, function () {

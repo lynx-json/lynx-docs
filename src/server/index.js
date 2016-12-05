@@ -16,7 +16,7 @@ function serveNotFound(req, res) {
 function serveError(req, res) {
   res.writeHead(500, { "Content-Type": "text/plain" });
   res.write("500 Server Error");
-  if (req.error) {
+  if(req.error) {
     if(req.error.stack) res.write("\n\n" + req.error.stack);
     else res.write("\n\n" + JSON.stringify(req.error, null, 2));
   }
@@ -34,7 +34,7 @@ function startServer(options) {
           serveNotFound(req, res);
         });
       });
-    } catch (e) {
+    } catch(e) {
       req.error = e;
       serveError(req, res);
     }
@@ -47,18 +47,8 @@ function startServer(options) {
 }
 
 function getRealms(options) {
-  var realms = [];
+  var realms = getRealmMetadata(options.root);
 
-  options.root.forEach(function (root) {
-    realms = realms.concat(getRealmMetadata(root));
-  });
-
-  realms = realms.sort(function (a,b) {
-    if (a.realm === b.realm) return 0;
-    if (a.realm.indexOf(b.realm) === 0) return 1;
-    if (b.realm.indexOf(a.realm) === 0) return -1;
-  });
-  
   realms.forEach(realm => {
     realm.url = realm.url || url.parse(realm.realm).pathname;
     realm.variants.forEach(variant => {
