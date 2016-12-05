@@ -24,7 +24,7 @@ function exportRealms(realms, options) {
 
 function exportFormat(realms, createFile, options) {
   if(!formats[options.format]) throw new Error("Unsupported format: " + options.format);
-  formats[options.format].fn(realms, createFile, options);
+  formats[options.format](realms, createFile, options);
 }
 
 exportRealms.add = function addExportFn(format, exportFn) {

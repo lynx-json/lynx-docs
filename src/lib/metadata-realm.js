@@ -13,6 +13,9 @@ function getRealms(roots, realm) {
   roots.forEach(root => {
     root = path.resolve(root);
     aggregateRealms(root, root, realm || "/", realms);
+    realms
+      .filter(realm => !realm.root)
+      .forEach(realm => realm.root = root);
   });
 
   return realms.sort(function (a, b) {
@@ -49,7 +52,6 @@ function aggregateRealms(folder, root, parentRealm, realms) {
   aggregateContentFiles(contentFiles, realmsForFolder);
 
   realmsForFolder.forEach(function (realm) {
-    realm.root = root;
     realms.push(realm);
   });
 
