@@ -6,6 +6,7 @@ var parseYaml = require("../parse-yaml");
 var expandYaml = require("../expand-yaml");
 var finishYaml = require("../finish-yaml");
 var getMetadata = require("../metadata-yaml");
+var flattenSpecForKvp = require("./flatten-yaml");
 
 function getKVP(yaml) {
   if(!util.isObject(yaml)) return { key: undefined, value: yaml };
@@ -44,6 +45,10 @@ function expandAndFinishTemplate(templatePath, options) {
   if(options.log) {
     console.log("### Finished");
     console.log(JSON.stringify(finishedYaml), "\n");
+  }
+  
+  if (options.flatten) {
+    finishedYaml = flattenSpecForKvp(finishedYaml);
   }
 
   return finishedYaml;
