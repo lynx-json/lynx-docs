@@ -22,6 +22,8 @@ function getRealms(roots, realm) {
     if(a.realm === b.realm) return 0;
     if(a.realm.indexOf(b.realm) === 0) return 1;
     if(b.realm.indexOf(a.realm) === 0) return -1;
+    if(a.realm < b.realm) return 1;
+    if(a.realm > b.realm) return -1;
   });
 }
 
