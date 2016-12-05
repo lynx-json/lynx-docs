@@ -1,7 +1,7 @@
 "use strict";
 
 var should = require("chai").should();
-var kvpToHandlebars = require("../../src/lib/kvp-to-handlebars");
+var kvpToHandlebars = require("../../../../src/lib/export/to-handlebars/kvp");
 
 function runTest(test) {
   var actual = kvpToHandlebars({ key: test.key, value: test.value });

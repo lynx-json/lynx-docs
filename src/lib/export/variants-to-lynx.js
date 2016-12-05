@@ -2,7 +2,7 @@
 
 var path = require("path");
 var expandAndFinishTemplate = require("./expand-finish-template");
-var kvpToHandlebars = require("../kvp-to-handlebars");
+var kvpToHandlebars = require("./to-handlebars/kvp");
 var templateData = require("../template-data");
 var handlebars = require("handlebars");
 

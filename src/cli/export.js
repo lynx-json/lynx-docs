@@ -48,28 +48,9 @@ var exportCli = function (options) {
   var output = options.output === "stdout" ? process.stdout : options.output;
   var dest = streamUtils.createDestinationStream(output);
 
-  if(!util.isArray(options.root)) options.root = [options.root];
-  options.root = options.root.map(r => path.resolve(r));
-
-  var realms = getRealms(options);
+  var realms = getRealmMetadata(options.root);
   exportLib(realms, options).pipe(dest);
 };
-
-function getRealms(options) {
-  var realms = [];
-
-  options.root.forEach(function (root) {
-    realms = realms.concat(getRealmMetadata(root));
-  });
-
-  realms = realms.sort(function (a, b) {
-    if(a.realm === b.realm) return 0;
-    if(a.realm.indexOf(b.realm) === 0) return 1;
-    if(b.realm.indexOf(a.realm) === 0) return -1;
-  });
-
-  return realms;
-}
 
 exports.handler = exportCli;
 exports.builder = buildCommand;

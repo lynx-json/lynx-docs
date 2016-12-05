@@ -1,7 +1,7 @@
 "use strict";
 
 const util = require("util");
-const getMetadata = require("./metadata-yaml");
+const getMetadata = require("../../metadata-yaml");
 
 var templateExporters = {
   literal: exportLiteralTemplate,

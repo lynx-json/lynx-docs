@@ -13,6 +13,7 @@ function ot(variable, inverse) {
   var tag = inverse ? "^" : "#";
   return {
     section: tag + variable,
+    symbol: tag,
     type: "object",
     variable: variable
   };
@@ -21,6 +22,7 @@ function ot(variable, inverse) {
 function at(variable) {
   return {
     section: "@" + variable,
+    symbol: "@",
     type: "array",
     variable: variable
   };
@@ -30,15 +32,15 @@ function lt(variable, quoted) {
   var tag = quoted ? "<" : "=";
   var lt = {
     section: tag + variable,
+    symbol: tag,
     type: "literal",
     variable: variable
   };
-  if (tag === "<") lt.quoted = true;
+  if(tag === "<") lt.quoted = true;
   return lt;
 }
 
-var tests = [
-  {
+var tests = [{
     actual: "bareKey",
     expected: { key: "bareKey" },
     description: "a bare key",
@@ -142,7 +144,7 @@ describe("when getting metadata for a key/value pair", function () {
       runTest(test);
     });
   });
-  
+
   describe("child key without templates/partials", function () {
     it("should return correct metadata", function () {
       var meta = getMetadata({ key: undefined, value: { greeting: "Hi" } });
@@ -153,7 +155,7 @@ describe("when getting metadata for a key/value pair", function () {
       meta.children.greeting[0].key.should.equal("greeting");
     });
   });
-  
+
   describe("child object template key without a name", function () {
     it("should return correct metadata", function () {
       var meta = getMetadata({ key: undefined, value: { "greeting#": { message: "{{{message}}}" } } });
@@ -166,7 +168,7 @@ describe("when getting metadata for a key/value pair", function () {
       meta.children.greeting[0].template.section.should.equal("#greeting");
     });
   });
-  
+
   describe("child inverse object template key without a name", function () {
     it("should return correct metadata", function () {
       var meta = getMetadata({ key: undefined, value: { "greeting^": { message: "{{{message}}}" } } });
@@ -179,7 +181,7 @@ describe("when getting metadata for a key/value pair", function () {
       meta.children.greeting[0].template.section.should.equal("^greeting");
     });
   });
-  
+
   describe("child array template key without a name", function () {
     it("should return correct metadata", function () {
       var meta = getMetadata({ key: undefined, value: { "greetings@": "{{{message}}}" } });
@@ -191,7 +193,7 @@ describe("when getting metadata for a key/value pair", function () {
       meta.children.greetings[0].template.section.should.equal("@greetings");
     });
   });
-  
+
   describe("child object template key with a name", function () {
     it("should return correct metadata", function () {
       var meta = getMetadata({ key: undefined, value: { "greeting#dataVariable": { message: "{{{message}}}" } } });
@@ -204,7 +206,7 @@ describe("when getting metadata for a key/value pair", function () {
       meta.children.greeting[0].template.section.should.equal("#dataVariable");
     });
   });
-  
+
   describe("child inverse object template key with a name", function () {
     it("should return correct metadata", function () {
       var meta = getMetadata({ key: undefined, value: { "greeting^dataVariable": { message: "{{{message}}}" } } });
@@ -217,7 +219,7 @@ describe("when getting metadata for a key/value pair", function () {
       meta.children.greeting[0].template.section.should.equal("^dataVariable");
     });
   });
-  
+
   describe("child with two object templates", function () {
     it("should return correct metadata", function () {
       var meta = getMetadata({ key: undefined, value: { "greeting#dataVariable": { message: "{{{message}}}" }, "greeting^dataVariable": { message: "{{{message}}}" } } });
@@ -234,7 +236,7 @@ describe("when getting metadata for a key/value pair", function () {
       meta.children.greeting[1].template.section.should.equal("^dataVariable");
     });
   });
-  
+
   describe("child array template key with a name", function () {
     it("should return correct metadata", function () {
       var meta = getMetadata({ key: undefined, value: { "greetings@dataVariable": "{{{message}}}" } });

@@ -1,8 +1,8 @@
 "use strict";
 
 var path = require("path");
-var expandAndFinishTemplate = require("./expand-finish-template");
-var kvpToHandlebars = require("../kvp-to-handlebars");
+var expandAndFinishTemplate = require("../expand-finish-template");
+var kvpToHandlebars = require("./kvp");
 
 function exportTemplatesToHandlebars(realms, createFile, options) {
   realms.forEach(realm => realm.templates
