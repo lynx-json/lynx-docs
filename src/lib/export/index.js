@@ -4,8 +4,8 @@ var Vinyl = require("vinyl");
 var streamFromArray = require("stream-from-array");
 
 var formats = {
-  handlebars: { fn: require("./to-handlebars/templates"), ext: ".handlebars" },
-  lynx: { fn: require("./variants-to-lynx").all, ext: ".lnx" }
+  handlebars: require("./to-handlebars/templates"),
+  lynx: require("./variants-to-lynx").all
 };
 
 function exportRealms(realms, options) {
@@ -27,12 +27,9 @@ function exportFormat(realms, createFile, options) {
   formats[options.format].fn(realms, createFile, options);
 }
 
-exportRealms.add = function addExportFn(format, exportFn, ext) {
-  formats[format] = { fn: exportFn, ext: ext };
-};
-
-exportRealms.getExtension = function getExtensionForFormat(format) {
-  return formats[format] && formats[format].ext;
+exportRealms.add = function addExportFn(format, exportFn) {
+  //signature of export function. exportFn(realms, createFile, options)
+  formats[format] = exportFn;
 };
 
 module.exports = exports = exportRealms;
