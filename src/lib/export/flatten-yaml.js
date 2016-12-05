@@ -2,7 +2,9 @@ var getMetadata = require("../metadata-yaml");
 
 function flattenSpecForKvp(kvp, parentSpec) {
   var meta = getMetadata(kvp);
+  
   if (!meta.children || !meta.children.spec || !meta.children.value) return;
+  if (meta.template) return;
   if (meta.children.spec.length !== 1 || meta.children.value.length !== 1) return;
   if (meta.children.spec[0].template) return;
   
