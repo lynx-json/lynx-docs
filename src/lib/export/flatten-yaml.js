@@ -1,17 +1,21 @@
 var getMetadata = require("../metadata-yaml");
 
+function isNode(meta) {
+  return meta.children && meta.children.spec && meta.children.value;
+}
+
 function flattenSpecForKvp(kvp, parentSpec) {
   var meta = getMetadata(kvp);
   
-  if (!meta.children || !meta.children.spec || !meta.children.value) return;
-  if (meta.template) return;
-  if (meta.children.spec.length !== 1 || meta.children.value.length !== 1) return;
-  if (meta.children.spec[0].template) return;
+  if (!isNode(meta)) return; // only process nodes
+  if (meta.template) return; // we cannot flatten dynamic nodes
+  if (meta.children.value.length !== 1) return; // I think this is wrong. 1 spec, * values should be okay/flattened
+  if (meta.children.spec[0].template) return; // we cannot flatten dynamic specs
   
   var specMeta = meta.children.spec[0].more();
   var valueMeta = meta.children.value[0].more();
   
-  function processChildMeta(childMeta) {    
+  function processObjectChildMeta(childMeta) {    
     childMeta = childMeta.more();
     var childKvp = flattenSpecForKvp(childMeta.src, specMeta.src.value);
     if (!childKvp) return;
@@ -26,13 +30,17 @@ function flattenSpecForKvp(kvp, parentSpec) {
   }
   
   for (var child in valueMeta.children) {
-    valueMeta.children[child].forEach(processChildMeta);
+    valueMeta.children[child].forEach(processObjectChildMeta);
   }
   
   if (!parentSpec) return kvp;
   
+  if (!parentSpec.children || !Array.isArray(parentSpec.children)) 
+    throw new Error("Parent spec for key '" + meta.key + "' does not have a 'children' array.");
+    
   var childSpecInParent = parentSpec.children.find(cs => cs.name === meta.key);  
   var childSpec = specMeta.src.value;
+  if (!childSpecInParent) throw new Error("Cannot find a spec in the parent's 'children' array with name of: " + meta.key);
   Object.assign(childSpecInParent, childSpec);
   
   if (valueMeta.template) {
