@@ -7,12 +7,24 @@ const util = require("util");
 const mime = require("mime");
 const parseYaml = require("./parse-yaml");
 
-function getRealms(root, realm) {
-  root = path.resolve(root);
+function getRealms(roots, realm) {
   var realms = [];
-  aggregateRealms(root, root, realm || "/", realms);
-  realms.forEach(realm => realm.root = root);
-  return realms;
+  if(!util.isArray(roots)) roots = [roots];
+  roots.forEach(root => {
+    root = path.resolve(root);
+    aggregateRealms(root, root, realm || "/", realms);
+    realms
+      .filter(realm => !realm.root)
+      .forEach(realm => realm.root = root);
+  });
+
+  return realms.sort(function (a, b) {
+    if(a.realm === b.realm) return 0;
+    if(a.realm.indexOf(b.realm) === 0) return 1;
+    if(b.realm.indexOf(a.realm) === 0) return -1;
+    if(a.realm < b.realm) return 1;
+    if(a.realm > b.realm) return -1;
+  });
 }
 
 function aggregateRealms(folder, root, parentRealm, realms) {
@@ -41,8 +53,8 @@ function aggregateRealms(folder, root, parentRealm, realms) {
   aggregateTemplateFiles(templateFiles, realmsForFolder);
   aggregateContentFiles(contentFiles, realmsForFolder);
 
-  realmsForFolder.forEach(function (realmObj) {
-    realms.push(realmObj);
+  realmsForFolder.forEach(function (realm) {
+    realms.push(realm);
   });
 
   subfolders.forEach(function (subfolder) {
@@ -236,8 +248,8 @@ function aggregateDataFiles(pathToDir, dataFiles) {
 }
 
 function isDataFileForTemplate(dataFile, templateFile) {
-  if (dataFile === templateFile) return false;
-  
+  if(dataFile === templateFile) return false;
+
   return getTemplateFileName(dataFile) === getTemplateFileName(templateFile);
 }
 

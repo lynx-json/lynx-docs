@@ -25,23 +25,21 @@ function buildCommand(yargs) {
     .argv;
 }
 
-var startCli = function(options) {
-  if (options.config) {
+var startCli = function (options) {
+  if(options.config) {
     var config = path.resolve(process.cwd(), options.config);
     require(config)(lynxDocs);
   } else {
     require("../config")(lynxDocs);
   }
-  
-  if (!util.isArray(options.root)) options.root = [options.root];
-  
+
   // start the server
   require("../server/index.js")(options);
 };
 
-module.exports = { 
-  command: "start", 
-  describe: "Starts a web server to browse Lynx documents", 
-  builder: buildCommand, 
-  handler: startCli 
+module.exports = {
+  command: "start",
+  describe: "Starts a web server to browse Lynx documents",
+  builder: buildCommand,
+  handler: startCli
 };

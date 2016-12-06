@@ -2,17 +2,17 @@
 
 var path = require("path");
 var expandAndFinishTemplate = require("./expand-finish-template");
-var kvpToHandlebars = require("../kvp-to-handlebars");
+var kvpToHandlebars = require("./to-handlebars/kvp");
 var templateData = require("../template-data");
 var handlebars = require("handlebars");
 
 function exportLynxDocuments(realms, createFile, options) {
   realms.forEach(realm => realm.variants
-    .filter(variant => variant.template && variant.data) //only variants that have template and data
+    .filter(variant => variant.template) //only variants that have template and data
     .forEach(function (variant) {
       var variantOptions = Object.assign({}, options, { realm: realm });
       var content = transformVariantToLynx(variant, variantOptions);
-      var outputPath = path.join(path.dirname(variant.template), path.basename(variant.template, ".yml") + ".lxn");
+      var outputPath = path.join(path.relative(realm.root, path.dirname(variant.template)), variant.name + ".lnx");
       createFile(outputPath, content);
     }));
 }
