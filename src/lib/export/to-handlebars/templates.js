@@ -9,7 +9,7 @@ function exportTemplatesToHandlebars(realms, createFile, options) {
     .forEach(templatePath => {
       var templateOptions = Object.assign({}, options, { realm: realm });
       var content = transformTemplateToHandlebars(templatePath, templateOptions);
-      var outputPath = path.join(path.dirname(templatePath), path.basename(templatePath, ".yml") + ".handlebars");
+      var outputPath = path.join(path.relative(realm.root, path.dirname(templatePath)), path.basename(templatePath, ".yml") + ".handlebars");
       createFile(outputPath, content);
     }));
 }
