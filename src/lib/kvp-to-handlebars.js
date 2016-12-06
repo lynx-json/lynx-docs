@@ -1,7 +1,7 @@
 "use strict";
 
 const util = require("util");
-const getMetadata = require("../metadata-yaml");
+const getMetadata = require("./metadata-yaml");
 
 var templateExporters = {
   literal: exportLiteralTemplate,
@@ -14,11 +14,11 @@ function resolveValue(kvmp) {
 }
 
 function getKVP(yaml) {
-  if (!util.isObject(yaml)) return { key: undefined, value: yaml };
+  if(!util.isObject(yaml)) return { key: undefined, value: yaml };
 
   var props = Object.getOwnPropertyNames(yaml);
 
-  if (props.length === 1 && getMetadata(props[0]).key === undefined) {
+  if(props.length === 1 && getMetadata(props[0]).key === undefined) {
     return {
       key: props[0],
       value: yaml[props[0]]
@@ -31,17 +31,17 @@ function getKVP(yaml) {
 function exportLiteralTemplate(kvmp, cb) {
   function exportTemplate(meta, defaultValue) {
     cb("{{#if " + meta.template.variable + "}}");
-    if (meta.template.quoted) cb('"');
+    if(meta.template.quoted) cb('"');
     cb("{{" + meta.template.variable + "}}");
-    if (meta.template.quoted) cb('"');
-    if (defaultValue !== undefined) {
+    if(meta.template.quoted) cb('"');
+    if(defaultValue !== undefined) {
       cb("{{else}}");
       cb(JSON.stringify(defaultValue));
     }
     cb("{{/if}}");
   }
 
-  if (kvmp.metas.length === 1) {
+  if(kvmp.metas.length === 1) {
     var defaultValue = resolveValue(kvmp);
     exportTemplate(kvmp.metas[0], defaultValue);
   } else {
@@ -54,14 +54,14 @@ function exportObjectTemplate(kvmp, cb) {
     var sectionTag = meta.template.section[0];
     var inverseTag = sectionTag === "#" ? "^" : "#";
     cb("{{" + sectionTag + "with " + meta.template.variable + "}}");
-    exportObject({key: kvmp.key, metas: [meta]}, cb);
+    exportObject({ key: kvmp.key, metas: [meta] }, cb);
     cb("{{/with}}");
-    if (fallback) {
+    if(fallback) {
       cb("{{" + inverseTag + "with " + meta.template.variable + "}}null{{/with}}");
     }
   }
 
-  if (kvmp.metas.length === 1) {
+  if(kvmp.metas.length === 1) {
     var meta = kvmp.metas[0];
     exportTemplate(meta, true);
   } else {
@@ -97,12 +97,12 @@ function exportObject(kvmp, cb) {
   cb("{");
 
   var count = 0;
-  for (let childKey in meta.children) {
+  for(let childKey in meta.children) {
     count++;
     let metas = meta.children[childKey].map(expandMetadata);
     let childKvmp = { key: childKey, metas: metas };
     exportHandlebars(childKvmp, cb);
-    if (count !== meta.countOfChildren) cb(",");
+    if(count !== meta.countOfChildren) cb(",");
   }
 
   cb(" }");
@@ -117,33 +117,39 @@ function exportArray(kvmp, cb) {
   meta.src.value.forEach((child, index) => {
     let childKvmp = getKVP(child);
     exportHandlebars(childKvmp, cb);
-    if (index + 1 !== length) cb(",");
+    if(index + 1 !== length) cb(",");
   });
 
   cb("]");
 }
 
 function exportHandlebars(kvmp, cb) {
-  if (!kvmp.metas) {
+  if(!kvmp.metas) {
     var meta = getMetadata(kvmp);
     kvmp.metas = [meta];
   }
 
-  if (kvmp.metas[0].key) {
+  if(kvmp.metas[0].key) {
     cb(JSON.stringify(kvmp.metas[0].key) + ":");
   }
 
   var value = resolveValue(kvmp);
 
-  if (kvmp.metas[0].template) {
+  if(kvmp.metas[0].template) {
     exportTemplate(kvmp, cb);
-  } else if (util.isObject(value) && !util.isArray(value)) {
+  } else if(util.isObject(value) && !util.isArray(value)) {
     exportObject(kvmp, cb);
-  } else if (util.isArray(value)) {
+  } else if(util.isArray(value)) {
     exportArray(kvmp, cb);
   } else {
     cb(JSON.stringify(value));
   }
 }
 
-module.exports = exports = exportHandlebars;
+function kvpToHandlebars(kvp) {
+  var buffer = "";
+  exportHandlebars(kvp, data => buffer += data);
+  return buffer;
+}
+
+module.exports = exports = kvpToHandlebars;

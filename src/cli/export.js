@@ -3,11 +3,8 @@
 var lynxDocs = require("../index");
 var path = require("path");
 var util = require("util");
-var fs = require("fs");
-var Vinyl = require("vinyl");
-var exportVinyl = require("../lib/export-vinyl");
 var streamUtils = require("./stream-utils");
-var streamFromArray = require("stream-from-array");
+var exportLib = require("../lib/export");
 
 const getRealmMetadata = require("../lib/metadata-realm");
 
@@ -48,27 +45,14 @@ var exportCli = function (options) {
     require("../config")(lynxDocs);
   }
 
-  if(!util.isArray(options.root)) options.root = [options.root];
-  options.root = options.root.map(r => path.resolve(r));
-  var realms = getRealms(options);
-
-  var templates = [];
-
-  realms.forEach(realm => realm.templates.forEach(function (pathToTemplateFile) {
-    templates.push(new Vinyl({
-      path: path.relative(realm.root, pathToTemplateFile),
-      options: { realm: realm, template: pathToTemplateFile },
-      contents: fs.readFileSync(pathToTemplateFile)
-    }));
-  }));
-
-  var source = streamFromArray.obj(templates);
-
   var output = options.output === "stdout" ? process.stdout : options.output;
   var dest = streamUtils.createDestinationStream(output);
 
-  source.pipe(exportVinyl(options))
-    .pipe(dest);
+  if(!util.isArray(options.root)) options.root = [options.root];
+  options.root = options.root.map(r => path.resolve(r));
+
+  var realms = getRealms(options);
+  exportLib(realms, options).pipe(dest);
 };
 
 function getRealms(options) {

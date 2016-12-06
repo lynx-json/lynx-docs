@@ -5,7 +5,7 @@ const url = require("url");
 const getRealmMetadata = require("../lib/metadata-realm");
 const serveStatic = require("./serve-static");
 const serveRealm = require("./serve-realm");
-const serveMeta = require("./serve-meta");
+// const serveMeta = require("./serve-meta");
 const titleCase = require("to-title-case");
 
 function serveNotFound(req, res) {
@@ -34,11 +34,11 @@ function startServer(options) {
       req.pathname = parsedURL.pathname;
       req.realms = getRealms(options);
       serveRealm(options)(req, res, function () {
-        serveMeta(options)(req, res, function () {
+        // serveMeta(options)(req, res, function () {
           serveStatic(options)(req, res, function () {
             serveNotFound(req, res);
           })
-        })
+        // })
       });
     } catch (e) {
       req.error = e;

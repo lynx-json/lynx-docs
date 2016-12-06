@@ -26,7 +26,8 @@ function getTemplateVariableName(key) {
   return match[4] || match[1];
 }
 
-var objectTemplatePattern = /#|\^/;
+var objectTemplatePattern = /#/;
+var inverseObjectTemplatePattern = /\^/;
 var arrayTemplatePattern = /@/;
 var literalTemplatePattern = /=/;
 var literalQuotedTemplatePattern = /</;
@@ -35,13 +36,15 @@ function applyTemplateMeta(key, meta) {
   if (!key || !util.isString(key)) return;
   
   if (key.match(objectTemplatePattern)) {
-    meta.template = { type: "object" };
+    meta.template = { type: "object", symbol: "#" };
+  } else if (key.match(inverseObjectTemplatePattern)) {
+    meta.template = { type: "object", symbol: "^" };
   } else if (key.match(arrayTemplatePattern)) {
-    meta.template = { type: "array" };
+    meta.template = { type: "array", symbol: "@" };
   } else if (key.match(literalTemplatePattern)) {
-    meta.template = { type: "literal" };
+    meta.template = { type: "literal", symbol: "=" };
   } else if (key.match(literalQuotedTemplatePattern)) {
-    meta.template = { type: "literal", quoted: true };
+    meta.template = { type: "literal", quoted: true, symbol: "<" };
   }
 
   if (meta.template) {

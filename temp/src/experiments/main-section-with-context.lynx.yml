@@ -1,0 +1,7 @@
+>page:
+  ctx>context:
+    header: Context Header
+    message: This is context.
+  main>:
+    header: Main Header
+    message: Welcome message
