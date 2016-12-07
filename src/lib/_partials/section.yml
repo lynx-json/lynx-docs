@@ -1,9 +1,4 @@
-spec:
-  hints~: [ section ]
-  labeledBy~: header
-value:
-  header~:
-    spec:
-      visibility: hidden
-    value: ""
+>lynx:
+  spec.hints~: [ section ]
   ~*:
+    

@@ -6,7 +6,7 @@ const parseYaml = require("./parse-yaml");
 const YAML = require("yamljs");
 const path = require("path");
 const getMetadata = require("./metadata-yaml");
-const paramPattern = () => /([.-\w]*)?~([*.-\w]*)?/g;
+const paramPattern = () => /([*.-\w]*)?~([*.-\w]*)?/g;
 
 function isPartial(kvp) {
   return getMetadata(kvp).partial !== undefined;
@@ -55,17 +55,6 @@ function resolvePartial(kvp, options) {
       let content = fs.readFileSync(partialFile);
       
       let yaml = parseYaml(content);
-      let props = Object.getOwnPropertyNames(yaml);
-
-      // Allow YAML partial to redefine the key.
-      // This is necessary in order to allow a document-level partial to call another document-level partial.
-      if (!key && props.length === 1 && getMetadata(props[0]).key === undefined) {
-        return {
-          key: props[0],
-          value: yaml[props[0]],
-          location: partialFile
-        };
-      }
       
       return {
         key: key,
@@ -105,9 +94,9 @@ function collectKnownParameters(partialValue) {
   /*jshint ignore:start */
   while(match = pattern.exec(partialContent)) {
     let paramName = match[2] || match[1];
-    paramName = getMetadata({
-      key: paramName
-    }).key;
+    let meta = getMetadata({ key: paramName });
+    paramName = meta.key || paramName;
+    
     if(result.indexOf(paramName) === -1) result.push(paramName);
   }
   /*jshint ignore:end */
@@ -201,6 +190,17 @@ function getPartialKVP(kvp, options) {
   var partial = exports.resolvePartial(kvp, options);
   if (!partial) return;
   
+  // Allow YAML partial to redefine the key.
+  // This is necessary in order to allow a partial to defer to another partial.
+  let props = Object.getOwnPropertyNames(partial.value);
+  if (props.length === 1) {
+    let key = props[0].replace(/~.*$/, "");
+    if (getMetadata(key).key === undefined) {
+      partial.key = partial.key ? partial.key + props[0] : props[0];
+      partial.value = partial.value[props[0]];
+    }
+  }
+  
   partial.value = applyParameters(partial.value, kvp);
 
   return partial;
@@ -233,7 +233,8 @@ function getPartial(kvp, options) {
     options.partials = {
       context: result.location
     };
-    return getPartial(result, options);
+    result = getPartial(result, options);
+    return result;
   }
   
   return result;
