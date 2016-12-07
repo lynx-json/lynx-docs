@@ -2,11 +2,11 @@
 
 const http = require("http");
 const url = require("url");
-const getRealmMetadata = require("../lib/metadata-realm");
 const serveStatic = require("./serve-static");
 const serveRealm = require("./serve-realm");
+const getWatchedRealms = require("./get-watched-realms");
+
 // const serveMeta = require("./serve-meta");
-const titleCase = require("to-title-case");
 
 function serveNotFound(req, res) {
   res.writeHead(404, { "Content-Type": "text/plain" });
@@ -27,17 +27,18 @@ function serveError(req, res) {
 function startServer(options) {
   var port = options.port || 0;
 
+  var getRealms = getWatchedRealms(options);
   var handler = function (req, res) {
     try {
       var parsedURL = url.parse(req.url, true);
       req.query = parsedURL.query;
       req.pathname = parsedURL.pathname;
-      req.realms = getRealms(options);
+      req.realms = getRealms();
       serveRealm(options)(req, res, function () {
         // serveMeta(options)(req, res, function () {
-          serveStatic(options)(req, res, function () {
-            serveNotFound(req, res);
-          });
+        serveStatic(options)(req, res, function () {
+          serveNotFound(req, res);
+        });
         // })
       });
     } catch(e) {
@@ -50,24 +51,6 @@ function startServer(options) {
   console.log("Lynx Docs server is running at http://localhost:" + port);
 
   return server;
-}
-
-function getRealms(options) {
-  var realms = getRealmMetadata(options.root);
-
-  realms.forEach(realm => {
-    realm.url = realm.url || url.parse(realm.realm).pathname;
-    realm.variants.forEach(variant => {
-      variant.title = variant.title || titleCase(variant.name);
-      variant.url = variant.url || urlForVariant(realm, variant);
-    });
-  });
-
-  return realms;
-}
-
-function urlForVariant(realm, variant) {
-  return realm.url + "?variant=" + encodeURIComponent(variant.name);
 }
 
 module.exports = exports = startServer;

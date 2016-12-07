@@ -36,9 +36,10 @@ module.exports = exports = function createRealmHandler(options) {
       return next();
     }
 
-    var variants = realm.variants;
-    realm.children = req.realms.filter(isChildOfRealm(realm));
-    realm.metaURL = "/meta/?realm=" + realm.realm;
+    function addRealmIndexData() {
+      realm.children = req.realms.filter(isChildOfRealm(realm));
+      realm.metaURL = "/meta/?realm=" + realm.realm;
+    }
 
     function serveVariant(variant) {
       res.setHeader("Content-Type", "application/lynx+json");
@@ -49,6 +50,7 @@ module.exports = exports = function createRealmHandler(options) {
     }
 
     function serveRealmIndex() {
+      addRealmIndexData();
       serveVariant({
         template: path.join(__dirname, "realm-index.lynx.yml"),
         data: realm
@@ -56,6 +58,7 @@ module.exports = exports = function createRealmHandler(options) {
     }
 
     function serveVariantWithAlternateIndex(variantName) {
+      addRealmIndexData();
       realm.variantURL = url.parse(req.url).pathname + "?variant=" + variantName + "&direct=true";
       realm.indexURL = url.parse(req.url).pathname + "?variant=index";
 
@@ -66,7 +69,7 @@ module.exports = exports = function createRealmHandler(options) {
     }
 
     var variantName = req.query.variant || "default";
-    var variant = variants.find(v => v.name === variantName || v.content !== undefined);
+    var variant = realm.variants.find(v => v.name === variantName || v.content !== undefined);
 
     if(variantName === "index" || !variant) {
       return serveRealmIndex();
