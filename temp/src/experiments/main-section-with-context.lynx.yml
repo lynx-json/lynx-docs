@@ -1,6 +1,15 @@
 >page:
   ctx>context:
-    header: Context Header
+    labeledBy: label
+    header: 
+      image>:
+        width: 50
+        height: 50
+      label: Context Header
+      editLink:
+        title: Edit
+        href: .
+        type: application/lynx+json
     message: This is context.
   main>:
     header: Main Header

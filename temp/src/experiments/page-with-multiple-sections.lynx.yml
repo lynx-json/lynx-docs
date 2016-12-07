@@ -6,7 +6,24 @@
         width: 32
         height: 32
       label: Section One
+      editLink:
+        title: Edit
+        href: .
+        type: application/lynx+json
     message: This is the first section.
   sectionTwo>section:
-    header: Section Two
+    labeledBy: label
+    header: 
+      icon>image:
+        width: 32
+        height: 32
+      label: Section Two
+      editLink:
+        title: Edit
+        href: .
+        type: application/lynx+json
+      deleteLink:
+        title: Delete
+        href: .
+        type: application/lynx+json
     message: This is the second section.

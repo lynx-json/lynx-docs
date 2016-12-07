@@ -1,4 +1,9 @@
 spec:
   hints~: [ http://uncategorized/main, section ]
+  labeledBy~: header
 value:
+  header~:
+    spec:
+      visibility: hidden
+    value: ""
   ~*:
