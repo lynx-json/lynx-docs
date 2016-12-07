@@ -6,12 +6,24 @@ const parseYaml = require("./parse-yaml");
 const YAML = require("yamljs");
 const path = require("path");
 const getMetadata = require("./metadata-yaml");
+const paramPattern = () => /([.-\w]*)?~([*.-\w]*)?/g;
 
 function isPartial(kvp) {
   return getMetadata(kvp).partial !== undefined;
 }
 
 const fallbackPartialsFolder = path.join(__dirname, "_partials");
+
+function parseParamName(fullName) {
+  var namespacePattern = /(?:([.-\w]*)\.)?(.*)/g;
+  var match = namespacePattern.exec(fullName);
+  
+  return {
+    name: match[2],
+    namespace: match[1],
+    fullName: fullName
+  };
+}
 
 function resolvePartial(kvp, options) {
   var value = kvp.value,
@@ -69,11 +81,6 @@ function resolvePartial(kvp, options) {
 }
 
 function* params(kvp) {
-  yield getMetadata({
-    key: "key",
-    value: kvp.key
-  });
-
   if(kvp.value && util.isObject(kvp.value)) {
     for(let p in kvp.value) {
       yield getMetadata({
@@ -91,12 +98,12 @@ function getParam(kvp, name) {
 }
 
 function collectKnownParameters(partialValue) {
-  var paramPattern = /(\w*)?~(\w*|\*)?/g;
+  var pattern = paramPattern();
   var partialContent = YAML.stringify(partialValue);
   var result = [],
     match;
   /*jshint ignore:start */
-  while(match = paramPattern.exec(partialContent)) {
+  while(match = pattern.exec(partialContent)) {
     let paramName = match[2] || match[1];
     paramName = getMetadata({
       key: paramName
@@ -108,16 +115,20 @@ function collectKnownParameters(partialValue) {
   return result;
 }
 
-function applyWildcardParameters(inputKVP, outputKVP, knownParameters) {
+function applyWildcardParameters(inputKVP, outputKVP, knownParameters, namespace) {
   for(let p in inputKVP.value) {
     if(p === "partial" || p === "value" || p === "key") continue;
     let param = getMetadata({
       key: p,
       value: inputKVP.value[p]
     });
+    
+    let parsedKey = parseParamName(param.src.key);
+    
+    if (parsedKey.namespace !== namespace) continue;
 
     if(knownParameters.indexOf(param.key) === -1) {
-      outputKVP[param.src.key] = param.src.value;
+      outputKVP[parsedKey.name] = param.src.value;
     }
   }
 }
@@ -135,20 +146,20 @@ function applyParameters(partialValue, kvp, knownParameters) {
   var result = {};
 
   for(let p in partialValue) {
-    let paramPattern = /(\w*)?~(\w*|\*)?/;
-    let match = paramPattern.exec(p);
+    let pattern = paramPattern();
+    let match = pattern.exec(p);
 
     let partialChildValue = partialValue[p];
     if(match) {
-      let paramName = match[2] || match[1];
+      let paramName = parseParamName(match[2] || match[1]);
 
-      if(paramName === "*") {
-        applyWildcardParameters(kvp, result, knownParameters);
+      if(paramName.name === "*") {
+        applyWildcardParameters(kvp, result, knownParameters, paramName.namespace);
         continue;
       }
 
       // Apply explicit parameter
-      let param = getParam(kvp, paramName);
+      let param = getParam(kvp, paramName.fullName);
 
       if(param) {
         let pMeta = getMetadata({

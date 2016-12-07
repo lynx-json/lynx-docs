@@ -5,7 +5,7 @@ var util = require("util");
 function applyKeyName(key, meta) {
   if (!key) return;
   // key, key@, key#, key^, key<, key@foo, key#foo, key^foo, key<foo, should all yield 'key'
-  var keyPattern = /^([a-zA-Z]*)($|[@#\^><=](.*)$)/;
+  var keyPattern = /^([a-zA-Z.]*)($|[@#\^><=](.*)$)/;
   var match = keyPattern.exec(key);
   if (match && match[1]) {
     meta.key = match[1];

@@ -51,6 +51,11 @@ var tests = [{
     expected: { key: "normal" },
     description: "a key without templates/partials",
     should: "should return correct metadata"
+  },{
+    actual: { key: "spec.hints" },
+    expected: { key: "spec.hints" },
+    description: "a namespaced key (for partials)",
+    should: "should return correct metadata"
   },
   {
     actual: { key: "objectTemplate#" },

@@ -1,6 +1,5 @@
-spec:
+>section:
   hints: [ http://uncategorized/page, section ]
-value:
   banner~:
   globalNav~:
   search~:

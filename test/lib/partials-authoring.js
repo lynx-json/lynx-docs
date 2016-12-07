@@ -8,8 +8,8 @@ const partials = require("../../src/lib/partials-yaml");
 
 function runTest(test) {
   var actual = partials.getPartial(test.kvp);
-  actual.should.deep.equal(test.expected);
   // console.log(JSON.stringify(actual, null, 2));
+  actual.should.deep.equal(test.expected);
 }
 
 var tests = [{
@@ -260,7 +260,7 @@ var tests = [{
   kvp: {
     key: ">section",
     value: {
-      visibility: "visible",
+      "spec.visibility": "visible",
       one: "One",
       two: "Two",
       three: "Three"
@@ -270,7 +270,7 @@ var tests = [{
     value: {
       spec: {
         hints: ["section"],
-        "visibility~": "hidden"
+        "visibility~spec.visibility": "hidden"
       },
       value: {
         "~*": null,
@@ -294,9 +294,47 @@ var tests = [{
   },
   description: "a partial with a wildcard parameter ~*",
   should: "should add all unknown parameters in place of the wildcard"
+}, {
+  kvp: {
+    key: ">section",
+    value: {
+      "spec.visibility": "visible",
+      one: "A",
+      two: "B",
+      three: "C"
+    }
+  },
+  partial: {
+    value: {
+      spec: {
+        hints: ["section"],
+        "~spec.*": null
+      },
+      value: {
+        "~*": null,
+        message: "Hello, World!"
+      }
+    }
+  },
+  expected: {
+    value: {
+      spec: {
+        hints: ["section"],
+        visibility: "visible"
+      },
+      value: {
+        one: "A",
+        two: "B",
+        three: "C",
+        message: "Hello, World!"
+      }
+    }
+  },
+  description: "a partial with a namespaced wildcard parameter ~spec.*",
+  should: "should add all unknown parameters within the namespace in place of the wildcard"
 }];
 
-describe("when authoring partials", function () {
+describe.only("when authoring partials", function () {
   tests.forEach(function (test) {
     describe(test.description, function () {
       beforeEach(function () {
