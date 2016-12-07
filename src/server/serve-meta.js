@@ -4,7 +4,7 @@ const url = require("url");
 
 module.exports = exports = function createMetaHandler(options) {
   return function (req, res, next) {
-    if (!req.pathname === "/docs/meta/realm/") return next();
+    if (req.pathname !== "/docs/meta/realm/") return next();
     
     var realm = req.realms.find(r => r.realm === req.query.realm);
     // var metaRealm = req.realms.find(r => url.parse(r.realm).pathname === url.parse(req.url).pathname);

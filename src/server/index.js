@@ -37,7 +37,7 @@ function startServer(options) {
         // serveMeta(options)(req, res, function () {
           serveStatic(options)(req, res, function () {
             serveNotFound(req, res);
-          })
+          });
         // })
       });
     } catch(e) {

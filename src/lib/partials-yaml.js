@@ -232,7 +232,7 @@ function getPartial(kvp, options) {
   if (isPartial(result)) {
     options.partials = {
       context: result.location
-    }
+    };
     return getPartial(result, options);
   }
   
