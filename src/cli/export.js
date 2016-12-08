@@ -1,6 +1,5 @@
 "use strict";
 
-var util = require("util");
 var commonCli = require("./common");
 var streamUtils = require("./stream-utils");
 var exportLib = require("../lib/export");

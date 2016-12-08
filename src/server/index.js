@@ -4,7 +4,7 @@ const http = require("http");
 const url = require("url");
 const serveStatic = require("./serve-static");
 const serveRealm = require("./serve-realm");
-const getWatchedRealms = require("./get-watched-realms");
+const WatchedRealms = require("./watched-realms");
 
 // const serveMeta = require("./serve-meta");
 
@@ -27,13 +27,13 @@ function serveError(req, res) {
 function startServer(options) {
   var port = options.port || 0;
 
-  var getRealms = getWatchedRealms(options);
+  var watched = new WatchedRealms(options);
   var handler = function (req, res) {
     try {
       var parsedURL = url.parse(req.url, true);
       req.query = parsedURL.query;
       req.pathname = parsedURL.pathname;
-      req.realms = getRealms();
+      req.realms = watched.current();
       serveRealm(options)(req, res, function () {
         // serveMeta(options)(req, res, function () {
         serveStatic(options)(req, res, function () {
