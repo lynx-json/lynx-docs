@@ -5,6 +5,7 @@ const expandAndFinishTemplate = require("./expand-finish-template");
 const kvpToHandlebars = require("./to-handlebars/kvp");
 const templateData = require("./template-data");
 const handlebars = require("handlebars");
+const jsonLint = require("json-lint");
 
 function exportLynxDocuments(realms, createFile, options) {
   realms.forEach(realm => realm.variants
@@ -30,9 +31,9 @@ function transformVariantToLynx(variant, options) {
       data = variant.data;
     }
 
-    return bindData(content, data);
+    return lintContent(bindData(content, data), variant);
   } catch(err) {
-    err.message = "Error converting '".concat(variant.template, "' to lynx.\n", err.message);
+    err.message = "Unable to export '".concat(variant.template, "' to lynx format.\n\n", err.message);
     throw err;
   }
 }
@@ -40,6 +41,17 @@ function transformVariantToLynx(variant, options) {
 function bindData(content, data) {
   var template = handlebars.compile(content, { noEscape: true });
   return template(data);
+}
+
+function lintContent(content, variant) {
+  var linted = jsonLint(content);
+  if(linted.error) {
+    var message = "Failed JSON linting when data binding '".concat(variant.data, "'.\n");
+    message += "\nNote: <<ERROR>> token denotes location of linting failure.\n"
+      .concat(content.substr(0, linted.character - 1), "<<ERROR>>", content.substr(linted.character - 1));
+    throw new Error(message);
+  }
+  return content;
 }
 
 exports.one = transformVariantToLynx;
