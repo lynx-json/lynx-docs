@@ -1,6 +1,4 @@
-var path = require("path");
-var util = require("util");
-var lynxDocs = require("../");
+var commonCli = require("./common");
 
 function buildCommand(yargs) {
   return yargs
@@ -26,12 +24,8 @@ function buildCommand(yargs) {
 }
 
 var startCli = function (options) {
-  if(options.config) {
-    var config = path.resolve(process.cwd(), options.config);
-    require(config)(lynxDocs);
-  } else {
-    require("../config")(lynxDocs);
-  }
+
+  commonCli(options);
 
   // start the server
   require("../server/index.js")(options);

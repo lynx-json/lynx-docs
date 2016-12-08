@@ -8,10 +8,9 @@ const titleCase = require("to-title-case");
 
 function getWatchedRealms(options) {
   var reload = true;
-  var roots = util.isArray(options.root) ? options.root : [options.root];
   var realms = [];
 
-  roots.forEach(root => chokidar
+  options.root.forEach(root => chokidar
     .watch(root)
     .on("all", function (event, path) {
       reload = true;
@@ -20,8 +19,8 @@ function getWatchedRealms(options) {
 
   return function getRealms() {
     if(reload) {
-      if(options.log) console.log("Loading realm(s)", roots);
-      realms = loadRealms(roots);
+      if(options.log) console.log("Loading realm(s)", options.root);
+      realms = loadRealms(options.root);
       reload = false;
     }
     return realms;

@@ -1,8 +1,7 @@
 "use strict";
 
-var lynxDocs = require("../index");
-var path = require("path");
 var util = require("util");
+var commonCli = require("./common");
 var streamUtils = require("./stream-utils");
 var exportLib = require("../lib/export");
 
@@ -38,12 +37,7 @@ function buildCommand(yargs) {
 
 var exportCli = function (options) {
 
-  if(options.config) {
-    var config = path.resolve(process.cwd(), options.config);
-    require(config)(lynxDocs);
-  } else {
-    require("../config")(lynxDocs);
-  }
+  commonCli(options);
 
   var output = options.output === "stdout" ? process.stdout : options.output;
   var dest = streamUtils.createDestinationStream(output);
