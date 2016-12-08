@@ -9,7 +9,7 @@ module.exports = exports = (kvp, options) => {
   for (var p in kvp.value) {
     if (p === "key" || p === "value" || p === "partial") continue;
     
-    var childKVP = { key: p + ">.meta." + p, value: kvp.value[p] };
+    var childKVP = { key: p + ">.meta.realm." + p, value: kvp.value[p] };
     var partialKVP = partials.getPartial(childKVP, options);
     if (partialKVP) {
       result[partialKVP.key] = partialKVP.value;

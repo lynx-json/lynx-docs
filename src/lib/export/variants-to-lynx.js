@@ -1,10 +1,10 @@
 "use strict";
 
-var path = require("path");
-var expandAndFinishTemplate = require("./expand-finish-template");
-var kvpToHandlebars = require("./to-handlebars/kvp");
-var templateData = require("../template-data");
-var handlebars = require("handlebars");
+const path = require("path");
+const expandAndFinishTemplate = require("./expand-finish-template");
+const kvpToHandlebars = require("./to-handlebars/kvp");
+const templateData = require("./template-data");
+const handlebars = require("handlebars");
 
 function exportLynxDocuments(realms, createFile, options) {
   realms.forEach(realm => realm.variants
@@ -18,18 +18,23 @@ function exportLynxDocuments(realms, createFile, options) {
 }
 
 function transformVariantToLynx(variant, options) {
-  var kvp = expandAndFinishTemplate(variant.template, options);
-  //TODO: Extract spec if set on options and emit spec content
-  var content = kvpToHandlebars(kvp, options) + "\n";
+  try {
+    var kvp = expandAndFinishTemplate(variant.template, options);
+    //TODO: Extract spec if set on options and emit spec content
+    var content = kvpToHandlebars(kvp, options) + "\n";
 
-  var data;
-  if((typeof variant.data) === "string") {
-    data = templateData(variant.data);
-  } else {
-    data = variant.data;
+    var data;
+    if((typeof variant.data) === "string") {
+      data = templateData(variant.data);
+    } else {
+      data = variant.data;
+    }
+
+    return bindData(content, data);
+  } catch(err) {
+    err.message = "Error converting '".concat(variant.template, "' to lynx.\n", err.message);
+    throw err;
   }
-
-  return bindData(content, data);
 }
 
 function bindData(content, data) {

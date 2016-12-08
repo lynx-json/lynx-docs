@@ -1,0 +1,13 @@
+>page:
+  main>:
+    labeledBy: label
+    header: 
+      icon>image:
+        width: 20
+        height: 20
+      label: Main Header
+      editLink:
+        title: Edit
+        href: .
+        type: application/lynx+json
+    message: Welcome message
