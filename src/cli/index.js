@@ -9,5 +9,6 @@ yargs
   .version(require("../../package.json").version)
   .help()
   .demand(1)
-  .example("$0 export -i **/*.yml -o ./out")
+  .example("$0 export -r src -o views")
+  .example("$0 start -r src")
   .argv;

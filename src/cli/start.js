@@ -4,22 +4,22 @@ const commonCli = require("./common");
 
 function buildCommand(yargs) {
   return yargs
-    .usage("$0 start [--port]")
+    .usage("$0 start [--root OR root..] [--config] [--port]")
     .option("port", {
       alias: "p",
-      describe: "Port to listen on.",
+      describe: "Port to listen on",
       default: 3000
     })
     .option("root", {
       alias: "r",
-      describe: "Root(s) for the web site.",
+      describe: "Root folder(s) for the web site",
       default: "."
     })
     .option("config", {
       alias: "c",
-      describe: "External configuration file to import."
+      describe: "External configuration file to require"
     })
-    .example("$0 start")
+    .example("$0 start -r src")
     .example("$0 start -p 8080")
     .help()
     .argv;
