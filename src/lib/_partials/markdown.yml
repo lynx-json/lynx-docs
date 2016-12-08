@@ -1,6 +1,5 @@
-spec:
-  hints~: [ content ]
-value:
+>lynx:
+  spec.hints~: [ content ]
   data~value:
   data~:
   src~:

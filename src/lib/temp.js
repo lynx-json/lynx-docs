@@ -186,6 +186,7 @@ function applyParameters(partialKVP, paramsKVP, knownParameters) {
       }
       continue;
     }
+    
 
     let explicitResult = applyExplicitPlaceholders(partialChildKVP, paramsKVP);
     if (explicitResult) {
@@ -193,6 +194,7 @@ function applyParameters(partialKVP, paramsKVP, knownParameters) {
       continue;
     }
     
+    // TODO: Would it simplify things if I were not continuing above and just fall through to this one?
     if(util.isObject(partialChildKVP.value)) {
       let objectResult = applyParameters(partialChildKVP, paramsKVP, knownParameters);
       result[objectResult.key] = objectResult.value;
@@ -202,18 +204,27 @@ function applyParameters(partialKVP, paramsKVP, knownParameters) {
     // If the value is not null or undefined, include it
     // even if there was no match.
     let key = getKeyFromPlaceholder(partialChildKVP.key);
+    // if (!key) {
+    //   console.log("WTF", partialChildKVP.key);
+    //   continue;
+    // }
     
     if(partialChildKVP.value !== null && partialChildKVP.value !== undefined) {
       result[key] = partialChildKVP.value;
     }
     
+    // partial value
+    // : one: "foo ~{{bar}}"
+    // if (typeof partialChildValue === "string") {
+    //   let inlineParamPattern = new RegExp("~{{" + paramName.fullName + "(?:|([^}]*))?}}", "g");
+    //   result[key] = partialChildValue.replace()
+    //   param.src.value;
+    // }
+    
     // Or if the value is a template or partial reference, include it.
     
     let meta = getMetadata(key);
-    if(meta.template || meta.partial) {
-      console.log(key);
-      result[key] = partialChildKVP.value
-    };
+    if(meta.template || meta.partial) result[key] = partialChildKVP.value;
   }
 
   partialKVP.value = result;

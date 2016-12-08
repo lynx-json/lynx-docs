@@ -1,3 +1,4 @@
 >section:
   spec.hints~: [ http://uncategorized/main, section ]
+  foo~: [ 1, 2, 3 ] # Not working for some reason
   ~*:

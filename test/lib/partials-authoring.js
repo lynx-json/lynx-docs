@@ -9,7 +9,6 @@ const YAML = require("yamljs");
 
 function runTest(test) {
   var actual = partials.getPartial(test.kvp);
-  // console.log(YAML.stringify(actual));
   actual.should.deep.equal(test.expected);
 }
 
@@ -182,6 +181,24 @@ var tests = [{
   },
   description: "a partial with a default parameter",
   should: "should return the default value when the parameter is not provided"
+// }, {
+//   kvp: {
+//     key: ">greeting",
+//     value: "Universe"
+//   },
+//   partial: {
+//     value: {
+//       "message": "Hello, ~{{value}}!"
+//     }
+//   },
+//   expected: {
+//     value: {
+//       message: "Hello, Universe!"
+//     }
+//   },
+//   description: "a partial with an inline parameter ~{{value}}",
+//   should: "should include the parameter value when provided"
+// }, {
 }, {
   kvp: {
     key: ">em",
@@ -336,6 +353,9 @@ var tests = [{
 }];
 
 describe("when authoring partials", function () {
+  var only = tests.find(t => t.only);
+  if (only) tests = [only];
+  
   tests.forEach(function (test) {
     describe(test.description, function () {
       beforeEach(function () {
