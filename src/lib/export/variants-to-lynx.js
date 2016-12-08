@@ -18,18 +18,23 @@ function exportLynxDocuments(realms, createFile, options) {
 }
 
 function transformVariantToLynx(variant, options) {
-  var kvp = expandAndFinishTemplate(variant.template, options);
-  //TODO: Extract spec if set on options and emit spec content
-  var content = kvpToHandlebars(kvp, options) + "\n";
+  try {
+    var kvp = expandAndFinishTemplate(variant.template, options);
+    //TODO: Extract spec if set on options and emit spec content
+    var content = kvpToHandlebars(kvp, options) + "\n";
 
-  var data;
-  if((typeof variant.data) === "string") {
-    data = templateData(variant.data);
-  } else {
-    data = variant.data;
+    var data;
+    if((typeof variant.data) === "string") {
+      data = templateData(variant.data);
+    } else {
+      data = variant.data;
+    }
+
+    return bindData(content, data);
+  } catch(err) {
+    err.message = "Error converting '".concat(variant.template, "' to lynx.\n", err.message);
+    throw err;
   }
-
-  return bindData(content, data);
 }
 
 function bindData(content, data) {

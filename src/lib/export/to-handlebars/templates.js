@@ -15,8 +15,13 @@ function exportTemplatesToHandlebars(realms, createFile, options) {
 }
 
 function transformTemplateToHandlebars(templatePath, options) {
-  var kvp = expandAndFinishTemplate(templatePath, options);
-  return kvpToHandlebars(kvp, options) + "\n";
+  try {
+    var kvp = expandAndFinishTemplate(templatePath, options);
+    return kvpToHandlebars(kvp, options) + "\n";
+  } catch(err) {
+    err.message = "Error converting '".concat(templatePath, "' to handlebars.\n", err.message);
+    throw err;
+  }
 }
 
 module.exports = exports = exportTemplatesToHandlebars;
