@@ -20,8 +20,7 @@ var tests = [
       },
       flattened: {
         spec: { 
-          hints: [ "text" ],
-          children: []
+          hints: [ "text" ]
         },
         value: "Hi"
       }
@@ -40,7 +39,8 @@ var tests = [
         },
         value: {
           message: {
-            spec: { 
+            spec: {
+              name: "message", 
               hints: [ "text" ] 
             },
             value: "Hi"
@@ -65,7 +65,7 @@ var tests = [
   },
   {
     description: "a homogenous array value",
-    should: "should flatten specs",
+    should: "should flatten specs to children template",
     case: {
       expanded: {
         spec: { 
@@ -100,7 +100,7 @@ var tests = [
   },
   {
     description: "a heterogenous array value",
-    should: "should not flatten specs",
+    should: "should flatten specs to children array",
     case: {
       expanded: {
         spec: { 
@@ -124,23 +124,14 @@ var tests = [
       },
       flattened: {
         spec: { 
-          hints: [ "container" ], 
-          children: [] 
+          hints: [ "container" ],
+          children: [
+            { name: 0, hints: [ "http://example.com/one", "text" ] },
+            { name: 1, hints: [ "http://example.com/two", "text" ] },
+            { name: 2, hints: [ "http://example.com/three", "text" ] }
+          ]
         },
-        value: [
-          {
-            spec: { hints: [ "http://example.com/one", "text" ] },
-            value: "One"
-          },
-          {
-            spec: { hints: [ "http://example.com/two", "text" ] },
-            value: "Two"
-          },
-          {
-            spec: { hints: [ "http://example.com/three", "text" ] },
-            value: "Three"
-          }
-        ]
+        value: [ "One", "Two", "Three" ]
       }
     }
   },
@@ -190,22 +181,41 @@ var tests = [
         "value@greetings": [
           {
             spec: { 
-              hints: [ "container" ] 
+              hints: [ "container" ],
+              children: [
+                { name: "message" }
+              ]
             },
-            "value#message": "Hi"
+            "value#message": {
+              message: {
+                spec: {
+                  hints: [ "text" ],
+                  children: []
+                },
+                "value<": "Hi"
+              }
+            }
           }
         ]
       },
       flattened: {
         spec: { 
           hints: [ "container" ], 
-          children: {
-            hints: [ "text" ]    
+          children: { 
+            hints: [ "container" ],
+            children: [
+              { 
+                name: "message",
+                hints: [ "text" ]
+              }
+            ]
           }
         },
         "value@greetings": [
           {
-            "<message": "Hi"
+            "#message": {
+              "message<value": "Hi"
+            }
           }
         ]
       }
@@ -318,8 +328,7 @@ var tests = [
               children: [
                 {
                   name: "message",
-                  hints: [ "text" ],
-                  children: []
+                  hints: [ "text" ]
                 }
               ]
             } 
@@ -365,7 +374,8 @@ var tests = [
           "message#": {
             spec: { 
               "visibility<": "hidden", 
-              hints: [ "text" ] 
+              hints: [ "text" ],
+              name: "message"
             },
             "value<": "Hi"
           }
@@ -381,12 +391,18 @@ function runTest(test) {
   actual.value.should.deep.equal(test.case.flattened);
 }
 
-// describe.only("when flattening YAML", function () {
-//   tests.forEach(function (test) {
-//     describe(test.description, function () {
-//       it(test.should, function () {
-//         runTest(test);
-//       });
-//     });
-//   });
-// });
+function byDesc(desc) {
+  return function (test) {
+    return test.description === desc;
+  };
+}
+
+describe.only("when flattening YAML", function () {
+  tests.forEach(function (test) {
+    describe(test.description, function () {
+      it(test.should, function () {
+        runTest(test);
+      });
+    });
+  });
+});
