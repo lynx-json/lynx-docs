@@ -143,11 +143,20 @@ function applyExplicitPlaceholders(partialKVP, paramsKVP) {
   let match = pattern.exec(partialKVP.key);
   if (!match) return;
   
-  let param = getParam(paramsKVP, match[2] || match[1]);
-  if (!param) return;
-  
-  let newKey = param.src.key;
   let keyFromPlaceholder = getKeyFromPlaceholder(partialKVP.key);
+  let param = getParam(paramsKVP, match[2] || match[1]);
+  let newKey = param ? param.src.key : keyFromPlaceholder;
+  
+  if (!param) {
+    if (partialKVP.value !== null && partialKVP.value !== undefined) {
+      return {
+        key: newKey,
+        value: partialKVP.value
+      };
+    }
+    
+    return null;
+  }
   
   // The partial key wins, but we need to copy template and partial info from
   // the param key.

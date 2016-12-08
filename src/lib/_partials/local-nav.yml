@@ -1,5 +1,5 @@
 spec:
-  hints~: [ http://uncategorized/local-navigation, complement, section ]
+  hints: [ http://uncategorized/local-navigation, complement, section ]
   labeledBy~: header
 value:
   header~:

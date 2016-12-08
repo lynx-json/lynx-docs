@@ -1,5 +1,5 @@
 spec:
-  hints~spec-hints: [ "http://uncategorized/listing/item", card, section ]
+  hints: [ "http://uncategorized/listing/item", card, section ]
   labeledBy~: header
   option~: 
 value:
