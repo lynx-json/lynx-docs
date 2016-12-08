@@ -1,12 +1,12 @@
 "use strict";
 
-var fs = require("fs");
-var util = require("util");
-var parseYaml = require("../parse-yaml");
-var expandYaml = require("../expand-yaml");
-var finishYaml = require("../finish-yaml");
-var getMetadata = require("../metadata-yaml");
-var flattenSpecForKvp = require("./flatten-yaml");
+const fs = require("fs");
+const util = require("util");
+const parseYaml = require("../parse-yaml");
+const expandYaml = require("../expand-yaml");
+const finishYaml = require("../finish-yaml");
+const getMetadata = require("../metadata-yaml");
+const flattenSpecForKvp = require("./flatten-yaml");
 
 function getKVP(yaml) {
   if(!util.isObject(yaml)) return { key: undefined, value: yaml };
@@ -46,8 +46,8 @@ function expandAndFinishTemplate(templatePath, options) {
     console.log("### Finished");
     console.log(JSON.stringify(finishedYaml), "\n");
   }
-  
-  if (options.flatten) {
+
+  if(options.flatten) {
     finishedYaml = flattenSpecForKvp(finishedYaml);
   }
 

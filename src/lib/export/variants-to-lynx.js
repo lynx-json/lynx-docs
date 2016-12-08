@@ -1,10 +1,10 @@
 "use strict";
 
-var path = require("path");
-var expandAndFinishTemplate = require("./expand-finish-template");
-var kvpToHandlebars = require("./to-handlebars/kvp");
-var templateData = require("../template-data");
-var handlebars = require("handlebars");
+const path = require("path");
+const expandAndFinishTemplate = require("./expand-finish-template");
+const kvpToHandlebars = require("./to-handlebars/kvp");
+const templateData = require("./template-data");
+const handlebars = require("handlebars");
 
 function exportLynxDocuments(realms, createFile, options) {
   realms.forEach(realm => realm.variants

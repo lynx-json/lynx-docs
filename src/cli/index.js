@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-var yargs = require("yargs");
+const yargs = require("yargs");
 
 yargs
   .command(require("./export"))

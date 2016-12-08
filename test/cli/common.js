@@ -25,7 +25,7 @@ var tests = [{
   }
 ];
 
-describe.only("when normalizing cli root value", function () {
+describe("when normalizing cli root value", function () {
   tests.forEach(test => {
     describe(test.description, function () {
       it(test.should, function () {

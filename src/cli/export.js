@@ -1,8 +1,8 @@
 "use strict";
 
-var commonCli = require("./common");
-var streamUtils = require("./stream-utils");
-var exportLib = require("../lib/export");
+const commonCli = require("./common");
+const streamUtils = require("./stream-utils");
+const exportLib = require("../lib/export");
 
 const getRealmMetadata = require("../lib/metadata-realm");
 

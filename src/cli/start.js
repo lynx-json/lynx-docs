@@ -1,4 +1,6 @@
-var commonCli = require("./common");
+"use strict";
+
+const commonCli = require("./common");
 
 function buildCommand(yargs) {
   return yargs
