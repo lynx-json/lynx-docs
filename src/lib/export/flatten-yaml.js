@@ -48,8 +48,19 @@ function getChildSpec(parentSpec, name) {
 
 function moveChildSpecToParent(childSpec, parentSpec) {
   var targetSpec = getChildSpec(parentSpec, childSpec.name);
-  if (targetSpec) Object.assign(targetSpec, childSpec);
-  else parentSpec.children.push(childSpec);
+  
+  if (targetSpec) {
+    Object.assign(targetSpec, childSpec);
+  }
+  else {
+    if (!parentSpec.children) {
+      var message = "'parentSpec.children' is null/undefined.";
+      message += "\n" + JSON.stringify(parentSpec, null, 2);
+      throw new Error(message);
+    }
+    
+    parentSpec.children.push(childSpec);
+  }
 }
 
 function flattenSpecForArrayNode(kvp, parentSpec) {
