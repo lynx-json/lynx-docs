@@ -1,18 +1,15 @@
 >page:
   localNav>:
-  search:
-    spec:
-      hints: [ http://uncategorized/search, form ]
-    value:
-      phone>input:
-        label: Phone Number
-        required: true
-      email>input:
-        label: Email
-      submit:
-        action: ./
-        method: GET
-        title: Search
+  searchForm>search:
+    phone>input:
+      label: Phone Number
+      required: true
+    email>input:
+      label: Email
+    submit:
+      action: ./
+      method: GET
+      title: Search
   main>:
     header: Search
     description:

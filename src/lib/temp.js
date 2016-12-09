@@ -94,27 +94,17 @@ function collectKnownParameters(partial) {
   /*jshint ignore:start */
   while(match = pattern.exec(partialContent)) {
     let paramName = match[2] || match[1];
-    if (!paramName) continue;
-    
     let meta = getMetadata({ key: paramName });
     paramName = meta.key || paramName;
     
-    if(result.indexOf(paramName) === -1) {
-      result.push(parseParamName(paramName));
-    }
+    if(result.indexOf(paramName) === -1) result.push(paramName);
   }
   /*jshint ignore:end */
 
-  return result.sort(function (a, b) {
-    if(a.fullName === b.fullName) return 0;
-    if(a.fullName.indexOf(b.fullName) === 0) return 1;
-    if(b.fullName.indexOf(a.fullName) === 0) return -1;
-    if(a.fullName < b.fullName) return 1;
-    if(a.fullName > b.fullName) return -1;
-  });
+  return result;
 }
 
-function* replaceWildcardPlaceholder(partialKVP, paramsKVP, knownParameters) {
+function* applyWildcards(partialKVP, paramsKVP, knownParameters) {
   let pattern = placeholderPattern();
   
   let match = pattern.exec(partialKVP.key);
@@ -123,24 +113,22 @@ function* replaceWildcardPlaceholder(partialKVP, paramsKVP, knownParameters) {
   let placeholderName = parseParamName(match[2] || match[1]);
   if (placeholderName.name !== "*") return;
   
-  function isMostSpecificPlaceholderFor(param) {
-    let match = knownParameters.find(k => param.fullName === k.fullName || 
-      (param.fullName.startsWith(k.namespace) && k.name === "*") || 
-      k.fullName === "*");
-    
-    return match && match.fullName === placeholderName.fullName;
-  }
-  
   for(let p in paramsKVP.value) {
     if(p === "partial" || p === "value" || p === "key") continue;
-    let param = getMetadata({ key: p, value: paramsKVP.value[p] });
-    param = Object.assign({}, param, parseParamName(param.src.key));
+    let param = getMetadata({
+      key: p,
+      value: paramsKVP.value[p]
+    });
     
-    if(isMostSpecificPlaceholderFor(param)) {
+    let parsedParamName = parseParamName(param.src.key);
+    
+    if (parsedParamName.namespace !== placeholderName.namespace) continue;
+
+    if(knownParameters.indexOf(param.key) === -1) {
       yield {
-        key: param.fullName.replace(placeholderName.namespace + ".", ""),
+        key: parsedParamName.name,
         value: param.src.value
-      };
+      }
     }
   }
 }
@@ -149,34 +137,17 @@ function getKeyFromPlaceholder(paramName) {
   return paramName.replace(/~.*$/, "");
 }
 
-function replaceExplicitPlaceholder(partialKVP, paramsKVP) {
+function applyExplicitPlaceholders(partialKVP, paramsKVP) {
   let pattern = placeholderPattern();
   
   let match = pattern.exec(partialKVP.key);
-  if (!match) return partialKVP;
+  if (!match) return;
   
-  let keyFromPlaceholder = getKeyFromPlaceholder(partialKVP.key);
   let param = getParam(paramsKVP, match[2] || match[1]);
-  let newKey = param ? param.src.key : keyFromPlaceholder;
+  if (!param) return;
   
-  if (!param) {
-    if (partialKVP.value !== null && partialKVP.value !== undefined) {
-      return {
-        key: newKey,
-        value: partialKVP.value
-      };
-    }
-    
-    let meta = getMetadata(newKey);
-    if(meta.template || meta.partial) {
-      return {
-        key: newKey,
-        value: partialKVP.value
-      }
-    };
-    
-    return;
-  }
+  let newKey = param.src.key;
+  let keyFromPlaceholder = getKeyFromPlaceholder(partialKVP.key);
   
   // The partial key wins, but we need to copy template and partial info from
   // the param key.
@@ -192,46 +163,71 @@ function replaceExplicitPlaceholder(partialKVP, paramsKVP) {
   };
 }
 
-function applyParametersToChildrenOfObject(partialKVP, paramsKVP, knownParameters) {
+function applyParameters(partialKVP, paramsKVP, knownParameters) {
+  if(!util.isObject(partialKVP.value)) return partialKVP;
+  if(!paramsKVP.value) return partialKVP;
+
+  if(!knownParameters) knownParameters = collectKnownParameters(partialKVP);
+
+  if(util.isArray(partialKVP.value)) {
+    partialKVP.value = partialKVP.value.map(item => applyParameters({ value: item }, paramsKVP, knownParameters).value);
+    return partialKVP;
+  }
+
   var result = {};
-  
+
   for(let p in partialKVP.value) {
     let partialChildKVP = { key: p, value: partialKVP.value[p]};
     
     let isWildcard = partialChildKVP.key.indexOf("*") !== -1;
     if (isWildcard) {
-      for (let r of replaceWildcardPlaceholder(partialChildKVP, paramsKVP, knownParameters)) {
+      for (let r of applyWildcards(partialChildKVP, paramsKVP, knownParameters)) {
         result[r.key] = r.value;
       }
       continue;
     }
     
-    let childResult = applyParameters(partialChildKVP, paramsKVP, knownParameters);
-    if (childResult) result[childResult.key] = childResult.value;
+
+    let explicitResult = applyExplicitPlaceholders(partialChildKVP, paramsKVP);
+    if (explicitResult) {
+      result[explicitResult.key] = explicitResult.value;
+      continue;
+    }
+    
+    // TODO: Would it simplify things if I were not continuing above and just fall through to this one?
+    if(util.isObject(partialChildKVP.value)) {
+      let objectResult = applyParameters(partialChildKVP, paramsKVP, knownParameters);
+      result[objectResult.key] = objectResult.value;
+      continue;
+    }
+
+    // If the value is not null or undefined, include it
+    // even if there was no match.
+    let key = getKeyFromPlaceholder(partialChildKVP.key);
+    // if (!key) {
+    //   console.log("WTF", partialChildKVP.key);
+    //   continue;
+    // }
+    
+    if(partialChildKVP.value !== null && partialChildKVP.value !== undefined) {
+      result[key] = partialChildKVP.value;
+    }
+    
+    // partial value
+    // : one: "foo ~{{bar}}"
+    // if (typeof partialChildValue === "string") {
+    //   let inlineParamPattern = new RegExp("~{{" + paramName.fullName + "(?:|([^}]*))?}}", "g");
+    //   result[key] = partialChildValue.replace()
+    //   param.src.value;
+    // }
+    
+    // Or if the value is a template or partial reference, include it.
+    
+    let meta = getMetadata(key);
+    if(meta.template || meta.partial) result[key] = partialChildKVP.value;
   }
-  
+
   partialKVP.value = result;
-  return partialKVP;
-}
-
-function applyParametersToChildrenOfArray(partialKVP, paramsKVP, knownParameters) {
-  partialKVP.value = partialKVP.value.map(item => applyParameters({ value: item }, paramsKVP, knownParameters).value);
-  return partialKVP;
-}
-
-function applyParameters(partialKVP, paramsKVP, knownParameters) {
-  if(!paramsKVP.value) return partialKVP;
-
-  if(!knownParameters) knownParameters = collectKnownParameters(partialKVP);
-  
-  if(util.isArray(partialKVP.value)) {
-    partialKVP = applyParametersToChildrenOfArray(partialKVP, paramsKVP, knownParameters);
-  } else if (util.isObject(partialKVP.value)) {
-    partialKVP = applyParametersToChildrenOfObject(partialKVP, paramsKVP, knownParameters);
-  }
-  
-  partialKVP = replaceExplicitPlaceholder(partialKVP, paramsKVP);
-  
   return partialKVP;
 }
 

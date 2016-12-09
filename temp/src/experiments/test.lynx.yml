@@ -1,2 +1,4 @@
->page:
-  header: Hello
+foo:
+  - A
+  - B
+  - C

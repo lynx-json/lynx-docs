@@ -5,10 +5,10 @@ const should = chai.should();
 const expect = chai.expect;
 const sinon = require("sinon");
 const partials = require("../../src/lib/partials-yaml");
+const YAML = require("yamljs");
 
 function runTest(test) {
   var actual = partials.getPartial(test.kvp);
-  // console.log(JSON.stringify(actual, null, 2));
   actual.should.deep.equal(test.expected);
 }
 
@@ -181,6 +181,24 @@ var tests = [{
   },
   description: "a partial with a default parameter",
   should: "should return the default value when the parameter is not provided"
+// }, {
+//   kvp: {
+//     key: ">greeting",
+//     value: "Universe"
+//   },
+//   partial: {
+//     value: {
+//       "message": "Hello, ~{{value}}!"
+//     }
+//   },
+//   expected: {
+//     value: {
+//       message: "Hello, Universe!"
+//     }
+//   },
+//   description: "a partial with an inline parameter ~{{value}}",
+//   should: "should include the parameter value when provided"
+// }, {
 }, {
   kvp: {
     key: ">em",
@@ -269,10 +287,10 @@ var tests = [{
   partial: {
     value: {
       spec: {
-        hints: ["section"],
-        "visibility~spec.visibility": "hidden"
+        hints: ["section"]
       },
       value: {
+        "a~one": null,
         "~*": null,
         message: "Hello, World!"
       }
@@ -281,11 +299,11 @@ var tests = [{
   expected: {
     value: {
       spec: {
-        hints: ["section"],
-        visibility: "visible"
+        hints: ["section"]
       },
       value: {
-        one: "One",
+        a: "One",
+        "spec.visibility": "visible",
         two: "Two",
         three: "Three",
         message: "Hello, World!"
@@ -335,6 +353,9 @@ var tests = [{
 }];
 
 describe("when authoring partials", function () {
+  var only = tests.find(t => t.only);
+  if (only) tests = [only];
+  
   tests.forEach(function (test) {
     describe(test.description, function () {
       beforeEach(function () {
@@ -363,6 +384,63 @@ describe("when authoring partials", function () {
       value: {
         header: "Greetings",
         "~*": null
+      }
+    };
+    
+    var innerPartial = {
+      value: {
+        spec: {
+          hints: [ "page", "section" ]
+        },
+        value: {
+          "~*": null
+        }
+      }
+    };
+    
+    var expected = {
+      value: {
+        spec: {
+          hints: [ "page", "section" ]
+        },
+        value: {
+          header: "Greetings",
+          message: "Hello, World!"
+        }
+      }
+    };
+    
+    beforeEach(function () {
+      var stub = sinon.stub(partials, "resolvePartial");
+      
+      stub.withArgs(kvp).returns(outerPartial);
+      stub.withArgs(outerPartial).returns(innerPartial);
+    });
+    afterEach(function () {
+      if (partials.resolvePartial.restore) partials.resolvePartial.restore();
+    });
+
+    it("should include the inner partial, including parameters described by the outer partial", function () {
+      var actual = partials.getPartial(kvp);
+      actual.should.deep.equal(expected);
+    });
+  });
+  
+  describe("referencing a root partial from a partial with a key", function () {
+    var kvp = {
+      key: "greeting>outer",
+      value: {
+        "message": "Hello, World!"
+      }
+    };
+    
+    var outerPartial = {
+      key: "greeting",
+      value: {
+        ">inner": {
+          header: "Greetings",
+          "~*": null
+        }
       }
     };
     

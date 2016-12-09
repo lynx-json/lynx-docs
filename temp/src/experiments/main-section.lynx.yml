@@ -1,6 +1,6 @@
 >page:
   main>:
-    labeledBy: label
+    spec.labeledBy: label
     header: 
       icon>image:
         width: 20

@@ -1,8 +1,3 @@
 >section:
-  hints: [ http://uncategorized/page, section ]
-  banner~:
-  globalNav~:
-  search~:
-  localNav~:
-  ctx~: 
+  spec.hints~: [ http://uncategorized/page, section ]
   ~*:

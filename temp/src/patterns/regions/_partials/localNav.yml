@@ -1,6 +1,4 @@
-spec:
-  hints: [ http://uncategorized/local-navigation, section ]
-value:
+>local-nav:
   header: Regions
   list:
     src: /retail/library/patterns/regions/menu/
