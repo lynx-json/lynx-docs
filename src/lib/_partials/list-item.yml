@@ -1,18 +1,6 @@
-spec:
-  hints: [ "http://uncategorized/listing/item", card, section ]
-  labeledBy~: header
-  option~: 
-value:
-  symbol:
-    spec:
-      hints: [ "http://uncategorized/listing/item/symbol"]
+>section:
+  spec.hints~: [ "http://uncategorized/listing/item", card, section ]
+  symbol>lynx:
+    spec.hints: [ "http://uncategorized/listing/item/symbol"]
     value~symbol: ●
-  href~:
-  action~:
-  type~:
-  scope~:
-  for~:
-  content: 
-    header~:
-    ~*:
-  children~:
+  ~*:

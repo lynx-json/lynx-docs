@@ -1,5 +1,3 @@
 >lynx:
-  # spec.hints: [ section, foo ]
-  foo~: ["a", "b", "c"]
+  spec.hints~: [ section ]
   ~*:
-    

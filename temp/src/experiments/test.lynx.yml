@@ -1,3 +1,4 @@
->section:
-  # spec.hints: [ section ]
-  header: Hello
+>list:
+  - >list-item:
+      symbol: ⁌
+      message: Hello

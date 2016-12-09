@@ -287,10 +287,10 @@ var tests = [{
   partial: {
     value: {
       spec: {
-        hints: ["section"],
-        "visibility~spec.visibility": "hidden"
+        hints: ["section"]
       },
       value: {
+        "a~one": null,
         "~*": null,
         message: "Hello, World!"
       }
@@ -299,11 +299,11 @@ var tests = [{
   expected: {
     value: {
       spec: {
-        hints: ["section"],
-        visibility: "visible"
+        hints: ["section"]
       },
       value: {
-        one: "One",
+        a: "One",
+        "spec.visibility": "visible",
         two: "Two",
         three: "Three",
         message: "Hello, World!"
