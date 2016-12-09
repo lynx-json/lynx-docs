@@ -24,29 +24,43 @@ function serveError(req, res) {
   res.end();
 }
 
+function reduction(acc, cv) {
+  return function (req, res) {
+    cv(req, res, function () {
+      acc(req, res);
+    });
+  };
+}
+
 function startServer(options) {
   var port = options.port || 0;
   var realms = getRealms(options);
   
-  var handler = function (req, res) {
+  function addRequestContext(req, res, next) {
+    var parsedURL = url.parse(req.url, true);
+    req.query = parsedURL.query;
+    req.pathname = parsedURL.pathname;
+    req.realms = realms;
+    next();
+  }
+  
+  function addErrorHandler(req, res, next) {
     try {
-      var parsedURL = url.parse(req.url, true);
-      req.query = parsedURL.query;
-      req.pathname = parsedURL.pathname;
-      req.realms = realms;
-      serveRealm(options)(req, res, function () {
-        // serveMeta(options)(req, res, function () {
-        serveStatic(options)(req, res, function () {
-          serveNotFound(req, res);
-        });
-        // })
-      });
-    } catch(e) {
+      next();
+    } catch (e) {
       req.error = e;
       serveError(req, res);
     }
-  };
-
+  }
+  
+  var handlers = [
+    addRequestContext,
+    addErrorHandler, 
+    serveRealm(options),
+    serveStatic(options)
+  ];
+  
+  var handler = handlers.reverse().reduce(reduction, serveNotFound);
   var server = http.createServer(handler).listen(port);
   console.log("Lynx Docs server is running at http://localhost:" + port);
 
