@@ -19,7 +19,7 @@ function transformTemplateToHandlebars(templatePath, options) {
     var kvp = expandAndFinishTemplate(templatePath, options);
     return kvpToHandlebars(kvp, options) + "\n";
   } catch(err) {
-    err.message = "Unable to export '".concat(templatePath, "' to handlebars format.\n", err.message);
+    err.message = "Unable to export '".concat(templatePath, "' to handlebars format.\n\n", err.message);
     throw err;
   }
 }
