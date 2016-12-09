@@ -70,8 +70,7 @@ function flattenSpecForArrayNode(kvp, parentSpec) {
   var newValue = [];
   
   value.forEach((item, idx) => {
-    item.spec.name = item.spec.name || idx;
-    let childKvp = { value: item };
+    let childKvp = { key: idx, value: item };
     childKvp = flattenSpecForKvp(childKvp, spec);
     newValue.push(childKvp.value);
   });
@@ -104,9 +103,7 @@ function flattenSpecForObjectNode(kvp, parentSpec) {
   var newValue = {};
   
   Object.getOwnPropertyNames(value).forEach(childKey => {
-    var childMeta = getMetadata(childKey);
     let childKvp = { key: childKey, value: value[childKey] };
-    childKvp.value.spec.name = childKvp.value.spec.name || childMeta.key;
     childKvp = flattenSpecForKvp(childKvp, spec);
     newValue[childKvp.key] = childKvp.value;
   });
@@ -176,9 +173,7 @@ function flattenSpecForObjectValueTemplateNode(kvp, parentSpec) {
     var newTemplateValue = {};
     
     Object.getOwnPropertyNames(templateValue).forEach(childKey => {
-      var childMeta = getMetadata(childKey);
       let childKvp = { key: childKey, value: templateValue[childKey] };
-      childKvp.value.spec.name = childKvp.value.spec.name || childMeta.key;
       childKvp = flattenSpecForKvp(childKvp, spec);
       newTemplateValue[childKvp.key] = childKvp.value;
     });
@@ -229,7 +224,7 @@ function flattenSpecForKvp(kvp, parentSpec) {
   
   var meta = getMetadata(kvp);
   
-  if (!isNode(meta)) throw new Error("Expected a 'kvp.value' to be value/spec pair."); // only process nodes
+  if (!isNode(meta)) return kvp;
   if (meta.template) return kvp; // we cannot flatten dynamic nodes
   if (meta.children.spec[0].template) return kvp; // we cannot flatten dynamic specs
   
@@ -247,6 +242,6 @@ function flattenSpecForKvp(kvp, parentSpec) {
 
 module.exports = exports = function flattenYaml(kvp) {
   kvp = flattenSpecForKvp(kvp);
-  if (kvp.value.spec.children.length === 0) delete kvp.value.spec.children;
+  if (kvp.value.spec.children && kvp.value.spec.children.length === 0) delete kvp.value.spec.children;
   return kvp;
 };

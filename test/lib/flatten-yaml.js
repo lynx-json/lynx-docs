@@ -70,15 +70,24 @@ var tests = [{
           children: []
         },
         value: [{
-            spec: { hints: ["text"] },
+            spec: {
+              name: 0,
+              hints: ["text"]
+            },
             value: "One"
           },
           {
-            spec: { hints: ["text"] },
+            spec: {
+              name: 1,
+              hints: ["text"]
+            },
             value: "Two"
           },
           {
-            spec: { hints: ["text"] },
+            spec: {
+              name: 2,
+              hints: ["text"]
+            },
             value: "Three"
           }
         ]
@@ -104,15 +113,24 @@ var tests = [{
           children: []
         },
         value: [{
-            spec: { hints: ["http://example.com/one", "text"] },
+            spec: {
+              name: 0,
+              hints: ["http://example.com/one", "text"]
+            },
             value: "One"
           },
           {
-            spec: { hints: ["http://example.com/two", "text"] },
+            spec: {
+              name: 1,
+              hints: ["http://example.com/two", "text"]
+            },
             value: "Two"
           },
           {
-            spec: { hints: ["http://example.com/three", "text"] },
+            spec: {
+              name: 2,
+              hints: ["http://example.com/three", "text"]
+            },
             value: "Three"
           }
         ]
@@ -179,6 +197,7 @@ var tests = [{
           "value#message": {
             message: {
               spec: {
+                name: "message",
                 hints: ["text"],
                 children: []
               },
@@ -219,7 +238,10 @@ var tests = [{
         },
         value: {
           message: {
-            spec: { hints: ["text"] },
+            spec: { 
+              name: "message",
+              hints: ["text"] 
+            },
             "value<message": "Hi"
           }
         }
@@ -251,7 +273,10 @@ var tests = [{
         },
         value: {
           message: {
-            spec: { hints: ["text"] },
+            spec: { 
+              name: "message",
+              hints: ["text"] 
+            },
             "value=message": "Hi"
           }
         }
@@ -284,12 +309,14 @@ var tests = [{
         value: {
           greeting: {
             spec: {
+              name: "greeting",
               hints: ["container"],
               children: [{ name: "message" }]
             },
             "value#greeting": {
               message: {
                 spec: {
+                  name: "message",
                   hints: ["text"],
                   children: []
                 },
@@ -333,6 +360,7 @@ var tests = [{
         value: {
           "message#": {
             spec: {
+              name: "message",
               "visibility<": "hidden",
               hints: ["text"]
             },
@@ -380,10 +408,12 @@ var tests = [{
         spec: {
           hints: ["image", "content"]
         },
-        src: ".",
-        type: "image/whatever",
-        height: 20,
-        width: 20
+        value: {
+          src: ".",
+          type: "image/whatever",
+          height: 20,
+          width: 20  
+        }
       }
     }
   }
@@ -401,7 +431,7 @@ function byDesc(desc) {
   };
 }
 
-describe("when flattening YAML", function () {
+describe.only("when flattening YAML", function () {
   tests.forEach(function (test) {
     describe(test.description, function () {
       it(test.should, function () {
