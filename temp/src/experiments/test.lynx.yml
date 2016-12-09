@@ -1,4 +1,4 @@
->list:
-  - >list-item:
-      symbol: ⁌
-      message: Hello
+foo:
+  - A
+  - B
+  - C
