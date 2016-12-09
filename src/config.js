@@ -50,10 +50,12 @@ module.exports = exports = function(lynxDocs) {
     }
     
     var meta = lynxDocs.lib.meta(kvp);  
-    if (!isNode(meta) || isArray(meta)) return;
+    if (!isNode(meta)) return;
     
     var node = kvp.value;
     node.spec.children = node.spec.children || [];
+    
+    if (isArray(meta)) return;
     
     function addChildNode(childMeta) {
       function match(childSpec) {

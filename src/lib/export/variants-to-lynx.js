@@ -1,10 +1,11 @@
 "use strict";
 
-var path = require("path");
-var expandAndFinishTemplate = require("./expand-finish-template");
-var kvpToHandlebars = require("./to-handlebars/kvp");
-var templateData = require("../template-data");
-var handlebars = require("handlebars");
+const path = require("path");
+const expandAndFinishTemplate = require("./expand-finish-template");
+const kvpToHandlebars = require("./to-handlebars/kvp");
+const templateData = require("./template-data");
+const handlebars = require("handlebars");
+const jsonLint = require("json-lint");
 
 function exportLynxDocuments(realms, createFile, options) {
   realms.forEach(realm => realm.variants
@@ -18,23 +19,39 @@ function exportLynxDocuments(realms, createFile, options) {
 }
 
 function transformVariantToLynx(variant, options) {
-  var kvp = expandAndFinishTemplate(variant.template, options);
-  //TODO: Extract spec if set on options and emit spec content
-  var content = kvpToHandlebars(kvp, options) + "\n";
+  try {
+    var kvp = expandAndFinishTemplate(variant.template, options);
+    //TODO: Extract spec if set on options and emit spec content
+    var content = kvpToHandlebars(kvp, options) + "\n";
 
-  var data;
-  if((typeof variant.data) === "string") {
-    data = templateData(variant.data);
-  } else {
-    data = variant.data;
+    var data;
+    if((typeof variant.data) === "string") {
+      data = templateData(variant.data);
+    } else {
+      data = variant.data;
+    }
+
+    return lintContent(bindData(content, data), variant);
+  } catch(err) {
+    err.message = "Unable to export '".concat(variant.template, "' to lynx format.\n\n", err.message);
+    throw err;
   }
-
-  return bindData(content, data);
 }
 
 function bindData(content, data) {
   var template = handlebars.compile(content, { noEscape: true });
   return template(data);
+}
+
+function lintContent(content, variant) {
+  var linted = jsonLint(content);
+  if(linted.error) {
+    var message = "Failed JSON linting when data binding '".concat(variant.data, "'.\n");
+    message += "\nNote: <<ERROR>> token denotes location of linting failure.\n"
+      .concat(content.substr(0, linted.character - 1), "<<ERROR>>", content.substr(linted.character - 1));
+    throw new Error(message);
+  }
+  return content;
 }
 
 exports.one = transformVariantToLynx;

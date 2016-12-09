@@ -1,8 +1,8 @@
 "use strict";
 
-var path = require("path");
-var expandAndFinishTemplate = require("../expand-finish-template");
-var kvpToHandlebars = require("./kvp");
+const path = require("path");
+const expandAndFinishTemplate = require("../expand-finish-template");
+const kvpToHandlebars = require("./kvp");
 
 function exportTemplatesToHandlebars(realms, createFile, options) {
   realms.forEach(realm => realm.templates
@@ -15,8 +15,13 @@ function exportTemplatesToHandlebars(realms, createFile, options) {
 }
 
 function transformTemplateToHandlebars(templatePath, options) {
-  var kvp = expandAndFinishTemplate(templatePath, options);
-  return kvpToHandlebars(kvp, options) + "\n";
+  try {
+    var kvp = expandAndFinishTemplate(templatePath, options);
+    return kvpToHandlebars(kvp, options) + "\n";
+  } catch(err) {
+    err.message = "Unable to export '".concat(templatePath, "' to handlebars format.\n\n", err.message);
+    throw err;
+  }
 }
 
 module.exports = exports = exportTemplatesToHandlebars;

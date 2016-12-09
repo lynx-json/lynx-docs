@@ -5,11 +5,6 @@ const url = require("url");
 const path = require("path");
 const variantToLynx = require("../lib/export/variants-to-lynx").one;
 
-function handleVariant(variant, options) {
-  options.output.write(variantToLynx(variant, options));
-  options.output.end();
-}
-
 function redirectToRealmIndex(req, res, next) {
   var realm = req.realms[0];
   if(!realm) return next();
@@ -41,45 +36,40 @@ module.exports = exports = function createRealmHandler(options) {
       return next();
     }
 
-    var variants = realm.variants;
-    realm.children = req.realms.filter(isChildOfRealm(realm));
-    realm.metaURL = "/meta/?realm=" + realm.realm;
+    function addRealmIndexData() {
+      realm.children = req.realms.filter(isChildOfRealm(realm));
+      realm.metaURL = "/meta/?realm=" + realm.realm;
+    }
 
-    function serveRealmIndex() {
+    function serveVariant(variant) {
       res.setHeader("Content-Type", "application/lynx+json");
       res.setHeader("Cache-control", "no-cache");
 
-      handleVariant({
+      res.write(variantToLynx(variant, { realm: realm }));
+      res.end();
+    }
+
+    function serveRealmIndex() {
+      addRealmIndexData();
+      serveVariant({
         template: path.join(__dirname, "realm-index.lynx.yml"),
-        data: realm,
-        realm: realm
-      }, {
-        format: "lynx",
-        output: res,
-        realm: realm
+        data: realm
       });
     }
 
     function serveVariantWithAlternateIndex(variantName) {
-      res.setHeader("Content-Type", "application/lynx+json");
-      res.setHeader("Cache-control", "no-cache");
-
+      addRealmIndexData();
       realm.variantURL = url.parse(req.url).pathname + "?variant=" + variantName + "&direct=true";
       realm.indexURL = url.parse(req.url).pathname + "?variant=index";
 
-      handleVariant({
+      serveVariant({
         template: path.join(__dirname, "variant-with-alternate-index.lynx.yml"),
-        data: realm,
-        realm: realm
-      }, {
-        format: "lynx",
-        output: res,
-        realm: realm
+        data: realm
       });
     }
 
     var variantName = req.query.variant || "default";
-    var variant = variants.find(v => v.name === variantName || v.content !== undefined);
+    var variant = realm.variants.find(v => v.name === variantName || v.content !== undefined);
 
     if(variantName === "index" || !variant) {
       return serveRealmIndex();
@@ -90,17 +80,10 @@ module.exports = exports = function createRealmHandler(options) {
       return next();
     }
 
-    if (!req.query.direct) {
+    if(!req.query.direct) {
       return serveVariantWithAlternateIndex(variantName);
     }
 
-    res.setHeader("Content-Type", "application/lynx+json");
-    res.setHeader("Cache-control", "no-cache");
-
-    return handleVariant(variant, {
-      format: "lynx",
-      output: res,
-      realm: realm
-    });
+    return serveVariant(variant);
   };
 };

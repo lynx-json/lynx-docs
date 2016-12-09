@@ -6,22 +6,20 @@ var should = chai.should();
 var expect = chai.expect;
 var flattenYaml = require("../../src/lib/export/flatten-yaml");
 
-var tests = [
-  {
+var tests = [{
     description: "a non-container value",
     should: "should not flatten specs",
     case: {
       expanded: {
-        spec: { 
-          hints: [ "text" ],
+        spec: {
+          hints: ["text"],
           children: []
         },
         value: "Hi"
       },
       flattened: {
-        spec: { 
-          hints: [ "text" ],
-          children: []
+        spec: {
+          hints: ["text"]
         },
         value: "Hi"
       }
@@ -32,30 +30,29 @@ var tests = [
     should: "should flatten specs",
     case: {
       expanded: {
-        spec: { 
-          hints: [ "container" ], 
-          children: [ 
+        spec: {
+          hints: ["container"],
+          children: [
             { name: "message" }
-          ] 
+          ]
         },
         value: {
           message: {
-            spec: { 
-              hints: [ "text" ] 
+            spec: {
+              name: "message",
+              hints: ["text"]
             },
             value: "Hi"
           }
         }
       },
       flattened: {
-        spec: { 
-          hints: [ "container" ], 
-          children: [ 
-            { 
-              name: "message", 
-              hints: [ "text" ] 
-            } 
-          ] 
+        spec: {
+          hints: ["container"],
+          children: [{
+            name: "message",
+            hints: ["text"]
+          }]
         },
         value: {
           message: "Hi"
@@ -65,82 +62,89 @@ var tests = [
   },
   {
     description: "a homogenous array value",
-    should: "should flatten specs",
+    should: "should flatten specs to children template",
     case: {
       expanded: {
-        spec: { 
-          hints: [ "container" ], 
-          children: [] 
+        spec: {
+          hints: ["container"],
+          children: []
         },
-        value: [
-          {
-            spec: { hints: [ "text" ] },
+        value: [{
+            spec: {
+              name: 0,
+              hints: ["text"]
+            },
             value: "One"
           },
           {
-            spec: { hints: [ "text" ] },
+            spec: {
+              name: 1,
+              hints: ["text"]
+            },
             value: "Two"
           },
           {
-            spec: { hints: [ "text" ] },
+            spec: {
+              name: 2,
+              hints: ["text"]
+            },
             value: "Three"
           }
         ]
       },
       flattened: {
-        spec: { 
-          hints: [ "container" ], 
-          children: { 
-            hints: [ "text" ] 
-          } 
+        spec: {
+          hints: ["container"],
+          children: {
+            hints: ["text"]
+          }
         },
-        value: [ "One", "Two", "Three" ]
+        value: ["One", "Two", "Three"]
       }
     }
   },
   {
     description: "a heterogenous array value",
-    should: "should not flatten specs",
+    should: "should flatten specs to children array",
     case: {
       expanded: {
-        spec: { 
-          hints: [ "container" ], 
-          children: [] 
+        spec: {
+          hints: ["container"],
+          children: []
         },
-        value: [
-          {
-            spec: { hints: [ "http://example.com/one", "text" ] },
+        value: [{
+            spec: {
+              name: 0,
+              hints: ["http://example.com/one", "text"]
+            },
             value: "One"
           },
           {
-            spec: { hints: [ "http://example.com/two", "text" ] },
+            spec: {
+              name: 1,
+              hints: ["http://example.com/two", "text"]
+            },
             value: "Two"
           },
           {
-            spec: { hints: [ "http://example.com/three", "text" ] },
+            spec: {
+              name: 2,
+              hints: ["http://example.com/three", "text"]
+            },
             value: "Three"
           }
         ]
       },
       flattened: {
-        spec: { 
-          hints: [ "container" ], 
-          children: [] 
+        spec: {
+          hints: ["container"],
+          children: [
+            { name: 0, hints: ["http://example.com/one", "text"] },
+            { name: 1, hints: ["http://example.com/two", "text"] },
+            { name: 2, hints: ["http://example.com/three", "text"] }
+          ]
         },
-        value: [
-          {
-            spec: { hints: [ "http://example.com/one", "text" ] },
-            value: "One"
-          },
-          {
-            spec: { hints: [ "http://example.com/two", "text" ] },
-            value: "Two"
-          },
-          {
-            spec: { hints: [ "http://example.com/three", "text" ] },
-            value: "Three"
-          }
-        ]
+        value: ["One", "Two", "Three"]
       }
     }
   },
@@ -149,32 +153,28 @@ var tests = [
     should: "should flatten specs",
     case: {
       expanded: {
-        spec: { 
-          hints: [ "container" ], 
-          children: [] 
+        spec: {
+          hints: ["container"],
+          children: []
         },
-        "value@greetings": [
-          {
-            spec: { 
-              hints: [ "text" ],
-              children: []
-            },
-            "value<message": "Hi"
-          }
-        ]
+        "value@greetings": [{
+          spec: {
+            hints: ["text"],
+            children: []
+          },
+          "value<message": "Hi"
+        }]
       },
       flattened: {
-        spec: { 
-          hints: [ "container" ], 
+        spec: {
+          hints: ["container"],
           children: {
-            hints: [ "text" ]    
+            hints: ["text"]
           }
         },
-        "value@greetings": [
-          {
-            "<message": "Hi"
-          }
-        ]
+        "value@greetings": [{
+          "<message": "Hi"
+        }]
       }
     }
   },
@@ -183,31 +183,45 @@ var tests = [
     should: "should flatten specs",
     case: {
       expanded: {
-        spec: { 
-          hints: [ "container" ], 
-          children: [] 
+        spec: {
+          hints: ["container"],
+          children: []
         },
-        "value@greetings": [
-          {
-            spec: { 
-              hints: [ "container" ] 
-            },
-            "value#message": "Hi"
+        "value@greetings": [{
+          spec: {
+            hints: ["container"],
+            children: [
+              { name: "message" }
+            ]
+          },
+          "value#message": {
+            message: {
+              spec: {
+                name: "message",
+                hints: ["text"],
+                children: []
+              },
+              "value<": "Hi"
+            }
           }
-        ]
+        }]
       },
       flattened: {
-        spec: { 
-          hints: [ "container" ], 
+        spec: {
+          hints: ["container"],
           children: {
-            hints: [ "text" ]    
+            hints: ["container"],
+            children: [{
+              name: "message",
+              hints: ["text"]
+            }]
           }
         },
-        "value@greetings": [
-          {
-            "<message": "Hi"
+        "value@greetings": [{
+          "#message": {
+            "message<value": "Hi"
           }
-        ]
+        }]
       }
     }
   },
@@ -217,27 +231,28 @@ var tests = [
     case: {
       expanded: {
         spec: {
-          hints: [ "container" ],
-          children: [ 
-            { name: "message" } 
+          hints: ["container"],
+          children: [
+            { name: "message" }
           ]
         },
         value: {
           message: {
-            spec: { hints: [ "text" ] },
-            "value<message": "Hi" 
+            spec: { 
+              name: "message",
+              hints: ["text"] 
+            },
+            "value<message": "Hi"
           }
         }
       },
       flattened: {
         spec: {
-          hints: [ "container" ],
-          children: [ 
-            { 
-              name: "message", 
-              hints: [ "text" ] 
-            } 
-          ]
+          hints: ["container"],
+          children: [{
+            name: "message",
+            hints: ["text"]
+          }]
         },
         value: {
           "message<": "Hi"
@@ -251,27 +266,28 @@ var tests = [
     case: {
       expanded: {
         spec: {
-          hints: [ "container" ],
-          children: [ 
-            { name: "message" } 
+          hints: ["container"],
+          children: [
+            { name: "message" }
           ]
         },
         value: {
           message: {
-            spec: { hints: [ "text" ] },
-            "value=message": "Hi" 
+            spec: { 
+              name: "message",
+              hints: ["text"] 
+            },
+            "value=message": "Hi"
           }
         }
       },
       flattened: {
         spec: {
-          hints: [ "container" ],
-          children: [ 
-            { 
-              name: "message", 
-              hints: [ "text" ] 
-            } 
-          ]
+          hints: ["container"],
+          children: [{
+            name: "message",
+            hints: ["text"]
+          }]
         },
         value: {
           "message=": "Hi"
@@ -285,21 +301,23 @@ var tests = [
     case: {
       expanded: {
         spec: {
-          hints: [ "container" ],
-          children: [ 
-            { name: "greeting" } 
+          hints: ["container"],
+          children: [
+            { name: "greeting" }
           ]
         },
         value: {
           greeting: {
-            spec: { 
-              hints: [ "container" ], 
-              children: [ { name: "message" } ] 
+            spec: {
+              name: "greeting",
+              hints: ["container"],
+              children: [{ name: "message" }]
             },
             "value#greeting": {
               message: {
                 spec: {
-                  hints: [ "text" ],
+                  name: "message",
+                  hints: ["text"],
                   children: []
                 },
                 "value<message": "Hi"
@@ -310,20 +328,15 @@ var tests = [
       },
       flattened: {
         spec: {
-          hints: [ "container" ],
-          children: [ 
-            { 
-              name: "greeting",
-              hints: [ "container" ],
-              children: [
-                {
-                  name: "message",
-                  hints: [ "text" ],
-                  children: []
-                }
-              ]
-            } 
-          ]
+          hints: ["container"],
+          children: [{
+            name: "greeting",
+            hints: ["container"],
+            children: [{
+              name: "message",
+              hints: ["text"]
+            }]
+          }]
         },
         value: {
           "greeting#": {
@@ -339,16 +352,17 @@ var tests = [
     case: {
       expanded: {
         spec: {
-          hints: [ "container" ],
-          children: [ 
-            { name: "message" } 
+          hints: ["container"],
+          children: [
+            { name: "message" }
           ]
         },
         value: {
           "message#": {
-            spec: { 
-              "visibility<": "hidden", 
-              hints: [ "text" ] 
+            spec: {
+              name: "message",
+              "visibility<": "hidden",
+              hints: ["text"]
             },
             "value<": "Hi"
           }
@@ -356,19 +370,49 @@ var tests = [
       },
       flattened: {
         spec: {
-          hints: [ "container" ],
-          children: [ 
-            { name: "message" } 
+          hints: ["container"],
+          children: [
+            { name: "message" }
           ]
         },
         value: {
           "message#": {
-            spec: { 
-              "visibility<": "hidden", 
-              hints: [ "text" ] 
+            spec: {
+              "visibility<": "hidden",
+              hints: ["text"],
+              name: "message"
             },
             "value<": "Hi"
           }
+        }
+      }
+    }
+  },
+  {
+    description: "an image value",
+    should: "should not flatten specs",
+    case: {
+      expanded: {
+        spec: {
+          hints: ["image", "content"],
+          children: []
+        },
+        value: {
+          src: ".",
+          type: "image/whatever",
+          height: 20,
+          width: 20
+        }
+      },
+      flattened: {
+        spec: {
+          hints: ["image", "content"]
+        },
+        value: {
+          src: ".",
+          type: "image/whatever",
+          height: 20,
+          width: 20  
         }
       }
     }
@@ -381,12 +425,18 @@ function runTest(test) {
   actual.value.should.deep.equal(test.case.flattened);
 }
 
-// describe.only("when flattening YAML", function () {
-//   tests.forEach(function (test) {
-//     describe(test.description, function () {
-//       it(test.should, function () {
-//         runTest(test);
-//       });
-//     });
-//   });
-// });
+function byDesc(desc) {
+  return function (test) {
+    return test.description === desc;
+  };
+}
+
+describe("when flattening YAML", function () {
+  tests.forEach(function (test) {
+    describe(test.description, function () {
+      it(test.should, function () {
+        runTest(test);
+      });
+    });
+  });
+});
