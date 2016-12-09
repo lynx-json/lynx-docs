@@ -2,9 +2,11 @@
 
 const http = require("http");
 const url = require("url");
+const getRealms = require("./get-realms");
 const serveStatic = require("./serve-static");
 const serveRealm = require("./serve-realm");
-const getRealms = require("./get-realms");
+const serveByTemplate = require("./serve-by-template");
+
 
 // const serveMeta = require("./serve-meta");
 
@@ -56,6 +58,7 @@ function startServer(options) {
   var handlers = [
     addRequestContext,
     addErrorHandler, 
+    serveByTemplate(options),
     serveRealm(options),
     serveStatic(options)
   ];
