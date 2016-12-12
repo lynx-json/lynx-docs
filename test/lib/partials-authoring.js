@@ -400,6 +400,34 @@ var tests = [{
   },
   description: "a partial with a namespaced wildcard parameter ~spec.*",
   should: "should add all unknown parameters within the namespace in place of the wildcard"
+}, {
+  kvp: {
+    key: ">section",
+    value: {
+      "spec.visibility": "visible",
+      one: "A",
+      two: "B",
+      three: "C"
+    }
+  },
+  partial: {
+    value: {
+      "spec.*~": null,
+      "~*": null,
+      message: "Hello, World!"
+    }
+  },
+  expected: {
+    value: {
+      "spec.visibility": "visible",
+      one: "A",
+      two: "B",
+      three: "C",
+      message: "Hello, World!"
+    }
+  },
+  description: "a partial with a namespaced wildcard parameter spec.*~",
+  should: "should add all unknown parameters within the namespace in place of the wildcard"
 }];
 
 describe("when authoring partials", function () {
