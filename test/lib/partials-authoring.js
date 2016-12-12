@@ -181,24 +181,74 @@ var tests = [{
   },
   description: "a partial with a default parameter",
   should: "should return the default value when the parameter is not provided"
-// }, {
-//   kvp: {
-//     key: ">greeting",
-//     value: "Universe"
-//   },
-//   partial: {
-//     value: {
-//       "message": "Hello, ~{{value}}!"
-//     }
-//   },
-//   expected: {
-//     value: {
-//       message: "Hello, Universe!"
-//     }
-//   },
-//   description: "a partial with an inline parameter ~{{value}}",
-//   should: "should include the parameter value when provided"
-// }, {
+}, {
+  kvp: {
+    key: ">greeting",
+    value: "Universe"
+  },
+  partial: {
+    value: {
+      "message": "Hello, ~{{value|World}}!"
+    }
+  },
+  expected: {
+    value: {
+      message: "Hello, Universe!"
+    }
+  },
+  description: "a partial with an inline placeholder ~{{value}}",
+  should: "should replace the placeholder with the parameter value"
+}, {
+  kvp: {
+    key: ">greeting",
+    value: null
+  },
+  partial: {
+    value: {
+      "message": "Hello, ~{{value|World}}!"
+    }
+  },
+  expected: {
+    value: {
+      message: "Hello, World!"
+    }
+  },
+  description: "a partial with an inline placeholder with a default value -- ~{{value|default value}}",
+  should: "should replace the placeholder with the default value when a parameter is not provided"
+}, {
+  kvp: {
+    key: ">greeting",
+    value: "World"
+  },
+  partial: {
+    value: {
+      "message": "Hello, ~{{value}}! Hello, ~{{value}}!"
+    }
+  },
+  expected: {
+    value: {
+      message: "Hello, World! Hello, World!"
+    }
+  },
+  description: "a partial with multiple instances of an inline placeholder ~{{value}}",
+  should: "should replace all placeholders"
+}, {
+  kvp: {
+    key: "hello>greeting",
+    value: "World"
+  },
+  partial: {
+    value: {
+      "~{{key}}Greeting": "Hello, ~{{value}}! Hello, ~{{value}}!"
+    }
+  },
+  expected: {
+    value: {
+      helloGreeting: "Hello, World! Hello, World!"
+    }
+  },
+  description: "a partial with a key with an inline placeholder ~{{key}}",
+  should: "should replace all placeholders"
 }, {
   kvp: {
     key: ">em",
@@ -349,6 +399,34 @@ var tests = [{
     }
   },
   description: "a partial with a namespaced wildcard parameter ~spec.*",
+  should: "should add all unknown parameters within the namespace in place of the wildcard"
+}, {
+  kvp: {
+    key: ">section",
+    value: {
+      "spec.visibility": "visible",
+      one: "A",
+      two: "B",
+      three: "C"
+    }
+  },
+  partial: {
+    value: {
+      "spec.*~": null,
+      "~*": null,
+      message: "Hello, World!"
+    }
+  },
+  expected: {
+    value: {
+      "spec.visibility": "visible",
+      one: "A",
+      two: "B",
+      three: "C",
+      message: "Hello, World!"
+    }
+  },
+  description: "a partial with a namespaced wildcard parameter spec.*~",
   should: "should add all unknown parameters within the namespace in place of the wildcard"
 }];
 

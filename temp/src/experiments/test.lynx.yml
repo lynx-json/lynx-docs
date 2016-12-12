@@ -1,4 +1,2 @@
-foo:
-  - A
-  - B
-  - C
+>greeting:
+  name: George
