@@ -114,7 +114,7 @@ function collectKnownParameters(partial) {
   });
 }
 
-function* replaceWildcardPlaceholder(partialKVP, paramsKVP, knownParameters) {
+function* replaceWildcardPlaceholders(partialKVP, paramsKVP, knownParameters) {
   let pattern = placeholderPattern();
   
   let match = pattern.exec(partialKVP.key);
@@ -146,10 +146,10 @@ function* replaceWildcardPlaceholder(partialKVP, paramsKVP, knownParameters) {
 }
 
 function getKeyFromPlaceholder(paramName) {
-  return paramName.replace(/~.*$/, "");
+  return paramName.replace(/~[^{]*$/, "");
 }
 
-function replaceExplicitPlaceholder(partialKVP, paramsKVP) {
+function replaceExplicitPlaceholders(partialKVP, paramsKVP) {
   let pattern = placeholderPattern();
   
   let match = pattern.exec(partialKVP.key);
@@ -172,8 +172,8 @@ function replaceExplicitPlaceholder(partialKVP, paramsKVP) {
       return {
         key: newKey,
         value: partialKVP.value
-      }
-    };
+      };
+    }
     
     return;
   }
@@ -200,7 +200,7 @@ function applyParametersToChildrenOfObject(partialKVP, paramsKVP, knownParameter
     
     let isWildcard = partialChildKVP.key.indexOf("*") !== -1;
     if (isWildcard) {
-      for (let r of replaceWildcardPlaceholder(partialChildKVP, paramsKVP, knownParameters)) {
+      for (let r of replaceWildcardPlaceholders(partialChildKVP, paramsKVP, knownParameters)) {
         result[r.key] = r.value;
       }
       continue;
@@ -219,6 +219,37 @@ function applyParametersToChildrenOfArray(partialKVP, paramsKVP, knownParameters
   return partialKVP;
 }
 
+const inlineParameterPattern = /~{{([^}^|]*)(?:\|([^}]*))?}}/g;
+
+function replaceInlinePlaceholders(partialKVP, paramsKVP) {
+  function replace(text) {
+    for (var p in paramsKVP.value) {
+      let param = getMetadata({
+        key: p,
+        value: paramsKVP.value[p]
+      });
+      
+      if (param.src.value === null || param.src.value === undefined) continue;
+      let pattern = new RegExp("~{{" + param.key + "(?:\|([^}]*))?}}", "g");
+      text = text.replace(pattern, param.src.value);
+    }
+    
+    text = text.replace(inlineParameterPattern, "$2");
+    
+    return text;
+  }
+  
+  if (partialKVP.value && (typeof partialKVP.value === "string")) {
+    partialKVP.value = replace(partialKVP.value);
+  }
+  
+  if (partialKVP.key) {
+    partialKVP.key = replace(partialKVP.key);
+  }
+  
+  return partialKVP;
+}
+
 function applyParameters(partialKVP, paramsKVP, knownParameters) {
   if(!paramsKVP.value) return partialKVP;
 
@@ -230,7 +261,8 @@ function applyParameters(partialKVP, paramsKVP, knownParameters) {
     partialKVP = applyParametersToChildrenOfObject(partialKVP, paramsKVP, knownParameters);
   }
   
-  partialKVP = replaceExplicitPlaceholder(partialKVP, paramsKVP);
+  partialKVP = replaceInlinePlaceholders(partialKVP, paramsKVP);
+  partialKVP = replaceExplicitPlaceholders(partialKVP, paramsKVP);
   
   return partialKVP;
 }
@@ -241,8 +273,9 @@ function getPartialKVP(kvp, options) {
   
   // Allow YAML partial to redefine the key.
   // This is necessary in order to allow a partial to defer to another partial.
+  
   let props = Object.getOwnPropertyNames(partial.value);
-  if (props.length === 1) {
+  if (props.length === 1 && !inlineParameterPattern.test(props[0])) {
     let key = props[0].replace(/~.*$/, "");
     if (getMetadata(key).key === undefined) {
       partial.key = partial.key ? partial.key + props[0] : props[0];
