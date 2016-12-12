@@ -45,7 +45,9 @@ module.exports = exports = function createRealmHandler(options) {
       res.setHeader("Content-Type", "application/lynx+json");
       res.setHeader("Cache-control", "no-cache");
 
-      res.write(variantToLynx(variant, { realm: realm }));
+      var variantOptions = Object.assign({}, options, { realm: realm });
+
+      res.write(variantToLynx(variant, variantOptions));
       res.end();
     }
 
