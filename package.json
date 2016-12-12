@@ -1,13 +1,13 @@
 {
   "name": "lynx-docs",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Lynx templates in YAML",
   "main": "src/index.js",
   "bin": {
     "lynx-docs": "./src/cli/index.js"
   },
   "scripts": {
-    "test": "mocha test/**/*.js",
+    "test": "mocha --recursive test",
     "lint": "jshint ./src/ ./test/; errorlevel=0;"
   },
   "repository": {

@@ -50,14 +50,24 @@ function exportLiteralTemplate(kvmp, cb) {
 }
 
 function exportObjectTemplate(kvmp, cb) {
+  function exportBlock(block, variable, contentFn) {
+    cb("{{#" + block + " " + variable + "}}");
+    contentFn();
+    cb("{{/" + block + "}}");
+  }
+  
   function exportTemplate(meta, fallback) {
-    var sectionTag = meta.template.section[0];
-    var inverseTag = sectionTag === "#" ? "^" : "#";
-    cb("{{" + sectionTag + "with " + meta.template.variable + "}}");
-    exportObject({ key: kvmp.key, metas: [meta] }, cb);
-    cb("{{/with}}");
-    if(fallback) {
-      cb("{{" + inverseTag + "with " + meta.template.variable + "}}null{{/with}}");
+    var block = meta.template.symbol === "#" ? "with" : "unless";
+    
+    exportBlock(block, meta.template.variable, function () {
+      exportObject({ key: kvmp.key, metas: [meta] }, cb);
+    });
+    
+    if (fallback) {
+      var inverseBlock = block === "with" ? "unless" : "with";
+      exportBlock(inverseBlock, meta.template.variable, function () { 
+        cb("null");
+      });
     }
   }
 

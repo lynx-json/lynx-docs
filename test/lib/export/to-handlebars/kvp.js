@@ -113,7 +113,7 @@ var tests = [{
     value: {
       greeting: "Hi"
     },
-    expected: '"key":{{#with key}}{"greeting":"Hi" }{{/with}}{{^with key}}null{{/with}}',
+    expected: '"key":{{#with key}}{"greeting":"Hi" }{{/with}}{{#unless key}}null{{/unless}}',
     should: "a kvp with a single object template should export a kvp with an object value template and a null fallback value"
   },
   {
@@ -121,7 +121,7 @@ var tests = [{
     value: {
       "greeting<": "Hi"
     },
-    expected: '"key":{{#with key}}{"greeting":{{#if greeting}}"{{greeting}}"{{else}}"Hi"{{/if}} }{{/with}}{{^with key}}null{{/with}}',
+    expected: '"key":{{#with key}}{"greeting":{{#if greeting}}"{{greeting}}"{{else}}"Hi"{{/if}} }{{/with}}{{#unless key}}null{{/unless}}',
     should: "a kvp with a single object template with a single value template should export correctly"
   },
   {
@@ -130,7 +130,7 @@ var tests = [{
       "greeting<": null,
       "greeting<alternateGreeting": null
     },
-    expected: '"key":{{#with key}}{"greeting":{{#if greeting}}"{{greeting}}"{{/if}}{{#if alternateGreeting}}"{{alternateGreeting}}"{{/if}} }{{/with}}{{^with key}}null{{/with}}',
+    expected: '"key":{{#with key}}{"greeting":{{#if greeting}}"{{greeting}}"{{/if}}{{#if alternateGreeting}}"{{alternateGreeting}}"{{/if}} }{{/with}}{{#unless key}}null{{/unless}}',
     should: "a kvp with a single object template with multiple value templates should export correctly without a value template fallback/default value"
   },
   {
@@ -138,7 +138,7 @@ var tests = [{
     value: {
       greeting: "Hi"
     },
-    expected: '"key":{{^with key}}{"greeting":"Hi" }{{/with}}{{#with key}}null{{/with}}',
+    expected: '"key":{{#unless key}}{"greeting":"Hi" }{{/unless}}{{#with key}}null{{/with}}',
     should: "a kvp with a single negative object template should export a kvp with an object value template and a null fallback value"
   },
   {
@@ -164,7 +164,7 @@ var tests = [{
         label: "Secondary Contact"
       }
     },
-    expected: '{"contact":{{#with isPrimary}}{"label":"Primary Contact" }{{/with}}{{^with isPrimary}}{"label":"Secondary Contact" }{{/with}} }',
+    expected: '{"contact":{{#with isPrimary}}{"label":"Primary Contact" }{{/with}}{{#unless isPrimary}}{"label":"Secondary Contact" }{{/unless}} }',
     should: "a kvp with a multiple object templates should export a kvp with multiple object templates"
   },
   {
