@@ -137,10 +137,18 @@ function* replaceWildcardPlaceholders(partialKVP, paramsKVP, knownParameters) {
     param = Object.assign({}, param, parseParamName(param.src.key));
     
     if(isMostSpecificPlaceholderFor(param)) {
-      yield {
-        key: param.fullName.replace(placeholderName.namespace + ".", ""),
-        value: param.src.value
-      };
+      // spec.*~input.spec.* -> spec.key: value
+      if (match[1]) {
+        yield {
+          key: match[1].replace("*", param.name),
+          value: param.src.value
+        };
+      } else {
+        yield {
+          key: param.fullName.replace(placeholderName.namespace + ".", ""),
+          value: param.src.value
+        };
+      }
     }
   }
 }
