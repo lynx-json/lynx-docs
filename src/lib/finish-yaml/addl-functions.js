@@ -148,13 +148,12 @@ function images(kvp, options) {
   var meta = getMetadata(kvp);
   if (hasImageProperties(kvp, meta)) {
     addHint(kvp, "image");
-    if (!nodeHasProperty(kvp, meta, "type")) throw new Error("Missing 'type' attribute for '" + meta.key + "'");
   }
 }
 
 function content(kvp, options) {
   var meta = getMetadata(kvp);
-  if (nodeHasProperty(kvp, meta, "src") && !hasImageProperties(kvp, meta)) {
+  if (nodeHasProperty(kvp, meta, "src")) {
     var node = kvp.value;
     if (node.value.src === null || node.value.src === "") throw new Error("'src' cannot be null/empty for '" + meta.key + "'");
     if (!nodeHasProperty(kvp, meta, "type")) throw new Error("Missing 'type' attribute for '" + meta.key + "'");
