@@ -82,9 +82,7 @@ function flattenSpecForArrayNode(kvp, parentSpec) {
     newValue.push(childKvp.value);
   });
   
-  if (spec.children.length === 0) {
-    delete spec.children;
-  } else if (spec.children.length === 1 || childSpecsAreIdentical()) {
+  if (spec.children && (spec.children.length === 1 || childSpecsAreIdentical())) {
     spec.children = spec.children[0];
     delete spec.children.name;
   }
