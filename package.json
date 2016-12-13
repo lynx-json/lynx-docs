@@ -24,11 +24,12 @@
   },
   "homepage": "https://github.com/danmork/lynx-docs#readme",
   "dependencies": {
-    "deep-diff": "^0.3.4",
     "chokidar": "^1.6.1",
+    "deep-diff": "^0.3.4",
     "handlebars": "^4.0.5",
     "isstream": "^0.1.2",
     "json-lint": "^0.1.0",
+    "md5": "^2.2.1",
     "mime": "^1.3.4",
     "stream-from-array": "^1.0.0",
     "through2": "^2.0.1",

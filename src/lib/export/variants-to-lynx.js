@@ -1,7 +1,7 @@
 "use strict";
 
 const path = require("path");
-const expandAndFinishTemplate = require("./expand-finish-template");
+const processTemplate = require("./process-template");
 const kvpToHandlebars = require("./to-handlebars/kvp");
 const templateData = require("./template-data");
 const handlebars = require("handlebars");
@@ -12,16 +12,15 @@ function exportLynxDocuments(realms, createFile, options) {
     .filter(variant => variant.template) //only variants that have template and data
     .forEach(function (variant) {
       var variantOptions = Object.assign({}, options, { realm: realm });
-      var content = transformVariantToLynx(variant, variantOptions);
+      var content = transformVariantToLynx(variant, variantOptions, createFile);
       var outputPath = path.join(path.relative(realm.root, path.dirname(variant.template)), variant.name + ".lnx");
       createFile(outputPath, content);
     }));
 }
 
-function transformVariantToLynx(variant, options) {
+function transformVariantToLynx(variant, options, createFile) {
   try {
-    var kvp = expandAndFinishTemplate(variant.template, options);
-    //TODO: Extract spec if set on options and emit spec content
+    var kvp = processTemplate(variant.template, options, createFile);
     var content = kvpToHandlebars(kvp, options) + "\n";
 
     var data;

@@ -7,6 +7,7 @@ const expandYaml = require("../expand-yaml");
 const finishYaml = require("../finish-yaml");
 const getMetadata = require("../metadata-yaml");
 const flattenSpecForKvp = require("./flatten-yaml");
+const extractSpec = require("./extract-spec");
 
 function getKVP(yaml) {
   if(!util.isObject(yaml)) return { key: undefined, value: yaml };
@@ -23,13 +24,13 @@ function getKVP(yaml) {
   return { key: undefined, value: yaml };
 }
 
-function expandAndFinishTemplate(templatePath, options) {
+function processTemplate(templatePath, options, createFile) {
   var buffer = fs.readFileSync(templatePath);
   var yaml = parseYaml(buffer);
   var kvp = getKVP(yaml);
 
   if(options.log) {
-    console.log("### Options");
+    console.log("### Template Options");
     console.log(JSON.stringify(options), "\n");
   }
 
@@ -51,7 +52,11 @@ function expandAndFinishTemplate(templatePath, options) {
     finishedYaml = flattenSpecForKvp(finishedYaml);
   }
 
+  if(options.spec) {
+    finishedYaml = extractSpec(finishedYaml, options, createFile);
+  }
+
   return finishedYaml;
 }
 
-module.exports = exports = expandAndFinishTemplate;
+module.exports = exports = processTemplate;

@@ -7,6 +7,19 @@ const util = require("util");
 function handleOptions(options) {
   processConfig(options.config);
   normalizeRoot(options);
+  normalizeSpecHandling(options);
+
+  if(options.log) console.log("Options\n=======\n", options);
+}
+
+function normalizeSpecHandling(options) {
+  if(!options.spec) return;
+  options.flatten = true;
+  if(options.spec === true) options.spec = {};
+
+  if(!options.spec.dir) options.spec.dir = ".";
+
+  if(!options.spec.url) options.spec.url = "/";
 }
 
 function processConfig(config) {
