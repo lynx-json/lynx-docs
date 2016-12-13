@@ -147,6 +147,7 @@ function hasImageProperties(kvp, meta) {
 function images(kvp, options) {
   var meta = getMetadata(kvp);
   if (hasImageProperties(kvp, meta)) {
+    validateContentNode(kvp, meta);
     addHint(kvp, "image");
   }
 }
@@ -154,11 +155,15 @@ function images(kvp, options) {
 function content(kvp, options) {
   var meta = getMetadata(kvp);
   if (nodeHasProperty(kvp, meta, "src")) {
-    var node = kvp.value;
-    if (node.value.src === null || node.value.src === "") throw new Error("'src' cannot be null/empty for '" + meta.key + "'");
-    if (!nodeHasProperty(kvp, meta, "type")) throw new Error("Missing 'type' attribute for '" + meta.key + "'");
+    validateContentNode(kvp, meta);
     addHint(kvp, "content");
   }
+}
+
+function validateContentNode(kvp, meta) {
+  var node = kvp.value;
+  if (node.value.src === null || node.value.src === "") throw new Error("'src' cannot be null/empty for '" + meta.key + "'");
+  if (!nodeHasProperty(kvp, meta, "type")) throw new Error("Missing 'type' attribute for '" + meta.key + "'");
 }
 
 function containers(kvp, options) {

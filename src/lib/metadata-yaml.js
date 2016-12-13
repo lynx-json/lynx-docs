@@ -3,7 +3,13 @@
 var util = require("util");
 
 function applyKeyName(key, meta) {
-  if (!key) return;
+  if (key === null || key === undefined) return;
+  
+  if (typeof key === "number") {
+    meta.key = key;
+    return;
+  }
+  
   // key, key@, key#, key^, key<, key@foo, key#foo, key^foo, key<foo, should all yield 'key'
   var keyPattern = /^([a-zA-Z.]*)($|[@#\^><=](.*)$)/;
   var match = keyPattern.exec(key);
@@ -85,7 +91,7 @@ function applyPartialMeta(key, meta) {
 }
 
 function getMetadata(kvp) {
-  if (!kvp) throw new Error("'kvp' param is required");
+  if (kvp === undefined || kvp === null) throw new Error("'kvp' param is required");
   if (util.isArray(kvp)) throw new Error("'kvp' param cannot be an array");
   if (!util.isObject(kvp)) kvp = { key: kvp.toString() };
   

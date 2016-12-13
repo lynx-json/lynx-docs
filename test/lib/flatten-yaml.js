@@ -12,8 +12,7 @@ var tests = [{
     case: {
       expanded: {
         spec: {
-          hints: ["text"],
-          children: []
+          hints: ["text"]
         },
         value: "Hi"
       },
@@ -39,7 +38,6 @@ var tests = [{
         value: {
           message: {
             spec: {
-              name: "message",
               hints: ["text"]
             },
             value: "Hi"
@@ -66,26 +64,22 @@ var tests = [{
     case: {
       expanded: {
         spec: {
-          hints: ["container"],
-          children: []
+          hints: ["container"]
         },
         value: [{
             spec: {
-              name: 0,
               hints: ["text"]
             },
             value: "One"
           },
           {
             spec: {
-              name: 1,
               hints: ["text"]
             },
             value: "Two"
           },
           {
             spec: {
-              name: 2,
               hints: ["text"]
             },
             value: "Three"
@@ -109,26 +103,22 @@ var tests = [{
     case: {
       expanded: {
         spec: {
-          hints: ["container"],
-          children: []
+          hints: ["container"]
         },
         value: [{
             spec: {
-              name: 0,
               hints: ["http://example.com/one", "text"]
             },
             value: "One"
           },
           {
             spec: {
-              name: 1,
               hints: ["http://example.com/two", "text"]
             },
             value: "Two"
           },
           {
             spec: {
-              name: 2,
               hints: ["http://example.com/three", "text"]
             },
             value: "Three"
@@ -154,13 +144,11 @@ var tests = [{
     case: {
       expanded: {
         spec: {
-          hints: ["container"],
-          children: []
+          hints: ["container"]
         },
         "value@greetings": [{
           spec: {
-            hints: ["text"],
-            children: []
+            hints: ["text"]
           },
           "value<message": "Hi"
         }]
@@ -184,8 +172,7 @@ var tests = [{
     case: {
       expanded: {
         spec: {
-          hints: ["container"],
-          children: []
+          hints: ["container"]
         },
         "value@greetings": [{
           spec: {
@@ -197,9 +184,7 @@ var tests = [{
           "value#message": {
             message: {
               spec: {
-                name: "message",
-                hints: ["text"],
-                children: []
+                hints: ["text"]
               },
               "value<": "Hi"
             }
@@ -239,7 +224,6 @@ var tests = [{
         value: {
           message: {
             spec: { 
-              name: "message",
               hints: ["text"] 
             },
             "value<message": "Hi"
@@ -274,7 +258,6 @@ var tests = [{
         value: {
           message: {
             spec: { 
-              name: "message",
               hints: ["text"] 
             },
             "value=message": "Hi"
@@ -309,16 +292,13 @@ var tests = [{
         value: {
           greeting: {
             spec: {
-              name: "greeting",
               hints: ["container"],
               children: [{ name: "message" }]
             },
             "value#greeting": {
               message: {
                 spec: {
-                  name: "message",
-                  hints: ["text"],
-                  children: []
+                  hints: ["text"]
                 },
                 "value<message": "Hi"
               }
@@ -360,7 +340,6 @@ var tests = [{
         value: {
           "message#": {
             spec: {
-              name: "message",
               "visibility<": "hidden",
               hints: ["text"]
             },
@@ -379,8 +358,7 @@ var tests = [{
           "message#": {
             spec: {
               "visibility<": "hidden",
-              hints: ["text"],
-              name: "message"
+              hints: ["text"]
             },
             "value<": "Hi"
           }
@@ -394,8 +372,7 @@ var tests = [{
     case: {
       expanded: {
         spec: {
-          hints: ["image", "content"],
-          children: []
+          hints: ["image", "content"]
         },
         value: {
           src: ".",

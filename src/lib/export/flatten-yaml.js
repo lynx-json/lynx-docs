@@ -36,17 +36,13 @@ function isLiteralValueTemplateNode(meta) {
   return firstValueMeta.template && firstValueMeta.template.type === "literal";
 }
 
-function ensureParentSpecChildren(parentSpec, key) {
-  if (parentSpec.children && Array.isArray(parentSpec.children)) return;
-  throw new Error("Parent spec for key '" + key + "' does not have a 'children' array.");
-}
-
 function getChildSpec(parentSpec, name) {
   if (name === undefined) return;
   return parentSpec.children.find(cs => cs.name === name);
 }
 
 function moveChildSpecToParent(childSpec, parentSpec) {
+  parentSpec.children = parentSpec.children || [];
   var targetSpec = getChildSpec(parentSpec, childSpec.name);
   
   if (targetSpec) {
@@ -116,11 +112,9 @@ function flattenSpecForObjectNode(kvp, parentSpec) {
   Object.getOwnPropertyNames(value).forEach(childKey => {
     let childKvp = { key: childKey, value: value[childKey] };
     childKvp = flattenSpecForKvp(childKvp, spec);
+    let childMeta = getMetadata(childKvp);
     newValue[childKvp.key] = childKvp.value;
   });
-  
-  // clean up the children property for this node
-  if (spec.children.length === 0) delete spec.children;
   
   if (!parentSpec) {
     // this is the root node, so we need to return the value/spec pair
@@ -139,14 +133,11 @@ function flattenSpecForObjectNode(kvp, parentSpec) {
 
 function flattenSpecForTextNode(kvp, parentSpec) {
   if (!parentSpec) return kvp;
-  ensureParentSpecChildren(parentSpec, kvp.key);
   
   var spec = kvp.value.spec;
-  if ("children" in spec) delete spec.children;
-  
   moveChildSpecToParent(spec, parentSpec);
-  kvp.value = kvp.value.value;
   
+  kvp.value = kvp.value.value;
   return kvp;
 }
 
@@ -203,7 +194,7 @@ function flattenSpecForObjectValueTemplateNode(kvp, parentSpec) {
 }
 
 function flattenSpecForLiteralValueTemplateNode(kvp, parentSpec) {
-  delete kvp.value.spec.children;
+  // delete kvp.value.spec.children;
   var meta = getMetadata(kvp);
   if (meta.children.value.length !== 1) return kvp;
   return flattenSpecForSingleValueTemplateNode(kvp, parentSpec);
@@ -239,6 +230,11 @@ function flattenSpecForKvp(kvp, parentSpec) {
   if (meta.template) return kvp; // we cannot flatten dynamic nodes
   if (meta.children.spec[0].template) return kvp; // we cannot flatten dynamic specs
   
+  if (meta.key !== undefined && meta.key !== null) {
+    var specMeta = meta.children.spec[0].more();
+    specMeta.src.value.name = meta.key;
+  }
+  
   if (isArrayNode(meta)) return flattenSpecForArrayNode(kvp, parentSpec);
   if (isObjectNode(meta)) return flattenSpecForObjectNode(kvp, parentSpec);
   if (isTextNode(meta)) return flattenSpecForTextNode(kvp, parentSpec);
@@ -251,8 +247,4 @@ function flattenSpecForKvp(kvp, parentSpec) {
   throw new Error(msg);
 }
 
-module.exports = exports = function flattenYaml(kvp) {
-  kvp = flattenSpecForKvp(kvp);
-  if (kvp.value.spec.children && kvp.value.spec.children.length === 0) delete kvp.value.spec.children;
-  return kvp;
-};
+module.exports = exports = flattenSpecForKvp;
