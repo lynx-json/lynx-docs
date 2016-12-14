@@ -52,8 +52,18 @@ function processTemplate(templatePath, options, createFile) {
     finishedYaml = flattenSpecForKvp(finishedYaml);
   }
 
+  if(options.log) {
+    console.log("### Flattened");
+    console.log(JSON.stringify(finishedYaml), "\n");
+  }
+
   if(options.spec) {
     finishedYaml = extractSpec(finishedYaml, options, createFile);
+  }
+
+  if(options.log) {
+    console.log("### Spec extracted");
+    console.log(JSON.stringify(finishedYaml), "\n");
   }
 
   return finishedYaml;

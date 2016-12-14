@@ -37,24 +37,17 @@ function isLiteralValueTemplateNode(meta) {
 }
 
 function getChildSpec(parentSpec, name) {
-  if (name === undefined) return;
+  if(name === undefined) return;
   return parentSpec.children.find(cs => cs.name === name);
 }
 
 function moveChildSpecToParent(childSpec, parentSpec) {
   parentSpec.children = parentSpec.children || [];
   var targetSpec = getChildSpec(parentSpec, childSpec.name);
-  
-  if (targetSpec) {
+
+  if(targetSpec) {
     Object.assign(targetSpec, childSpec);
-  }
-  else {
-    if (!parentSpec.children) {
-      var message = "'parentSpec.children' is null/undefined.";
-      message += "\n" + JSON.stringify(parentSpec, null, 2);
-      throw new Error(message);
-    }
-    
+  } else {
     parentSpec.children.push(childSpec);
   }
 }
@@ -63,42 +56,42 @@ function flattenSpecForArrayNode(kvp, parentSpec) {
   function ignoreName(path, key) {
     return path.length === 0 && key === "name";
   }
-  
+
   function childSpecsAreIdentical() {
     var firstSpec = spec.children[0];
     return spec.children.every((childSpec, idx) => {
-      if (idx === 0) return true;
+      if(idx === 0) return true;
       return undefined === diff(firstSpec, childSpec, ignoreName);
     });
   }
-  
+
   var spec = kvp.value.spec;
   var value = kvp.value.value;
   var newValue = [];
-  
+
   value.forEach((item, idx) => {
     let childKvp = { key: idx, value: item };
     childKvp = flattenSpecForKvp(childKvp, spec);
     newValue.push(childKvp.value);
   });
-  
-  if (spec.children && (spec.children.length === 1 || childSpecsAreIdentical())) {
+
+  if(spec.children && (spec.children.length === 1 || childSpecsAreIdentical())) {
     spec.children = spec.children[0];
     delete spec.children.name;
   }
-  
-  if (!parentSpec) {
+
+  if(!parentSpec) {
     // this is the root node, so we need to return the value/spec pair
     // just update the value/spec pair's value
     kvp.value.value = newValue;
     return kvp;
   }
-  
+
   moveChildSpecToParent(spec, parentSpec);
-  
+
   // convert the value/spec pair to just a value
   kvp.value = newValue;
-  
+
   return kvp;
 }
 
@@ -106,35 +99,35 @@ function flattenSpecForObjectNode(kvp, parentSpec) {
   var spec = kvp.value.spec;
   var value = kvp.value.value;
   var newValue = {};
-  
+
   Object.getOwnPropertyNames(value).forEach(childKey => {
     let childKvp = { key: childKey, value: value[childKey] };
     childKvp = flattenSpecForKvp(childKvp, spec);
     let childMeta = getMetadata(childKvp);
     newValue[childKvp.key] = childKvp.value;
   });
-  
-  if (!parentSpec) {
+
+  if(!parentSpec) {
     // this is the root node, so we need to return the value/spec pair
     // just update the value/spec pair's value
     kvp.value.value = newValue;
     return kvp;
   }
-  
+
   moveChildSpecToParent(spec, parentSpec);
-  
+
   // convert the value/spec pair to just a value
   kvp.value = newValue;
-  
+
   return kvp;
 }
 
 function flattenSpecForTextNode(kvp, parentSpec) {
-  if (!parentSpec) return kvp;
-  
+  if(!parentSpec) return kvp;
+
   var spec = kvp.value.spec;
   moveChildSpecToParent(spec, parentSpec);
-  
+
   kvp.value = kvp.value.value;
   return kvp;
 }
@@ -142,59 +135,59 @@ function flattenSpecForTextNode(kvp, parentSpec) {
 function flattenSpecForArrayValueTemplateNode(kvp, parentSpec) {
   var meta = getMetadata(kvp);
   var spec = kvp.value.spec;
-  
-  if (meta.children.value.length !== 1) return kvp;
-  
+
+  if(meta.children.value.length !== 1) return kvp;
+
   var valueMeta = meta.children.value[0].more();
-  if (valueMeta.src.value.length !== 1) throw new Error("Multiple item templates are not currently supported.");
-  
+  if(valueMeta.src.value.length !== 1) throw new Error("Multiple item templates are not currently supported.");
+
   let childKvp = { value: valueMeta.src.value[0] };
   childKvp = flattenSpecForKvp(childKvp, spec);
-  
-  if (childKvp.key) {
+
+  if(childKvp.key) {
     var newItemTemplate = {};
     newItemTemplate[childKvp.key] = childKvp.value;
     valueMeta.src.value[0] = newItemTemplate;
   } else {
     valueMeta.src.value[0] = childKvp.value;
   }
-  
+
   spec.children = spec.children[0];
-  
+
   return kvp;
 }
 
 function flattenSpecForObjectValueTemplateNode(kvp, parentSpec) {
   var meta = getMetadata(kvp);
   var spec = kvp.value.spec;
-  
+
   function flattenSpecForChildren(valueMeta) {
     var templateValue = valueMeta.src.value;
     var newTemplateValue = {};
-    
+
     Object.getOwnPropertyNames(templateValue).forEach(childKey => {
       let childKvp = { key: childKey, value: templateValue[childKey] };
       childKvp = flattenSpecForKvp(childKvp, spec);
       newTemplateValue[childKvp.key] = childKvp.value;
     });
-    
+
     kvp.value[valueMeta.src.key] = newTemplateValue;
   }
-  
-  if (meta.children.value.length === 1) {
+
+  if(meta.children.value.length === 1) {
     flattenSpecForChildren(meta.children.value[0].more());
     return flattenSpecForSingleValueTemplateNode(kvp, parentSpec);
   } else {
     meta.children.value.map(m => m.more()).forEach(flattenSpecForChildren);
   }
-  
+
   return kvp;
 }
 
 function flattenSpecForLiteralValueTemplateNode(kvp, parentSpec) {
   // delete kvp.value.spec.children;
   var meta = getMetadata(kvp);
-  if (meta.children.value.length !== 1) return kvp;
+  if(meta.children.value.length !== 1) return kvp;
   return flattenSpecForSingleValueTemplateNode(kvp, parentSpec);
 }
 
@@ -202,44 +195,44 @@ function flattenSpecForSingleValueTemplateNode(kvp, parentSpec) {
   var meta = getMetadata(kvp);
   var spec = kvp.value.spec;
   var valueMeta = meta.children.value[0].more();
-  
+
   var newKvp = { key: null, value: valueMeta.src.value };
   var template = valueMeta.template;
-  
-  if (meta.key === template.variable) {
+
+  if(meta.key === template.variable) {
     newKvp.key = meta.key + template.symbol;
   } else {
-    newKvp.key = meta.key ? 
+    newKvp.key = meta.key ?
       meta.key + template.symbol + template.variable :
       template.symbol + template.variable;
   }
-  
+
   moveChildSpecToParent(spec, parentSpec);
-  
+
   return newKvp;
 }
 
 function flattenSpecForKvp(kvp, parentSpec) {
-  if (!kvp) throw new Error("'kvp' param is required");
-  
+  if(!kvp) throw new Error("'kvp' param is required");
+
   var meta = getMetadata(kvp);
-  
-  if (!isNode(meta)) return kvp;
-  if (meta.template) return kvp; // we cannot flatten dynamic nodes
-  if (meta.children.spec[0].template) return kvp; // we cannot flatten dynamic specs
-  
-  if (meta.key !== undefined && meta.key !== null) {
+
+  if(!isNode(meta)) return kvp;
+  if(meta.template) return kvp; // we cannot flatten dynamic nodes
+  if(meta.children.spec[0].template) return kvp; // we cannot flatten dynamic specs
+
+  if(meta.key !== undefined && meta.key !== null) {
     var specMeta = meta.children.spec[0].more();
     specMeta.src.value.name = meta.key;
   }
-  
-  if (isArrayNode(meta)) return flattenSpecForArrayNode(kvp, parentSpec);
-  if (isObjectNode(meta)) return flattenSpecForObjectNode(kvp, parentSpec);
-  if (isTextNode(meta)) return flattenSpecForTextNode(kvp, parentSpec);
-  if (isArrayValueTemplateNode(meta)) return flattenSpecForArrayValueTemplateNode(kvp, parentSpec);
-  if (isObjectValueTemplateNode(meta)) return flattenSpecForObjectValueTemplateNode(kvp, parentSpec);
-  if (isLiteralValueTemplateNode(meta)) return flattenSpecForLiteralValueTemplateNode(kvp, parentSpec);
-  
+
+  if(isArrayNode(meta)) return flattenSpecForArrayNode(kvp, parentSpec);
+  if(isObjectNode(meta)) return flattenSpecForObjectNode(kvp, parentSpec);
+  if(isTextNode(meta)) return flattenSpecForTextNode(kvp, parentSpec);
+  if(isArrayValueTemplateNode(meta)) return flattenSpecForArrayValueTemplateNode(kvp, parentSpec);
+  if(isObjectValueTemplateNode(meta)) return flattenSpecForObjectValueTemplateNode(kvp, parentSpec);
+  if(isLiteralValueTemplateNode(meta)) return flattenSpecForLiteralValueTemplateNode(kvp, parentSpec);
+
   delete meta.src;
   var msg = "Unexpected type of KVP. Metadata for KVP is: " + JSON.stringify(meta);
   throw new Error(msg);
