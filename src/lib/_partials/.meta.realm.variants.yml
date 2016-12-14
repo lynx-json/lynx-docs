@@ -3,6 +3,8 @@ spec:
 value:
   header: Variants
   variants@:
-    - href<url: 
+    - href<url:
       title<name:
       type<: application/lynx+json
+      template: "Template: {{{template}}}"
+      data: "Data: {{{data}}}"

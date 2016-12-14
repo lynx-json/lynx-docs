@@ -6,9 +6,7 @@ const getRealms = require("./get-realms");
 const serveStatic = require("./serve-static");
 const serveRealm = require("./serve-realm");
 const serveByTemplate = require("./serve-by-template");
-
-
-// const serveMeta = require("./serve-meta");
+const serveMeta = require("./serve-meta");
 
 function serveNotFound(req, res) {
   res.writeHead(404, { "Content-Type": "text/plain" });
@@ -37,7 +35,7 @@ function reduction(acc, cv) {
 function startServer(options) {
   var port = options.port || 0;
   var realms = getRealms(options);
-  
+
   function addRequestContext(req, res, next) {
     var parsedURL = url.parse(req.url, true);
     req.query = parsedURL.query;
@@ -45,24 +43,25 @@ function startServer(options) {
     req.realms = realms;
     next();
   }
-  
+
   function addErrorHandler(req, res, next) {
     try {
       next();
-    } catch (e) {
+    } catch(e) {
       req.error = e;
       serveError(req, res);
     }
   }
-  
+
   var handlers = [
     addRequestContext,
-    addErrorHandler, 
+    addErrorHandler,
+    serveMeta(options),
     serveByTemplate(options),
     serveRealm(options),
     serveStatic(options)
   ];
-  
+
   var handler = handlers.reverse().reduce(reduction, serveNotFound);
   var server = http.createServer(handler).listen(port);
   console.log("Lynx Docs server is running at http://localhost:" + port);

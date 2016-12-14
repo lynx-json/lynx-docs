@@ -7,13 +7,15 @@ module.exports = exports = (kvp, options) => {
   options.partials = {
     contextFolder: kvp.value.folder
   };
-  
-  kvp.value.value.forEach(item => {
-    result.items.push({
-      ">markdown": item
+
+  if(kvp.value.value) {
+    kvp.value.value.forEach(item => {
+      result.items.push({
+        ">markdown": item
+      });
     });
-  });
-  
+  }
+
   return {
     key: kvp.key,
     value: result
