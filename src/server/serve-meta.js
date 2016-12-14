@@ -11,6 +11,11 @@ module.exports = exports = function createMetaHandler(options) {
 
     if(!realm) return next();
 
+    var descendants = req.realms.filter(candidate => {
+      return candidate.realm.indexOf(realm.realm) === 0 &&
+        candidate.realm.length > realm.realm.length;
+    });
+
     function serveVariant(variant) {
       res.setHeader("Content-Type", "application/lynx+json");
       res.setHeader("Cache-control", "no-cache");
@@ -24,7 +29,7 @@ module.exports = exports = function createMetaHandler(options) {
     if(realm) {
       var variant = {
         template: path.join(__dirname, "meta/default.lynx.yml"),
-        data: realm
+        data: Object.assign({}, realm, { descendants: descendants })
       };
       serveVariant(variant);
     }

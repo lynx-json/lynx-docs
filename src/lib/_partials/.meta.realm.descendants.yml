@@ -1,0 +1,8 @@
+spec:
+  hints: [ section ]
+value:
+  header: Decendant realms
+  descendants@:
+    - title<realm:
+      href<url:
+      type: application/lynx+json
