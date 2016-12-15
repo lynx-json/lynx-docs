@@ -5,7 +5,7 @@ const url = require("url");
 const getRealms = require("./get-realms");
 const serveStatic = require("./serve-static");
 const serveRealm = require("./serve-realm");
-const serveByTemplate = require("./meta/serve-by-template");
+const searchMeta = require("./meta/search-meta");
 const serveMeta = require("./meta/serve-meta");
 
 function serveNotFound(req, res) {
@@ -57,7 +57,7 @@ function startServer(options) {
     addRequestContext,
     addErrorHandler,
     serveMeta(options),
-    serveByTemplate(options),
+    searchMeta(options),
     serveRealm(options),
     serveStatic(options)
   ];
