@@ -32,7 +32,7 @@ function transformVariantToLynx(variant, options, createFile) {
 
     return lintContent(bindData(content, data), variant);
   } catch(err) {
-    err.message = "Unable to export '".concat(variant.template, "' to lynx format.\n\n", err.message);
+    err.message = "Unable to export ".concat(JSON.stringify(variant.template), " to lynx format.\n\n", err.message);
     throw err;
   }
 }

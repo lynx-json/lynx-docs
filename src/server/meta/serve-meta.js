@@ -1,5 +1,5 @@
 const path = require("path");
-const variantToLynx = require("../lib/export/variants-to-lynx").one;
+const variantToLynx = require("../../lib/export/variants-to-lynx").one;
 const url = require("url");
 
 module.exports = exports = function createMetaHandler(options) {
@@ -11,28 +11,26 @@ module.exports = exports = function createMetaHandler(options) {
 
     if(!realm) return next();
 
-    var descendants = req.realms.filter(candidate => {
-      return candidate.realm.indexOf(realm.realm) === 0 &&
-        candidate.realm.length > realm.realm.length;
-    });
-
     function serveVariant(variant) {
       res.setHeader("Content-Type", "application/lynx+json");
       res.setHeader("Cache-control", "no-cache");
 
-      var variantOptions = Object.assign({}, options, { realm: realm });
+      var metaRealm = Object.assign({}, realm, { realm: "http://lynx-json.org/docs/meta/" });
+      var variantOptions = Object.assign({}, options, { realm: metaRealm });
 
       res.write(variantToLynx(variant, variantOptions));
       res.end();
     }
 
-    if(realm) {
-      var variant = {
-        template: path.join(__dirname, "meta/default.lynx.yml"),
-        data: Object.assign({}, realm, { descendants: descendants })
-      };
-      serveVariant(variant);
-    }
+    var realmPathSegments = url.parse(realm.realm).pathname.split("/");
 
+    var template = { ">.meta.realm": {} };
+    Object.assign(template[">.meta.realm"], realm);
+
+    var variant = {
+      template: template,
+      data: realm
+    };
+    serveVariant(variant);
   };
 }

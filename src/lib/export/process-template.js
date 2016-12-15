@@ -24,10 +24,17 @@ function getKVP(yaml) {
   return { key: undefined, value: yaml };
 }
 
-function processTemplate(templatePath, options, createFile) {
-  var buffer = fs.readFileSync(templatePath);
-  var yaml = parseYaml(buffer);
-  var kvp = getKVP(yaml);
+function getTemplateKvp(template) {
+  if(util.isString(template)) {
+    var buffer = fs.readFileSync(template);
+    return getKVP(parseYaml(buffer));
+  }
+
+  return getKVP(template);
+}
+
+function processTemplate(template, options, createFile) {
+  var kvp = getTemplateKvp(template);
 
   if(options.log) {
     console.log("### Template Options");

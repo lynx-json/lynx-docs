@@ -18,15 +18,6 @@ function redirectToRealmIndex(req, res, next) {
   res.end("Redirecting to realm index");
 }
 
-function isChildOfRealm(parentRealm) {
-  return function (otherRealm) {
-    if(otherRealm.realm === parentRealm.realm) return false;
-    if(otherRealm.realm.indexOf(parentRealm.realm) === -1) return false;
-    return otherRealm.realm.split("/").length -
-      parentRealm.realm.split("/").length === 1;
-  };
-}
-
 module.exports = exports = function createRealmHandler(options) {
   return function (req, res, next) {
     var realm = req.realms.find(r => url.parse(r.realm).pathname === url.parse(req.url).pathname);
@@ -34,11 +25,6 @@ module.exports = exports = function createRealmHandler(options) {
     if(!realm) {
       if(req.url === "/" || req.url === "") return redirectToRealmIndex(req, res, next);
       return next();
-    }
-
-    function addRealmIndexData() {
-      realm.children = req.realms.filter(isChildOfRealm(realm));
-      realm.metaURL = "/meta/?realm=" + realm.realm;
     }
 
     function serveVariant(variant) {
@@ -52,7 +38,6 @@ module.exports = exports = function createRealmHandler(options) {
     }
 
     function serveRealmIndex() {
-      addRealmIndexData();
       serveVariant({
         template: path.join(__dirname, "realm-index.lynx.yml"),
         data: realm
@@ -60,13 +45,14 @@ module.exports = exports = function createRealmHandler(options) {
     }
 
     function serveVariantWithAlternateIndex(variantName) {
-      addRealmIndexData();
-      realm.variantURL = url.parse(req.url).pathname + "?variant=" + variantName + "&direct=true";
-      realm.indexURL = url.parse(req.url).pathname + "?variant=index";
+      var data = {
+        variantURL: url.parse(req.url).pathname + "?variant=" + variantName + "&direct=true",
+        indexURL: url.parse(req.url).pathname + "?variant=index"
+      }
 
       serveVariant({
         template: path.join(__dirname, "variant-with-alternate-index.lynx.yml"),
-        data: realm
+        data: Object.assign(data, realm)
       });
     }
 

@@ -14,12 +14,12 @@ function exportTemplatesToHandlebars(realms, createFile, options) {
     }));
 }
 
-function transformTemplateToHandlebars(templatePath, options, createFile) {
+function transformTemplateToHandlebars(template, options, createFile) {
   try {
-    var kvp = processTemplate(templatePath, options, createFile);
+    var kvp = processTemplate(template, options, createFile);
     return kvpToHandlebars(kvp, options) + "\n";
   } catch(err) {
-    err.message = "Unable to export '".concat(templatePath, "' to handlebars format.\n\n", err.message);
+    err.message = "Unable to export ".concat(JSON.stringify(template), " to handlebars format.\n\n", err.message);
     throw err;
   }
 }

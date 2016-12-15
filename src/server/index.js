@@ -5,8 +5,8 @@ const url = require("url");
 const getRealms = require("./get-realms");
 const serveStatic = require("./serve-static");
 const serveRealm = require("./serve-realm");
-const serveByTemplate = require("./serve-by-template");
-const serveMeta = require("./serve-meta");
+const serveByTemplate = require("./meta/serve-by-template");
+const serveMeta = require("./meta/serve-meta");
 
 function serveNotFound(req, res) {
   res.writeHead(404, { "Content-Type": "text/plain" });

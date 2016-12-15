@@ -1,0 +1,17 @@
+spec:
+  hints: [ section ]
+value:
+  header: Realms
+  realms@:
+    - ">section":
+      header:
+        title<realm:
+        href<url:
+        type: application/lynx+json
+      meta:
+        title: Metadata
+        href<metaURL:
+        type: application/lynx+json
+      counts:
+        variants: "Variant count: {{{variants.length}}}"
+        templates: "Template count: {{{templates.length}}}"
