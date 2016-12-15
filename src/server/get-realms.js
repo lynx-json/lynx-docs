@@ -29,11 +29,12 @@ function reloadRealms(target, options) {
   realms.forEach(realm => {
     realm.url = realm.url || url.parse(realm.realm).pathname;
     realm.metaURL = "/meta/?realm=" + realm.realm;
-    realm.realms = realms.filter(isChildOfRealm(realm));
     realm.variants.forEach(variant => {
       variant.title = variant.title || titleCase(variant.name);
       variant.url = variant.url || urlForVariant(realm, variant);
     });
+    realm.realms = realms.filter(isChildOfRealm(realm));
+    realm.realms.forEach(child => child.parent = realm);
   });
 
   target.length = 0;

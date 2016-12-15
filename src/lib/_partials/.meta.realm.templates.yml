@@ -1,6 +1,6 @@
 spec:
   hints: [ section ]
 value:
-  header: Templates
+  header: "Templates ({{{templates.length}}})"
   templates@:
     - "{{.}}"

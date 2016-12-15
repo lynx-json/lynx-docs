@@ -1,7 +1,7 @@
 spec:
   hints: [ section ]
 value:
-  header: Realms
+  header: "Realms ({{{realms.length}}})"
   realms@:
     - ">section":
       header:

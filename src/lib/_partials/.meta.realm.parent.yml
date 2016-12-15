@@ -1,0 +1,12 @@
+spec:
+  hints: [ section ]
+value#parent:
+  header: Parent Realm
+  linkToParent:
+    title<realm:
+    href<url:
+    type: application/lynx+json
+  linkToParentMeta:
+    title: Metadata
+    href<metaURL:
+    type: application/lynx+json

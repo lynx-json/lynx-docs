@@ -1,5 +1,6 @@
 "use strict";
 
+const util = require("util");
 const path = require("path");
 const processTemplate = require("../process-template");
 const kvpToHandlebars = require("./kvp");
@@ -19,7 +20,7 @@ function transformTemplateToHandlebars(template, options, createFile) {
     var kvp = processTemplate(template, options, createFile);
     return kvpToHandlebars(kvp, options) + "\n";
   } catch(err) {
-    err.message = "Unable to export ".concat(JSON.stringify(template), " to handlebars format.\n\n", err.message);
+    err.message = "Unable to export ".concat(util.inspect(template), " to handlebars format.\n\n", err.message);
     throw err;
   }
 }

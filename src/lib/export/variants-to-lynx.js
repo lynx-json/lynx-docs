@@ -1,5 +1,6 @@
 "use strict";
 
+const util = require("util");
 const path = require("path");
 const processTemplate = require("./process-template");
 const kvpToHandlebars = require("./to-handlebars/kvp");
@@ -32,7 +33,7 @@ function transformVariantToLynx(variant, options, createFile) {
 
     return lintContent(bindData(content, data), variant);
   } catch(err) {
-    err.message = "Unable to export ".concat(JSON.stringify(variant.template), " to lynx format.\n\n", err.message);
+    err.message = "Unable to export ".concat(util.inspect(variant.template), " to lynx format.\n\n", err.message);
     throw err;
   }
 }

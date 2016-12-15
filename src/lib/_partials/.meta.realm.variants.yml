@@ -1,7 +1,7 @@
 spec:
   hints: [ section ]
 value:
-  header: Variants
+  header: "Variants ({{{variants.length}}})"
   variants@:
     - href<url:
       title<name:
