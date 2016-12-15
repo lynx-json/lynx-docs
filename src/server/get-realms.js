@@ -5,8 +5,8 @@ const chokidar = require("chokidar");
 const getRealmMetadata = require("../lib/metadata-realm");
 const titleCase = require("to-title-case");
 
-function getPathSegments(realmUri) {
-  return url.parse(realmUri).pathname.split("/").filter(segment => segment !== "");
+function getPathSegments(realmURI) {
+  return url.parse(realmURI).pathname.split("/").filter(segment => segment !== "");
 }
 
 function isChildOfRealm(parentRealm) {

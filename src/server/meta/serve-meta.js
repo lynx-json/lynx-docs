@@ -22,8 +22,6 @@ module.exports = exports = function createMetaHandler(options) {
       res.end();
     }
 
-    var realmPathSegments = url.parse(realm.realm).pathname.split("/");
-
     var template = { ">.meta.realm": {} };
     Object.assign(template[">.meta.realm"], realm);
 
