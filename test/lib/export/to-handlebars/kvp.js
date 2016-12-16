@@ -1,5 +1,5 @@
 "use strict";
-/*jshint expr:true */
+
 var should = require("chai").should();
 var kvpToHandlebars = require("../../../../src/lib/export/to-handlebars/kvp");
 

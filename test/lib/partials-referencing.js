@@ -1,5 +1,5 @@
 "use strict";
-/*jshint expr:true */
+
 const chai = require("chai");
 const should = chai.should();
 const expect = chai.expect;

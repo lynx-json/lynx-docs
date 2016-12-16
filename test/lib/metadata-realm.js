@@ -1,5 +1,5 @@
 "use strict";
-/*jshint expr:true */
+
 const mime = require("mime");
 const chai = require("chai");
 const should = chai.should();

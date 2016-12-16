@@ -1,5 +1,13 @@
 {
   "esversion": 6,
   "node": true,
-  "mocha": true
+  "mocha": true,
+  "overrides": {
+     "src/cli/index.js": {
+      "expr": true
+    },
+    "test/**/*.js": {
+      "expr": true
+    }
+  }
 }

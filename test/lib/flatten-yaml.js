@@ -1,5 +1,5 @@
 "use strict";
-/*jshint expr:true */
+
 var util = require("util");
 var chai = require("chai");
 var should = chai.should();

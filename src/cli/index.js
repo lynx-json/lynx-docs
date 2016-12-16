@@ -1,6 +1,5 @@
 #!/usr/bin/env node
 
-/*jshint expr:true */
 const yargs = require("yargs");
 
 yargs
