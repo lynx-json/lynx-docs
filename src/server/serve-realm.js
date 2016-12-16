@@ -48,7 +48,7 @@ module.exports = exports = function createRealmHandler(options) {
       var data = {
         variantURL: url.parse(req.url).pathname + "?variant=" + variantName + "&direct=true",
         indexURL: url.parse(req.url).pathname + "?variant=index"
-      }
+      };
 
       serveVariant({
         template: path.join(__dirname, "variant-with-alternate-index.lynx.yml"),

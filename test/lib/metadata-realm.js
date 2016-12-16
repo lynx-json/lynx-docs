@@ -1,3 +1,5 @@
+"use strict";
+/*jshint expr:true */
 const mime = require("mime");
 const chai = require("chai");
 const should = chai.should();
@@ -11,10 +13,10 @@ const YAML = require("yamljs");
 
 function statsFake(isDirectory) {
   return {
-    isDirectory: function() {
+    isDirectory: function () {
       return isDirectory;
     },
-    isFile: function() {
+    isFile: function () {
       return !isDirectory;
     }
   };
@@ -359,12 +361,12 @@ var tests = [{
 ];
 
 function realmObject(realm, variants) {
-  if (variants && !util.isArray(variants)) {
+  if(variants && !util.isArray(variants)) {
     variants = [variants];
   }
 
   var realmObj = {};
-  if (realm) realmObj.realm = realm;
+  if(realm) realmObj.realm = realm;
   realmObj.variants = variants || [];
 
   return toYamlBuffer(realmObj);
@@ -372,14 +374,14 @@ function realmObject(realm, variants) {
 
 function variant(name, pathToTemplateFile, pathToDataFile) {
   var variant = { type: "application/lynx+json" };
-  if (name) variant.name = name;
-  if (pathToTemplateFile) variant.template = pathToTemplateFile;
-  if (pathToDataFile) variant.data = pathToDataFile;
+  if(name) variant.name = name;
+  if(pathToTemplateFile) variant.template = pathToTemplateFile;
+  if(pathToDataFile) variant.data = pathToDataFile;
   return variant;
 }
 
 function countOf(n) {
-  var assertion = function(realms) {
+  var assertion = function (realms) {
     realms.length.should.equal(n);
   };
   assertion.should = "should have a count of " + n.toString();
@@ -387,7 +389,7 @@ function countOf(n) {
 }
 
 function containsRealm(realmUri) {
-  var assertion = function(realms) {
+  var assertion = function (realms) {
     var result = realms.some(realm => realm.realm === realmUri);
     result.should.equal(true);
   };
@@ -396,7 +398,7 @@ function containsRealm(realmUri) {
 }
 
 function containsVariant(realmUri, name, pathToTemplateFile, pathToDataFile) {
-  var assertion = function(realms) {
+  var assertion = function (realms) {
     var result = realms.some(
       r => r.variants.some(
         v => r.realm === realmUri &&
@@ -412,10 +414,10 @@ function containsVariant(realmUri, name, pathToTemplateFile, pathToDataFile) {
   desc += ", with name '" + name + "'";
   desc += ", with template '" + pathToTemplateFile + "'";
 
-  if (pathToDataFile) {
+  if(pathToDataFile) {
     desc += ", with data '" + pathToDataFile + "'";
   }
-  
+
   desc += ", with type 'application/lynx+json'";
 
   assertion.should = desc;
@@ -425,13 +427,13 @@ function containsVariant(realmUri, name, pathToTemplateFile, pathToDataFile) {
 
 function containsContentVariant(realmUri, name, pathToContentFile) {
   var contentType = mime.lookup(pathToContentFile);
-  
-  var assertion = function(realms) {
+
+  var assertion = function (realms) {
     var result = realms.some(
       r => r.variants.some(
         v => r.realm === realmUri &&
         v.name === name &&
-        v.content === path.resolve(pathToContentFile) && 
+        v.content === path.resolve(pathToContentFile) &&
         v.type === contentType));
 
     result.should.equal(true);
@@ -447,25 +449,25 @@ function containsContentVariant(realmUri, name, pathToContentFile) {
   return assertion;
 }
 
-describe("when getting realm metadata", function() {
-  tests.forEach(function(test) {
-    describe(test.description, function() {
+describe("when getting realm metadata", function () {
+  tests.forEach(function (test) {
+    describe(test.description, function () {
       var realms;
 
-      beforeEach(function() {
+      beforeEach(function () {
         var readdirStub = sinon.stub(fs, "readdirSync");
         var readFileStub = sinon.stub(fs, "readFileSync");
         var existsSyncStub = sinon.stub(fs, "existsSync");
         var statStub = sinon.stub(fs, "statSync");
 
-        Object.getOwnPropertyNames(test.fs.dirs).forEach(function(dir) {
+        Object.getOwnPropertyNames(test.fs.dirs).forEach(function (dir) {
           var rdir = path.resolve(dir);
           existsSyncStub.withArgs(rdir).returns(true);
           readdirStub.withArgs(rdir).returns(test.fs.dirs[dir]);
           statStub.withArgs(rdir).returns(statsFake(true));
         });
 
-        Object.getOwnPropertyNames(test.fs.files).forEach(function(file) {
+        Object.getOwnPropertyNames(test.fs.files).forEach(function (file) {
           var rfile = path.resolve(file);
           existsSyncStub.withArgs(rfile).returns(true);
           readFileStub.withArgs(rfile).returns(test.fs.files[file]);
@@ -475,15 +477,15 @@ describe("when getting realm metadata", function() {
         realms = getRealms(test.root, test.realm);
       });
 
-      afterEach(function() {
+      afterEach(function () {
         fs.readdirSync.restore();
         fs.readFileSync.restore();
         fs.existsSync.restore();
-        if (fs.statSync.restore) fs.statSync.restore();
+        if(fs.statSync.restore) fs.statSync.restore();
       });
 
-      test.assertions.forEach(function(assertion) {
-        it(assertion.should, function() {
+      test.assertions.forEach(function (assertion) {
+        it(assertion.should, function () {
           assertion(realms);
         });
       });

@@ -31,4 +31,4 @@ module.exports = exports = function createMetaHandler(options) {
     };
     serveVariant(variant);
   };
-}
+};

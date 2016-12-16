@@ -1,5 +1,5 @@
 "use strict";
-
+/*jshint expr:true */
 const chai = require("chai");
 const should = chai.should();
 const expect = chai.expect;
@@ -432,15 +432,15 @@ var tests = [{
 
 describe("when authoring partials", function () {
   var only = tests.find(t => t.only);
-  if (only) tests = [only];
-  
+  if(only) tests = [only];
+
   tests.forEach(function (test) {
     describe(test.description, function () {
       beforeEach(function () {
         sinon.stub(partials, "resolvePartial").returns(test.partial);
       });
       afterEach(function () {
-        if (partials.resolvePartial.restore) partials.resolvePartial.restore();
+        if(partials.resolvePartial.restore) partials.resolvePartial.restore();
       });
 
       it(test.should, function () {
@@ -448,7 +448,7 @@ describe("when authoring partials", function () {
       });
     });
   });
-  
+
   describe("referencing another partial at the root", function () {
     var kvp = {
       key: ">outer",
@@ -456,7 +456,7 @@ describe("when authoring partials", function () {
         "message": "Hello, World!"
       }
     };
-    
+
     var outerPartial = {
       key: ">inner",
       value: {
@@ -464,22 +464,22 @@ describe("when authoring partials", function () {
         "~*": null
       }
     };
-    
+
     var innerPartial = {
       value: {
         spec: {
-          hints: [ "page", "section" ]
+          hints: ["page", "section"]
         },
         value: {
           "~*": null
         }
       }
     };
-    
+
     var expected = {
       value: {
         spec: {
-          hints: [ "page", "section" ]
+          hints: ["page", "section"]
         },
         value: {
           header: "Greetings",
@@ -487,15 +487,15 @@ describe("when authoring partials", function () {
         }
       }
     };
-    
+
     beforeEach(function () {
       var stub = sinon.stub(partials, "resolvePartial");
-      
+
       stub.withArgs(kvp).returns(outerPartial);
       stub.withArgs(outerPartial).returns(innerPartial);
     });
     afterEach(function () {
-      if (partials.resolvePartial.restore) partials.resolvePartial.restore();
+      if(partials.resolvePartial.restore) partials.resolvePartial.restore();
     });
 
     it("should include the inner partial, including parameters described by the outer partial", function () {
@@ -503,7 +503,7 @@ describe("when authoring partials", function () {
       actual.should.deep.equal(expected);
     });
   });
-  
+
   describe("referencing a root partial from a partial with a key", function () {
     var kvp = {
       key: "greeting>outer",
@@ -511,7 +511,7 @@ describe("when authoring partials", function () {
         "message": "Hello, World!"
       }
     };
-    
+
     var outerPartial = {
       key: "greeting",
       value: {
@@ -521,22 +521,22 @@ describe("when authoring partials", function () {
         }
       }
     };
-    
+
     var innerPartial = {
       value: {
         spec: {
-          hints: [ "page", "section" ]
+          hints: ["page", "section"]
         },
         value: {
           "~*": null
         }
       }
     };
-    
+
     var expected = {
       value: {
         spec: {
-          hints: [ "page", "section" ]
+          hints: ["page", "section"]
         },
         value: {
           header: "Greetings",
@@ -544,15 +544,15 @@ describe("when authoring partials", function () {
         }
       }
     };
-    
+
     beforeEach(function () {
       var stub = sinon.stub(partials, "resolvePartial");
-      
+
       stub.withArgs(kvp).returns(outerPartial);
       stub.withArgs(outerPartial).returns(innerPartial);
     });
     afterEach(function () {
-      if (partials.resolvePartial.restore) partials.resolvePartial.restore();
+      if(partials.resolvePartial.restore) partials.resolvePartial.restore();
     });
 
     it("should include the inner partial, including parameters described by the outer partial", function () {

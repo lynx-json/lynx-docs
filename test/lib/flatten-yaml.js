@@ -1,5 +1,5 @@
 "use strict";
-
+/*jshint expr:true */
 var util = require("util");
 var chai = require("chai");
 var should = chai.should();
@@ -223,8 +223,8 @@ var tests = [{
         },
         value: {
           message: {
-            spec: { 
-              hints: ["text"] 
+            spec: {
+              hints: ["text"]
             },
             "value<message": "Hi"
           }
@@ -257,8 +257,8 @@ var tests = [{
         },
         value: {
           message: {
-            spec: { 
-              hints: ["text"] 
+            spec: {
+              hints: ["text"]
             },
             "value=message": "Hi"
           }
@@ -389,7 +389,7 @@ var tests = [{
           src: ".",
           type: "image/whatever",
           height: 20,
-          width: 20  
+          width: 20
         }
       }
     }

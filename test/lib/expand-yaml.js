@@ -1,5 +1,5 @@
 "use strict";
-
+/*jshint expr:true */
 var chai = require("chai");
 var should = chai.should();
 var expect = chai.expect;
@@ -18,11 +18,11 @@ function vsp(value, options) {
     value: value
   };
 
-  if (options && options.hints) {
+  if(options && options.hints) {
     vsp.spec.hints = options.hints;
   }
 
-  if (options && options.valueKey) {
+  if(options && options.valueKey) {
     vsp[options.valueKey] = vsp.value;
     delete vsp.value;
   }

@@ -1,5 +1,5 @@
 "use strict";
-
+/*jshint expr:true */
 const chai = require("chai");
 const should = chai.should();
 const expect = chai.expect;
@@ -20,13 +20,13 @@ describe("when referencing partials", function () {
       beforeEach(function () {
         sinon.stub(partials, "resolvePartial").withArgs(test.kvp).returns(test.partial);
       });
-      afterEach(function () { 
-        if (partials.resolvePartial.restore) partials.resolvePartial.restore();
+      afterEach(function () {
+        if(partials.resolvePartial.restore) partials.resolvePartial.restore();
       });
-      
+
       it(test.should, function () {
         runTest(test);
       });
-    });  
+    });
   });
 });
