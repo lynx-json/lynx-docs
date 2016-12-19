@@ -1,6 +1,0 @@
->section:
-  spec.hints~: [ "http://uncategorized/listing/item", card, section ]
-  symbol>lynx:
-    spec.hints: [ "http://uncategorized/listing/item/symbol"]
-    value~symbol: ●
-  ~*:

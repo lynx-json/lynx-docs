@@ -428,6 +428,45 @@ var tests = [{
   },
   description: "a partial with a namespaced wildcard parameter spec.*~",
   should: "should add all unknown parameters within the namespace in place of the wildcard"
+}, {
+  kvp: {
+    key: "input>",
+    value: null
+  },
+  partial: {
+    value: {
+      message: "Required Input",
+      "requiredMessage~?required": "The value is required."
+    }
+  },
+  expected: {
+    value: {
+      message: "Required Input"
+    }
+  },
+  description: "a partial with a conditional '~?param' parameter",
+  should: "should not include the partial value if the parameter is not supplied"
+}, {
+  kvp: {
+    key: "input>",
+    value: {
+      required: true
+    }
+  },
+  partial: {
+    value: {
+      message: "Required Input",
+      "required~?": "The value is required."
+    }
+  },
+  expected: {
+    value: {
+      message: "Required Input",
+      required: "The value is required."
+    }
+  },
+  description: "a partial with a conditional '~?param' parameter",
+  should: "should include the partial value if the parameter is supplied"
 }];
 
 describe("when authoring partials", function () {

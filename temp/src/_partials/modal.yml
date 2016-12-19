@@ -1,5 +1,0 @@
-spec:
-  hints: [ "http://bestbuy.com/retail/modal-container" ]
-  visibility: hidden
-value:
-  scope=:

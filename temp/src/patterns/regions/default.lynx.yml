@@ -1,9 +1,0 @@
->page:
-  main>:
-    header: Regions
-    description:
-      src: ./description.md
-      type: text/markdown
-    list:
-      src: ./menu/
-      type: application/lynx+json

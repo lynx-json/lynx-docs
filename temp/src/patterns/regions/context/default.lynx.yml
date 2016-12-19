@@ -1,7 +1,0 @@
->page:
-  globalNav>:
-  localNav>:
-  ctx>context:
-    header: This is Context
-  main:
-    header: Context

@@ -1,7 +1,0 @@
->page:
-  localNav>:
-  main>:
-    header: Local Navigation
-    description:
-      src: ./description.md
-      type: text/markdown

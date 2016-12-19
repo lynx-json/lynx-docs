@@ -1,8 +1,0 @@
->list:
-  value@patterns:
-    - >list-item:
-        symbol: ⁌
-        href<url: ./lists/
-        for: ./lists/
-        type: application/lynx+json
-        header<: Lists

@@ -7,6 +7,7 @@ const YAML = require("yamljs");
 const path = require("path");
 const getMetadata = require("./metadata-yaml");
 const placeholderPattern = () => /([*.-\w]*)?~([*.-\w]*)?/g;
+const conditionalPlaceholderPattern = () => /([*.-\w]*)?~\?([*.-\w]*)?/g;
 
 function isPartial(kvp) {
   return getMetadata(kvp).partial !== undefined;
@@ -158,6 +159,24 @@ function getKeyFromPlaceholder(paramName) {
   return paramName.replace(/~[^{]*$/, "");
 }
 
+// Conditional placeholders are in the form 'key~?param'. The partial
+// provides a value that should only be used in the case where the
+// named parameter was provided.
+function applyConditionalPlaceholders(partialKVP, paramsKVP) {
+  let pattern = conditionalPlaceholderPattern();
+  
+  let match = pattern.exec(partialKVP.key);
+  if(!match) return partialKVP;
+  
+  let param = getParam(paramsKVP, match[2] || match[1]);
+  if (!param) return null;
+  
+  partialKVP.key = getKeyFromPlaceholder(partialKVP.key);
+  return partialKVP;
+}
+
+// Explicit placeholders (as opposed to wildcard placeholders)
+// are in the form 'key~param'.
 function replaceExplicitPlaceholders(partialKVP, paramsKVP) {
   let pattern = placeholderPattern();
 
@@ -230,6 +249,8 @@ function applyParametersToChildrenOfArray(partialKVP, paramsKVP, knownParameters
 
 const inlineParameterPattern = /~{{([^}^|]*)(?:\|([^}]*))?}}/g;
 
+// Inline placeholders are for replacing part of a string value. They
+// are in the form ~{{param|Default Value}}
 function replaceInlinePlaceholders(partialKVP, paramsKVP) {
   function replace(text) {
     for(var p in paramsKVP.value) {
@@ -270,9 +291,12 @@ function applyParameters(partialKVP, paramsKVP, knownParameters) {
     partialKVP = applyParametersToChildrenOfObject(partialKVP, paramsKVP, knownParameters);
   }
 
+  partialKVP = applyConditionalPlaceholders(partialKVP, paramsKVP);
+  if (!partialKVP) return partialKVP;
+  
   partialKVP = replaceInlinePlaceholders(partialKVP, paramsKVP);
   partialKVP = replaceExplicitPlaceholders(partialKVP, paramsKVP);
-
+  
   return partialKVP;
 }
 

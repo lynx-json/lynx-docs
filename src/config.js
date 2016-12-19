@@ -25,6 +25,9 @@ module.exports = exports = function(lynxDocs) {
     if (!util.isObject(kvp.value)) return;
     if (!options || !options.realm) return;
 
+    var meta = lynxDocs.lib.meta(kvp);
+      if (meta.children.realm && meta.children.realm[0].template) return;
+      
     if (kvp.value.realm) {
       kvp.value.realm = url.resolve(options.realm.realm, kvp.value.realm);
     } else {  

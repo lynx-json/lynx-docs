@@ -1,5 +1,0 @@
->local-nav:
-  header: Regions
-  list:
-    src: /retail/library/patterns/regions/menu/
-    type: application/lynx+json
