@@ -3,6 +3,10 @@ const path = require("path");
 const fs = require("fs");
 const mime = require("mime");
 
+mime.define({
+  "application/lynx+json": ["lnx"],
+  "application/lynx-spec+json": ["lnxs"]  
+});
 
 function createServeStatic(options) {
   function serveFile(req, res, next) {
