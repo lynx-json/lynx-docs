@@ -6,8 +6,8 @@ const parseYaml = require("./parse-yaml");
 const YAML = require("yamljs");
 const path = require("path");
 const getMetadata = require("./metadata-yaml");
-const placeholderPattern = () => /([*.-\w]*)?~([*.-\w]*)?/g;
-const conditionalPlaceholderPattern = () => /([*.-\w]*)?~\?([*.-\w]*)?/g;
+const placeholderPattern = () => /([*.-\w]*)?(?:[#@<>=]*)~([#@<>*.-\w]*)?/g;
+const conditionalPlaceholderPattern = () => /([#@<>=*.-\w]*)?(~[#@<>=*.-\w]*)?\?(.*)/g;
 
 function isPartial(kvp) {
   return getMetadata(kvp).partial !== undefined;
@@ -159,19 +159,31 @@ function getKeyFromPlaceholder(paramName) {
   return paramName.replace(/~[^{]*$/, "");
 }
 
-// Conditional placeholders are in the form 'key~?param'. The partial
-// provides a value that should only be used in the case where the
-// named parameter was provided.
+// Conditional placeholders are in the form 'key~param?condition'. The partial
+// provides a value that should only be used in the case where a param with a 
+// name matching the condition was provided.
 function applyConditionalPlaceholders(partialKVP, paramsKVP) {
-  let pattern = conditionalPlaceholderPattern();
+  var pattern = conditionalPlaceholderPattern();
   
-  let match = pattern.exec(partialKVP.key);
+  var match = pattern.exec(partialKVP.key);
   if(!match) return partialKVP;
   
-  let param = getParam(paramsKVP, match[2] || match[1]);
-  if (!param) return null;
+  var key = match[1];
+  var placeholder = match[2];
+  var condition = new RegExp(match[3]);
+  var params = getParams(paramsKVP);
+  var matchesCondition = false;
+  for (let p of params) {
+    if (condition.test(p.key)) {
+      matchesCondition = true;
+      continue;
+    }
+  }
   
-  partialKVP.key = getKeyFromPlaceholder(partialKVP.key);
+  if (!matchesCondition) return null;
+  
+  partialKVP.key = key;
+  if (placeholder) partialKVP.key += placeholder;
   return partialKVP;
 }
 

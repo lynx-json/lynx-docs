@@ -294,13 +294,13 @@ var tests = [{
   partial: {
     value: {
       "message~": "Hello, World!",
-      "partial>~": null
+      "other>~": null
     }
   },
   expected: {
     value: {
       message: "Hello, World!",
-      "partial>": null
+      "other>": null
     }
   },
   description: "a parameter with a partial reference key (key>partial) and a null default value",
@@ -436,7 +436,7 @@ var tests = [{
   partial: {
     value: {
       message: "Required Input",
-      "requiredMessage~?required": "The value is required."
+      "requiredMessage?required": "The value is required."
     }
   },
   expected: {
@@ -444,8 +444,26 @@ var tests = [{
       message: "Required Input"
     }
   },
-  description: "a partial with a conditional '~?param' parameter",
-  should: "should not include the partial value if the parameter is not supplied"
+  description: "a partial with a conditional '?param' placeholder",
+  should: "should not include the partial value if the named parameter is not supplied"
+}, {
+  kvp: {
+    key: "input>",
+    value: null
+  },
+  partial: {
+    value: {
+      message: "Text Input",
+      "textInvalidMessage~?minLength|maxLength|pattern|format": "Invalid Format"
+    }
+  },
+  expected: {
+    value: {
+      message: "Text Input"
+    }
+  },
+  description: "a partial with a conditional placeholder with a regular expression",
+  should: "should not include the partial value if a parameter matching the pattern is not supplied"
 }, {
   kvp: {
     key: "input>",
@@ -456,7 +474,28 @@ var tests = [{
   partial: {
     value: {
       message: "Required Input",
-      "required~?": "The value is required."
+      "requiredMessage?required": "The value is required."
+    }
+  },
+  expected: {
+    value: {
+      message: "Required Input",
+      requiredMessage: "The value is required."
+    }
+  },
+  description: "a partial with a conditional 'key?param' placeholder",
+  should: "should include the partial value if the named parameter is supplied"
+}, {
+  kvp: {
+    key: "input>",
+    value: {
+      required: true
+    }
+  },
+  partial: {
+    value: {
+      message: "Required Input",
+      "required?": "The value is required."
     }
   },
   expected: {
@@ -465,8 +504,138 @@ var tests = [{
       required: "The value is required."
     }
   },
-  description: "a partial with a conditional '~?param' parameter",
+  description: "a partial with a conditional 'param?' placeholder",
   should: "should include the partial value if the parameter is supplied"
+}, {
+  kvp: {
+    key: "input>",
+    value: {
+      maxLength: 1,
+      textInvalidMessage: "Must have a maximum length of 1"
+    }
+  },
+  partial: {
+    value: {
+      message: "Text Input",
+      "textInvalidMessage~?minLength|maxLength|pattern|format": "Invalid Format"
+    }
+  },
+  expected: {
+    value: {
+      message: "Text Input",
+      textInvalidMessage: "Must have a maximum length of 1"
+    }
+  },
+  description: "a partial with a conditional placeholder with a regular expression",
+  should: "should include the partial value if a parameter name matching the pattern is supplied"
+}, {
+  kvp: {
+    key: "input>",
+    value: {
+    }
+  },
+  partial: {
+    value: {
+      "label<~": "string template",
+      "input#~": "object template",
+      "items@~": "array template",
+      "literal=~": "literal template"
+    }
+  },
+  expected: {
+    value: {
+      "label<": "string template",
+      "input#": "object template",
+      "items@": "array template",
+      "literal=": "literal template"
+    }
+  },
+  description: "a partial with data-bound placeholders",
+  should: "should include the data templates in the result"
+}, {
+  kvp: {
+    key: "input>",
+    value: {
+      "label": "replacement string",
+      "input": "replacement object",
+      "items": "replacement array",
+      "literal": "replacement literal"
+    }
+  },
+  partial: {
+    value: {
+      "label<~": "string template",
+      "input#~": "object template",
+      "items@~": "array template",
+      "literal=~": "literal template"
+    }
+  },
+  expected: {
+    value: {
+      "label<": "replacement string",
+      "input#": "replacement object",
+      "items@": "replacement array",
+      "literal=": "replacement literal"
+    }
+  },
+  description: "a partial with data-bound named placeholders",
+  should: "should match params with the same names"
+}, {
+  kvp: {
+    key: "input>",
+    value: {
+      "label<": "replacement string",
+      "input#": "replacement object",
+      "items@": "replacement array",
+      "literal=": "replacement literal"
+    }
+  },
+  partial: {
+    value: {
+      "label~": "string template",
+      "input~": "object template",
+      "items~": "array template",
+      "literal~": "literal template"
+    }
+  },
+  expected: {
+    value: {
+      "label<": "replacement string",
+      "input#": "replacement object",
+      "items@": "replacement array",
+      "literal=": "replacement literal"
+    }
+  },
+  description: "a partial called with data-bound parameters",
+  should: "should include the data templates in the result"
+}, {
+  kvp: {
+    key: "input>",
+    value: {
+      "label<": "string template",
+      "input#": "object template",
+      "items@": "array template",
+      "literal=": "literal template"
+    }
+  },
+  partial: {
+    value: {
+      "label?": "string template",
+      "input?": "object template",
+      "items?": "array template",
+      "literal?": "literal template"
+    }
+  },
+  expected: {
+    value: {
+      "label": "string template",
+      "input": "object template",
+      "items": "array template",
+      "literal": "literal template"
+    }
+  },
+  description: "a partial called with data-bound parameters",
+  should: "should match conditional placeholders by name"
 }];
 
 describe("when authoring partials", function () {
