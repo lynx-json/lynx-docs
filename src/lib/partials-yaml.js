@@ -6,8 +6,8 @@ const parseYaml = require("./parse-yaml");
 const YAML = require("yamljs");
 const path = require("path");
 const getMetadata = require("./metadata-yaml");
-const placeholderPattern = () => /([*.-\w]*)?(?:[#@<>=]*)~([#@<>*.-\w]*)?/g;
-const conditionalPlaceholderPattern = () => /([#@<>=*.-\w]*)?(~[#@<>=*.-\w]*)?\?(.*)/g;
+const placeholderPattern = () => /([*.-\w]*)(?:[#@<>=]*)~([#@<>*.-\w]*)/g;
+const conditionalPlaceholderPattern = () => /([#@<>=*.-\w]*)(~[#@<>=*.-\w]*)?\?(.*)/g;
 
 function isPartial(kvp) {
   return getMetadata(kvp).partial !== undefined;
@@ -126,7 +126,7 @@ function* replaceWildcardPlaceholders(partialKVP, paramsKVP, knownParameters) {
   if(placeholderName.name !== "*") return;
 
   function isMostSpecificPlaceholderFor(param) {
-    let match = knownParameters.find(k => param.fullName === k.fullName ||
+    let match = knownParameters.find(k => param.key === k.fullName || param.fullName === k.fullName ||
       (param.fullName.startsWith(k.namespace) && k.name === "*") ||
       k.fullName === "*");
 
@@ -155,8 +155,9 @@ function* replaceWildcardPlaceholders(partialKVP, paramsKVP, knownParameters) {
   }
 }
 
-function getKeyFromPlaceholder(paramName) {
-  return paramName.replace(/~[^{]*$/, "");
+function getMetaKeyWithoutPlaceholder(paramName) {
+  var key = paramName.replace(/~[^{]*$/, "");
+  return getMetadata(key);
 }
 
 // Conditional placeholders are in the form 'key~param?condition'. The partial
@@ -190,14 +191,14 @@ function applyConditionalPlaceholders(partialKVP, paramsKVP) {
 // Explicit placeholders (as opposed to wildcard placeholders)
 // are in the form 'key~param'.
 function replaceExplicitPlaceholders(partialKVP, paramsKVP) {
-  let pattern = placeholderPattern();
+  var pattern = placeholderPattern();
 
-  let match = pattern.exec(partialKVP.key);
+  var match = pattern.exec(partialKVP.key);
   if(!match) return partialKVP;
 
-  let keyFromPlaceholder = getKeyFromPlaceholder(partialKVP.key);
-  let param = getParam(paramsKVP, match[2] || match[1]);
-  let newKey = param ? param.src.key : keyFromPlaceholder;
+  var metaFromPlaceholder = getMetaKeyWithoutPlaceholder(partialKVP.key);
+  var param = getParam(paramsKVP, match[2] || match[1]);
+  var newKey = param ? param.src.key : metaFromPlaceholder.src.key;
 
   if(!param) {
     if(partialKVP.value !== null && partialKVP.value !== undefined) {
@@ -220,10 +221,10 @@ function replaceExplicitPlaceholders(partialKVP, paramsKVP) {
 
   // The partial key wins, but we need to copy template and partial info from
   // the param key.
-  if(param.key !== keyFromPlaceholder) {
-    newKey = keyFromPlaceholder;
+  if(param.key !== metaFromPlaceholder.key) {
+    newKey = metaFromPlaceholder.key;
     if(param.template) newKey += param.template.section;
-    if(param.partial) newKey += ">" + param.partial;
+    if(param.partial) newKey += ">" + param.partial;  
   }
 
   return {

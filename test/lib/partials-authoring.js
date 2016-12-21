@@ -40,8 +40,25 @@ var tests = [{
       value: "Hello, World!"
     }
   },
-  description: "a partial with the parameter value~",
-  should: "should return the value in place"
+  description: "a partial with the placeholder value~",
+  should: "should return a text value in place of the placeholder"
+}, {
+  kvp: {
+    key: ">em",
+    value: [ "One", "Two", "Three" ]
+  },
+  partial: {
+    value: {
+      "value~": null
+    }
+  },
+  expected: {
+    value: {
+      value: [ "One", "Two", "Three" ]
+    }
+  },
+  description: "a partial with the placeholder value~",
+  should: "should return an array value in place of the placeholder"
 }, {
   kvp: {
     key: ">em",
@@ -331,7 +348,8 @@ var tests = [{
       "spec.visibility": "visible",
       one: "One",
       two: "Two",
-      three: "Three"
+      three: "Three",
+      "symbol<": "1"
     }
   },
   partial: {
@@ -340,6 +358,7 @@ var tests = [{
         hints: ["section"]
       },
       value: {
+        "value~symbol": "2",
         "a~one": null,
         "~*": null,
         message: "Hello, World!"
@@ -352,6 +371,7 @@ var tests = [{
         hints: ["section"]
       },
       value: {
+        "value<symbol": "1",
         a: "One",
         "spec.visibility": "visible",
         two: "Two",
@@ -559,7 +579,8 @@ var tests = [{
       "label": "replacement string",
       "input": "replacement object",
       "items": "replacement array",
-      "literal": "replacement literal"
+      "literal": "replacement literal",
+      "other": "replacement for other partial"
     }
   },
   partial: {
@@ -567,48 +588,63 @@ var tests = [{
       "label<~": "string template",
       "input#~": "object template",
       "items@~": "array template",
-      "literal=~": "literal template"
+      "literal=~": "literal template",
+      "other>~": "partial template"
     }
   },
   expected: {
     value: {
-      "label<": "replacement string",
-      "input#": "replacement object",
-      "items@": "replacement array",
-      "literal=": "replacement literal"
+      "label": "replacement string",
+      "input": "replacement object",
+      "items": "replacement array",
+      "literal": "replacement literal",
+      "other": "replacement for other partial"
     }
   },
   description: "a partial with data-bound named placeholders",
   should: "should match params with the same names"
 }, {
-  kvp: {
-    key: "input>",
-    value: {
-      "label<": "replacement string",
-      "input#": "replacement object",
-      "items@": "replacement array",
-      "literal=": "replacement literal"
-    }
-  },
-  partial: {
-    value: {
-      "label~": "string template",
-      "input~": "object template",
-      "items~": "array template",
-      "literal~": "literal template"
-    }
-  },
-  expected: {
-    value: {
-      "label<": "replacement string",
-      "input#": "replacement object",
-      "items@": "replacement array",
-      "literal=": "replacement literal"
-    }
-  },
-  description: "a partial called with data-bound parameters",
-  should: "should include the data templates in the result"
-}, {
+//   kvp: {
+//     key: "input>",
+//     value: {
+//       "label<": "replacement string",
+//       "input#": "replacement object",
+//       "items@": "replacement array",
+//       "literal=": "replacement literal",
+//       "other>": "replacement partial"
+//     }
+//   },
+//   partial: {
+//     value: {
+//       "label~": "string template",
+//       "input~": "object template",
+//       "items~": "array template",
+//       "literal~": "literal template",
+//       "other>": "nested partial",
+//       "l~label": "string template",
+//       "i~input": "object template",
+//       "a~items": "array template",
+//       "t~literal": "literal template",
+//       "o>other": "nested partial"
+//     }
+//   },
+//   expected: {
+//     value: {
+//       "label<": "replacement string",
+//       "input#": "replacement object",
+//       "items@": "replacement array",
+//       "literal=": "replacement literal",
+//       "other>": "replacement partial",
+//       "l<label": "replacement string",
+//       "i#input": "replacement object",
+//       "a@items": "replacement array",
+//       "t=literal": "replacement literal",
+//       "o>other": "replacement partial"
+//     }
+//   },
+//   description: "a partial called with data-bound parameters",
+//   should: "should include the data templates in the result"
+// }, {
   kvp: {
     key: "input>",
     value: {

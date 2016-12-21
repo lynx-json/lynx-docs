@@ -25,13 +25,33 @@ we may want to reference a partial without including a key.
 
 Authoring Partials
 -------------------------------------------------
+  
+### Placeholders
+  
+#### Named Placeholders
 
-### Conditional Placeholders
+#### Wildcard Placeholders
+
+```YAML
+~*:
+~spec.*:
+spec.*~input.spec.*:
+```
+
+```YAML
+spec:
+  hints: [ "http://uncategorized/listing" ]
+value~@:
+  - >section:
+      
+```
+
+#### Conditional Placeholders
 
 ```YAML
 spec:
   validation:
-    required~?:
+    required?:
       invalid: requiredInvalidMessage
 ```
 
@@ -42,7 +62,6 @@ will be included in the partial result.
 ```YAML
 spec:
   validation:
-    text~?minLength|maxLength|pattern|format:
+    text?minLength|maxLength|pattern|format:
       invalid: textInvalidMessage
-    
 ```
