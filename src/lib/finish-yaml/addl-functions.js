@@ -4,26 +4,25 @@ const util = require("util");
 const getMetadata = require("../metadata-yaml");
 const url = require("url");
 
-
 function isNode(meta) {
   return meta.children && meta.children.spec && meta.children.value;
 }
 
 function nodeHasProperty(kvp, meta, property) {
-  if (!isNode(meta)) return false;
-  return meta.children.value.map(mapExpandedChildMetadata(kvp.value)).some(function(childMeta) {
+  if(!isNode(meta)) return false;
+  return meta.children.value.map(mapExpandedChildMetadata(kvp.value)).some(function (childMeta) {
     return childMeta.children && property in childMeta.children;
   });
 }
 
 function mapExpandedChildMetadata(value) {
-  return function(childMeta) {
+  return function (childMeta) {
     var childKvp = { key: childMeta.src.key, value: value[childMeta.src.key] };
     return getMetadata(childKvp);
   };
 }
 
-var baseHints = ["text","content","container","link","submit","form"];
+var baseHints = ["text", "content", "container", "link", "submit", "form"];
 
 function isBaseHint(hint) {
   function match(baseHint) {
@@ -46,34 +45,34 @@ function isLiteralTemplate(meta) {
 }
 
 function addHint(kvp, hint) {
-  if (!kvp.value || !kvp.value.spec) return;
-  if (!kvp.value.spec.hints) return;
-  if (kvp.value.spec.hints.indexOf(hint) !== -1) return;
+  if(!kvp.value || !kvp.value.spec) return;
+  if(!kvp.value.spec.hints) return;
+  if(kvp.value.spec.hints.indexOf(hint) !== -1) return;
   if(!util.isArray(kvp.value.spec.hints)) {
     var meta = getMetadata(kvp);
     throw new Error("The 'hints' property of a spec must be an array for '" + meta.key + "'.");
   }
-  if (isBaseHint(hint) && kvp.value.spec.hints.some(isBaseHint)) return;
+  if(isBaseHint(hint) && kvp.value.spec.hints.some(isBaseHint)) return;
   kvp.value.spec.hints.push(hint);
 }
 
 function text(kvp, options) {
   var meta = getMetadata(kvp);
-  if (!isNode(meta)) return;
+  if(!isNode(meta)) return;
 
   var valueMetas = meta.children.value.map(cm => cm.more());
   var firstValueMeta = valueMetas[0];
 
-  if (isLiteralTemplate(firstValueMeta)) {
+  if(isLiteralTemplate(firstValueMeta)) {
     addHint(kvp, "text");
   }
 
-  if (isLiteralTemplate(firstValueMeta)) {
-        addHint(kvp, "text");
-  } else if (firstValueMeta.src.value !== undefined &&
-      firstValueMeta.src.value !== null &&
-      util.isPrimitive(firstValueMeta.src.value)) {
-        addHint(kvp, "text");
+  if(isLiteralTemplate(firstValueMeta)) {
+    addHint(kvp, "text");
+  } else if(firstValueMeta.src.value !== undefined &&
+    firstValueMeta.src.value !== null &&
+    util.isPrimitive(firstValueMeta.src.value)) {
+    addHint(kvp, "text");
   }
 }
 
@@ -83,33 +82,33 @@ function addLabeledBy(kvp, labelProperty) {
 
 function labels(kvp, options) {
   var meta = getMetadata(kvp);
-  if (!isNode(meta)) return;
+  if(!isNode(meta)) return;
 
   var valueMetas = meta.children.value.map(cm => cm.more());
   var firstValueMeta = valueMetas[0];
 
-  if (meta.key === "label" && util.isString(firstValueMeta.src.value)) {
+  if(meta.key === "label" && util.isString(firstValueMeta.src.value)) {
     addHint(kvp, "label");
-  } else if (nodeHasProperty(kvp, meta, "title")) {
+  } else if(nodeHasProperty(kvp, meta, "title")) {
     addLabeledBy(kvp, "title");
-  } else if (nodeHasProperty(kvp, meta, "header")) {
+  } else if(nodeHasProperty(kvp, meta, "header")) {
     addLabeledBy(kvp, "header");
-  } else if (nodeHasProperty(kvp, meta, "label")) {
+  } else if(nodeHasProperty(kvp, meta, "label")) {
     addLabeledBy(kvp, "label");
   }
 }
 
 function titles(kvp, options) {
   var meta = getMetadata(kvp);
-  if (meta.key === "title") {
+  if(meta.key === "title") {
     addHint(kvp, "label");
   }
 }
 
 function headers(kvp, options) {
   var meta = getMetadata(kvp);
-  
-  if (meta.key === "header") {
+
+  if(meta.key === "header") {
     addHint(kvp, "header");
     addHint(kvp, "label");
   }
@@ -117,14 +116,14 @@ function headers(kvp, options) {
 
 function links(kvp, options) {
   var meta = getMetadata(kvp);
-  if (nodeHasProperty(kvp, meta, "href")) {
+  if(nodeHasProperty(kvp, meta, "href")) {
     var node = kvp.value;
 
-    if (!nodeHasProperty(kvp, meta, "type") ||
+    if(!nodeHasProperty(kvp, meta, "type") ||
       node.value.type === null ||
       node.value.type === "") throw new Error("Missing 'type' attribute for '" + meta.key + "'");
 
-    if (node.value.href === null || node.value.href === "") throw new Error("'href' cannot be null/empty for '" + meta.key + "'");
+    if(node.value.href === null || node.value.href === "") throw new Error("'href' cannot be null/empty for '" + meta.key + "'");
 
     addHint(kvp, "link");
   }
@@ -132,9 +131,9 @@ function links(kvp, options) {
 
 function submits(kvp, options) {
   var meta = getMetadata(kvp);
-  if (nodeHasProperty(kvp, meta, "action")) {
+  if(nodeHasProperty(kvp, meta, "action")) {
     var node = kvp.value;
-    if (node.value.action === null || node.value.action === "") throw new Error("'action' cannot be null/empty for '" + meta.key + "'");
+    if(node.value.action === null || node.value.action === "") throw new Error("'action' cannot be null/empty for '" + meta.key + "'");
     addHint(kvp, "submit");
   }
 }
@@ -146,7 +145,7 @@ function hasImageProperties(kvp, meta) {
 
 function images(kvp, options) {
   var meta = getMetadata(kvp);
-  if (hasImageProperties(kvp, meta)) {
+  if(hasImageProperties(kvp, meta)) {
     validateContentNode(kvp, meta);
     addHint(kvp, "image");
   }
@@ -154,7 +153,7 @@ function images(kvp, options) {
 
 function content(kvp, options) {
   var meta = getMetadata(kvp);
-  if (nodeHasProperty(kvp, meta, "src")) {
+  if(nodeHasProperty(kvp, meta, "src")) {
     validateContentNode(kvp, meta);
     addHint(kvp, "content");
   }
@@ -162,26 +161,27 @@ function content(kvp, options) {
 
 function validateContentNode(kvp, meta) {
   var node = kvp.value;
-  if (node.value.src === null || node.value.src === "") throw new Error("'src' cannot be null/empty for '" + meta.key + "'");
-  if (!nodeHasProperty(kvp, meta, "type")) throw new Error("Missing 'type' attribute for '" + meta.key + "'");
+  if(!node.value) return;
+  if(node.value.src === null || node.value.src === "") throw new Error("'src' cannot be null/empty for '" + meta.key + "'");
+  if(!nodeHasProperty(kvp, meta, "type")) throw new Error("Missing 'type' attribute for '" + meta.key + "'");
 }
 
 function containers(kvp, options) {
   var meta = getMetadata(kvp);
-  if (!isNode(meta)) return;
+  if(!isNode(meta)) return;
 
   var valueMetas = meta.children.value.map(cm => cm.more());
   var firstValueMeta = valueMetas[0];
 
-  if (isObjectTemplate(firstValueMeta) || isArrayTemplate(firstValueMeta)) {
-        addHint(kvp, "container");
-  } else if (util.isObject(firstValueMeta.src.value)) {
-        addHint(kvp, "container");
+  if(isObjectTemplate(firstValueMeta) || isArrayTemplate(firstValueMeta)) {
+    addHint(kvp, "container");
+  } else if(util.isObject(firstValueMeta.src.value)) {
+    addHint(kvp, "container");
   }
 
-  if (nodeHasProperty(kvp, meta, "scope")) {
+  if(nodeHasProperty(kvp, meta, "scope")) {
     var node = kvp.value;
-    if (node.value.scope && options && options.realm) {
+    if(node.value.scope && options && options.realm) {
       node.value.scope = url.resolve(options.realm.realm, node.value.scope);
     }
   }
@@ -189,33 +189,33 @@ function containers(kvp, options) {
 
 function forms(kvp, options) {
   var meta = getMetadata(kvp);
-  if (meta.key && meta.key.match(/form/i)) {
+  if(meta.key && meta.key.match(/form/i)) {
     addHint(kvp, "form");
   }
 }
 
 function sections(kvp, options) {
   var meta = getMetadata(kvp);
-  if (nodeHasProperty(kvp, meta, "header")) {
+  if(nodeHasProperty(kvp, meta, "header")) {
     addHint(kvp, "section");
-  } else if (meta.key && meta.key.match(/section/i)) {
+  } else if(meta.key && meta.key.match(/section/i)) {
     addHint(kvp, "section");
   }
 }
 
 function markers(kvp, options) {
   var meta = getMetadata(kvp);
-  if (nodeHasProperty(kvp, meta, "for")) {
+  if(nodeHasProperty(kvp, meta, "for")) {
     addHint(kvp, "marker");
 
     var node = kvp.value;
-    if (node.value.for && options && options.realm) {
+    if(node.value.for && options && options.realm) {
       node.value.for = url.resolve(options.realm.realm, node.value.for);
     }
   }
 }
 
-module.exports = exports = function(finish) {
+module.exports = exports = function (finish) {
   finish.addHint = addHint;
 
   finish.headers = headers;
