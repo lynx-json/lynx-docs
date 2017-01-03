@@ -1,6 +1,6 @@
 {
   "name": "lynx-docs",
-  "version": "0.6.0",
+  "version": "0.6.1",
   "description": "Lynx templates in YAML",
   "main": "src/index.js",
   "bin": {
