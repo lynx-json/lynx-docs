@@ -708,7 +708,7 @@ var tests = [{
   should: "should match conditional placeholders by name"
 }];
 
-describe.only("when authoring partials", function () {
+describe("when authoring partials", function () {
   var only = tests.find(t => t.only);
   if(only) tests = [only];
 
