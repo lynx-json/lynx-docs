@@ -5,7 +5,7 @@ Lynx templates are authored using YAML. For details see [http://yaml.org/](http:
 ## Static Content
 Static content is embedded in the template and does not change.
 
-Here are the static content scenarios
+Static content scenarios
 - [Text Value](#static-text-value)
 - [Object Value](#static-object-value)
 - [Array Value](#static-array-value)
@@ -50,6 +50,11 @@ movies:
 
 ## Dynamic Content
 Dynamic content changes based on the state of the application and therefore, must be provided by the server. Dynamic content is bound to the templates at runtime.
+
+Static content scenarios
+- [Text Value](#dynamic-text-value)
+- [Object Value](#dynamic-object-value)
+- [Array Value](#dynamic-array-value)
 
 ### <a name="dynamic-text-value"></a>Dynamic Text
 #### Simple data binding example.
@@ -103,4 +108,131 @@ lastName: Chase
 Result:
 ```
 name: "Chevy Chase"
+```
+
+#### Binding literals
+The "<" binding token encloses the bound value in quotes. The "=" binding token binds the value as a literal (not quoted).
+
+Template:
+```
+height=:
+quoted<height:
+```
+
+Data:
+```
+height: 42
+```
+
+Result:
+```
+height: 42
+quoted: "42"
+```
+
+#### Default values
+You may specify a default value in the template. If the data being bound doesn't contain a matching key to bind, then the default value is used. If no default is specified, then it is assumed to be the literal null.
+
+Template:
+```
+firstName<: Chevy
+middleName<:
+lastName<: Silverado
+```
+
+Data:
+```
+lastName: Chase
+```
+
+Result:
+```
+firstName: Chevy
+middleName: null
+lastName: Chase
+```
+
+### <a name="dynamic-object-value"></a>Dynamic Object
+
+#### Changing binding context
+When binding to an object in data, you can change the binding context to the object being bound.
+
+Template:
+```
+user#:
+  firstName<: Chevy
+  middleName<:
+  lastName<: Silverado
+```
+
+Data:
+```
+user:
+  lastName: Chase
+```
+
+Result:
+```
+user:
+  firstName: Chevy
+  middleName: null
+  lastName: Chase
+```
+
+#### Output different values based on presence or absence of object
+When binding to an object in data, you can change the binding context to the object being bound.
+
+Template:
+```
+user:
+  value#user:
+    firstName<: Chevy
+    middleName<:
+    lastName<: Silverado
+  value^user:
+    message: User does not exist
+```
+
+Data:
+```
+null
+```
+
+Result:
+```
+user:
+  value:
+    message: User does not exist
+```
+
+### <a name="dynamic-array-value"></a>Dynamic Array
+
+#### Simple array binding
+When binding to an object in data, you can change the binding context to the object being bound.
+
+Template:
+```
+list:
+  value@users:
+    - name<:
+      age<:
+```
+
+Data:
+```
+users:
+  - name: User 1
+    age: 25
+  - name: User 2
+    age: 30
+```
+
+Result:
+```
+list:
+  value:
+    - name: "User 1"
+      age: "25"
+    - name: "User 2"
+      age: "30"
 ```
