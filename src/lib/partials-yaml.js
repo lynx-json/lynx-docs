@@ -134,7 +134,7 @@ function* replaceWildcardPlaceholders(partialKVP, paramsKVP, knownParameters) {
   }
 
   for(let p in paramsKVP.value) {
-    if(p === "partial" || p === "value" || p === "key") continue;
+    if(p === "partial" || p === "value" || p === "key" || p === "template") continue;
     let param = getMetadata({ key: p, value: paramsKVP.value[p] });
     param = Object.assign({}, param, parseParamName(param.src.key));
 
@@ -349,8 +349,9 @@ function getPartial(kvp, options) {
   var meta = getMetadata(kvp);
 
   kvp.value.partial = meta.partial;
-  kvp.value.key = meta.src.key.replace(/>.*/, "");
-  kvp.key = kvp.value.key;
+  kvp.value.key = meta.key;
+  kvp.value.template = meta.template;
+  kvp.key = meta.src.key.replace(/>.*/, "");
 
   var result = getPartialKVP(kvp, options);
   if(!result) return;

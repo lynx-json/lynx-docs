@@ -8,10 +8,7 @@ value:
       href<metaURL: 
       title: ℹ︎
       type: application/lynx+json
-  variants>list:
-    value@variants: 
-      - ">list-item":
-          symbol<: □
-          header<title: ""
-          href<url: ""
-          type<: application/lynx+json
+  variants@variants: 
+      - header<title: ""
+        href<url: ""
+        type<: application/lynx+json

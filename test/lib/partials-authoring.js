@@ -44,6 +44,40 @@ var tests = [{
   should: "should return a text value in place of the placeholder"
 }, {
   kvp: {
+    key: "name>em",
+    value: null
+  },
+  partial: {
+    value: {
+      "key~": null
+    }
+  },
+  expected: {
+    value: {
+      key: "name"
+    }
+  },
+  description: "a partial with the placeholder key~ referenced with a key",
+  should: "should replace the placeholder with the partial reference's key"
+}, {
+  kvp: {
+    key: "name#>em",
+    value: null
+  },
+  partial: {
+    value: {
+      "key~": null
+    }
+  },
+  expected: {
+    value: {
+      key: "name"
+    }
+  },
+  description: "a partial with the placeholder key~ referenced with a key and template",
+  should: "should replace the placeholder with the partial reference's key, but not its template"
+}, {
+  kvp: {
     key: ">em",
     value: [ "One", "Two", "Three" ]
   },
@@ -674,7 +708,7 @@ var tests = [{
   should: "should match conditional placeholders by name"
 }];
 
-describe("when authoring partials", function () {
+describe.only("when authoring partials", function () {
   var only = tests.find(t => t.only);
   if(only) tests = [only];
 
