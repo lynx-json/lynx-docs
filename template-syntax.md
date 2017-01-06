@@ -12,18 +12,18 @@ Static content scenarios
 
 ### <a name="static-text-value"></a>Text Value
 Simple text value example
-```
+```yaml
 title: Fletch
 ```
 
 Text values with special characters need to be quoted.
-```
+```yaml
 message: "{{braces need quotes}}"
 ```
 
 ### <a name="static-object-value"></a>Object Value
 Simple object value example
-```
+```yaml
 golfer:
   name: Ty
   handicap: 0
@@ -33,14 +33,14 @@ caddy:
 
 ### <a name="static-array-value"></a>Array Value
 Array example with text values
-```
+```yaml
 movies:
   - Fletch
   - Christmas Vacation
 ```
 
 Array example with object values
-```
+```yaml
 movies:
   - title: Fletch
     yearReleased: 1985
@@ -61,17 +61,17 @@ Static content scenarios
 The key in the template is the same as the key in the data that is being bound.
 
 Template:
-```
+```yaml
 name<:
 ```
 
 Data:
-```
+```yaml
 name: Chevy Chase
 ```
 
 Result:
-```
+```yaml
 name: "Chevy Chase"
 ```
 
@@ -79,34 +79,34 @@ name: "Chevy Chase"
 The key in the template is "name" and the key in the data is "username".
 
 Template:
-```
+```yaml
 name<username:
 ```
 
 Data:
-```
+```yaml
 username: Chevy Chase
 ```
 
 Result:
-```
+```yaml
 name: "Chevy Chase"
 ```
 
 #### Mixing static and dynamic
 Template:
-```
+```yaml
 name: "{{firstName}} {{lastName}}"
 ```
 
 Data:
-```
+```yaml
 firstName: Chevy
 lastName: Chase
 ```
 
 Result:
-```
+```yaml
 name: "Chevy Chase"
 ```
 
@@ -114,18 +114,18 @@ name: "Chevy Chase"
 The "<" binding token encloses the bound value in quotes. The "=" binding token binds the value as a literal (not quoted).
 
 Template:
-```
+```yaml
 height=:
 quoted<height:
 ```
 
 Data:
-```
+```yaml
 height: 42
 ```
 
 Result:
-```
+```yaml
 height: 42
 quoted: "42"
 ```
@@ -134,19 +134,19 @@ quoted: "42"
 You may specify a default value in the template. If the data being bound doesn't contain a matching key to bind, then the default value is used. If no default is specified, then it is assumed to be the literal null.
 
 Template:
-```
+```yaml
 firstName<: Chevy
 middleName<:
 lastName<: Silverado
 ```
 
 Data:
-```
+```yaml
 lastName: Chase
 ```
 
 Result:
-```
+```yaml
 firstName: Chevy
 middleName: null
 lastName: Chase
@@ -158,7 +158,7 @@ lastName: Chase
 When binding to an object in data, you can change the binding context to the object being bound.
 
 Template:
-```
+```yaml
 user#:
   firstName<: Chevy
   middleName<:
@@ -166,13 +166,13 @@ user#:
 ```
 
 Data:
-```
+```yaml
 user:
   lastName: Chase
 ```
 
 Result:
-```
+```yaml
 user:
   firstName: Chevy
   middleName: null
@@ -183,7 +183,7 @@ user:
 When binding to an object in data, you can change the binding context to the object being bound.
 
 Template:
-```
+```yaml
 user:
   value#user:
     firstName<: Chevy
@@ -194,12 +194,12 @@ user:
 ```
 
 Data:
-```
+```yaml
 null
 ```
 
 Result:
-```
+```yaml
 user:
   value:
     message: User does not exist
@@ -211,7 +211,7 @@ user:
 When binding to an object in data, you can change the binding context to the object being bound.
 
 Template:
-```
+```yaml
 list:
   value@users:
     - name<:
@@ -219,7 +219,7 @@ list:
 ```
 
 Data:
-```
+```yaml
 users:
   - name: User 1
     age: 25
@@ -228,7 +228,7 @@ users:
 ```
 
 Result:
-```
+```yaml
 list:
   value:
     - name: "User 1"
