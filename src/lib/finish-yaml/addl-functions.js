@@ -8,10 +8,19 @@ function isNode(meta) {
   return meta.children && meta.children.spec && meta.children.value;
 }
 
-function nodeHasProperty(kvp, meta, property) {
+function isDynamic(meta) {
+  return meta.template !== null;
+}
+
+function isNotNull(meta) {
+  return meta.more().src.value !== null;
+}
+
+function nodeHasProperty(kvp, meta, property, notEmpty) {
   if(!isNode(meta)) return false;
   return meta.children.value.map(mapExpandedChildMetadata(kvp.value)).some(function (childMeta) {
-    return childMeta.children && property in childMeta.children;
+    return childMeta.children && property in childMeta.children && 
+      (!notEmpty || isDynamic(childMeta) || isNotNull(childMeta));
   });
 }
 
@@ -117,14 +126,8 @@ function headers(kvp, options) {
 function links(kvp, options) {
   var meta = getMetadata(kvp);
   if(nodeHasProperty(kvp, meta, "href")) {
-    var node = kvp.value;
-
-    if(!nodeHasProperty(kvp, meta, "type") ||
-      node.value.type === null ||
-      node.value.type === "") throw new Error("Missing 'type' attribute for '" + meta.key + "'");
-
-    if(node.value.href === null || node.value.href === "") throw new Error("'href' cannot be null/empty for '" + meta.key + "'");
-
+    if(!nodeHasProperty(kvp, meta, "type", true)) throw new Error("Missing 'type' attribute for '" + meta.key + "'");
+    if (!nodeHasProperty(kvp, meta, "href", true)) throw new Error("'href' cannot be null/empty for '" + meta.key + "'");
     addHint(kvp, "link");
   }
 }
