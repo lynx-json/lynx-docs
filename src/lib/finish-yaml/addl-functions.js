@@ -9,26 +9,24 @@ function isNode(meta) {
 }
 
 function isDynamic(meta) {
-  return meta.template !== null;
+  return meta.template !== undefined;
 }
 
-function isNotNull(meta) {
-  return meta.more().src.value !== null;
+function isNotNullOrEmpty(meta) {
+  var value = meta.src.value;
+  return value !== null && value !== "";
 }
 
-function nodeHasProperty(kvp, meta, property, notEmpty) {
+function nodeHasProperty(kvp, meta, property, ensureNotNullOrEmpty) {
   if(!isNode(meta)) return false;
-  return meta.children.value.map(mapExpandedChildMetadata(kvp.value)).some(function (childMeta) {
-    return childMeta.children && property in childMeta.children && 
-      (!notEmpty || isDynamic(childMeta) || isNotNull(childMeta));
+  return meta.children.value.some(function (childMeta) {
+    childMeta = childMeta.more();
+    if (!childMeta.children || property in childMeta.children === false) return false;
+    if (!ensureNotNullOrEmpty) return true;
+    
+    var propertyMeta = childMeta.children[property][0].more();
+    return isDynamic(propertyMeta) || isNotNullOrEmpty(propertyMeta);
   });
-}
-
-function mapExpandedChildMetadata(value) {
-  return function (childMeta) {
-    var childKvp = { key: childMeta.src.key, value: value[childMeta.src.key] };
-    return getMetadata(childKvp);
-  };
 }
 
 var baseHints = ["text", "content", "container", "link", "submit", "form"];
