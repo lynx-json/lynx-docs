@@ -418,6 +418,25 @@ var tests = [{
   should: "should add all unknown parameters in place of the wildcard"
 }, {
   kvp: {
+    key: ">list",
+    value: [ 1, 2, 3]
+  },
+  partial: {
+    value: {
+      "spec.hints": [ "list" ],
+      "~*": null
+    }
+  },
+  expected: {
+    value: {
+      "spec.hints": ["list"],
+      value: [ 1, 2, 3 ]
+    }
+  },
+  description: "a partial with a wildcard parameter ~*",
+  should: "should add an explicit value in place of the wildcard"
+}, {
+  kvp: {
     key: ">section",
     value: {
       "spec.visibility": "visible",

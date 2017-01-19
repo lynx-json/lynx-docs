@@ -134,7 +134,7 @@ function* replaceWildcardPlaceholders(partialKVP, paramsKVP, knownParameters) {
   }
 
   for(let p in paramsKVP.value) {
-    if(p === "partial" || p === "value" || p === "key" || p === "template") continue;
+    if(p === "partial" || p === "key" || p === "template") continue;
     let param = getMetadata({ key: p, value: paramsKVP.value[p] });
     param = Object.assign({}, param, parseParamName(param.src.key));
 
