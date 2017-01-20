@@ -725,6 +725,75 @@ var tests = [{
   },
   description: "a partial called with data-bound parameters",
   should: "should match conditional placeholders by name"
+}, {
+  kvp: {
+    key: "header<label>",
+    value: "Default Label"
+  },
+  partial: {
+    value: {
+      spec: {
+        hints: [ "header" ]
+      },
+      "value~": null
+    }
+  },
+  expected: {
+    value: {
+      spec: {
+        hints: [ "header" ]
+      },
+      "value<label": "Default Label"
+    }
+  },
+  description: "a partial called with a data-bound string literal",
+  should: "should bind the string literal template to the value parameter (because there's no point binding it to a spec/value pair)"
+}, {
+  kvp: {
+    key: "price=>money",
+    value: 43
+  },
+  partial: {
+    value: {
+      spec: {
+        hints: [ "money" ]
+      },
+      "value~": null
+    }
+  },
+  expected: {
+    value: {
+      spec: {
+        hints: [ "money" ]
+      },
+      "value=price": 43
+    }
+  },
+  description: "a partial called with a data-bound literal",
+  should: "should bind the literal template to the value parameter"
+}, {
+  kvp: {
+    key: "items@results>list",
+    value: []
+  },
+  partial: {
+    value: {
+      spec: {
+        hints: [ "list" ]
+      },
+      "value~": null
+    }
+  },
+  expected: {
+    value: {
+      spec: {
+        hints: [ "list" ]
+      },
+      "value@results": []
+    }
+  },
+  description: "a partial called with a data-bound array",
+  should: "should bind the array template to the value parameter"
 }];
 
 describe("when authoring partials", function () {

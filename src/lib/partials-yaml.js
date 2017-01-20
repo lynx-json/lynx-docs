@@ -332,26 +332,38 @@ function getPartialKVP(kvp, options) {
   return applyParameters(partial, kvp);
 }
 
-function normalizeValueToObject(kvp) {
-  if(kvp.value === null || kvp.value === undefined)
+function normalizeToObjectAndAddCommonParameters(kvp) {  
+  var meta = getMetadata(kvp);
+  kvp.key = meta.src.key.replace(/>.*/, "");
+
+  if(kvp.value === null || kvp.value === undefined) {
     kvp.value = {};
-  else if(Array.isArray(kvp.value) || typeof kvp.value !== "object")
-    kvp.value = {
-      value: kvp.value
-    };
+  } else if(Array.isArray(kvp.value) || typeof kvp.value !== "object") {
+    let valueKey = "value";
+    
+    // If the data-bound parameter is text or an array, it
+    // should be bound to the value, not, for example, the spec/value pair.
+    let valueTemplates = [ "<", "=", "@"];
+    if (meta.template && valueTemplates.indexOf(meta.template.symbol) > -1) {
+      let boundVariable = meta.template.variable.replace(/>.*/, "") || meta.key;
+      valueKey += meta.template.symbol + boundVariable;
+    }
+    
+    let originalValue = kvp.value;
+    kvp.value = {};
+    kvp.value[valueKey] = originalValue;
+  }
+  
+  kvp.value.partial = meta.partial;
+  kvp.value.key = meta.key;
+  kvp.value.template = meta.template;
 
   return kvp;
 }
 
 function getPartial(kvp, options) {
   options = options || {};
-  kvp = normalizeValueToObject(kvp);
-  var meta = getMetadata(kvp);
-
-  kvp.value.partial = meta.partial;
-  kvp.value.key = meta.key;
-  kvp.value.template = meta.template;
-  kvp.key = meta.src.key.replace(/>.*/, "");
+  kvp = normalizeToObjectAndAddCommonParameters(kvp);
 
   var result = getPartialKVP(kvp, options);
   if(!result) return;
