@@ -347,45 +347,6 @@ describe("when using additional finishing functions", function () {
     });
   });
 
-  describe("for sections", function () {
-    var kvp;
-    beforeEach(function () {
-      kvp = {
-        key: "testSection",
-        value: vsp(null)
-      };
-    });
-
-    describe("for containers with a 'header' property", function () {
-      it("should add a 'section' hint", function () {
-        kvp.value.value = {
-          header: vsp("This is the Heading")
-        };
-
-        finishYaml.sections(kvp);
-        kvp.value.spec.hints.should.contain("section");
-      });
-    });
-
-    describe("for keys that end with 'section'", function () {
-      it("should add a 'section' hint", function () {
-        finishYaml.sections(kvp);
-        kvp.value.spec.hints.should.contain("section");
-      });
-    });
-
-    describe("for keys that are undefined", function () {
-      it("should not fail", function () {
-        var kvp = {
-          key: undefined,
-          value: vsp(null)
-        };
-
-        finishYaml.sections(kvp);
-      });
-    });
-  });
-
   describe("for data properties", function () {
     var kvp;
     beforeEach(function () {
