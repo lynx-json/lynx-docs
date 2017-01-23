@@ -21,9 +21,9 @@ function nodeHasProperty(kvp, meta, property, ensureNotNullOrEmpty) {
   if(!isNode(meta)) return false;
   return meta.children.value.some(function (childMeta) {
     childMeta = childMeta.more();
-    if (!childMeta.children || property in childMeta.children === false) return false;
-    if (!ensureNotNullOrEmpty) return true;
-    
+    if(!childMeta.children || property in childMeta.children === false) return false;
+    if(!ensureNotNullOrEmpty) return true;
+
     var propertyMeta = childMeta.children[property][0].more();
     return isDynamic(propertyMeta) || isNotNullOrEmpty(propertyMeta);
   });
@@ -125,7 +125,7 @@ function links(kvp, options) {
   var meta = getMetadata(kvp);
   if(nodeHasProperty(kvp, meta, "href")) {
     if(!nodeHasProperty(kvp, meta, "type", true)) throw new Error("Missing 'type' attribute for '" + meta.key + "'");
-    if (!nodeHasProperty(kvp, meta, "href", true)) throw new Error("'href' cannot be null/empty for '" + meta.key + "'");
+    if(!nodeHasProperty(kvp, meta, "href", true)) throw new Error("'href' cannot be null/empty for '" + meta.key + "'");
     addHint(kvp, "link");
   }
 }
@@ -195,15 +195,6 @@ function forms(kvp, options) {
   }
 }
 
-function sections(kvp, options) {
-  var meta = getMetadata(kvp);
-  if(nodeHasProperty(kvp, meta, "header")) {
-    addHint(kvp, "section");
-  } else if(meta.key && meta.key.match(/section/i)) {
-    addHint(kvp, "section");
-  }
-}
-
 function markers(kvp, options) {
   var meta = getMetadata(kvp);
   if(nodeHasProperty(kvp, meta, "for")) {
@@ -230,5 +221,4 @@ module.exports = exports = function (finish) {
   finish.containers = containers;
   finish.forms = forms;
   finish.submits = submits;
-  finish.sections = sections;
 };
