@@ -165,26 +165,26 @@ function getMetaKeyWithoutPlaceholder(paramName) {
 // name matching the condition was provided.
 function applyConditionalPlaceholders(partialKVP, paramsKVP) {
   var pattern = conditionalPlaceholderPattern();
-  
+
   var match = pattern.exec(partialKVP.key);
   if(!match) return partialKVP;
-  
+
   var key = match[1];
   var placeholder = match[2];
   var condition = new RegExp(match[3]);
   var params = getParams(paramsKVP);
   var matchesCondition = false;
-  for (let p of params) {
-    if (condition.test(p.key)) {
+  for(let p of params) {
+    if(condition.test(p.key)) {
       matchesCondition = true;
       continue;
     }
   }
-  
-  if (!matchesCondition) return null;
-  
+
+  if(!matchesCondition) return null;
+
   partialKVP.key = key;
-  if (placeholder) partialKVP.key += placeholder;
+  if(placeholder) partialKVP.key += placeholder;
   return partialKVP;
 }
 
@@ -224,7 +224,7 @@ function replaceExplicitPlaceholders(partialKVP, paramsKVP) {
   if(param.key !== metaFromPlaceholder.key) {
     newKey = metaFromPlaceholder.key;
     if(param.template) newKey += param.template.section;
-    if(param.partial) newKey += ">" + param.partial;  
+    if(param.partial) newKey += ">" + param.partial;
   }
 
   return {
@@ -305,11 +305,11 @@ function applyParameters(partialKVP, paramsKVP, knownParameters) {
   }
 
   partialKVP = applyConditionalPlaceholders(partialKVP, paramsKVP);
-  if (!partialKVP) return partialKVP;
-  
+  if(!partialKVP) return partialKVP;
+
   partialKVP = replaceInlinePlaceholders(partialKVP, paramsKVP);
   partialKVP = replaceExplicitPlaceholders(partialKVP, paramsKVP);
-  
+
   return partialKVP;
 }
 
@@ -332,7 +332,7 @@ function getPartialKVP(kvp, options) {
   return applyParameters(partial, kvp);
 }
 
-function normalizeToObjectAndAddCommonParameters(kvp) {  
+function normalizeToObjectAndAddCommonParameters(kvp) {
   var meta = getMetadata(kvp);
   kvp.key = meta.src.key.replace(/>.*/, "");
 
@@ -340,20 +340,20 @@ function normalizeToObjectAndAddCommonParameters(kvp) {
     kvp.value = {};
   } else if(Array.isArray(kvp.value) || typeof kvp.value !== "object") {
     let valueKey = "value";
-    
+
     // If the data-bound parameter is text or an array, it
     // should be bound to the value, not, for example, the spec/value pair.
-    let valueTemplates = [ "<", "=", "@"];
-    if (meta.template && valueTemplates.indexOf(meta.template.symbol) > -1) {
+    let valueTemplates = ["<", "=", "@"];
+    if(meta.template && valueTemplates.indexOf(meta.template.symbol) > -1) {
       let boundVariable = meta.template.variable.replace(/>.*/, "") || meta.key;
       valueKey += meta.template.symbol + boundVariable;
     }
-    
+
     let originalValue = kvp.value;
     kvp.value = {};
     kvp.value[valueKey] = originalValue;
   }
-  
+
   kvp.value.partial = meta.partial;
   kvp.value.key = meta.key;
   kvp.value.template = meta.template;
@@ -362,6 +362,7 @@ function normalizeToObjectAndAddCommonParameters(kvp) {
 }
 
 function getPartial(kvp, options) {
+  // kvp = Object.assign({}, kvp);
   options = options || {};
   kvp = normalizeToObjectAndAddCommonParameters(kvp);
 

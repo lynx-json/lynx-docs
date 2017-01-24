@@ -1,0 +1,6 @@
+spec~:
+  hints: [ link ]
+  ~spec.*:
+value~:
+  type~: application/lynx+json
+  ~*:

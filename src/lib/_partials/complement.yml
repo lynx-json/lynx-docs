@@ -1,0 +1,5 @@
+spec~:
+  hints: [ complement, container ]
+  ~spec.*:
+value~:
+  ~*:

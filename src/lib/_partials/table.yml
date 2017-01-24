@@ -1,5 +1,5 @@
 spec~:
-  hints: [ card ]
+  hints: [ table, list ]
   ~spec.*:
 value~:
   ~*:
