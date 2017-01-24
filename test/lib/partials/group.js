@@ -6,26 +6,27 @@ chai.use(chaiAsPromised);
 const partials = require("../../../src/lib/partials-yaml");
 
 describe("group partial", function () {
-  // it("should describe an array value with the 'group' hint", function () {
-//   var sourceKVP = {
-//     key: ">group",
-//     value: [
-//       "one",
-//       "two",
-//       "three"
-//     ]
-//   };
-// 
-//   var result = partials.getPartial(sourceKVP, {
-//     realm: {
-//       folder: process.cwd()
-//     }
-//   });
-// 
-//   result.value.spec.hints[0].should.equal("group");
-//   result.value.value.should.equal(sourceKVP.value);
-// });
+  it("should describe an array value with the 'group' hint", function () {
+    var sourceKVP = {
+      key: ">group",
+      value: [
+        "one",
+        "two",
+        "three"
+      ]
+    };
 
+    var result = partials.getPartial(sourceKVP, {
+      realm: {
+        folder: process.cwd()
+      }
+    });
+
+    result.value.spec.hints[0].should.equal("group");
+    result.value.value[0].should.equal("one");
+    result.value.value[1].should.equal("two");
+    result.value.value[2].should.equal("three");
+  });
 
   it("should describe an object value with the 'group' hint", function () {
     var sourceKVP = {
