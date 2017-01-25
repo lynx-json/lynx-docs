@@ -1,6 +1,8 @@
 spec~:
   hints: [ link ]
+  labeledBy?label: label
   ~spec.*:
 value~:
+  label>~:
   type~: application/lynx+json
   ~*:

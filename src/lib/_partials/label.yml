@@ -1,0 +1,4 @@
+spec~:
+  hints: [ label, text ]
+  ~spec.*:
+value~:

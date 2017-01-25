@@ -83,44 +83,6 @@ function text(kvp, options) {
   }
 }
 
-function addLabeledBy(kvp, labelProperty) {
-  kvp.value.spec.labeledBy = kvp.value.spec.labeledBy || labelProperty;
-}
-
-function labels(kvp, options) {
-  var meta = getMetadata(kvp);
-  if(!isNode(meta)) return;
-
-  var valueMetas = meta.children.value.map(cm => cm.more());
-  var firstValueMeta = valueMetas[0];
-
-  if(meta.key === "label" && util.isString(firstValueMeta.src.value)) {
-    addHint(kvp, "label");
-  } else if(nodeHasProperty(kvp, meta, "title")) {
-    addLabeledBy(kvp, "title");
-  } else if(nodeHasProperty(kvp, meta, "header")) {
-    addLabeledBy(kvp, "header");
-  } else if(nodeHasProperty(kvp, meta, "label")) {
-    addLabeledBy(kvp, "label");
-  }
-}
-
-function titles(kvp, options) {
-  var meta = getMetadata(kvp);
-  if(meta.key === "title") {
-    addHint(kvp, "label");
-  }
-}
-
-function headers(kvp, options) {
-  var meta = getMetadata(kvp);
-
-  if(meta.key === "header") {
-    addHint(kvp, "header");
-    addHint(kvp, "label");
-  }
-}
-
 function links(kvp, options) {
   var meta = getMetadata(kvp);
   if(nodeHasProperty(kvp, meta, "href")) {
@@ -210,9 +172,6 @@ function markers(kvp, options) {
 module.exports = exports = function (finish) {
   finish.addHint = addHint;
 
-  finish.headers = headers;
-  finish.titles = titles;
-  finish.labels = labels;
   finish.links = links;
   finish.images = images;
   finish.text = text;
