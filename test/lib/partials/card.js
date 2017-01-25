@@ -100,7 +100,9 @@ var tests = [{
     should: "copy input 'value' to 'value' key",
     kvp: {
       key: ">card",
-      value: ["one", "two", "three"]
+      value: {
+        value: ["one", "two", "three"]
+      }
     },
     expected: {
       spec: { hints: ["card"] },
@@ -109,6 +111,6 @@ var tests = [{
   },
 ];
 
-tests.description = "'card' partials";
+tests.description = "'card' partial";
 
 module.exports = tests;

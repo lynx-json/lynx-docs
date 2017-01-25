@@ -109,6 +109,6 @@ var tests = [{
   },
 ];
 
-tests.description = "'form' partials";
+tests.description = "'form' partial";
 
 module.exports = tests;

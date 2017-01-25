@@ -10,6 +10,7 @@ var partialsTests = [
   require("./complement"),
   require("./form"),
   require("./group"),
+  require("./link"),
   require("./list")
 ];
 
