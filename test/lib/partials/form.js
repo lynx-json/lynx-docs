@@ -100,7 +100,9 @@ var tests = [{
     should: "copy input 'value' to 'value' key",
     kvp: {
       key: ">form",
-      value: ["one", "two", "three"]
+      value: {
+        value: ["one", "two", "three"]
+      }
     },
     expected: {
       spec: { hints: ["form"] },
