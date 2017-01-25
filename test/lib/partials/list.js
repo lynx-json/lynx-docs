@@ -1,24 +1,24 @@
 var tests = [{
     description: "when array value",
-    should: "have group hint and array value",
+    should: "have list hint and array value",
     kvp: {
-      key: ">group",
+      key: ">list",
       value: ["one", "two", "three"]
     },
     expected: {
-      spec: { hints: ["group"] },
+      spec: { hints: ["list"] },
       value: ["one", "two", "three"]
     }
   },
   {
     description: "when object value",
-    should: "have group hint and object value",
+    should: "have list hint and object value",
     kvp: {
-      key: ">group",
+      key: ">list",
       value: { one: "one", two: "two", three: "three" }
     },
     expected: {
-      spec: { hints: ["group"] },
+      spec: { hints: ["list"] },
       value: { one: "one", two: "two", three: "three" }
     }
   },
@@ -26,9 +26,9 @@ var tests = [{
     description: "when spec.* properties",
     should: "have specified spec.* properties in result",
     kvp: {
-      key: ">group",
+      key: ">list",
       value: {
-        "spec.hints": ["whatever", "group"],
+        "spec.hints": ["whatever", "list"],
         "spec.visibility": "visible",
         "spec.input": true,
         value: ["one", "two"]
@@ -36,7 +36,7 @@ var tests = [{
     },
     expected: {
       spec: {
-        hints: ["whatever", "group"],
+        hints: ["whatever", "list"],
         visibility: "visible",
         "input": true
       },
@@ -47,7 +47,7 @@ var tests = [{
     description: "when spec.hints",
     should: "override default hints",
     kvp: {
-      key: ">group",
+      key: ">list",
       value: {
         "spec.hints": ["whatever"],
         value: ["one", "two"]
@@ -64,7 +64,7 @@ var tests = [{
     description: "when fully specified spec object",
     should: "use provided spec object. Don't default hints",
     kvp: {
-      key: ">group",
+      key: ">list",
       value: {
         spec: {
           hints: ["whatever"],
@@ -87,11 +87,11 @@ var tests = [{
     description: "when flattened value",
     should: "copy to 'value' key",
     kvp: {
-      key: ">group",
+      key: ">list",
       value: ["one", "two"]
     },
     expected: {
-      spec: { hints: ["group"] },
+      spec: { hints: ["list"] },
       value: ["one", "two"]
     }
   },
@@ -99,16 +99,16 @@ var tests = [{
     description: "when expanded value",
     should: "copy input 'value' to 'value' key",
     kvp: {
-      key: ">group",
+      key: ">list",
       value: ["one", "two", "three"]
     },
     expected: {
-      spec: { hints: ["group"] },
+      spec: { hints: ["list"] },
       value: ["one", "two", "three"]
     }
   },
 ];
 
-tests.description = "'group' partials";
+tests.description = "'list' partials";
 
 module.exports = tests;
