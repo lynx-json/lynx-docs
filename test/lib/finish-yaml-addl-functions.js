@@ -14,59 +14,6 @@ function vsp(value) {
 }
 
 describe("when using additional finishing functions", function () {
-  describe("for labels", function () {
-    describe("for containers with 'title' property", function () {
-      it("should add a 'labeledBy' property", function () {
-        var kvp = {
-          key: undefined,
-          value: vsp({ title: vsp("This is a Title") })
-        };
-
-        finishYaml.labels(kvp);
-        should.exist(kvp.value.spec.labeledBy);
-        kvp.value.spec.labeledBy.should.equal("title");
-      });
-    });
-
-    describe("for containers with 'header' property", function () {
-      it("should add a 'labeledBy' property", function () {
-        var kvp = {
-          key: undefined,
-          value: vsp({ header: vsp("This is a Heading") })
-        };
-
-        finishYaml.labels(kvp);
-        should.exist(kvp.value.spec.labeledBy);
-        kvp.value.spec.labeledBy.should.equal("header");
-      });
-    });
-
-    describe("for 'title' key", function () {
-      it("should add 'label' hint", function () {
-        var kvp = {
-          key: "title",
-          value: vsp("This is a Title")
-        };
-
-        finishYaml.titles(kvp);
-        kvp.value.spec.hints.should.contain("label");
-      });
-    });
-  });
-
-  describe("for labels", function () {
-    describe("for 'label' key and string value", function () {
-      it("should add 'label' hint", function () {
-        var kvp = {
-          key: "label",
-          value: vsp("This is a Label")
-        };
-
-        finishYaml.labels(kvp);
-        kvp.value.spec.hints.should.contain("label");
-      });
-    });
-  });
 
   describe("for links", function () {
     var kvp;

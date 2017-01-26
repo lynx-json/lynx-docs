@@ -74,11 +74,11 @@ var tests = [{
     should: "copy to 'value' key",
     kvp: {
       key: ">link",
-      value: { href: ".", title: "A link" }
+      value: { href: ".", label: "A link" }
     },
     expected: {
-      spec: { hints: ["link"] },
-      value: { href: ".", title: "A link", type: "application/lynx+json" }
+      spec: { hints: ["link"], labeledBy: "label" },
+      value: { href: ".", label: "A link", type: "application/lynx+json" }
     }
   },
   {
@@ -87,14 +87,14 @@ var tests = [{
     kvp: {
       key: ">link",
       value: {
-        value: { href: ".", title: "A link" }
+        value: { href: ".", label: "A link" }
       }
     },
     expected: {
       spec: { hints: ["link"] },
-      value: { href: ".", title: "A link" }
+      value: { href: ".", label: "A link" }
     }
-  },
+  }
 ];
 
 tests.description = "'link' partial";
