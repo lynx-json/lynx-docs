@@ -168,6 +168,51 @@ var tests = [{
     should: "a kvp with a multiple object templates should export a kvp with multiple object templates"
   },
   {
+    key: undefined,
+    value: {
+      spec: {
+        hints: ["container"]
+      },
+      "value#v1": {
+        name: "One"
+      }
+    },
+    expected: '{"spec":{"hints":["container"] },"value":{{#v1}}{"name":"One" }{{/v1}}{{^v1}}null{{/v1}} }',
+    should: "a kvp with a dynamic value template with no inverse should export a kvp with null inverse"
+  },
+  {
+    key: undefined,
+    value: {
+      spec: {
+        hints: ["container"]
+      },
+      "value#v1": {
+        name: "One"
+      },
+      "value^v1": {
+        name: "None"
+      }
+    },
+    expected: '{"spec":{"hints":["container"] },"value":{{#v1}}{"name":"One" }{{/v1}}{{^v1}}{"name":"None" }{{/v1}} }',
+    should: "a kvp with a dynamic value template with explicit inverse should export a kvp with explicit inverse"
+  },
+  {
+    key: undefined,
+    value: {
+      spec: {
+        hints: ["container"]
+      },
+      "value#v1": {
+        name: "One"
+      },
+      "value#v2": {
+        name: "Two"
+      }
+    },
+    expected: '{"spec":{"hints":["container"] },"value":{{#v1}}{"name":"One" }{{/v1}}{{#v2}}{"name":"Two" }{{/v2}} }',
+    should: "a kvp with a multiple value templates should export a kvp with values in blocks"
+  },
+  {
     key: "items@",
     value: [
       { label: "Hi" }
