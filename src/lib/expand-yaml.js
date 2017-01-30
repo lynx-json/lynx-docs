@@ -77,20 +77,27 @@ function expandArrayItem(options) {
   };
 }
 
-function expandObject(obj, options) {
+function expandObject(obj, options, valueMeta) {
   var expanded = {};
-  Object.getOwnPropertyNames(obj).forEach(function (key) {
-    var kvp = {
-      key: key,
-      value: obj[key]
+  
+  function expandObjectProperty(property) {
+    var skipCondensation = valueMeta.children[property].length > 1;
+    return function (childMeta) {
+      var kvp = expandKvp(childMeta.src, options, skipCondensation);
+      expanded[kvp.key] = kvp.value;
     };
-    kvp = expandKvp(kvp, options);
-    expanded[kvp.key] = kvp.value;
-  });
+  }
+  
+  for (var property in valueMeta.children) {
+    if (valueMeta.children.hasOwnProperty(property)) {
+      valueMeta.children[property].map(cm => cm.more()).forEach(expandObjectProperty(property));
+    }
+  }
+  
   return expanded;
 }
 
-function expandKvp(kvp, options) {
+function expandKvp(kvp, options, skipCondensation) {
   var meta = getMetadata(kvp);
 
   if (meta.partial) {    
@@ -107,7 +114,7 @@ function expandKvp(kvp, options) {
     ensureSpec(kvp);
     kvp.value.value = null;
   } else {
-    if (meta.template) {
+    if (meta.template && !skipCondensation) {
       kvp.key = meta.key;
       var newValue = {
         spec: {
@@ -139,7 +146,7 @@ function expandKvp(kvp, options) {
     if (util.isArray(value)) {
       kvp.value[valueMeta.src.key] = value.map(expandArrayItem(options));
     } else if (util.isObject(value)) {
-      kvp.value[valueMeta.src.key] = expandObject(value, options);
+      kvp.value[valueMeta.src.key] = expandObject(value, options, valueMeta);
     }
   });
 
