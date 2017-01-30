@@ -3,4 +3,4 @@ spec:
 value:
   header: "Templates ({{{templates.length}}})"
   templates@:
-    - "{{.}}"
+    - "<.": 

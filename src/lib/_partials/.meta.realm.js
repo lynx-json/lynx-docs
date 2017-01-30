@@ -8,14 +8,14 @@ module.exports = exports = (kvp, options) => {
   var partial = {};
   var raw = {};
   for(var p in kvp.value) {
-    if(p === "key" || p === "value" || p === "partial") continue;
+    if(p === "key" || p === "value" || p === "partial" || p === "template") continue;
 
-    var childKVP = { key: p + ">.meta.realm." + p, value: kvp.value[p] };
+    var childKVP = { key: p + ">.meta.realm." + p, value: Object.assign(kvp.value[p]) };
     var partialKVP = partials.getPartial(childKVP, options);
     if(partialKVP) {
       partial[partialKVP.key] = partialKVP.value;
     } else {
-      raw[p] = { header: p, content: childKVP.value };
+      raw[p] = { header: p, content: kvp.value[p] };
     }
   }
 
