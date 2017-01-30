@@ -85,7 +85,13 @@ function expandObject(obj, options) {
       value: obj[key]
     };
     kvp = expandKvp(kvp, options);
-    expanded[kvp.key] = kvp.value;
+    if (kvp.key in expanded) {
+      let meta = getMetadata(kvp);
+      meta = meta.children.value[0].more();
+      expanded[kvp.key][meta.src.key] = meta.src.value;
+    } else {
+      expanded[kvp.key] = kvp.value;  
+    }
   });
   return expanded;
 }
