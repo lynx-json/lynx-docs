@@ -7,7 +7,7 @@ const sinon = require("sinon");
 const fs = require("fs");
 const path = require("path");
 const parseYaml = require("../../../../src/lib/parse-yaml");
-const templatesToHandlebars = require("../../../../src/lib/export/to-handlebars/templates");
+const templatesToHandlebars = require("../../../../src/lib/export/to-handlebars/templates").all;
 
 var kvp = { key: "key", value: "value" };
 var tests = [{

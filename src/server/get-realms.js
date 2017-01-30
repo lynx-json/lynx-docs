@@ -18,8 +18,18 @@ function isChildOfRealm(parentRealm) {
   };
 }
 
-function urlForVariant(realm, variant) {
-  return realm.url + "?variant=" + encodeURIComponent(variant.name);
+function expandVariant(realm, variant) {
+  variant.title = variant.title || titleCase(variant.name);
+  if(!variant.url) variant.url = realm.url + "?variant=" + encodeURIComponent(variant.name);
+  if(!variant.handlebarsUrl) variant.handlebarsUrl = variant.url + "&format=handlebars";
+}
+
+function expandTemplate(realm, template) {
+  var firstVariant = realm.variants.find(v => v.template === template);
+  return {
+    path: template,
+    url: realm.url + "?template=" + encodeURIComponent(template)
+  }
 }
 
 function reloadRealms(target, options) {
@@ -29,10 +39,8 @@ function reloadRealms(target, options) {
   realms.forEach(realm => {
     realm.url = realm.url || url.parse(realm.realm).pathname;
     realm.metaURL = "/meta/?realm=" + realm.realm;
-    realm.variants.forEach(variant => {
-      variant.title = variant.title || titleCase(variant.name);
-      variant.url = variant.url || urlForVariant(realm, variant);
-    });
+    realm.variants.forEach(variant => expandVariant(realm, variant));
+    realm.templates = realm.templates.map(template => expandTemplate(realm, template));
     realm.realms = realms.filter(isChildOfRealm(realm));
     realm.realms.forEach(child => child.parent = realm);
   });

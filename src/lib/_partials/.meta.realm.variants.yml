@@ -2,7 +2,5 @@ header: "Variants ({{{variants.length}}})"
 variants>list:
   value@variants:
     - href<url:
-      title<name:
+      label<name:
       type<: application/lynx+json
-      template: "Template: {{{template}}}"
-      data: "Data: {{{data}}}"

@@ -3,12 +3,12 @@ spec:
 value:
   scope<realm:
   header:
-    title<realm: Realm
+    label<realm: Realm
     meta:
-      href<metaURL: 
-      title: ℹ︎
+      href<metaURL:
+      label: ℹ︎
       type: application/lynx+json
-  variants@variants: 
+  variants@variants:
       - header<title: ""
         href<url: ""
         type<: application/lynx+json

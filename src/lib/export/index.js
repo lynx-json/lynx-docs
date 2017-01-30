@@ -4,7 +4,7 @@ var Vinyl = require("vinyl");
 var streamFromArray = require("stream-from-array");
 
 var formats = {
-  handlebars: require("./to-handlebars/templates"),
+  handlebars: require("./to-handlebars/templates").all,
   lynx: require("./variants-to-lynx").all
 };
 

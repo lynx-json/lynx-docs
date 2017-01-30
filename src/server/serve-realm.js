@@ -4,6 +4,7 @@ const fs = require("fs");
 const url = require("url");
 const path = require("path");
 const variantToLynx = require("../lib/export/variants-to-lynx").one;
+const templateToHandlebars = require("../lib/export/to-handlebars/templates").one;
 
 function redirectToRealmIndex(req, res, next) {
   var realm = req.realms[0];
@@ -25,6 +26,16 @@ module.exports = exports = function createRealmHandler(options) {
     if(!realm) {
       if(req.url === "/" || req.url === "") return redirectToRealmIndex(req, res, next);
       return next();
+    }
+
+    function serveTemplate(template) {
+      res.setHeader("Content-Type", "text/plain");
+      res.setHeader("Cache-control", "no-cache");
+
+      var templateOptions = Object.assign({}, options, { realm: realm });
+
+      res.write(templateToHandlebars(template.path, templateOptions));
+      res.end();
     }
 
     function serveVariant(variant) {
@@ -56,6 +67,11 @@ module.exports = exports = function createRealmHandler(options) {
       });
     }
 
+    var template = req.query.template && realm.templates.find(t => t.path === req.query.template);
+    if(template) {
+      return serveTemplate(template);
+    }
+
     var variantName = req.query.variant || "default";
     var variant = realm.variants.find(v => v.name === variantName || v.content !== undefined);
 
@@ -72,6 +88,6 @@ module.exports = exports = function createRealmHandler(options) {
       return serveVariantWithAlternateIndex(variantName);
     }
 
-    return serveVariant(variant);
+    return serveVariant(variant, format);
   };
 };

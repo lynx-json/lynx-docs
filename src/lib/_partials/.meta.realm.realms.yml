@@ -2,11 +2,11 @@ header: "Realms ({{{realms.length}}})"
 realms>list:
   value@realms:
     - header:
-        title<realm:
+        label<realm:
         href<url:
         type: application/lynx+json
       meta:
-        title: Metadata
+        label: Metadata
         href<metaURL:
         type: application/lynx+json
       counts:

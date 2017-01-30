@@ -8,11 +8,11 @@ const kvpToHandlebars = require("./kvp");
 function exportTemplatesToHandlebars(realms, createFile, options) {
   realms.forEach(realm => realm.templates
     .forEach(templatePath => {
-      if (options.template) {
+      if(options.template) {
         var regex = new RegExp(options.template);
-        if (regex.test(templatePath) === false) return;  
+        if(regex.test(templatePath) === false) return;
       }
-      
+
       var templateOptions = Object.assign({}, options, { realm: realm });
       var content = transformTemplateToHandlebars(templatePath, templateOptions, createFile);
       var outputPath = path.join(path.relative(realm.root, path.dirname(templatePath)), path.basename(templatePath, ".yml") + ".handlebars");
@@ -30,4 +30,5 @@ function transformTemplateToHandlebars(template, options, createFile) {
   }
 }
 
-module.exports = exports = exportTemplatesToHandlebars;
+exports.all = exportTemplatesToHandlebars;
+exports.one = transformTemplateToHandlebars;
