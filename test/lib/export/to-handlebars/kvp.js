@@ -202,10 +202,10 @@ var tests = [{
       spec: {
         hints: ["container"]
       },
-      "flag#:": {
+      "flag#": {
         name: "One"
       },
-      "flag^:": {
+      "flag^": {
         name: "None"
       }
     },
