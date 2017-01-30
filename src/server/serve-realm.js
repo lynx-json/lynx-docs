@@ -88,6 +88,6 @@ module.exports = exports = function createRealmHandler(options) {
       return serveVariantWithAlternateIndex(variantName);
     }
 
-    return serveVariant(variant, format);
+    return serveVariant(variant);
   };
 };
