@@ -1,6 +1,4 @@
-spec:
-  hints: [ section ]
-value:
-  header: "Templates ({{{templates.length}}})"
-  templates@:
-    - "<.": 
+header: "Templates ({{{templates.length}}})"
+templates>list:
+  value@templates:
+    - "<.":

@@ -202,6 +202,22 @@ var tests = [{
       spec: {
         hints: ["container"]
       },
+      "flag#:": {
+        name: "One"
+      },
+      "flag^:": {
+        name: "None"
+      }
+    },
+    expected: '{"spec":{"hints":["container"] },"flag":{{#flag}}{"name":"One" }{{/flag}}{{^flag}}{"name":"None" }{{/flag}} }',
+    should: "a kvp with a dynamic value template with explicit inverse and with no variable should export a kvp with explicit inverse"
+  },
+  {
+    key: undefined,
+    value: {
+      spec: {
+        hints: ["container"]
+      },
       "value#v1": {
         name: "One"
       },

@@ -1,8 +1,6 @@
-spec:
-  hints: [ section ]
-value:
-  header: "Variants ({{{variants.length}}})"
-  variants@:
+header: "Variants ({{{variants.length}}})"
+variants>list:
+  value@variants:
     - href<url:
       title<name:
       type<: application/lynx+json

@@ -1,7 +1,5 @@
-spec:
-  hints: [ section ]
-value#parent:
-  header: Parent Realm
+header: Parent Realm
+"parent#>group":
   linkToParent:
     title<realm:
     href<url:
