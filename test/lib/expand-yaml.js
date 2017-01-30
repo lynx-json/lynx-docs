@@ -171,17 +171,12 @@ var tests = [{
           hints: []
         },
         value: {
-          key: {
-            spec: {
-              hints: []
-            },
-            "value#key": {
-              message: vsp("Yes")
-            },
-            "value^key": {
-              message: vsp("No")
-            }
-          }
+          "key#": vsp({ 
+            message: vsp("Yes") 
+          }),
+          "key^": vsp({ 
+            message: vsp("No") 
+          }),
         }
       }
     },
