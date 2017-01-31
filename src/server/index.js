@@ -19,7 +19,10 @@ function serveError(req, res) {
   res.write("500 Server Error");
   if(req.error) {
     if(req.error.stack) res.write("\n\n" + req.error.stack);
-    else res.write("\n\n" + JSON.stringify(req.error, null, 2));
+    else {
+      res.write("\n\n".concat(req.error.message));
+      res.write("\n\nError object details:\n".concat(JSON.stringify(req.error, null, 2)));
+    }
   }
   res.end();
 }

@@ -27,7 +27,12 @@ function getKVP(yaml) {
 function getTemplateKvp(template) {
   if(util.isString(template)) {
     var buffer = fs.readFileSync(template);
-    return getKVP(parseYaml(buffer));
+    try {
+      return getKVP(parseYaml(buffer));
+    } catch(err) {
+      err.message = "Error parsing YAML:\n".concat(err.message)
+      throw err;
+    }
   }
 
   return getKVP(template);
