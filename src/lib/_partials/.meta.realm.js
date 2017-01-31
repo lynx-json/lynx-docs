@@ -20,7 +20,7 @@ module.exports = exports = (kvp, options) => {
   }
 
   return {
-    key: kvp.key + ">main",
+    key: kvp.key,
     value: Object.assign(partial, raw)
   };
 };
