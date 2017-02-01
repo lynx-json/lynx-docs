@@ -79,7 +79,7 @@ var tests = [{
 }, {
   kvp: {
     key: ">em",
-    value: [ "One", "Two", "Three" ]
+    value: ["One", "Two", "Three"]
   },
   partial: {
     value: {
@@ -88,7 +88,7 @@ var tests = [{
   },
   expected: {
     value: {
-      value: [ "One", "Two", "Three" ]
+      value: ["One", "Two", "Three"]
     }
   },
   description: "a partial with the placeholder value~",
@@ -419,18 +419,18 @@ var tests = [{
 }, {
   kvp: {
     key: ">list",
-    value: [ 1, 2, 3]
+    value: [1, 2, 3]
   },
   partial: {
     value: {
-      "spec.hints": [ "list" ],
+      "spec.hints": ["list"],
       "~*": null
     }
   },
   expected: {
     value: {
       "spec.hints": ["list"],
-      value: [ 1, 2, 3 ]
+      value: [1, 2, 3]
     }
   },
   description: "a partial with a wildcard parameter ~*",
@@ -604,8 +604,7 @@ var tests = [{
 }, {
   kvp: {
     key: "input>",
-    value: {
-    }
+    value: {}
   },
   partial: {
     value: {
@@ -657,47 +656,47 @@ var tests = [{
   description: "a partial with data-bound named placeholders",
   should: "should match params with the same names"
 }, {
-//   kvp: {
-//     key: "input>",
-//     value: {
-//       "label<": "replacement string",
-//       "input#": "replacement object",
-//       "items@": "replacement array",
-//       "literal=": "replacement literal",
-//       "other>": "replacement partial"
-//     }
-//   },
-//   partial: {
-//     value: {
-//       "label~": "string template",
-//       "input~": "object template",
-//       "items~": "array template",
-//       "literal~": "literal template",
-//       "other>": "nested partial",
-//       "l~label": "string template",
-//       "i~input": "object template",
-//       "a~items": "array template",
-//       "t~literal": "literal template",
-//       "o>other": "nested partial"
-//     }
-//   },
-//   expected: {
-//     value: {
-//       "label<": "replacement string",
-//       "input#": "replacement object",
-//       "items@": "replacement array",
-//       "literal=": "replacement literal",
-//       "other>": "replacement partial",
-//       "l<label": "replacement string",
-//       "i#input": "replacement object",
-//       "a@items": "replacement array",
-//       "t=literal": "replacement literal",
-//       "o>other": "replacement partial"
-//     }
-//   },
-//   description: "a partial called with data-bound parameters",
-//   should: "should include the data templates in the result"
-// }, {
+  //   kvp: {
+  //     key: "input>",
+  //     value: {
+  //       "label<": "replacement string",
+  //       "input#": "replacement object",
+  //       "items@": "replacement array",
+  //       "literal=": "replacement literal",
+  //       "other>": "replacement partial"
+  //     }
+  //   },
+  //   partial: {
+  //     value: {
+  //       "label~": "string template",
+  //       "input~": "object template",
+  //       "items~": "array template",
+  //       "literal~": "literal template",
+  //       "other>": "nested partial",
+  //       "l~label": "string template",
+  //       "i~input": "object template",
+  //       "a~items": "array template",
+  //       "t~literal": "literal template",
+  //       "o>other": "nested partial"
+  //     }
+  //   },
+  //   expected: {
+  //     value: {
+  //       "label<": "replacement string",
+  //       "input#": "replacement object",
+  //       "items@": "replacement array",
+  //       "literal=": "replacement literal",
+  //       "other>": "replacement partial",
+  //       "l<label": "replacement string",
+  //       "i#input": "replacement object",
+  //       "a@items": "replacement array",
+  //       "t=literal": "replacement literal",
+  //       "o>other": "replacement partial"
+  //     }
+  //   },
+  //   description: "a partial called with data-bound parameters",
+  //   should: "should include the data templates in the result"
+  // }, {
   kvp: {
     key: "input>",
     value: {
@@ -733,7 +732,7 @@ var tests = [{
   partial: {
     value: {
       spec: {
-        hints: [ "header" ]
+        hints: ["header"]
       },
       "value~": null
     }
@@ -741,7 +740,7 @@ var tests = [{
   expected: {
     value: {
       spec: {
-        hints: [ "header" ]
+        hints: ["header"]
       },
       "value<label": "Default Label"
     }
@@ -756,7 +755,7 @@ var tests = [{
   partial: {
     value: {
       spec: {
-        hints: [ "money" ]
+        hints: ["money"]
       },
       "value~": null
     }
@@ -764,7 +763,7 @@ var tests = [{
   expected: {
     value: {
       spec: {
-        hints: [ "money" ]
+        hints: ["money"]
       },
       "value=price": 43
     }
@@ -779,7 +778,7 @@ var tests = [{
   partial: {
     value: {
       spec: {
-        hints: [ "list" ]
+        hints: ["list"]
       },
       "value~": null
     }
@@ -787,7 +786,7 @@ var tests = [{
   expected: {
     value: {
       spec: {
-        hints: [ "list" ]
+        hints: ["list"]
       },
       "value@results": []
     }
@@ -815,7 +814,7 @@ describe("when authoring partials", function () {
     });
   });
 
-  describe("referencing another partial at the root", function () {
+  describe("when referencing another partial at the root", function () {
     var kvp = {
       key: ">outer",
       value: {
@@ -857,8 +856,8 @@ describe("when authoring partials", function () {
     beforeEach(function () {
       var stub = sinon.stub(partials, "resolvePartial");
 
-      stub.withArgs(kvp).returns(outerPartial);
-      stub.withArgs(outerPartial).returns(innerPartial);
+      stub.onFirstCall().returns(outerPartial);
+      stub.onSecondCall().returns(innerPartial);
     });
     afterEach(function () {
       if(partials.resolvePartial.restore) partials.resolvePartial.restore();
@@ -870,7 +869,7 @@ describe("when authoring partials", function () {
     });
   });
 
-  describe("referencing a root partial from a partial with a key", function () {
+  describe("when referencing a root partial from a partial with a key", function () {
     var kvp = {
       key: "greeting>outer",
       value: {
@@ -914,8 +913,8 @@ describe("when authoring partials", function () {
     beforeEach(function () {
       var stub = sinon.stub(partials, "resolvePartial");
 
-      stub.withArgs(kvp).returns(outerPartial);
-      stub.withArgs(outerPartial).returns(innerPartial);
+      stub.onFirstCall().returns(outerPartial);
+      stub.onSecondCall().returns(innerPartial);
     });
     afterEach(function () {
       if(partials.resolvePartial.restore) partials.resolvePartial.restore();
@@ -924,6 +923,35 @@ describe("when authoring partials", function () {
     it("should include the inner partial, including parameters described by the outer partial", function () {
       var actual = partials.getPartial(kvp);
       actual.should.deep.equal(expected);
+    });
+  });
+
+  describe("when using an @ template on the key", function () {
+    var params = {
+      key: "stuff@",
+      value: [1, 2, 3]
+    };
+
+    var expectedParams = {
+      key: "stuff",
+      value: {
+        "value@stuff": [1, 2, 3]
+      }
+    };
+
+    beforeEach(function () {
+      var stub = sinon.stub(partials, "resolvePartial");
+
+      // If the expected params are passed, just return them.
+      stub.withArgs(sinon.match(expectedParams)).returns(expectedParams);
+    });
+    afterEach(function () {
+      if(partials.resolvePartial.restore) partials.resolvePartial.restore();
+    });
+
+    it("should move the @ template to the value parameter to avoid binding the array to the spec/value pair", function () {
+      var result = partials.getPartial(params);
+      result.should.deep.equal(expectedParams);
     });
   });
 });
