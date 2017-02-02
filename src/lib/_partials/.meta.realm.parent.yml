@@ -1,10 +1,10 @@
 header: Parent Realm
-"parent#>group":
-  linkToParent:
+"parent#":
+  parent>link:
     label<realm:
     href<url:
     type: application/lynx+json
-  linkToParentMeta:
+  parentMeta>link:
     label: Parent Metadata
     href<metaURL:
     type: application/lynx+json

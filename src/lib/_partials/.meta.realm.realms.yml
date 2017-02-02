@@ -1,14 +1,9 @@
-header: "Realms ({{{realms.length}}})"
-realms>list:
+header: "Child Realms ({{{realms.length}}})"
+realms:
   value@realms:
-    - header:
+    - content>link:
         label<realm:
         href<url:
-        type: application/lynx+json
-      meta:
+      meta>link:
         label: Metadata
         href<metaURL:
-        type: application/lynx+json
-      counts:
-        variants: "Variant count: {{{variants.length}}}"
-        templates: "Template count: {{{templates.length}}}"

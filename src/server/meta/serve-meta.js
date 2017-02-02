@@ -22,8 +22,7 @@ module.exports = exports = function createMetaHandler(options) {
       res.end();
     }
 
-    var template = { ">.meta.realm": {} };
-    Object.assign(template[">.meta.realm"], realm);
+    var template = { ">.meta.realm": Object.assign({}, realm) };
 
     var variant = {
       template: template,
