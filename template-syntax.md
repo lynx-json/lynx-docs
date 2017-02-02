@@ -160,7 +160,7 @@ When binding to an object in data, you can change the binding context to the obj
 
 Template:
 ```yaml
-user#:
+"user#":
   firstName<: Chevy
   middleName<:
   lastName<: Silverado
@@ -185,7 +185,7 @@ The `#` binding token indicates a section that is to bound when a value exists. 
 
 Template:
 ```yaml
-user#:
+"user#":
   firstName<: Chevy
   middleName<:
   lastName<: Silverado
@@ -239,9 +239,9 @@ In order to reference a partial for a value that is dynamic, you simply add the 
 
 Template with dynamic object value that references a partial:
 ```yaml
-user#>group:
+"user#>group":
 user^>group:
-foo#user>group:
+"foo#user>group":
 for^user>group:
 ```
 
