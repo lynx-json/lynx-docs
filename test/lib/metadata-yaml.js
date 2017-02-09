@@ -192,9 +192,10 @@ var tests = [{
     },
     expected: function (actual) {
       expect(actual.children.a).to.not.be.null;
-      actual.children.a.templates.length.should.equal(2);
-      actual.children.a.templates[0].template.should.deep.equal(ot("a"));
-      actual.children.a.templates[1].template.should.deep.equal(ot("b"));
+      let meta = actual.children.a.more();
+      meta.templates.length.should.equal(2);
+      meta.templates[0].template.should.deep.equal(ot("a"));
+      meta.templates[1].template.should.deep.equal(ot("b"));
     },
     description: "a key with a template container with two templates",
     should: "should return correct metadata"
@@ -228,9 +229,10 @@ var tests = [{
     },
     expected: function (actual) {
       expect(actual.children.a).to.not.be.null;
-      actual.children.a.templates.length.should.equal(2);
-      actual.children.a.templates[0].template.should.deep.equal(lt("a", true));
-      actual.children.a.templates[1].template.should.deep.equal(lt("b"));
+      let meta = actual.children.a.more();
+      meta.templates.length.should.equal(2);
+      meta.templates[0].template.should.deep.equal(lt("a", true));
+      meta.templates[1].template.should.deep.equal(lt("b"));
     },
     description: "a key with a template container with two literal templates",
     should: "should return correct metadata"

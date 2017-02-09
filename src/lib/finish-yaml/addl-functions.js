@@ -19,14 +19,14 @@ function isNotNullOrEmpty(meta) {
 
 function nodeHasProperty(kvp, meta, property, ensureNotNullOrEmpty) {
   if(!isNode(meta)) return false;
-  return meta.children.value.some(function (childMeta) {
-    childMeta = childMeta.more();
-    if(!childMeta.children || property in childMeta.children === false) return false;
-    if(!ensureNotNullOrEmpty) return true;
-
-    var propertyMeta = childMeta.children[property][0].more();
-    return isDynamic(propertyMeta) || isNotNullOrEmpty(propertyMeta);
-  });
+  
+  var valueMeta = meta.children.value.more();
+  if (valueMeta.templates) return false;
+  if (!valueMeta.children || property in valueMeta.children === false) return false;
+  if (!ensureNotNullOrEmpty) return true;
+  
+  var propertyMeta = valueMeta.children[property].more();
+  return isDynamic(propertyMeta) || isNotNullOrEmpty(propertyMeta);
 }
 
 var baseHints = ["text", "content", "container", "link", "submit", "form"];
@@ -51,6 +51,14 @@ function isLiteralTemplate(meta) {
   return meta.template && meta.template.type === "literal";
 }
 
+function getValueMeta(meta) {
+  if (meta.children.value.templates) {
+    return meta.children.value.templates[0];
+  }
+  
+  return meta.children.value.more();
+}
+
 function addHint(kvp, hint) {
   if(!kvp.value || !kvp.value.spec) return;
   if(!kvp.value.spec.hints) return;
@@ -66,19 +74,14 @@ function addHint(kvp, hint) {
 function text(kvp, options) {
   var meta = getMetadata(kvp);
   if(!isNode(meta)) return;
+  
+  var valueMeta = getValueMeta(meta);
 
-  var valueMetas = meta.children.value.map(cm => cm.more());
-  var firstValueMeta = valueMetas[0];
-
-  if(isLiteralTemplate(firstValueMeta)) {
+  if(isLiteralTemplate(valueMeta)) {
     addHint(kvp, "text");
-  }
-
-  if(isLiteralTemplate(firstValueMeta)) {
-    addHint(kvp, "text");
-  } else if(firstValueMeta.src.value !== undefined &&
-    firstValueMeta.src.value !== null &&
-    util.isPrimitive(firstValueMeta.src.value)) {
+  } else if(valueMeta.src.value !== undefined &&
+    valueMeta.src.value !== null &&
+    util.isPrimitive(valueMeta.src.value)) {
     addHint(kvp, "text");
   }
 }
@@ -133,8 +136,7 @@ function containers(kvp, options) {
   var meta = getMetadata(kvp);
   if(!isNode(meta)) return;
 
-  var valueMetas = meta.children.value.map(cm => cm.more());
-  var firstValueMeta = valueMetas[0];
+  var firstValueMeta = getValueMeta(meta);
 
   if(isObjectTemplate(firstValueMeta) || isArrayTemplate(firstValueMeta)) {
     addHint(kvp, "container");
