@@ -38,7 +38,8 @@ var tests = [{
       value: vsp("Hi")
     },
     description: "an expanded string value",
-    should: "should expand correctly"
+    should: "should expand correctly",
+    only: true
   }, {
     kvp: {
       value: 42
@@ -47,7 +48,8 @@ var tests = [{
       value: vsp(42)
     },
     description: "an expanded number value",
-    should: "should expand correctly"
+    should: "should expand correctly",
+    only: true
   }, {
     kvp: {
       value: true
@@ -56,16 +58,8 @@ var tests = [{
       value: vsp(true)
     },
     description: "an expanded boolean value",
-    should: "should expand correctly"
-  }, {
-    kvp: {
-      value: true
-    },
-    expected: {
-      value: vsp(true)
-    },
-    description: "an expanded boolean value",
-    should: "should expand correctly"
+    should: "should expand correctly",
+    only: true
   }, {
     kvp: {
       value: {
@@ -78,7 +72,8 @@ var tests = [{
       })
     },
     description: "an expanded object value",
-    should: "should expand correctly"
+    should: "should expand correctly",
+    only: true
   }, {
     kvp: {
       value: ["Hi", "Hello"]
@@ -87,7 +82,8 @@ var tests = [{
       value: vsp([vsp("Hi"), vsp("Hello")])
     },
     description: "an expanded array value",
-    should: "should expand correctly"
+    should: "should expand correctly",
+    only: true
   }, {
     kvp: {
       value: {
@@ -98,7 +94,8 @@ var tests = [{
       value: vsp("Hi")
     },
     description: "an expanded partial node (value)",
-    should: "should expand correctly"
+    should: "should expand correctly",
+    only: true
   }, {
     kvp: {
       value: {
@@ -113,7 +110,8 @@ var tests = [{
       })
     },
     description: "an expanded partial node (spec)",
-    should: "should expand correctly"
+    should: "should expand correctly",
+    only: true
   }, {
     kvp: {
       value: {
@@ -133,7 +131,8 @@ var tests = [{
       }
     },
     description: "an expanded array template value without a variable",
-    should: "should expand correctly"
+    should: "should expand correctly",
+    only: true
   }, {
     kvp: {
       value: {
@@ -153,35 +152,8 @@ var tests = [{
       }
     },
     description: "an expanded object template value without a variable",
-    should: "should expand correctly"
-  }, {
-    kvp: {
-      value: {
-        "key#": {
-          message: "Yes"
-        },
-        "key^": {
-          message: "No"
-        }
-      }
-    },
-    expected: {
-      value: {
-        spec: {
-          hints: []
-        },
-        value: {
-          "key#": vsp({ 
-            message: vsp("Yes") 
-          }),
-          "key^": vsp({ 
-            message: vsp("No") 
-          }),
-        }
-      }
-    },
-    description: "TBD",
-    should: "should expand correctly"
+    should: "should expand correctly",
+    only: true
   },
   {
     kvp: {
@@ -198,7 +170,8 @@ var tests = [{
       }
     },
     description: "an expanded simple template value without a variable",
-    should: "should expand correctly"
+    should: "should expand correctly",
+    only: false
   }, {
     kvp: {
       value: {
@@ -218,7 +191,8 @@ var tests = [{
       }
     },
     description: "an expanded array template value with a variable",
-    should: "should expand correctly"
+    should: "should expand correctly",
+    only: true
   }, {
     kvp: {
       value: {
@@ -238,7 +212,8 @@ var tests = [{
       }
     },
     description: "an expanded object template value with a variable",
-    should: "should expand correctly"
+    should: "should expand correctly",
+    only: true
   }, {
     kvp: {
       value: {
@@ -254,7 +229,8 @@ var tests = [{
       }
     },
     description: "an expanded simple template value with a variable",
-    should: "should expand correctly"
+    should: "should expand correctly",
+    only: true
   }, {
     kvp: {
       value: {
@@ -269,7 +245,8 @@ var tests = [{
       })
     },
     description: "an expanded array template kvp",
-    should: "should expand correctly"
+    should: "should expand correctly",
+    only: true
   }, {
     kvp: {
       value: {
@@ -288,7 +265,8 @@ var tests = [{
       })
     },
     description: "an expanded object template kvp",
-    should: "should expand correctly"
+    should: "should expand correctly",
+    only: true
   }, {
     kvp: {
       value: {
@@ -303,7 +281,116 @@ var tests = [{
       })
     },
     description: "an expanded simple template kvp",
-    should: "should expand correctly"
+    should: "should expand correctly",
+    only: true
+  },
+  {
+    kvp: {
+      value: {
+        "key#": {
+          message: "Yes"
+        },
+        "key^": {
+          message: "No"
+        }
+      }
+    },
+    expected: {
+      value: vsp({
+        "key#": vsp({
+          message: vsp("Yes")
+        }),
+        "key^": vsp({
+          message: vsp("No")
+        }),
+      })
+    },
+    description: "a key with two templates",
+    should: "should not move template to 'value' key",
+    only: true
+  },
+  {
+    kvp: {
+      key: "foo",
+      value: {
+        "#flag": {
+          message: "Yes"
+        },
+        "^flag": {
+          message: "No"
+        }
+      }
+    },
+    expected: {
+      key: "foo",
+      value: {
+        "#flag": vsp({
+          message: vsp("Yes")
+        }),
+        "^flag": vsp({
+          message: vsp("No")
+        })
+      }
+    },
+    description: "a key with a template container",
+    should: "should not move template to 'value' key",
+    only: true
+  },
+  {
+    kvp: {
+      key: "array@",
+      value: [
+        {
+          "#flag": {
+            message: "Yes"
+          },
+          "^flag": {
+            message: "No"
+          }
+        }
+      ]
+    },
+    expected: {
+      key: "array",
+      value: vsp([
+        {
+          "#flag": vsp({
+            message: vsp("Yes")
+          }),
+          "^flag": vsp({
+            message: vsp("No")
+          })
+        }
+      ], { valueKey: "value@array" })
+    },
+    description: "an expanded array template containing template container",
+    should: "should expand correctly",
+    only: true
+  },
+  {
+    kvp: {
+      value: {
+        "#flag": {
+          message: "Yes"
+        },
+        "^flag": {
+          message: "No"
+        }
+      }
+    },
+    expected: {
+      value: {
+        "#flag": vsp({
+          message: vsp("Yes")
+        }),
+        "^flag": vsp({
+          message: vsp("No")
+        })
+      }
+    },
+    description: "an expanded document containing a template container",
+    should: "should expand correctly",
+    only: true
   }
 ];
 
@@ -327,13 +414,15 @@ var reserveKeywords = [
 ];
 
 describe("when expanding YAML", function () {
-  tests.forEach(function (test) {
+
+  tests.filter(test => test.only).forEach(function (test) {
     describe(test.description, function () {
       it(test.should, function () {
         runTest(test);
       });
     });
   });
+
   reserveKeywords.forEach(function (keyword) {
     var test = {
       kvp: null,
@@ -341,13 +430,13 @@ describe("when expanding YAML", function () {
       description: "reserved keyword '" + keyword + "'",
       should: "should not be expanded"
     };
-
+  
     // actual
     test.kvp = {
       value: {}
     };
     test.kvp.value[keyword] = "";
-
+  
     // expected
     test.expected = {
       value: null
@@ -355,7 +444,7 @@ describe("when expanding YAML", function () {
     var obj = {};
     obj[keyword] = "";
     test.expected.value = vsp(obj);
-
+  
     describe(test.description, function () {
       it(test.should, function () {
         runTest(test);

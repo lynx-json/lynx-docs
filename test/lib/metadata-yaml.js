@@ -1,12 +1,18 @@
 "use strict";
 
-var should = require("chai").should();
+var chai = require("chai");
+var expect = chai.expect;
+var should = chai.should();
 var getMetadata = require("../../src/lib/metadata-yaml");
 
 function runTest(test) {
   var actual = getMetadata(test.actual);
-  test.expected.src = actual.src;
-  actual.should.deep.equal(test.expected);
+  if (typeof test.expected === "function") {
+    test.expected(actual);
+  } else {
+    test.expected.src = actual.src;
+    actual.should.deep.equal(test.expected);  
+  }
 }
 
 function ot(variable, inverse) {
@@ -140,6 +146,94 @@ var tests = [{
     expected: { template: at("dataVariable") },
     description: "an array template key key without a key name",
     should: "should return correct metadata"
+  },
+  {
+    actual: {
+      key: undefined,
+      value: {
+        "#a": {},
+        "#b": {}
+      }
+    },
+    expected: function (actual) {
+      actual.templates.length.should.equal(2);
+      actual.templates[0].template.should.deep.equal(ot("a"));
+      actual.templates[1].template.should.deep.equal(ot("b"));
+    },
+    description: "a template container of two templates",
+    should: "should return correct metadata"
+  },
+  {
+    actual: {
+      key: undefined,
+      value: {
+        "a#a": {},
+        "a#b": {}
+      }
+    },
+    expected: function (actual) {
+      expect(actual.children.a).to.not.be.null;
+      actual.children.a.templates.length.should.equal(2);
+      actual.children.a.templates[0].template.should.deep.equal(ot("a"));
+      actual.children.a.templates[1].template.should.deep.equal(ot("b"));
+    },
+    description: "a key with two templates",
+    should: "should return correct metadata"
+  },
+  {
+    actual: {
+      key: undefined,
+      value: {
+        a: {
+          "#a": {},
+          "#b": {}  
+        }
+      }
+    },
+    expected: function (actual) {
+      expect(actual.children.a).to.not.be.null;
+      actual.children.a.templates.length.should.equal(2);
+      actual.children.a.templates[0].template.should.deep.equal(ot("a"));
+      actual.children.a.templates[1].template.should.deep.equal(ot("b"));
+    },
+    description: "a key with a template container with two templates",
+    should: "should return correct metadata"
+  },
+  {
+    actual: {
+      key: undefined,
+      value: {
+        "a<a": "a",
+        "a=b": "b"
+      }
+    },
+    expected: function (actual) {
+      expect(actual.children.a).to.not.be.null;
+      actual.children.a.templates.length.should.equal(2);
+      actual.children.a.templates[0].template.should.deep.equal(lt("a", true));
+      actual.children.a.templates[1].template.should.deep.equal(lt("b"));
+    },
+    description: "a key with two literal templates",
+    should: "should return correct metadata"
+  },
+  {
+    actual: {
+      key: undefined,
+      value: {
+        a: {
+          "<a": "a",
+          "=b": "b"
+        }
+      }
+    },
+    expected: function (actual) {
+      expect(actual.children.a).to.not.be.null;
+      actual.children.a.templates.length.should.equal(2);
+      actual.children.a.templates[0].template.should.deep.equal(lt("a", true));
+      actual.children.a.templates[1].template.should.deep.equal(lt("b"));
+    },
+    description: "a key with a template container with two literal templates",
+    should: "should return correct metadata"
   }
 ];
 
@@ -155,9 +249,8 @@ describe("when getting metadata for a key/value pair", function () {
       var meta = getMetadata({ key: undefined, value: { greeting: "Hi" } });
       should.exist(meta.children);
       should.exist(meta.children.greeting);
-      meta.children.greeting.length.should.equal(1);
-      meta.children.greeting[0].src.key.should.equal("greeting");
-      meta.children.greeting[0].key.should.equal("greeting");
+      meta.children.greeting.src.key.should.equal("greeting");
+      meta.children.greeting.key.should.equal("greeting");
     });
   });
 
@@ -166,11 +259,10 @@ describe("when getting metadata for a key/value pair", function () {
       var meta = getMetadata({ key: undefined, value: { "greeting#": { message: "{{{message}}}" } } });
       should.exist(meta.children);
       should.exist(meta.children.greeting);
-      meta.children.greeting.length.should.equal(1);
-      meta.children.greeting[0].src.key.should.equal("greeting#");
-      meta.children.greeting[0].key.should.equal("greeting");
-      meta.children.greeting[0].template.type.should.equal("object");
-      meta.children.greeting[0].template.section.should.equal("#greeting");
+      meta.children.greeting.templates[0].src.key.should.equal("greeting#");
+      meta.children.greeting.templates[0].key.should.equal("greeting");
+      meta.children.greeting.templates[0].template.type.should.equal("object");
+      meta.children.greeting.templates[0].template.section.should.equal("#greeting");
     });
   });
 
@@ -179,11 +271,11 @@ describe("when getting metadata for a key/value pair", function () {
       var meta = getMetadata({ key: undefined, value: { "greeting^": { message: "{{{message}}}" } } });
       should.exist(meta.children);
       should.exist(meta.children.greeting);
-      meta.children.greeting.length.should.equal(1);
-      meta.children.greeting[0].src.key.should.equal("greeting^");
-      meta.children.greeting[0].key.should.equal("greeting");
-      meta.children.greeting[0].template.type.should.equal("object");
-      meta.children.greeting[0].template.section.should.equal("^greeting");
+      meta.children.greeting.templates.length.should.equal(1);
+      meta.children.greeting.templates[0].src.key.should.equal("greeting^");
+      meta.children.greeting.templates[0].key.should.equal("greeting");
+      meta.children.greeting.templates[0].template.type.should.equal("object");
+      meta.children.greeting.templates[0].template.section.should.equal("^greeting");
     });
   });
 
@@ -192,10 +284,10 @@ describe("when getting metadata for a key/value pair", function () {
       var meta = getMetadata({ key: undefined, value: { "greetings@": "{{{message}}}" } });
       should.exist(meta.children);
       should.exist(meta.children.greetings);
-      meta.children.greetings[0].src.key.should.equal("greetings@");
-      meta.children.greetings[0].key.should.equal("greetings");
-      meta.children.greetings[0].template.type.should.equal("array");
-      meta.children.greetings[0].template.section.should.equal("@greetings");
+      meta.children.greetings.templates[0].src.key.should.equal("greetings@");
+      meta.children.greetings.templates[0].key.should.equal("greetings");
+      meta.children.greetings.templates[0].template.type.should.equal("array");
+      meta.children.greetings.templates[0].template.section.should.equal("@greetings");
     });
   });
 
@@ -204,11 +296,11 @@ describe("when getting metadata for a key/value pair", function () {
       var meta = getMetadata({ key: undefined, value: { "greeting#dataVariable": { message: "{{{message}}}" } } });
       should.exist(meta.children);
       should.exist(meta.children.greeting);
-      meta.children.greeting.length.should.equal(1);
-      meta.children.greeting[0].src.key.should.equal("greeting#dataVariable");
-      meta.children.greeting[0].key.should.equal("greeting");
-      meta.children.greeting[0].template.type.should.equal("object");
-      meta.children.greeting[0].template.section.should.equal("#dataVariable");
+      meta.children.greeting.templates.length.should.equal(1);
+      meta.children.greeting.templates[0].src.key.should.equal("greeting#dataVariable");
+      meta.children.greeting.templates[0].key.should.equal("greeting");
+      meta.children.greeting.templates[0].template.type.should.equal("object");
+      meta.children.greeting.templates[0].template.section.should.equal("#dataVariable");
     });
   });
 
@@ -217,11 +309,11 @@ describe("when getting metadata for a key/value pair", function () {
       var meta = getMetadata({ key: undefined, value: { "greeting^dataVariable": { message: "{{{message}}}" } } });
       should.exist(meta.children);
       should.exist(meta.children.greeting);
-      meta.children.greeting.length.should.equal(1);
-      meta.children.greeting[0].src.key.should.equal("greeting^dataVariable");
-      meta.children.greeting[0].key.should.equal("greeting");
-      meta.children.greeting[0].template.type.should.equal("object");
-      meta.children.greeting[0].template.section.should.equal("^dataVariable");
+      meta.children.greeting.templates.length.should.equal(1);
+      meta.children.greeting.templates[0].src.key.should.equal("greeting^dataVariable");
+      meta.children.greeting.templates[0].key.should.equal("greeting");
+      meta.children.greeting.templates[0].template.type.should.equal("object");
+      meta.children.greeting.templates[0].template.section.should.equal("^dataVariable");
     });
   });
 
@@ -230,15 +322,15 @@ describe("when getting metadata for a key/value pair", function () {
       var meta = getMetadata({ key: undefined, value: { "greeting#dataVariable": { message: "{{{message}}}" }, "greeting^dataVariable": { message: "{{{message}}}" } } });
       should.exist(meta.children);
       should.exist(meta.children.greeting);
-      meta.children.greeting.length.should.equal(2);
-      meta.children.greeting[0].src.key.should.equal("greeting#dataVariable");
-      meta.children.greeting[0].key.should.equal("greeting");
-      meta.children.greeting[0].template.type.should.equal("object");
-      meta.children.greeting[0].template.section.should.equal("#dataVariable");
-      meta.children.greeting[1].src.key.should.equal("greeting^dataVariable");
-      meta.children.greeting[1].key.should.equal("greeting");
-      meta.children.greeting[1].template.type.should.equal("object");
-      meta.children.greeting[1].template.section.should.equal("^dataVariable");
+      meta.children.greeting.templates.length.should.equal(2);
+      meta.children.greeting.templates[0].src.key.should.equal("greeting#dataVariable");
+      meta.children.greeting.templates[0].key.should.equal("greeting");
+      meta.children.greeting.templates[0].template.type.should.equal("object");
+      meta.children.greeting.templates[0].template.section.should.equal("#dataVariable");
+      meta.children.greeting.templates[1].src.key.should.equal("greeting^dataVariable");
+      meta.children.greeting.templates[1].key.should.equal("greeting");
+      meta.children.greeting.templates[1].template.type.should.equal("object");
+      meta.children.greeting.templates[1].template.section.should.equal("^dataVariable");
     });
   });
 
@@ -247,10 +339,10 @@ describe("when getting metadata for a key/value pair", function () {
       var meta = getMetadata({ key: undefined, value: { "greetings@dataVariable": "{{{message}}}" } });
       should.exist(meta.children);
       should.exist(meta.children.greetings);
-      meta.children.greetings[0].src.key.should.equal("greetings@dataVariable");
-      meta.children.greetings[0].key.should.equal("greetings");
-      meta.children.greetings[0].template.type.should.equal("array");
-      meta.children.greetings[0].template.section.should.equal("@dataVariable");
+      meta.children.greetings.templates[0].src.key.should.equal("greetings@dataVariable");
+      meta.children.greetings.templates[0].key.should.equal("greetings");
+      meta.children.greetings.templates[0].template.type.should.equal("array");
+      meta.children.greetings.templates[0].template.section.should.equal("@dataVariable");
     });
   });
 });

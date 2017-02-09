@@ -10,7 +10,8 @@ function keyMatches(regex) {
   };
 }
 
-var blacklist = [
+var excludes = [
+  keyMatches(/^spec$/),
   keyMatches(/^href$/),
   keyMatches(/^src$/),
   keyMatches(/^data$/),
@@ -27,8 +28,8 @@ var blacklist = [
   keyMatches(/^for$/)
 ];
 
-function isBlacklisted(meta) {
-  return blacklist.some(function (predicate) {
+function isExcluded(meta) {
+  return excludes.some(function (predicate) {
     return predicate(meta);
   });
 }
@@ -63,41 +64,25 @@ function ensureSpec(kvp) {
     return;
   }
 
-  var specMetas = meta.children.spec;
-  specMetas.map(sm => sm.more()).forEach(function (specMeta) {
-    if (specMeta.children && specMeta.children.hints) return;
-    specMeta.src.value.hints = [];
-  });
+  var specMeta = meta.children.spec;
+  if (specMeta.more) specMeta = specMeta.more();
+  if (specMeta.children && specMeta.children.hints) return;
+  specMeta.src.value.hints = [];
 }
 
-function expandArrayItem(options) {
-  return function (val, idx, arr) {
-    var kvp = getKVP(val);
-    return expandKvp(kvp, options).value;
-  };
+function hasMultipleTemplates(meta, childKey) {
+  return meta.children && 
+    meta.children[childKey] && 
+    meta.children[childKey].templates && 
+    meta.children[childKey].templates.length > 1;
 }
 
-function expandObject(obj, options, valueMeta) {
-  var expanded = {};
-  
-  function expandObjectProperty(property) {
-    var skipCondensation = valueMeta.children[property].length > 1;
-    return function (childMeta) {
-      var kvp = expandKvp(childMeta.src, options, skipCondensation);
-      expanded[kvp.key] = kvp.value;
-    };
+function expandKvp(kvp, options, skipOptimization) {
+  function log(msg, kvp) {
+    // console.log(msg, kvp);
   }
   
-  for (var property in valueMeta.children) {
-    if (valueMeta.children.hasOwnProperty(property)) {
-      valueMeta.children[property].map(cm => cm.more()).forEach(expandObjectProperty(property));
-    }
-  }
-  
-  return expanded;
-}
-
-function expandKvp(kvp, options, skipCondensation) {
+  log("in", JSON.stringify(kvp));
   var meta = getMetadata(kvp);
 
   if (meta.partial) {    
@@ -105,54 +90,78 @@ function expandKvp(kvp, options, skipCondensation) {
     if (!kvp) throw new Error("Failed to locate partial '" + meta.partial + "'. Realm folder: " + options.realm.folder + ".");
     meta = getMetadata(kvp);
   }
+  
 
-  if (isBlacklisted(meta)) return kvp;
-
+  if (isExcluded(meta)) return kvp;
+  
+  
+  if (Array.isArray(kvp.value)) {
+    kvp.value.forEach((val, idx, arr) => {
+      arr[idx] = expandKvp({ value: val }, options).value;
+    });
+  } else if (util.isObject(kvp.value)) {
+    let newValue = {};
+    
+    Object.getOwnPropertyNames(kvp.value).forEach(propertyName => {
+      let ckvp = { key: propertyName, value: kvp.value[propertyName] };
+      let cmeta = getMetadata(ckvp.key);
+      ckvp = expandKvp(ckvp, options, hasMultipleTemplates(meta, cmeta.key));
+      newValue[ckvp.key] = ckvp.value;
+    });
+    
+    kvp.value = newValue;
+    meta = getMetadata(kvp);
+  }
+  
+  
+  if (meta.key === "value") {
+    log("out", JSON.stringify(kvp));
+    return kvp;
+  }
+  
+  if (meta.templates) {
+    log("out", JSON.stringify(kvp));
+    return kvp;
+  }
+  
   if (meta.children && meta.children.value) {
     ensureSpec(kvp);
-  } else if (meta.children && meta.children.spec) {
+    log("out", JSON.stringify(kvp));
+    return kvp;
+  }
+  
+  if (meta.children && meta.children.spec) {
     ensureSpec(kvp);
     kvp.value.value = null;
-  } else {
-    if (meta.template && !skipCondensation) {
-      kvp.key = meta.key;
-      var newValue = {
-        spec: {
-          hints: []
-        }
-      };
-      newValue["value" + meta.template.section] = kvp.value;
-      kvp.value = newValue;
-    } else {
-      kvp.value = {
-        spec: {
-          hints: []
-        },
-        value: kvp.value
-      };
-    }
+    log("out", JSON.stringify(kvp));
+    return kvp;
   }
-
-  meta = getMetadata(kvp);
-
-  if (meta.template && meta.template.type === "array" && !util.isArray(kvp.value.value)) {
-    kvp.value.value = [kvp.value.value];
+  
+  if (meta.key && meta.template && !skipOptimization) {
+    let expanded = {
+      spec: {
+        hints: []
+      }
+    };
+    
+    expanded["value" + meta.template.section] = kvp.value;
+    kvp.key = meta.key;
+    kvp.value = expanded;
+    log("out", JSON.stringify(kvp));
+    return kvp;
   }
-
-  meta.children.value.forEach(function (valueMeta) {
-    valueMeta = valueMeta.more();
-    let value = kvp.value[valueMeta.src.key];
-
-    if (util.isArray(value)) {
-      kvp.value[valueMeta.src.key] = value.map(expandArrayItem(options));
-    } else if (util.isObject(value)) {
-      kvp.value[valueMeta.src.key] = expandObject(value, options, valueMeta);
-    }
-  });
-
+  
+  kvp.value = {
+    spec: {
+      hints: []
+    },
+    value: kvp.value
+  };
+  
+  log("out", JSON.stringify(kvp));
   return kvp;
 }
 
-expandKvp.blacklist = blacklist;
+expandKvp.excludes = excludes;
 
 module.exports = exports = expandKvp;

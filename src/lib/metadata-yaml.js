@@ -60,27 +60,63 @@ function applyTemplateMeta(key, meta) {
 }
 
 function applyObjectMeta(value, meta) {
+  function isTemplateContainer() {
+    if (!value) return false;
+    if (typeof value !== "object" || Array.isArray(value)) return false;
+    var props = Object.getOwnPropertyNames(value);
+    return props.length > 0 &&
+      props.every(key => {
+        var meta = getMetadata(key);
+        return !meta.key && !!meta.template;
+      });
+  }
+
+  function getTemplates() {
+    return Object.getOwnPropertyNames(value).map(key => {
+      var kvp = { key: key, value: value[key] };
+      var meta = getMetadata(kvp);
+      return meta;
+    });
+  }
+  
   if (!util.isObject(value) || util.isArray(value)) return;
+  
+  if (isTemplateContainer()) {
+    meta.templates = getTemplates();
+    return;
+  }
   
   meta.children = {};
   meta.countOfChildren = 0;
   
-  Object.getOwnPropertyNames(value).forEach(function (childKey) {
-    if (!childKey) return; //TODO: Figure out why we're getting an empty key and blowing up.
-    
-    var childMeta = getMetadata(childKey);
-    
-    if (!meta.children[childMeta.key]) {
-      meta.children[childMeta.key] = [];
-      meta.countOfChildren++;
-    }
-    
-    childMeta.more = function () {
-      return getMetadata({ key: childKey, value: value[childKey] });
-    };
-    
-    meta.children[childMeta.key].push(childMeta);
-  });
+  Object.getOwnPropertyNames(value)
+    .filter(childKey => !!childKey)
+    .map(childKey => {
+      let childMeta = getMetadata(childKey);
+      let childValue = value[childKey];
+      
+      childMeta.more = function () {
+        return getMetadata({ key: childKey, value: childValue });
+      };
+      
+      if (isTemplateContainer(childValue)) {
+        childMeta.templates = getTemplates(childValue);
+      }
+      
+      return childMeta;
+    })
+    .forEach(childMeta => {
+      if (childMeta.template) {
+        if (childMeta.key in meta.children === false) {
+          meta.children[childMeta.key] = { templates: [] };
+          meta.countOfChildren++;
+        }
+        meta.children[childMeta.key].templates.push(childMeta.more());
+      } else {
+        meta.children[childMeta.key] = childMeta;
+        meta.countOfChildren++;
+      }
+    });
 }
 
 function applyPartialMeta(key, meta) {
