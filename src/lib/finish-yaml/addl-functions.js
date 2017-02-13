@@ -20,7 +20,8 @@ function isNotNullOrEmpty(meta) {
 function nodeHasProperty(kvp, meta, property, ensureNotNullOrEmpty) {
   if(!isNode(meta)) return false;
   
-  var valueMeta = meta.children.value.more();
+  var valueMeta = meta.children.value;
+  if (valueMeta.more) valueMeta = valueMeta.more();
   if (valueMeta.templates) return false;
   if (!valueMeta.children || property in valueMeta.children === false) return false;
   if (!ensureNotNullOrEmpty) return true;
