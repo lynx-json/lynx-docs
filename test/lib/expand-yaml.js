@@ -322,29 +322,25 @@ var tests = [{
   {
     kvp: {
       key: "array@",
-      value: [
-        {
-          "#flag": {
-            message: "Yes"
-          },
-          "^flag": {
-            message: "No"
-          }
+      value: [{
+        "#flag": {
+          message: "Yes"
+        },
+        "^flag": {
+          message: "No"
         }
-      ]
+      }]
     },
     expected: {
       key: "array",
-      value: vsp([
-        {
-          "#flag": vsp({
-            message: vsp("Yes")
-          }),
-          "^flag": vsp({
-            message: vsp("No")
-          })
-        }
-      ], { valueKey: "value@array" })
+      value: vsp([{
+        "#flag": vsp({
+          message: vsp("Yes")
+        }),
+        "^flag": vsp({
+          message: vsp("No")
+        })
+      }], { valueKey: "value@array" })
     },
     description: "an expanded array template containing template container",
     should: "should expand correctly"
@@ -396,7 +392,7 @@ var reserveKeywords = [
 
 describe("when expanding YAML", function () {
 
-  tests.filter(test => test.only).forEach(function (test) {
+  tests.forEach(function (test) {
     describe(test.description, function () {
       it(test.should, function () {
         runTest(test);
@@ -411,13 +407,13 @@ describe("when expanding YAML", function () {
       description: "reserved keyword '" + keyword + "'",
       should: "should not be expanded"
     };
-  
+
     // actual
     test.kvp = {
       value: {}
     };
     test.kvp.value[keyword] = "";
-  
+
     // expected
     test.expected = {
       value: null
@@ -425,7 +421,7 @@ describe("when expanding YAML", function () {
     var obj = {};
     obj[keyword] = "";
     test.expected.value = vsp(obj);
-  
+
     describe(test.description, function () {
       it(test.should, function () {
         runTest(test);
