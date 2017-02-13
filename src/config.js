@@ -22,7 +22,7 @@ module.exports = exports = function (lynxDocs) {
     if(!options || !options.realm) return;
 
     var meta = lynxDocs.lib.meta(kvp);
-    if(meta.children.realm && meta.children.realm[0].template) return;
+    if(meta.children.realm && meta.children.realm.templates) return;
 
     if(kvp.value.realm) {
       kvp.value.realm = url.resolve(options.realm.realm, kvp.value.realm);
@@ -42,9 +42,12 @@ module.exports = exports = function (lynxDocs) {
     }
 
     function isArray(meta) {
-      var firstMeta = meta.children.value[0];
-      if(firstMeta.template && firstMeta.template.type === "array") return true;
-      if(util.isArray(firstMeta.more().src.value)) return true;
+      var valueMeta = meta.children.value;
+      if (valueMeta.more) valueMeta = valueMeta.more();
+      
+      if (valueMeta.template && valueMeta.template.type === "array") return true;
+      if (valueMeta.templates && valueMeta.templates[0].template.type === "array") return true;
+      if (Array.isArray(valueMeta.src.value)) return true;
       return false;
     }
 
@@ -59,18 +62,23 @@ module.exports = exports = function (lynxDocs) {
         return childSpec.name === childMeta.key;
       }
 
+      if (childMeta.more) childMeta = childMeta.more();
+      
       if(!isNode(childMeta)) return;
       if(node.spec.children.some(match)) return;
-      if(childMeta.key === "href") {
-        console.log(JSON.stringify(childMeta));
-      }
+      
       node.spec.children.push({ name: childMeta.key });
     }
-
-    meta.children.value.map(expandMeta).forEach(function (valueMeta) {
-      for(let childKey in valueMeta.children) {
-        valueMeta.children[childKey].map(expandMeta).forEach(addChildNode);
-      }
-    });
+    
+    var valueMeta = meta.children.value;
+    if (valueMeta.more) valueMeta = valueMeta.more();
+    
+    if (valueMeta.children) {
+      Object.getOwnPropertyNames(valueMeta.children).forEach(childKey => {
+        addChildNode(valueMeta.children[childKey]);
+      });
+    } else if (valueMeta.templates) {
+      addChildNode(valueMeta.templates[0]);
+    }
   });
 };
