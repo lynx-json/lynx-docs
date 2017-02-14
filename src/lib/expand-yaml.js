@@ -35,14 +35,14 @@ function isExcluded(meta) {
 }
 
 function getKVP(yaml) {
-  if (!util.isObject(yaml)) return {
+  if(!util.isObject(yaml)) return {
     key: undefined,
     value: yaml
   };
 
   var props = Object.getOwnPropertyNames(yaml);
 
-  if (props.length === 1 && getMetadata(props[0]).key === undefined) {
+  if(props.length === 1 && getMetadata(props[0]).key === undefined) {
     return {
       key: props[0],
       value: yaml[props[0]]
@@ -57,7 +57,7 @@ function getKVP(yaml) {
 
 function ensureSpec(kvp) {
   var meta = getMetadata(kvp);
-  if (!meta.children || !meta.children.spec || kvp.value.spec === null) {
+  if(!meta.children || !meta.children.spec || kvp.value.spec === null) {
     kvp.value.spec = {
       hints: []
     };
@@ -65,15 +65,15 @@ function ensureSpec(kvp) {
   }
 
   var specMeta = meta.children.spec;
-  if (specMeta.more) specMeta = specMeta.more();
-  if (specMeta.children && specMeta.children.hints) return;
+  if(specMeta.more) specMeta = specMeta.more();
+  if(specMeta.children && specMeta.children.hints) return;
   specMeta.src.value.hints = [];
 }
 
 function hasMultipleTemplates(meta, childKey) {
-  return meta.children && 
-    meta.children[childKey] && 
-    meta.children[childKey].templates && 
+  return meta.children &&
+    meta.children[childKey] &&
+    meta.children[childKey].templates &&
     meta.children[childKey].templates.length > 1;
 }
 
@@ -81,84 +81,81 @@ function expandKvp(kvp, options, skipOptimization) {
   function log(msg, kvp) {
     // console.log(msg, kvp);
   }
-  
-  log("in", JSON.stringify(kvp));
+
+  log("in", util.inspect(kvp));
   var meta = getMetadata(kvp);
 
-  if (meta.partial) {    
+  if(meta.partial) {
     kvp = partials.getPartial(kvp, options);
-    if (!kvp) throw new Error("Failed to locate partial '" + meta.partial + "'. Realm folder: " + options.realm.folder + ".");
+    if(!kvp) throw new Error("Failed to locate partial '" + meta.partial + "'. Realm folder: " + options.realm.folder + ".");
     meta = getMetadata(kvp);
   }
-  
 
-  if (isExcluded(meta)) return kvp;
-  
-  
-  if (Array.isArray(kvp.value)) {
+  if(isExcluded(meta)) return kvp;
+
+  if(Array.isArray(kvp.value)) {
     kvp.value.forEach((val, idx, arr) => {
       arr[idx] = expandKvp({ value: val }, options).value;
     });
-  } else if (util.isObject(kvp.value)) {
+  } else if(util.isObject(kvp.value)) {
     let newValue = {};
-    
+
     Object.getOwnPropertyNames(kvp.value).forEach(propertyName => {
       let ckvp = { key: propertyName, value: kvp.value[propertyName] };
       let cmeta = getMetadata(ckvp.key);
       ckvp = expandKvp(ckvp, options, hasMultipleTemplates(meta, cmeta.key));
       newValue[ckvp.key] = ckvp.value;
     });
-    
+
     kvp.value = newValue;
     meta = getMetadata(kvp);
   }
-  
-  
-  if (meta.key === "value") {
-    log("out", JSON.stringify(kvp));
+
+  if(meta.key === "value") {
+    log("out", util.inspect(kvp));
     return kvp;
   }
-  
-  if (meta.templates) {
-    log("out", JSON.stringify(kvp));
+
+  if(meta.templates) {
+    log("out", util.inspect(kvp));
     return kvp;
   }
-  
-  if (meta.children && meta.children.value) {
+
+  if(meta.children && meta.children.value) {
     ensureSpec(kvp);
-    log("out", JSON.stringify(kvp));
+    log("out", util.inspect(kvp));
     return kvp;
   }
-  
-  if (meta.children && meta.children.spec) {
+
+  if(meta.children && meta.children.spec) {
     ensureSpec(kvp);
     kvp.value.value = null;
-    log("out", JSON.stringify(kvp));
+    log("out", util.inspect(kvp));
     return kvp;
   }
-  
-  if (meta.key && meta.template && !skipOptimization) {
+
+  if(meta.key && meta.template && !skipOptimization) {
     let expanded = {
       spec: {
         hints: []
       }
     };
-    
+
     expanded["value" + meta.template.section] = kvp.value;
     kvp.key = meta.key;
     kvp.value = expanded;
-    log("out", JSON.stringify(kvp));
+    log("out", util.inspect(kvp));
     return kvp;
   }
-  
+
   kvp.value = {
     spec: {
       hints: []
     },
     value: kvp.value
   };
-  
-  log("out", JSON.stringify(kvp));
+
+  log("out", util.inspect(kvp));
   return kvp;
 }
 

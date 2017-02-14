@@ -152,10 +152,10 @@ function flattenSpecForArrayValueTemplateNode(kvp, parentSpec) {
   var valueMeta = meta.children.value;
   if(valueMeta.more) valueMeta = valueMeta.more();
   if(valueMeta.templates && valueMeta.templates.length !== 1) return kvp;
-  
+
   var arrayItemTemplates = valueMeta.templates[0].src.value;
-  if (arrayItemTemplates.length !== 1) return kvp;
-  
+  if(arrayItemTemplates.length !== 1) return kvp;
+
   let ckvp = { value: arrayItemTemplates[0] };
 
   ckvp = flattenSpecForKvp(ckvp, spec);
@@ -175,7 +175,7 @@ function flattenSpecForArrayValueTemplateNode(kvp, parentSpec) {
 
 function flattenSpecForObjectValueTemplateNode(kvp, parentSpec) {
   function flattenSpecForChildren(valueMeta) {
-    if (valueMeta.more) valueMeta = valueMeta.more();
+    if(valueMeta.more) valueMeta = valueMeta.more();
     var templateValue = valueMeta.src.value;
     var newTemplateValue = {};
 
@@ -187,10 +187,10 @@ function flattenSpecForObjectValueTemplateNode(kvp, parentSpec) {
 
     kvp.value[valueMeta.src.key] = newTemplateValue;
   }
-  
+
   var meta = getMetadata(kvp);
   var spec = kvp.value.spec;
-  
+
   var valueMeta = meta.children.value;
   if(valueMeta.more) valueMeta = valueMeta.more();
 
@@ -206,7 +206,7 @@ function flattenSpecForObjectValueTemplateNode(kvp, parentSpec) {
 
 function flattenSpecForLiteralValueTemplateNode(kvp, parentSpec) {
   var meta = getMetadata(kvp);
-  
+
   var valueMeta = meta.children.value;
   if(valueMeta.more) valueMeta = valueMeta.more();
   if(valueMeta.templates && valueMeta.templates.length !== 1) return kvp;
@@ -242,34 +242,34 @@ function flattenSpecForKvp(kvp, parentSpec) {
   function log(msg, val) {
     // console.log(msg, val);
   }
-  
+
   function _return(param) {
-    log("out", JSON.stringify(param));
+    log("out", util.inspect(param));
     return param;
   }
-  
+
   if(!kvp) throw new Error("'kvp' param is required");
-  log("in", JSON.stringify(kvp));
+  log("in", util.inspect(kvp));
   var meta = getMetadata(kvp);
 
-  if(!isNode(meta)) return _return( kvp );
-  if(meta.template) return _return( kvp );
-  if(meta.children.spec.template) return _return( kvp );
+  if(!isNode(meta)) return _return(kvp);
+  if(meta.template) return _return(kvp);
+  if(meta.children.spec.template) return _return(kvp);
 
   if(meta.key !== undefined && meta.key !== null) {
     var specMeta = meta.children.spec.more();
     specMeta.src.value.name = meta.key;
   }
 
-  if(isArrayNode(meta)) return _return( flattenSpecForArrayNode(kvp, parentSpec) );
-  if(isObjectNode(meta)) return _return( flattenSpecForObjectNode(kvp, parentSpec) );
-  if(isTextNode(meta)) return _return( flattenSpecForTextNode(kvp, parentSpec) );
-  if(isArrayValueTemplateNode(meta)) return _return( flattenSpecForArrayValueTemplateNode(kvp, parentSpec) );
-  if(isObjectValueTemplateNode(meta)) return _return( flattenSpecForObjectValueTemplateNode(kvp, parentSpec) );
-  if(isLiteralValueTemplateNode(meta)) return _return( flattenSpecForLiteralValueTemplateNode(kvp, parentSpec) );
+  if(isArrayNode(meta)) return _return(flattenSpecForArrayNode(kvp, parentSpec));
+  if(isObjectNode(meta)) return _return(flattenSpecForObjectNode(kvp, parentSpec));
+  if(isTextNode(meta)) return _return(flattenSpecForTextNode(kvp, parentSpec));
+  if(isArrayValueTemplateNode(meta)) return _return(flattenSpecForArrayValueTemplateNode(kvp, parentSpec));
+  if(isObjectValueTemplateNode(meta)) return _return(flattenSpecForObjectValueTemplateNode(kvp, parentSpec));
+  if(isLiteralValueTemplateNode(meta)) return _return(flattenSpecForLiteralValueTemplateNode(kvp, parentSpec));
 
   delete meta.src;
-  var msg = "Unexpected type of KVP. Metadata for KVP is: " + JSON.stringify(meta);
+  var msg = "Unexpected type of KVP. Metadata for KVP is: " + util.inspect(meta);
   throw new Error(msg);
 }
 
