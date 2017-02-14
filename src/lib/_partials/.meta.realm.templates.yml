@@ -1,8 +1,9 @@
 header: "Templates ({{{templates.length}}})"
 templates>list:
   value@templates:
-    - header<path:
+    - ">group":
+      path<:
       handlebars:
-        label: View Handlebars
+        label: View as Handlebars
         href<url:
         type: text/plain

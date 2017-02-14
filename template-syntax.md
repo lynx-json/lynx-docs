@@ -51,10 +51,11 @@ movies:
 ## Dynamic Content
 Dynamic content changes based on the state of the application and therefore, must be provided by the server. Dynamic content is bound to the templates at runtime.
 
-Static content scenarios
+Dynamic content values
 - [Text Value](#dynamic-text-value)
 - [Object Value](#dynamic-object-value)
 - [Array Value](#dynamic-array-value)
+- [Dynamic with Partial](#dynamic-with-partial)
 
 ### <a name="dynamic-text-value"></a>Dynamic Text
 #### Simple data binding example.
@@ -76,7 +77,7 @@ name: "Chevy Chase"
 ```
 
 #### Key in template different than key in data
-The key in the template is "name" and the key in the data is "username".
+The key in the template is `name` and the key in the data is `username`.
 
 Template:
 ```yaml
@@ -96,7 +97,7 @@ name: "Chevy Chase"
 #### Mixing static and dynamic
 Template:
 ```yaml
-name: "{{firstName}} {{lastName}}"
+name: "{{firstName}} {{lastName}} is a great actor"
 ```
 
 Data:
@@ -107,11 +108,11 @@ lastName: Chase
 
 Result:
 ```yaml
-name: "Chevy Chase"
+name: "Chevy Chase is a great actor"
 ```
 
 #### Binding literals
-The "<" binding token encloses the bound value in quotes. The "=" binding token binds the value as a literal (not quoted).
+The `<` binding token encloses the bound value in quotes. The `=` binding token binds the value as a literal (not quoted).
 
 Template:
 ```yaml
@@ -131,7 +132,7 @@ quoted: "42"
 ```
 
 #### Default values
-You may specify a default value in the template. If the data being bound doesn't contain a matching key to bind, then the default value is used. If no default is specified, then it is assumed to be the literal null.
+Default values can be provided in the template. If the data being bound doesn't contain a value to bind, then the default value is used. If no default is specified, it is assumed to be the literal null.
 
 Template:
 ```yaml
@@ -159,7 +160,7 @@ When binding to an object in data, you can change the binding context to the obj
 
 Template:
 ```yaml
-user#:
+"user#":
   firstName<: Chevy
   middleName<:
   lastName<: Silverado
@@ -179,18 +180,17 @@ user:
   lastName: Chase
 ```
 
-#### Output different values based on presence or absence of object
-When binding to an object in data, you can change the binding context to the object being bound.
+#### Output different values based on presence or absence of data
+The `#` binding token indicates a section that is to bound when a value exists. The `^` binding token is the inverse of `#`. Therefore it is used to indicate a section that is to be bound when a value does not exist.
 
 Template:
 ```yaml
-user:
-  value#user:
-    firstName<: Chevy
-    middleName<:
-    lastName<: Silverado
-  value^user:
-    message: User does not exist
+"user#":
+  firstName<: Chevy
+  middleName<:
+  lastName<: Silverado
+user^:
+  message: User does not exist
 ```
 
 Data:
@@ -201,21 +201,19 @@ null
 Result:
 ```yaml
 user:
-  value:
-    message: User does not exist
+  message: User does not exist
 ```
 
 ### <a name="dynamic-array-value"></a>Dynamic Array
 
 #### Simple array binding
-When binding to an object in data, you can change the binding context to the object being bound.
+The `@` binding token is used to iterate over the values in a list.
 
 Template:
 ```yaml
-list:
-  value@users:
-    - name<:
-      age<:
+users@:
+  - name<:
+    age<:
 ```
 
 Data:
@@ -229,10 +227,38 @@ users:
 
 Result:
 ```yaml
-list:
-  value:
-    - name: "User 1"
-      age: "25"
-    - name: "User 2"
-      age: "30"
+users:
+  - name: "User 1"
+    age: "25"
+  - name: "User 2"
+    age: "30"
+```
+
+### <a name="dynamic-with-partial"></a>Dynamic Content with Partial
+In order to reference a partial for a value that is dynamic, you simply add the partial reference at the end of the key.
+
+Template with dynamic object value that references a partial:
+```yaml
+"user#>group":
+user^>group:
+"foo#user>group":
+for^user>group:
+```
+
+Data:
+```yaml
+user: null
+```
+
+Template with dynamic array value that references a partial:
+```yaml
+users@>list:
+foo@users>list:
+```
+
+Data:
+```yaml
+users:
+  - User One
+  - User Two
 ```
