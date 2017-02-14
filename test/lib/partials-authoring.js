@@ -12,7 +12,22 @@ function runTest(test) {
   actual.should.deep.equal(test.expected);
 }
 
-var tests = [{
+var tests = [
+  {
+    kvp: {
+      key: ">nothing",
+      value: null
+    },
+    partial: {
+      key: "",
+      value: "Hello, World!"
+    },
+    expected: {
+      value: "Hello, World!"
+    },
+    description: "a keyless partial",
+    should: "should return a KVP with no key"
+  }, {
   kvp: {
     key: ">nothing",
     value: null

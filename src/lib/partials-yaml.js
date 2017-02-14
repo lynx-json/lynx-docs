@@ -377,6 +377,7 @@ function getPartial(kvp, options) {
     return result;
   }
 
+  if (result.key === null || result.key === "") delete result.key;
   return result;
 }
 
