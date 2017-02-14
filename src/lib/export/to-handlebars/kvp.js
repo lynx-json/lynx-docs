@@ -94,45 +94,40 @@ function exportArrayTemplate(meta, cb, options) {
 }
 
 function exportHandlebars(meta, cb, options) {
-  try {
-    options = options || {};
+  options = options || {};
 
-    if(meta.key && !options.noKey) {
-      cb(JSON.stringify(meta.key) + ":");
-    }
+  if(meta.key && !options.noKey) {
+    cb(JSON.stringify(meta.key) + ":");
+  }
 
-    if(meta.templates) {
-      let len = meta.templates.length;
+  if(meta.templates) {
+    let len = meta.templates.length;
 
-      meta.templates.forEach((cmeta, idx) => {
-        let coptions = {};
+    meta.templates.forEach((cmeta, idx) => {
+      let coptions = {};
 
-        if(len > 1) {
-          coptions.noDefault = true;
-        }
+      if(len > 1) {
+        coptions.noDefault = true;
+      }
 
-        if(idx > 0) {
-          coptions.noKey = true;
-        }
+      if(idx > 0) {
+        coptions.noKey = true;
+      }
 
-        exportHandlebars(cmeta, cb, coptions);
-      });
-    } else if(meta.template && meta.template.type === "literal") {
-      exportLiteralTemplate(meta, cb, options);
-    } else if(meta.template && meta.template.type === "object") {
-      exportObjectTemplate(meta, cb, options);
-    } else if(meta.template && meta.template.type === "array") {
-      exportArrayTemplate(meta, cb, options);
-    } else if(util.isPrimitive(meta.src.value)) {
-      cb(JSON.stringify(meta.src.value));
-    } else if(Array.isArray(meta.src.value)) {
-      exportArray(meta, cb);
-    } else if(meta.children) {
-      exportObject(meta, cb);
-    }
-  } catch(err) {
-    console.log(JSON.stringify(meta));
-    throw err;
+      exportHandlebars(cmeta, cb, coptions);
+    });
+  } else if(meta.template && meta.template.type === "literal") {
+    exportLiteralTemplate(meta, cb, options);
+  } else if(meta.template && meta.template.type === "object") {
+    exportObjectTemplate(meta, cb, options);
+  } else if(meta.template && meta.template.type === "array") {
+    exportArrayTemplate(meta, cb, options);
+  } else if(util.isPrimitive(meta.src.value)) {
+    cb(JSON.stringify(meta.src.value));
+  } else if(Array.isArray(meta.src.value)) {
+    exportArray(meta, cb);
+  } else if(meta.children) {
+    exportObject(meta, cb);
   }
 }
 
