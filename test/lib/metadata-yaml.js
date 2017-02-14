@@ -113,7 +113,9 @@ var tests = [{
   },
   {
     actual: { key: ">partial" },
-    expected: { partial: "partial" },
+    expected: { partial: {
+      name: "partial"
+    } },
     description: "a partial key without a key name",
     should: "should return correct metadata"
   },

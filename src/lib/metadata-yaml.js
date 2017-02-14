@@ -119,11 +119,17 @@ function applyObjectMeta(value, meta) {
     });
 }
 
-function applyPartialMeta(key, meta) {
+function applyPartialMeta(kvp, meta) {
   var keyPattern = /^.*>(.*)?$/;
-  var match = keyPattern.exec(key);
+  var match = keyPattern.exec(kvp.key);
   if (!match) return;
-  meta.partial = match[1] || meta.key;
+  meta.partial = {
+    name: match[1] || meta.key
+  };
+  
+  if (kvp.value) {
+    meta.partial.params = JSON.parse(JSON.stringify(kvp.value))
+  }
 }
 
 function getMetadata(kvp) {
@@ -135,7 +141,7 @@ function getMetadata(kvp) {
   applyKeyName(kvp.key, meta);
   applyTemplateMeta(kvp.key, meta);
   applyObjectMeta(kvp.value, meta);
-  applyPartialMeta(kvp.key, meta);
+  applyPartialMeta(kvp, meta);
   
   return meta;
 }

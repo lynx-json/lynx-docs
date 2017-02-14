@@ -943,7 +943,7 @@ describe("when authoring partials", function () {
 
   describe("when using an @ template on the key", function () {
     var params = {
-      key: "stuff@",
+      key: "stuff@>whatever",
       value: [1, 2, 3]
     };
 

@@ -224,7 +224,7 @@ function replaceExplicitPlaceholders(partialKVP, paramsKVP) {
   if(param.key !== metaFromPlaceholder.key) {
     newKey = metaFromPlaceholder.key;
     if(param.template) newKey += param.template.section;
-    if(param.partial) newKey += ">" + param.partial;
+    if(param.partial) newKey += ">" + param.partial.name;
   }
 
   return {
@@ -355,7 +355,10 @@ function normalizeToObjectAndAddCommonParameters(kvp) {
     kvp.value[valueKey] = originalValue;
   }
 
-  kvp.value.partial = meta.partial;
+  if (!meta.partial) {
+    console.log("FFS", JSON.stringify(meta, null, 2));
+  }
+  kvp.value.partial = meta.partial.name;
   kvp.value.key = meta.key;
 
   return kvp;
