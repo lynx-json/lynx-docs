@@ -43,11 +43,11 @@ module.exports = exports = function (lynxDocs) {
 
     function isArray(meta) {
       var valueMeta = meta.children.value;
-      if (valueMeta.more) valueMeta = valueMeta.more();
-      
-      if (valueMeta.template && valueMeta.template.type === "array") return true;
-      if (valueMeta.templates && valueMeta.templates[0].template.type === "array") return true;
-      if (Array.isArray(valueMeta.src.value)) return true;
+      if(valueMeta.more) valueMeta = valueMeta.more();
+
+      if(valueMeta.template) return valueMeta.template.type === "array";
+      if(valueMeta.templates) return valueMeta.templates[0].template.type === "array";
+      if(Array.isArray(valueMeta.src.value)) return true;
       return false;
     }
 
@@ -62,22 +62,22 @@ module.exports = exports = function (lynxDocs) {
         return childSpec.name === childMeta.key;
       }
 
-      if (childMeta.more) childMeta = childMeta.more();
-      
+      if(childMeta.more) childMeta = childMeta.more();
+
       if(!isNode(childMeta)) return;
       if(node.spec.children.some(match)) return;
-      
+
       node.spec.children.push({ name: childMeta.key });
     }
-    
+
     var valueMeta = meta.children.value;
-    if (valueMeta.more) valueMeta = valueMeta.more();
-    
-    if (valueMeta.children) {
+    if(valueMeta.more) valueMeta = valueMeta.more();
+
+    if(valueMeta.children) {
       Object.getOwnPropertyNames(valueMeta.children).forEach(childKey => {
         addChildNode(valueMeta.children[childKey]);
       });
-    } else if (valueMeta.templates) {
+    } else if(valueMeta.templates) {
       addChildNode(valueMeta.templates[0]);
     }
   });

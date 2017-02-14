@@ -134,7 +134,7 @@ function* replaceWildcardPlaceholders(partialKVP, paramsKVP, knownParameters) {
   }
 
   for(let p in paramsKVP.value) {
-    if(p === "partial" || p === "key" || p === "template") continue;
+    if(p === "partial" || p === "key") continue;
     let param = getMetadata({ key: p, value: paramsKVP.value[p] });
     param = Object.assign({}, param, parseParamName(param.src.key));
 
@@ -161,7 +161,7 @@ function getMetaKeyWithoutPlaceholder(paramName) {
 }
 
 // Conditional placeholders are in the form 'key~param?condition'. The partial
-// provides a value that should only be used in the case where a param with a 
+// provides a value that should only be used in the case where a param with a
 // name matching the condition was provided.
 function applyConditionalPlaceholders(partialKVP, paramsKVP) {
   var pattern = conditionalPlaceholderPattern();
@@ -347,6 +347,7 @@ function normalizeToObjectAndAddCommonParameters(kvp) {
     if(meta.template && valueTemplates.indexOf(meta.template.symbol) > -1) {
       let boundVariable = meta.template.variable.replace(/>.*/, "") || meta.key;
       valueKey += meta.template.symbol + boundVariable;
+      kvp.key = meta.key;
     }
 
     let originalValue = kvp.value;
@@ -356,13 +357,12 @@ function normalizeToObjectAndAddCommonParameters(kvp) {
 
   kvp.value.partial = meta.partial;
   kvp.value.key = meta.key;
-  kvp.value.template = meta.template;
 
   return kvp;
 }
 
 function getPartial(kvp, options) {
-  // kvp = Object.assign({}, kvp);
+  kvp = Object.assign({}, kvp);
   options = options || {};
   kvp = normalizeToObjectAndAddCommonParameters(kvp);
 

@@ -9,7 +9,7 @@ function isNode(meta) {
 }
 
 function isDynamic(meta) {
-  return meta.template !== undefined;
+  return meta.templates !== undefined || meta.template !== undefined;
 }
 
 function isNotNullOrEmpty(meta) {
@@ -19,14 +19,15 @@ function isNotNullOrEmpty(meta) {
 
 function nodeHasProperty(kvp, meta, property, ensureNotNullOrEmpty) {
   if(!isNode(meta)) return false;
-  
+
   var valueMeta = meta.children.value;
-  if (valueMeta.more) valueMeta = valueMeta.more();
-  if (valueMeta.templates) return false;
-  if (!valueMeta.children || property in valueMeta.children === false) return false;
-  if (!ensureNotNullOrEmpty) return true;
-  
-  var propertyMeta = valueMeta.children[property].more();
+  if(valueMeta.more) valueMeta = valueMeta.more();
+  if(valueMeta.templates) return false;
+  if(!valueMeta.children || property in valueMeta.children === false) return false;
+  if(!ensureNotNullOrEmpty) return true;
+
+  var propertyMeta = valueMeta.children[property];
+  if(propertyMeta.more) propertyMeta = propertyMeta.more();
   return isDynamic(propertyMeta) || isNotNullOrEmpty(propertyMeta);
 }
 
@@ -53,10 +54,10 @@ function isLiteralTemplate(meta) {
 }
 
 function getValueMeta(meta) {
-  if (meta.children.value.templates) {
+  if(meta.children.value.templates) {
     return meta.children.value.templates[0];
   }
-  
+
   return meta.children.value.more();
 }
 
@@ -75,7 +76,7 @@ function addHint(kvp, hint) {
 function text(kvp, options) {
   var meta = getMetadata(kvp);
   if(!isNode(meta)) return;
-  
+
   var valueMeta = getValueMeta(meta);
 
   if(isLiteralTemplate(valueMeta)) {
