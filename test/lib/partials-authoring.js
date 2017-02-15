@@ -59,40 +59,6 @@ var tests = [
   should: "should return a text value in place of the placeholder"
 }, {
   kvp: {
-    key: "name>em",
-    value: null
-  },
-  partial: {
-    value: {
-      "key~": null
-    }
-  },
-  expected: {
-    value: {
-      key: "name"
-    }
-  },
-  description: "a partial with the placeholder key~ referenced with a key",
-  should: "should replace the placeholder with the partial reference's key"
-}, {
-  kvp: {
-    key: "name#>em",
-    value: null
-  },
-  partial: {
-    value: {
-      "key~": null
-    }
-  },
-  expected: {
-    value: {
-      key: "name"
-    }
-  },
-  description: "a partial with the placeholder key~ referenced with a key and template",
-  should: "should replace the placeholder with the partial reference's key, but not its template"
-}, {
-  kvp: {
     key: ">em",
     value: ["One", "Two", "Three"]
   },
@@ -108,6 +74,57 @@ var tests = [
   },
   description: "a partial with the placeholder value~",
   should: "should return an array value in place of the placeholder"
+}, {
+  kvp: {
+    key: "things@>list",
+    value: ["One", "Two", "Three"]
+  },
+  partial: {
+    value: {
+      "value~": null
+    }
+  },
+  expected: {
+    value: {
+      "value@things": ["One", "Two", "Three"]
+    }
+  },
+  description: "a partial with the placeholder value~ and an array template @",
+  should: "include the template in the value key"
+}, {
+  kvp: {
+    key: "message<>greeting",
+    value: null
+  },
+  partial: {
+    value: {
+      "value~": null
+    }
+  },
+  expected: {
+    value: {
+      "value<message": null
+    }
+  },
+  description: "a partial with the placeholder value~ and a quoted literal template <",
+  should: "include the template in the value key"
+}, {
+  kvp: {
+    key: "message=>greeting",
+    value: null
+  },
+  partial: {
+    value: {
+      "value~": null
+    }
+  },
+  expected: {
+    value: {
+      "value=message": null
+    }
+  },
+  description: "a partial with the placeholder value~ and a literal template =",
+  should: "include the template in the value key"
 }, {
   kvp: {
     key: ">em",
@@ -297,23 +314,6 @@ var tests = [
     }
   },
   description: "a partial with multiple instances of an inline placeholder ~{{value}}",
-  should: "should replace all placeholders"
-}, {
-  kvp: {
-    key: "hello>greeting",
-    value: "World"
-  },
-  partial: {
-    value: {
-      "~{{key}}Greeting": "Hello, ~{{value}}! Hello, ~{{value}}!"
-    }
-  },
-  expected: {
-    value: {
-      helloGreeting: "Hello, World! Hello, World!"
-    }
-  },
-  description: "a partial with a key with an inline placeholder ~{{key}}",
   should: "should replace all placeholders"
 }, {
   kvp: {
@@ -938,35 +938,6 @@ describe("when authoring partials", function () {
     it("should include the inner partial, including parameters described by the outer partial", function () {
       var actual = partials.getPartial(kvp);
       actual.should.deep.equal(expected);
-    });
-  });
-
-  describe("when using an @ template on the key", function () {
-    var params = {
-      key: "stuff@>whatever",
-      value: [1, 2, 3]
-    };
-
-    var expectedParams = {
-      key: "stuff",
-      value: {
-        "value@stuff": [1, 2, 3]
-      }
-    };
-
-    beforeEach(function () {
-      var stub = sinon.stub(partials, "resolvePartial");
-
-      // If the expected params are passed, just return them.
-      stub.withArgs(sinon.match(expectedParams)).returns(expectedParams);
-    });
-    afterEach(function () {
-      if(partials.resolvePartial.restore) partials.resolvePartial.restore();
-    });
-
-    it("should move the @ template to the value parameter to avoid binding the array to the spec/value pair", function () {
-      var result = partials.getPartial(params);
-      result.should.deep.equal(expectedParams);
     });
   });
 });

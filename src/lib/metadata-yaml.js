@@ -128,7 +128,7 @@ function applyPartialMeta(kvp, meta) {
   };
   
   if (kvp.value) {
-    meta.partial.params = JSON.parse(JSON.stringify(kvp.value))
+    meta.partial.params = kvp.value;
   }
 }
 
