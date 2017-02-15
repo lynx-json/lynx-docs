@@ -11,7 +11,8 @@ var partialsTests = [
   require("./form"),
   require("./group"),
   require("./link"),
-  require("./list")
+  require("./list"),
+  require("./header")
 ];
 
 describe("partials", function () {
