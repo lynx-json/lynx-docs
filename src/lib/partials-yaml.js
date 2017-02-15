@@ -73,7 +73,7 @@ function resolvePartial(meta, options) {
 }
 
 function* getParams(meta) {
-  if (Array.isArray(meta.partial.params) || typeof meta.partial.params !== "object") {
+  if (Array.isArray(meta.partial.params) || typeof meta.partial.params !== "object" || meta.partial.params === null) {
     let valueKey = "value";
     let valueTemplates = ["<", "=", "@"];
     if(meta.template && valueTemplates.indexOf(meta.template.symbol) > -1) {
@@ -307,6 +307,7 @@ function applyParameters(partialResult, meta, explicitPlaceholders) {
   if(!partialResult) return partialResult;
 
   partialResult = replaceInlinePlaceholders(partialResult, meta);
+  
   partialResult = replaceExplicitPlaceholders(partialResult, meta);
 
   return partialResult;
@@ -349,7 +350,6 @@ function getPartial(kvp, options) {
   return result;
 }
 
-exports.getParam = getParam;
 exports.isPartial = isPartial;
 exports.getPartial = getPartial;
 exports.resolvePartial = resolvePartial;

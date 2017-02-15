@@ -120,15 +120,35 @@ function applyObjectMeta(value, meta) {
 }
 
 function applyPartialMeta(kvp, meta) {
-  var keyPattern = /^.*>(.*)?$/;
-  var match = keyPattern.exec(kvp.key);
-  if (!match) return;
-  meta.partial = {
-    name: match[1] || meta.key
-  };
+  function getPartialName(key) {
+    var keyPattern = /^.*>(.*)?$/;
+    var match = keyPattern.exec(key);
+    
+    if (!match) return;
+    
+    return match[1] || meta.key;
+  }
   
-  if (kvp.value) {
-    meta.partial.params = kvp.value;
+  // If the object value has a single key that is just a partial, assign
+  // that partial to the container.
+  if (kvp.value && !util.isArray(kvp.value) && util.isObject(kvp.value)) {
+    var props = Object.getOwnPropertyNames(kvp.value);
+    
+    if (props.length === 1 && props[0].startsWith(">")) {
+      return meta.partial = {
+        name: getPartialName(props[0]),
+        params: kvp.value[props[0]]
+      };
+    }
+  }
+  
+  var partialName = getPartialName(kvp.key);
+  
+  if (partialName) {
+    meta.partial = {
+      name: partialName,
+      params: kvp.value
+    };
   }
 }
 

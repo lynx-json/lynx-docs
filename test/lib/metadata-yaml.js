@@ -112,11 +112,25 @@ var tests = [{
     should: "should return correct metadata"
   },
   {
-    actual: { key: ">partial" },
+    actual: { key: ">partial", value: null },
     expected: { partial: {
-      name: "partial"
+      name: "partial",
+      params: null
     } },
     description: "a partial key without a key name",
+    should: "should return correct metadata"
+  },
+  {
+    actual: { 
+      value: {
+        ">partial": true
+      } 
+    },
+    expected: function (actual) {
+      actual.partial.name.should.equal("partial");
+      actual.partial.params.should.equal(true);
+    },
+    description: "an object with a single property that is just a partial reference",
     should: "should return correct metadata"
   },
   {
