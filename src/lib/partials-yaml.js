@@ -76,6 +76,8 @@ function hasValueTemplate(meta) {
 }
 
 function* getParams(meta) {
+  if (isArrayOrPrimitive(meta.partial.params)) return;
+  
   for(let p in meta.partial.params) {
     yield getMetadata({
       key: p,
@@ -203,7 +205,7 @@ function replaceExplicitPlaceholders(partialResult, meta) {
   var placeholder = match[2] || match[1];
   
   if (placeholder === "value" && isArrayOrPrimitive(meta.partial.params)) {
-    let valueKey = "value";
+    let valueKey = metaFromPlaceholder.src.key;
     
     if (hasValueTemplate(meta)) {
       let boundVariable = meta.template.variable.replace(/>.*/, "") || meta.key;
