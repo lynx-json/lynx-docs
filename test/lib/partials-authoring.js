@@ -85,6 +85,7 @@ var tests = [
     }
   },
   expected: {
+    key: "things",
     value: {
       "value@things": ["One", "Two", "Three"]
     }
@@ -102,6 +103,7 @@ var tests = [
     }
   },
   expected: {
+    key: "message",
     value: {
       "value<message": null
     }
@@ -119,6 +121,7 @@ var tests = [
     }
   },
   expected: {
+    key: "message",
     value: {
       "value=message": null
     }
@@ -433,25 +436,6 @@ var tests = [
   should: "should add all unknown parameters in place of the wildcard"
 }, {
   kvp: {
-    key: ">list",
-    value: [1, 2, 3]
-  },
-  partial: {
-    value: {
-      "spec.hints": ["list"],
-      "~*": null
-    }
-  },
-  expected: {
-    value: {
-      "spec.hints": ["list"],
-      value: [1, 2, 3]
-    }
-  },
-  description: "a partial with a wildcard parameter ~*",
-  should: "should add an explicit value in place of the wildcard"
-}, {
-  kvp: {
     key: ">section",
     value: {
       "spec.visibility": "visible",
@@ -528,6 +512,7 @@ var tests = [
     }
   },
   expected: {
+    key: "input",
     value: {
       message: "Required Input"
     }
@@ -546,6 +531,7 @@ var tests = [
     }
   },
   expected: {
+    key: "input",
     value: {
       message: "Text Input"
     }
@@ -566,6 +552,7 @@ var tests = [
     }
   },
   expected: {
+    key: "input",
     value: {
       message: "Required Input",
       requiredMessage: "The value is required."
@@ -587,6 +574,7 @@ var tests = [
     }
   },
   expected: {
+    key: "input",
     value: {
       message: "Required Input",
       required: "The value is required."
@@ -609,6 +597,7 @@ var tests = [
     }
   },
   expected: {
+    key: "input",
     value: {
       message: "Text Input",
       textInvalidMessage: "Must have a maximum length of 1"
@@ -630,6 +619,7 @@ var tests = [
     }
   },
   expected: {
+    key: "input",
     value: {
       "label<": "string template",
       "input#": "object template",
@@ -660,6 +650,7 @@ var tests = [
     }
   },
   expected: {
+    key: "input",
     value: {
       "label": "replacement string",
       "input": "replacement object",
@@ -671,47 +662,6 @@ var tests = [
   description: "a partial with data-bound named placeholders",
   should: "should match params with the same names"
 }, {
-  //   kvp: {
-  //     key: "input>",
-  //     value: {
-  //       "label<": "replacement string",
-  //       "input#": "replacement object",
-  //       "items@": "replacement array",
-  //       "literal=": "replacement literal",
-  //       "other>": "replacement partial"
-  //     }
-  //   },
-  //   partial: {
-  //     value: {
-  //       "label~": "string template",
-  //       "input~": "object template",
-  //       "items~": "array template",
-  //       "literal~": "literal template",
-  //       "other>": "nested partial",
-  //       "l~label": "string template",
-  //       "i~input": "object template",
-  //       "a~items": "array template",
-  //       "t~literal": "literal template",
-  //       "o>other": "nested partial"
-  //     }
-  //   },
-  //   expected: {
-  //     value: {
-  //       "label<": "replacement string",
-  //       "input#": "replacement object",
-  //       "items@": "replacement array",
-  //       "literal=": "replacement literal",
-  //       "other>": "replacement partial",
-  //       "l<label": "replacement string",
-  //       "i#input": "replacement object",
-  //       "a@items": "replacement array",
-  //       "t=literal": "replacement literal",
-  //       "o>other": "replacement partial"
-  //     }
-  //   },
-  //   description: "a partial called with data-bound parameters",
-  //   should: "should include the data templates in the result"
-  // }, {
   kvp: {
     key: "input>",
     value: {
@@ -730,6 +680,7 @@ var tests = [
     }
   },
   expected: {
+    key: "input",
     value: {
       "label": "string template",
       "input": "object template",
@@ -753,6 +704,7 @@ var tests = [
     }
   },
   expected: {
+    key: "header",
     value: {
       spec: {
         hints: ["header"]
@@ -776,6 +728,7 @@ var tests = [
     }
   },
   expected: {
+    key: "price",
     value: {
       spec: {
         hints: ["money"]
@@ -799,6 +752,7 @@ var tests = [
     }
   },
   expected: {
+    key: "items",
     value: {
       spec: {
         hints: ["list"]
@@ -826,118 +780,6 @@ describe("when authoring partials", function () {
       it(test.should, function () {
         runTest(test);
       });
-    });
-  });
-
-  describe("when referencing another partial at the root", function () {
-    var kvp = {
-      key: ">outer",
-      value: {
-        "message": "Hello, World!"
-      }
-    };
-
-    var outerPartial = {
-      key: ">inner",
-      value: {
-        header: "Greetings",
-        "~*": null
-      }
-    };
-
-    var innerPartial = {
-      value: {
-        spec: {
-          hints: ["page", "section"]
-        },
-        value: {
-          "~*": null
-        }
-      }
-    };
-
-    var expected = {
-      value: {
-        spec: {
-          hints: ["page", "section"]
-        },
-        value: {
-          header: "Greetings",
-          message: "Hello, World!"
-        }
-      }
-    };
-
-    beforeEach(function () {
-      var stub = sinon.stub(partials, "resolvePartial");
-
-      stub.onFirstCall().returns(outerPartial);
-      stub.onSecondCall().returns(innerPartial);
-    });
-    afterEach(function () {
-      if(partials.resolvePartial.restore) partials.resolvePartial.restore();
-    });
-
-    it("should include the inner partial, including parameters described by the outer partial", function () {
-      var actual = partials.getPartial(kvp);
-      actual.should.deep.equal(expected);
-    });
-  });
-
-  describe("when referencing a root partial from a partial with a key", function () {
-    var kvp = {
-      key: "greeting>outer",
-      value: {
-        "message": "Hello, World!"
-      }
-    };
-
-    var outerPartial = {
-      key: "greeting",
-      value: {
-        ">inner": {
-          header: "Greetings",
-          "~*": null
-        }
-      }
-    };
-
-    var innerPartial = {
-      value: {
-        spec: {
-          hints: ["page", "section"]
-        },
-        value: {
-          "~*": null
-        }
-      }
-    };
-
-    var expected = {
-      value: {
-        spec: {
-          hints: ["page", "section"]
-        },
-        value: {
-          header: "Greetings",
-          message: "Hello, World!"
-        }
-      }
-    };
-
-    beforeEach(function () {
-      var stub = sinon.stub(partials, "resolvePartial");
-
-      stub.onFirstCall().returns(outerPartial);
-      stub.onSecondCall().returns(innerPartial);
-    });
-    afterEach(function () {
-      if(partials.resolvePartial.restore) partials.resolvePartial.restore();
-    });
-
-    it("should include the inner partial, including parameters described by the outer partial", function () {
-      var actual = partials.getPartial(kvp);
-      actual.should.deep.equal(expected);
     });
   });
 });

@@ -1,7 +1,6 @@
 header: "Templates ({{{templates.length}}})"
-templates>list:
-  value@templates:
-    - ">group":
+templates@>list:
+  - >group:
       path<:
       handlebars:
         label: View as Handlebars

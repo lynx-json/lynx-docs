@@ -46,7 +46,6 @@ function resolvePartial(meta, options) {
       delete require.cache[require.resolve(partialFile)];
       
       return {
-        key: options.key,
         value: require(partialFile)(meta.partial.params, options),
         location: partialFile
       };
@@ -60,7 +59,6 @@ function resolvePartial(meta, options) {
       let yaml = parseYaml(content);
 
       return {
-        key: options.key,
         value: yaml,
         location: partialFile
       };
@@ -72,26 +70,17 @@ function resolvePartial(meta, options) {
   }
 }
 
+function hasValueTemplate(meta) {
+  var valueTemplates = ["<", "=", "@"];
+  return meta.template && valueTemplates.indexOf(meta.template.symbol) > -1;
+}
+
 function* getParams(meta) {
-  if (Array.isArray(meta.partial.params) || typeof meta.partial.params !== "object" || meta.partial.params === null) {
-    let valueKey = "value";
-    let valueTemplates = ["<", "=", "@"];
-    if(meta.template && valueTemplates.indexOf(meta.template.symbol) > -1) {
-      let boundVariable = meta.template.variable.replace(/>.*/, "") || meta.key;
-      valueKey += meta.template.symbol + boundVariable;
-    }
-    
+  for(let p in meta.partial.params) {
     yield getMetadata({
-      key: valueKey,
-      value: meta.partial.params
+      key: p,
+      value: meta.partial.params[p]
     });
-  } else {
-    for(let p in meta.partial.params) {
-      yield getMetadata({
-        key: p,
-        value: meta.partial.params[p]
-      });
-    }
   }
 }
 
@@ -198,6 +187,10 @@ function applyConditionalPlaceholders(partialResult, meta) {
   return partialResult;
 }
 
+function isArrayOrPrimitive(value) {
+  return Array.isArray(value) || util.isPrimitive(value);
+}
+
 // Explicit placeholders (as opposed to wildcard placeholders)
 // are in the form 'key~param'.
 function replaceExplicitPlaceholders(partialResult, meta) {
@@ -207,23 +200,36 @@ function replaceExplicitPlaceholders(partialResult, meta) {
   if(!match) return partialResult;
 
   var metaFromPlaceholder = getMetaKeyWithoutPlaceholder(partialResult.key);
-  var param = getParam(meta, match[2] || match[1]);
+  var placeholder = match[2] || match[1];
+  
+  if (placeholder === "value" && isArrayOrPrimitive(meta.partial.params)) {
+    let valueKey = "value";
+    
+    if (hasValueTemplate(meta)) {
+      let boundVariable = meta.template.variable.replace(/>.*/, "") || meta.key;
+      valueKey += meta.template.symbol + boundVariable;
+      meta.src.key = meta.key;
+    }
+    
+    partialResult.key = valueKey;
+    partialResult.value = meta.partial.params;
+    
+    return partialResult;
+  }
+  
+  var param = getParam(meta, placeholder);
   var newKey = param ? param.src.key : metaFromPlaceholder.src.key;
 
   if(!param) {
     if(partialResult.value !== null && partialResult.value !== undefined) {
-      return {
-        key: newKey,
-        value: partialResult.value
-      };
+      partialResult.key = newKey;
+      return partialResult;
     }
 
     let newKeyMeta = getMetadata(newKey);
     if(newKeyMeta.template || newKeyMeta.partial) {
-      return {
-        key: newKey,
-        value: partialResult.value
-      };
+      partialResult.key = newKey;
+      return partialResult;
     }
 
     return;
@@ -237,10 +243,10 @@ function replaceExplicitPlaceholders(partialResult, meta) {
     if(param.partial) newKey += ">" + param.partial.name;
   }
 
-  return {
-    key: newKey,
-    value: param.src.value !== undefined ? param.src.value : null
-  };
+  partialResult.key = newKey;
+  partialResult.value = param.src.value !== undefined ? param.src.value : null;
+  
+  return partialResult;
 }
 
 function applyParametersToChildrenOfObject(partialResult, meta, explicitPlaceholders) {
@@ -281,6 +287,13 @@ function replaceInlinePlaceholders(partialResult, meta) {
       let pattern = new RegExp("~{{" + param.key + "(?:\|([^}]*))?}}", "g");
       text = text.replace(pattern, param.src.value);
     }
+    
+    if (isArrayOrPrimitive(meta.partial.params)) {
+      if (meta.partial.params !== null && meta.partial.params !== undefined) {
+        let pattern = new RegExp("~{{value(?:\|([^}]*))?}}", "g");
+        text = text.replace(pattern, meta.partial.params);
+      }
+    }
 
     text = text.replace(inlineParameterPattern, "$2");
 
@@ -317,8 +330,7 @@ function getPartialResult(kvp, options) {
   var meta = getMetadata(kvp);
   var partialResult = exports.resolvePartial(meta, options);
   if(!partialResult) return;
-
-  // Allow YAML partial to redefine the key.
+  
   // This is necessary in order to allow a partial to defer to another partial.
   let props = Object.getOwnPropertyNames(partialResult.value);
   if(props.length === 1 && !inlineParameterPattern.test(props[0])) {
@@ -329,7 +341,18 @@ function getPartialResult(kvp, options) {
     }
   }
 
-  return applyParameters(partialResult, meta);
+  partialResult = applyParameters(partialResult, meta);
+  
+  // Remove the partial reference from the src key.
+  var newKey = meta.src.key ? meta.src.key.replace(/>.*/, "") : undefined;
+  
+  if (newKey !== null && newKey !== "" && newKey !== undefined) {
+    partialResult.key = newKey;
+  } else {
+    delete partialResult.key;
+  }
+  
+  return partialResult;
 }
 
 function getPartial(kvp, options) {
@@ -346,7 +369,6 @@ function getPartial(kvp, options) {
     return result;
   }
 
-  if (result.key === null || result.key === "") delete result.key;
   return result;
 }
 
