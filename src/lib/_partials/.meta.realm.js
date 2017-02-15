@@ -15,7 +15,7 @@ module.exports = exports = (params, options) => {
     var childKVP = { key: p + ">.meta.realm." + p, value: params[p] };
     var partialKVP = partials.getPartial(childKVP, options);
     if(!partialKVP) raw[p] = { header: p, content: params[p] };
-    else partial[partialKVP.key] = partialKVP.value;
+    else partial[p] = partialKVP.value;
   }
 
   return Object.assign(partial, raw);
