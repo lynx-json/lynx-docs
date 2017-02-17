@@ -71,14 +71,14 @@ module.exports = exports = function (lynxDocs) {
     }
 
     var valueMeta = meta.children.value;
+
+    if(valueMeta.templates) valueMeta = valueMeta.templates[0];
     if(valueMeta.more) valueMeta = valueMeta.more();
 
     if(valueMeta.children) {
       Object.getOwnPropertyNames(valueMeta.children).forEach(childKey => {
         addChildNode(valueMeta.children[childKey]);
       });
-    } else if(valueMeta.templates) {
-      addChildNode(valueMeta.templates[0]);
     }
   });
 };
