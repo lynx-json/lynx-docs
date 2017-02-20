@@ -331,17 +331,8 @@ function applyParameters(partialResult, meta, explicitPlaceholders) {
 function getPartialResult(kvp, options) {
   var meta = getMetadata(kvp);
   var partialResult = exports.resolvePartial(meta, options);
+  console.log("RESOLVED PARTIAL", JSON.stringify(partialResult, null, 2));
   if(!partialResult) return;
-  
-  // This is necessary in order to allow a partial to defer to another partial.
-  let props = Object.getOwnPropertyNames(partialResult.value);
-  if(props.length === 1 && !inlineParameterPattern.test(props[0])) {
-    let key = props[0].replace(/~.*$/, "");
-    if(getMetadata(key).key === undefined) {
-      partialResult.key = partialResult.key ? partialResult.key + props[0] : props[0];
-      partialResult.value = partialResult.value[props[0]];
-    }
-  }
 
   partialResult = applyParameters(partialResult, meta);
   

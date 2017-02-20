@@ -782,4 +782,60 @@ describe("when authoring partials", function () {
       });
     });
   });
+  
+  describe("when referencing another partial at the root", function () {
+    var kvp = {
+      key: ">outer",
+      value: {
+        "message": "Hello, World!"
+      }
+    };
+
+    var outerPartial = {
+      value: {
+        ">inner": {
+          header: "Greetings",
+          "~*": null
+        }
+      }
+    };
+
+    var innerPartial = {
+      value: {
+        spec: {
+          hints: ["page", "section"]
+        },
+        value: {
+          "~*": null
+        }
+      }
+    };
+
+    var expected = {
+      value: {
+        spec: {
+          hints: ["page", "section"]
+        },
+        value: {
+          header: "Greetings",
+          message: "Hello, World!"
+        }
+      }
+    };
+
+    beforeEach(function () {
+      var stub = sinon.stub(partials, "resolvePartial");
+
+      stub.onFirstCall().returns(outerPartial);
+      stub.onSecondCall().returns(innerPartial);
+    });
+    afterEach(function () {
+      if(partials.resolvePartial.restore) partials.resolvePartial.restore();
+    });
+
+    it("should include the inner partial, including parameters described by the outer partial", function () {
+      var actual = partials.getPartial(kvp);
+      actual.should.deep.equal(expected);
+    });
+  });
 });
