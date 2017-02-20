@@ -44,7 +44,7 @@ function resolvePartial(meta, options) {
       //Since we're using require, the js is cached, so a change
       //will not be loaded unless we clear require cache.
       delete require.cache[require.resolve(partialFile)];
-      
+
       return {
         value: require(partialFile)(meta.partial.params, options),
         location: partialFile
@@ -76,8 +76,8 @@ function hasValueTemplate(meta) {
 }
 
 function* getParams(meta) {
-  if (isArrayOrPrimitive(meta.partial.params)) return;
-  
+  if(isArrayOrPrimitive(meta.partial.params)) return;
+
   for(let p in meta.partial.params) {
     yield getMetadata({
       key: p,
@@ -203,22 +203,22 @@ function replaceExplicitPlaceholders(partialResult, meta) {
 
   var metaFromPlaceholder = getMetaKeyWithoutPlaceholder(partialResult.key);
   var placeholder = match[2] || match[1];
-  
-  if (placeholder === "value" && isArrayOrPrimitive(meta.partial.params)) {
+
+  if(placeholder === "value" && isArrayOrPrimitive(meta.partial.params)) {
     let valueKey = metaFromPlaceholder.src.key;
-    
-    if (hasValueTemplate(meta)) {
+
+    if(hasValueTemplate(meta)) {
       let boundVariable = meta.template.variable.replace(/>.*/, "") || meta.key;
       valueKey += meta.template.symbol + boundVariable;
       meta.src.key = meta.key;
     }
-    
+
     partialResult.key = valueKey;
     partialResult.value = meta.partial.params;
-    
+
     return partialResult;
   }
-  
+
   var param = getParam(meta, placeholder);
   var newKey = param ? param.src.key : metaFromPlaceholder.src.key;
 
@@ -247,7 +247,7 @@ function replaceExplicitPlaceholders(partialResult, meta) {
 
   partialResult.key = newKey;
   partialResult.value = param.src.value !== undefined ? param.src.value : null;
-  
+
   return partialResult;
 }
 
@@ -289,9 +289,9 @@ function replaceInlinePlaceholders(partialResult, meta) {
       let pattern = new RegExp("~{{" + param.key + "(?:\|([^}]*))?}}", "g");
       text = text.replace(pattern, param.src.value);
     }
-    
-    if (isArrayOrPrimitive(meta.partial.params)) {
-      if (meta.partial.params !== null && meta.partial.params !== undefined) {
+
+    if(isArrayOrPrimitive(meta.partial.params)) {
+      if(meta.partial.params !== null && meta.partial.params !== undefined) {
         let pattern = new RegExp("~{{value(?:\|([^}]*))?}}", "g");
         text = text.replace(pattern, meta.partial.params);
       }
@@ -322,7 +322,7 @@ function applyParameters(partialResult, meta, explicitPlaceholders) {
   if(!partialResult) return partialResult;
 
   partialResult = replaceInlinePlaceholders(partialResult, meta);
-  
+
   partialResult = replaceExplicitPlaceholders(partialResult, meta);
 
   return partialResult;
@@ -331,27 +331,27 @@ function applyParameters(partialResult, meta, explicitPlaceholders) {
 function getPartialResult(kvp, options) {
   var meta = getMetadata(kvp);
   var partialResult = exports.resolvePartial(meta, options);
-  console.log("RESOLVED PARTIAL", JSON.stringify(partialResult, null, 2));
+  if(options.log) console.log("RESOLVED PARTIAL", JSON.stringify(partialResult, null, 2));
   if(!partialResult) return;
 
   partialResult = applyParameters(partialResult, meta);
-  
+
   // Remove the partial reference from the src key.
   var newKey = meta.src.key ? meta.src.key.replace(/>.*/, "") : undefined;
-  
-  if (newKey !== null && newKey !== "" && newKey !== undefined) {
+
+  if(newKey !== null && newKey !== "" && newKey !== undefined) {
     partialResult.key = newKey;
   } else {
     delete partialResult.key;
   }
-  
+
   return partialResult;
 }
 
 function getPartial(kvp, options) {
   options = options || {};
   var result = getPartialResult(kvp, options);
-  
+
   if(!result) return;
 
   if(isPartial(result)) {
