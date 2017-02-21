@@ -1,3 +1,5 @@
->lynx:
-  spec.hints~: [ section ]
+spec~:
+  hints: [ section ]
+  ~spec.*:
+value~:
   ~*:

@@ -7,33 +7,46 @@ function isNode(meta) {
 }
 
 function isArrayNode(meta) {
-  var firstValueMeta = meta.children.value[0].more();
-  return !firstValueMeta.template && Array.isArray(firstValueMeta.src.value);
+  var firstValueMeta = meta.children.value;
+  if(firstValueMeta.more) firstValueMeta = firstValueMeta.more();
+  return !firstValueMeta.template &&
+    firstValueMeta.src &&
+    Array.isArray(firstValueMeta.src.value);
 }
 
 function isObjectNode(meta) {
-  var firstValueMeta = meta.children.value[0].more();
-  return !firstValueMeta.template && util.isObject(firstValueMeta.src.value);
+  var firstValueMeta = meta.children.value;
+  if(firstValueMeta.more) firstValueMeta = firstValueMeta.more();
+  return !firstValueMeta.template &&
+    firstValueMeta.src &&
+    util.isObject(firstValueMeta.src.value);
 }
 
 function isTextNode(meta) {
-  var firstValueMeta = meta.children.value[0].more();
-  return !firstValueMeta.template && util.isPrimitive(firstValueMeta.src.value);
+  var firstValueMeta = meta.children.value;
+  if(firstValueMeta.more) firstValueMeta = firstValueMeta.more();
+  return !firstValueMeta.template &&
+    firstValueMeta.src &&
+    util.isPrimitive(firstValueMeta.src.value);
+}
+
+function isTemplateNode(meta, type) {
+  var valueMeta = meta.children.value;
+  if(valueMeta.more) valueMeta = valueMeta.more();
+  return(valueMeta.template && valueMeta.template.type === type) ||
+    (valueMeta.templates && valueMeta.templates[0].template.type === type);
 }
 
 function isArrayValueTemplateNode(meta) {
-  var firstValueMeta = meta.children.value[0].more();
-  return firstValueMeta.template && firstValueMeta.template.type === "array";
+  return isTemplateNode(meta, "array");
 }
 
 function isObjectValueTemplateNode(meta) {
-  var firstValueMeta = meta.children.value[0].more();
-  return firstValueMeta.template && firstValueMeta.template.type === "object";
+  return isTemplateNode(meta, "object");
 }
 
 function isLiteralValueTemplateNode(meta) {
-  var firstValueMeta = meta.children.value[0].more();
-  return firstValueMeta.template && firstValueMeta.template.type === "literal";
+  return isTemplateNode(meta, "literal");
 }
 
 function getChildSpec(parentSpec, name) {
@@ -136,20 +149,23 @@ function flattenSpecForArrayValueTemplateNode(kvp, parentSpec) {
   var meta = getMetadata(kvp);
   var spec = kvp.value.spec;
 
-  if(meta.children.value.length !== 1) return kvp;
+  var valueMeta = meta.children.value;
+  if(valueMeta.more) valueMeta = valueMeta.more();
+  if(valueMeta.templates && valueMeta.templates.length !== 1) return kvp;
 
-  var valueMeta = meta.children.value[0].more();
-  if(valueMeta.src.value.length !== 1) throw new Error("Multiple item templates are not currently supported.");
+  var arrayItemTemplates = valueMeta.templates[0].src.value;
+  if(arrayItemTemplates.length !== 1) return kvp;
 
-  let childKvp = { value: valueMeta.src.value[0] };
-  childKvp = flattenSpecForKvp(childKvp, spec);
+  let ckvp = { value: arrayItemTemplates[0] };
 
-  if(childKvp.key) {
-    var newItemTemplate = {};
-    newItemTemplate[childKvp.key] = childKvp.value;
-    valueMeta.src.value[0] = newItemTemplate;
+  ckvp = flattenSpecForKvp(ckvp, spec);
+
+  if(ckvp.key) {
+    let newItemTemplate = {};
+    newItemTemplate[ckvp.key] = ckvp.value;
+    arrayItemTemplates[0] = newItemTemplate;
   } else {
-    valueMeta.src.value[0] = childKvp.value;
+    arrayItemTemplates[0] = ckvp.value;
   }
 
   spec.children = spec.children[0];
@@ -158,10 +174,8 @@ function flattenSpecForArrayValueTemplateNode(kvp, parentSpec) {
 }
 
 function flattenSpecForObjectValueTemplateNode(kvp, parentSpec) {
-  var meta = getMetadata(kvp);
-  var spec = kvp.value.spec;
-
   function flattenSpecForChildren(valueMeta) {
+    if(valueMeta.more) valueMeta = valueMeta.more();
     var templateValue = valueMeta.src.value;
     var newTemplateValue = {};
 
@@ -174,30 +188,42 @@ function flattenSpecForObjectValueTemplateNode(kvp, parentSpec) {
     kvp.value[valueMeta.src.key] = newTemplateValue;
   }
 
-  if(meta.children.value.length === 1) {
-    flattenSpecForChildren(meta.children.value[0].more());
+  var meta = getMetadata(kvp);
+  var spec = kvp.value.spec;
+
+  var valueMeta = meta.children.value;
+  if(valueMeta.more) valueMeta = valueMeta.more();
+
+  if(valueMeta.templates.length === 1) {
+    flattenSpecForChildren(valueMeta.templates[0]);
     return flattenSpecForSingleValueTemplateNode(kvp, parentSpec);
   } else {
-    meta.children.value.map(m => m.more()).forEach(flattenSpecForChildren);
+    valueMeta.templates.forEach(flattenSpecForChildren);
   }
 
   return kvp;
 }
 
 function flattenSpecForLiteralValueTemplateNode(kvp, parentSpec) {
-  // delete kvp.value.spec.children;
   var meta = getMetadata(kvp);
-  if(meta.children.value.length !== 1) return kvp;
+
+  var valueMeta = meta.children.value;
+  if(valueMeta.more) valueMeta = valueMeta.more();
+  if(valueMeta.templates && valueMeta.templates.length !== 1) return kvp;
+
   return flattenSpecForSingleValueTemplateNode(kvp, parentSpec);
 }
 
 function flattenSpecForSingleValueTemplateNode(kvp, parentSpec) {
   var meta = getMetadata(kvp);
-  var spec = kvp.value.spec;
-  var valueMeta = meta.children.value[0].more();
 
-  var newKvp = { key: null, value: valueMeta.src.value };
-  var template = valueMeta.template;
+  var valueMeta = meta.children.value;
+  if(valueMeta.more) valueMeta = valueMeta.more();
+  if(valueMeta.templates && valueMeta.templates.length !== 1) return kvp;
+
+  var spec = kvp.value.spec;
+  var newKvp = { key: null, value: valueMeta.templates[0].src.value };
+  var template = valueMeta.templates[0].template;
 
   if(meta.key === template.variable) {
     newKvp.key = meta.key + template.symbol;
@@ -213,28 +239,37 @@ function flattenSpecForSingleValueTemplateNode(kvp, parentSpec) {
 }
 
 function flattenSpecForKvp(kvp, parentSpec) {
-  if(!kvp) throw new Error("'kvp' param is required");
+  function log(msg, val) {
+    // console.log(msg, val);
+  }
 
+  function _return(param) {
+    log("out", util.inspect(param));
+    return param;
+  }
+
+  if(!kvp) throw new Error("'kvp' param is required");
+  log("in", util.inspect(kvp));
   var meta = getMetadata(kvp);
 
-  if(!isNode(meta)) return kvp;
-  if(meta.template) return kvp; // we cannot flatten dynamic nodes
-  if(meta.children.spec[0].template) return kvp; // we cannot flatten dynamic specs
+  if(!isNode(meta)) return _return(kvp);
+  if(meta.template) return _return(kvp);
+  if(meta.children.spec.template) return _return(kvp);
 
   if(meta.key !== undefined && meta.key !== null) {
-    var specMeta = meta.children.spec[0].more();
+    var specMeta = meta.children.spec.more();
     specMeta.src.value.name = meta.key;
   }
 
-  if(isArrayNode(meta)) return flattenSpecForArrayNode(kvp, parentSpec);
-  if(isObjectNode(meta)) return flattenSpecForObjectNode(kvp, parentSpec);
-  if(isTextNode(meta)) return flattenSpecForTextNode(kvp, parentSpec);
-  if(isArrayValueTemplateNode(meta)) return flattenSpecForArrayValueTemplateNode(kvp, parentSpec);
-  if(isObjectValueTemplateNode(meta)) return flattenSpecForObjectValueTemplateNode(kvp, parentSpec);
-  if(isLiteralValueTemplateNode(meta)) return flattenSpecForLiteralValueTemplateNode(kvp, parentSpec);
+  if(isArrayNode(meta)) return _return(flattenSpecForArrayNode(kvp, parentSpec));
+  if(isObjectNode(meta)) return _return(flattenSpecForObjectNode(kvp, parentSpec));
+  if(isTextNode(meta)) return _return(flattenSpecForTextNode(kvp, parentSpec));
+  if(isArrayValueTemplateNode(meta)) return _return(flattenSpecForArrayValueTemplateNode(kvp, parentSpec));
+  if(isObjectValueTemplateNode(meta)) return _return(flattenSpecForObjectValueTemplateNode(kvp, parentSpec));
+  if(isLiteralValueTemplateNode(meta)) return _return(flattenSpecForLiteralValueTemplateNode(kvp, parentSpec));
 
   delete meta.src;
-  var msg = "Unexpected type of KVP. Metadata for KVP is: " + JSON.stringify(meta);
+  var msg = "Unexpected type of KVP. Metadata for KVP is: " + util.inspect(meta);
   throw new Error(msg);
 }
 

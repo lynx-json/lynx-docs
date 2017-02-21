@@ -10,6 +10,12 @@ function runTest(test) {
 
 var tests = [{
     key: undefined,
+    value: null,
+    expected: 'null',
+    should: "a null value should export a JSON null literal"
+  },
+  {
+    key: undefined,
     value: "String",
     expected: '"String"',
     should: "a string value should export a JSON string"
@@ -25,6 +31,30 @@ var tests = [{
     value: 42,
     expected: "42",
     should: "a number value should export a JSON number"
+  },
+  {
+    key: undefined,
+    value: true,
+    expected: "true",
+    should: "a true value should export a JSON true literal"
+  },
+  {
+    key: "key",
+    value: true,
+    expected: '"key":true',
+    should: "a kvp with a true value should export a JSON true kvp"
+  },
+  {
+    key: undefined,
+    value: false,
+    expected: "false",
+    should: "a false value should export a JSON false literal"
+  },
+  {
+    key: "key",
+    value: false,
+    expected: '"key":false',
+    should: "a kvp with a false value should export a JSON false kvp"
   },
   {
     key: "key",

@@ -3,165 +3,138 @@
 const util = require("util");
 const getMetadata = require("../../metadata-yaml");
 
-var templateExporters = {
-  literal: exportLiteralTemplate,
-  object: exportObjectTemplate,
-  array: exportArrayTemplate
-};
+function exportObject(meta, cb, options) {
+  var propertyNames = Object.getOwnPropertyNames(meta.children);
+  var len = propertyNames.length;
 
-function resolveValue(kvmp) {
-  return kvmp.value !== undefined ? kvmp.value : kvmp.metas[0].src.value;
+  cb("{");
+  propertyNames.forEach((ckey, idx) => {
+    let cmeta = meta.children[ckey];
+    if(cmeta.more) cmeta = cmeta.more();
+    exportHandlebars(cmeta, cb);
+    if(idx + 1 !== len) cb(",");
+  });
+  cb(" }");
 }
 
-function getKVP(yaml) {
-  if(!util.isObject(yaml)) return { key: undefined, value: yaml };
+function exportArray(meta, cb) {
+  var kvp = meta.src;
+  var len = kvp.value.length;
 
-  var props = Object.getOwnPropertyNames(yaml);
-
-  if(props.length === 1 && getMetadata(props[0]).key === undefined) {
-    return {
-      key: props[0],
-      value: yaml[props[0]]
-    };
-  }
-
-  return { key: undefined, value: yaml };
+  cb("[");
+  kvp.value.forEach((val, idx) => {
+    let ckvp = { value: val };
+    exportHandlebars(getMetadata(ckvp), cb);
+    if(idx + 1 !== len) cb(",");
+  });
+  cb("]");
 }
 
-function exportLiteralTemplate(kvmp, cb) {
-  function exportTemplate(meta, defaultValue) {
-    cb("{{#if " + meta.template.variable + "}}");
-    if(meta.template.quoted) cb('"');
-    cb("{{" + meta.template.variable + "}}");
-    if(meta.template.quoted) cb('"');
-    if(defaultValue !== undefined) {
-      cb("{{else}}");
-      cb(JSON.stringify(defaultValue));
-    }
-    cb("{{/if}}");
+function exportLiteralTemplate(meta, cb, options) {
+  cb("{{#if " + meta.template.variable + "}}");
+
+  if(meta.template.quoted) cb('"');
+  cb("{{" + meta.template.variable + "}}");
+  if(meta.template.quoted) cb('"');
+
+  if(!options.noDefault) {
+    var defaultValue = meta.src.value;
+    cb("{{else}}");
+    cb(JSON.stringify(defaultValue));
   }
 
-  if(kvmp.metas.length === 1) {
-    var defaultValue = resolveValue(kvmp);
-    exportTemplate(kvmp.metas[0], defaultValue);
-  } else {
-    kvmp.metas.forEach(meta => exportTemplate(meta));
-  }
+  cb("{{/if}}");
 }
 
-function exportObjectTemplate(kvmp, cb) {
-  function exportBlock(section, variable, contentFn) {
-    cb("{{" + section + "}}");
-    contentFn();
-    cb("{{/" + variable + "}}");
-  }
-  
-  function exportTemplate(meta, fallback) {
-    exportBlock(meta.template.section, meta.template.variable, function () {
-      exportObject({ key: kvmp.key, metas: [meta] }, cb);
-    });
-    
-    if (fallback) {
-      var inverseSymbol = meta.template.symbol === "#" ? "^" : "#";
-      var inverseSection = meta.template.section.replace(meta.template.symbol, inverseSymbol);
-      exportBlock(inverseSection, meta.template.variable, function () { 
-        if (meta.key === "value") {
-          cb("null");
-        } else {
-          cb('{"spec":{"hints":["container"]},"value":null}');  
-        }
-      });
-    }
-  }
+function getInverseObjectTemplate(template) {
+  var inverseSymbol = template.symbol === "#" ? "^" : "#";
+  var inverseSection = template.section.replace(template.symbol, inverseSymbol);
+  return {
+    type: "object",
+    symbol: inverseSymbol,
+    section: inverseSection,
+    variable: template.variable
+  };
+}
 
-  if(kvmp.metas.length === 1) {
-    var meta = kvmp.metas[0];
-    exportTemplate(meta, true);
-  } else {
-    kvmp.metas.forEach(meta => exportTemplate(meta));
+function exportObjectTemplate(meta, cb, options) {
+  cb("{{" + meta.template.section + "}}");
+  exportObject(meta, cb);
+  cb("{{/" + meta.template.variable + "}}");
+
+  if(!options.noDefault) {
+    var defaultValue = meta.key === "value" ? null : emptyVsp();
+    var inverse = getInverseObjectTemplate(meta.template);
+    cb("{{" + inverse.section + "}}");
+    cb(JSON.stringify(defaultValue));
+    cb("{{/" + inverse.variable + "}}");
   }
 }
 
-function exportArrayTemplate(kvmp, cb) {
-  var meta = kvmp.metas[0];
+function emptyVsp() {
+  return {
+    spec: {
+      hints: ["container"]
+    },
+    value: null
+  };
+}
+
+function exportArrayTemplate(meta, cb, options) {
   cb("[");
   cb("{{#each " + meta.template.variable + "}}");
-  meta.src.value.forEach(function (itemTemplate) {
-    var itemTemplateKVP = getKVP(itemTemplate);
-    exportHandlebars(itemTemplateKVP, cb);
+  meta.src.value.forEach(itemTemplate => {
+    let ckvp = { value: itemTemplate };
+    let cmeta = getMetadata(ckvp);
+    exportHandlebars(cmeta, cb);
   });
   cb("{{#unless @last}},{{/unless}}");
   cb("{{/each}}");
   cb("]");
 }
 
-function exportTemplate(kvmp, cb) {
-  var type = kvmp.metas[0].template.type;
-  templateExporters[type](kvmp, cb);
-}
+function exportHandlebars(meta, cb, options) {
+  options = options || {};
 
-function expandMetadata(meta) {
-  return meta.more();
-}
-
-function exportObject(kvmp, cb) {
-  var meta = kvmp.metas[0];
-
-  cb("{");
-
-  var count = 0;
-  for(let childKey in meta.children) {
-    count++;
-    let metas = meta.children[childKey].map(expandMetadata);
-    let childKvmp = { key: childKey, metas: metas };
-    exportHandlebars(childKvmp, cb);
-    if(count !== meta.countOfChildren) cb(",");
+  if(meta.key && !options.noKey) {
+    cb(JSON.stringify(meta.key) + ":");
   }
 
-  cb(" }");
-}
+  if(meta.templates) {
+    let len = meta.templates.length;
 
-function exportArray(kvmp, cb) {
-  var meta = kvmp.metas[0];
+    meta.templates.forEach((cmeta, idx) => {
+      let coptions = {};
 
-  cb("[");
+      if(len > 1) {
+        coptions.noDefault = true;
+      }
 
-  var length = meta.src.value.length;
-  meta.src.value.forEach((child, index) => {
-    let childKvmp = getKVP(child);
-    exportHandlebars(childKvmp, cb);
-    if(index + 1 !== length) cb(",");
-  });
+      if(idx > 0) {
+        coptions.noKey = true;
+      }
 
-  cb("]");
-}
-
-function exportHandlebars(kvmp, cb) {
-  if(!kvmp.metas) {
-    var meta = getMetadata(kvmp);
-    kvmp.metas = [meta];
-  }
-
-  if(kvmp.metas[0].key) {
-    cb(JSON.stringify(kvmp.metas[0].key) + ":");
-  }
-
-  var value = resolveValue(kvmp);
-
-  if(kvmp.metas[0].template) {
-    exportTemplate(kvmp, cb);
-  } else if(util.isObject(value) && !util.isArray(value)) {
-    exportObject(kvmp, cb);
-  } else if(util.isArray(value)) {
-    exportArray(kvmp, cb);
-  } else {
-    cb(JSON.stringify(value));
+      exportHandlebars(cmeta, cb, coptions);
+    });
+  } else if(meta.template && meta.template.type === "literal") {
+    exportLiteralTemplate(meta, cb, options);
+  } else if(meta.template && meta.template.type === "object") {
+    exportObjectTemplate(meta, cb, options);
+  } else if(meta.template && meta.template.type === "array") {
+    exportArrayTemplate(meta, cb, options);
+  } else if(util.isPrimitive(meta.src.value)) {
+    cb(JSON.stringify(meta.src.value));
+  } else if(Array.isArray(meta.src.value)) {
+    exportArray(meta, cb);
+  } else if(meta.children) {
+    exportObject(meta, cb);
   }
 }
 
 function kvpToHandlebars(kvp) {
   var buffer = "";
-  exportHandlebars(kvp, data => buffer += data);
+  var meta = getMetadata(kvp);
+  exportHandlebars(meta, data => buffer += data);
   return buffer;
 }
 

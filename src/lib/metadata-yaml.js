@@ -60,34 +60,96 @@ function applyTemplateMeta(key, meta) {
 }
 
 function applyObjectMeta(value, meta) {
+  function isTemplateContainer() {
+    if (!value) return false;
+    if (typeof value !== "object" || Array.isArray(value)) return false;
+    var props = Object.getOwnPropertyNames(value);
+    return props.length > 0 &&
+      props.every(key => {
+        var meta = getMetadata(key);
+        return !meta.key && !!meta.template;
+      });
+  }
+
+  function getTemplates() {
+    return Object.getOwnPropertyNames(value).map(key => {
+      var kvp = { key: key, value: value[key] };
+      var meta = getMetadata(kvp);
+      return meta;
+    });
+  }
+  
   if (!util.isObject(value) || util.isArray(value)) return;
+  
+  if (isTemplateContainer()) {
+    meta.templates = getTemplates();
+    return;
+  }
   
   meta.children = {};
   meta.countOfChildren = 0;
   
-  Object.getOwnPropertyNames(value).forEach(function (childKey) {
-    if (!childKey) return; //TODO: Figure out why we're getting an empty key and blowing up.
-    
-    var childMeta = getMetadata(childKey);
-    
-    if (!meta.children[childMeta.key]) {
-      meta.children[childMeta.key] = [];
-      meta.countOfChildren++;
-    }
-    
-    childMeta.more = function () {
-      return getMetadata({ key: childKey, value: value[childKey] });
-    };
-    
-    meta.children[childMeta.key].push(childMeta);
-  });
+  Object.getOwnPropertyNames(value)
+    .filter(childKey => !!childKey)
+    .map(childKey => {
+      let childMeta = getMetadata(childKey);
+      let childValue = value[childKey];
+      
+      childMeta.more = function () {
+        return getMetadata({ key: childKey, value: childValue });
+      };
+      
+      if (isTemplateContainer(childValue)) {
+        childMeta.templates = getTemplates(childValue);
+      }
+      
+      return childMeta;
+    })
+    .forEach(childMeta => {
+      if (childMeta.template) {
+        if (childMeta.key in meta.children === false) {
+          meta.children[childMeta.key] = { templates: [] };
+          meta.countOfChildren++;
+        }
+        meta.children[childMeta.key].templates.push(childMeta.more());
+      } else {
+        meta.children[childMeta.key] = childMeta;
+        meta.countOfChildren++;
+      }
+    });
 }
 
-function applyPartialMeta(key, meta) {
-  var keyPattern = /^.*>(.*)?$/;
-  var match = keyPattern.exec(key);
-  if (!match) return;
-  meta.partial = match[1] || meta.key;
+function applyPartialMeta(kvp, meta) {
+  function getPartialName(key) {
+    var keyPattern = /^.*>(.*)?$/;
+    var match = keyPattern.exec(key);
+    
+    if (!match) return;
+    
+    return match[1] || meta.key;
+  }
+  
+  // If the object value has a single key that is just a partial, assign
+  // that partial to the container.
+  if (kvp.value && !util.isArray(kvp.value) && util.isObject(kvp.value)) {
+    var props = Object.getOwnPropertyNames(kvp.value);
+    
+    if (props.length === 1 && props[0].startsWith(">")) {
+      return meta.partial = {
+        name: getPartialName(props[0]),
+        params: kvp.value[props[0]]
+      };
+    }
+  }
+  
+  var partialName = getPartialName(kvp.key);
+  
+  if (partialName) {
+    meta.partial = {
+      name: partialName,
+      params: kvp.value
+    };
+  }
 }
 
 function getMetadata(kvp) {
@@ -99,7 +161,7 @@ function getMetadata(kvp) {
   applyKeyName(kvp.key, meta);
   applyTemplateMeta(kvp.key, meta);
   applyObjectMeta(kvp.value, meta);
-  applyPartialMeta(kvp.key, meta);
+  applyPartialMeta(kvp, meta);
   
   return meta;
 }

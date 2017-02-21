@@ -59,15 +59,6 @@ var tests = [{
     should: "should expand correctly"
   }, {
     kvp: {
-      value: true
-    },
-    expected: {
-      value: vsp(true)
-    },
-    description: "an expanded boolean value",
-    should: "should expand correctly"
-  }, {
-    kvp: {
       value: {
         greeting: "Hi"
       }
@@ -154,34 +145,6 @@ var tests = [{
     },
     description: "an expanded object template value without a variable",
     should: "should expand correctly"
-  }, {
-    kvp: {
-      value: {
-        "key#": {
-          message: "Yes"
-        },
-        "key^": {
-          message: "No"
-        }
-      }
-    },
-    expected: {
-      value: {
-        spec: {
-          hints: []
-        },
-        value: {
-          "key#": vsp({ 
-            message: vsp("Yes") 
-          }),
-          "key^": vsp({ 
-            message: vsp("No") 
-          }),
-        }
-      }
-    },
-    description: "TBD",
-    should: "should expand correctly"
   },
   {
     kvp: {
@@ -198,7 +161,8 @@ var tests = [{
       }
     },
     description: "an expanded simple template value without a variable",
-    should: "should expand correctly"
+    should: "should expand correctly",
+    only: false
   }, {
     kvp: {
       value: {
@@ -304,6 +268,106 @@ var tests = [{
     },
     description: "an expanded simple template kvp",
     should: "should expand correctly"
+  },
+  {
+    kvp: {
+      value: {
+        "key#": {
+          message: "Yes"
+        },
+        "key^": {
+          message: "No"
+        }
+      }
+    },
+    expected: {
+      value: vsp({
+        "key#": vsp({
+          message: vsp("Yes")
+        }),
+        "key^": vsp({
+          message: vsp("No")
+        }),
+      })
+    },
+    description: "a key with two templates",
+    should: "should not move template to 'value' key"
+  },
+  {
+    kvp: {
+      key: "foo",
+      value: {
+        "#flag": {
+          message: "Yes"
+        },
+        "^flag": {
+          message: "No"
+        }
+      }
+    },
+    expected: {
+      key: "foo",
+      value: {
+        "#flag": vsp({
+          message: vsp("Yes")
+        }),
+        "^flag": vsp({
+          message: vsp("No")
+        })
+      }
+    },
+    description: "a key with a template container",
+    should: "should not move template to 'value' key"
+  },
+  {
+    kvp: {
+      key: "array@",
+      value: [{
+        "#flag": {
+          message: "Yes"
+        },
+        "^flag": {
+          message: "No"
+        }
+      }]
+    },
+    expected: {
+      key: "array",
+      value: vsp([{
+        "#flag": vsp({
+          message: vsp("Yes")
+        }),
+        "^flag": vsp({
+          message: vsp("No")
+        })
+      }], { valueKey: "value@array" })
+    },
+    description: "an expanded array template containing template container",
+    should: "should expand correctly"
+  },
+  {
+    kvp: {
+      value: {
+        "#flag": {
+          message: "Yes"
+        },
+        "^flag": {
+          message: "No"
+        }
+      }
+    },
+    expected: {
+      value: {
+        "#flag": vsp({
+          message: vsp("Yes")
+        }),
+        "^flag": vsp({
+          message: vsp("No")
+        })
+      }
+    },
+    description: "an expanded document containing a template container",
+    should: "should expand correctly"
   }
 ];
 
@@ -327,6 +391,7 @@ var reserveKeywords = [
 ];
 
 describe("when expanding YAML", function () {
+
   tests.forEach(function (test) {
     describe(test.description, function () {
       it(test.should, function () {
@@ -334,6 +399,7 @@ describe("when expanding YAML", function () {
       });
     });
   });
+
   reserveKeywords.forEach(function (keyword) {
     var test = {
       kvp: null,
