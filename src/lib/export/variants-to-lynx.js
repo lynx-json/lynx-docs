@@ -8,6 +8,14 @@ const templateData = require("./template-data");
 const handlebars = require("handlebars");
 const jsonLint = require("json-lint");
 
+handlebars.Utils.escapeExpression = function (val) {
+  if(val === null || val === undefined) return "";
+  if(typeof val !== "string") return val;
+
+  var temp = JSON.stringify(val);
+  return temp.substr(1, temp.length - 2);
+};
+
 function exportLynxDocuments(realms, createFile, options) {
   realms.forEach(realm => realm.variants
     .filter(variant => variant.template) //only variants that have template and data
@@ -39,7 +47,7 @@ function transformVariantToLynx(variant, options, createFile) {
 }
 
 function bindData(content, data) {
-  var template = handlebars.compile(content, { noEscape: true });
+  var template = handlebars.compile(content);
   return template(data);
 }
 
