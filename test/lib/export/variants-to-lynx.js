@@ -9,7 +9,7 @@ const path = require("path");
 const parseYaml = require("../../../src/lib/parse-yaml");
 const variantsToLynx = require("../../../src/lib/export/variants-to-lynx").all;
 
-var kvp = { key: "key", value: "value" };
+var inputValue = "Hello world!";
 var tests = [{
     realms: [{
       root: "/src/",
@@ -20,7 +20,7 @@ var tests = [{
       }]
     }],
     options: {},
-    expected: [
+    files: [
       path.join("folder-one", "default.lnx")
     ],
     description: "when realm with one template variant",
@@ -41,7 +41,7 @@ var tests = [{
       ]
     }],
     options: {},
-    expected: [
+    files: [
       path.join("folder-one", "default.lnx"),
       path.join("folder-one", "default-invalid.lnx")
     ],
@@ -58,27 +58,64 @@ var tests = [{
       }]
     }],
     options: {},
-    expected: [],
+    files: [],
     description: "when realm with content variant",
     should: "should ignore content variant"
+  },
+  {
+    realms: [{
+      root: "/src/",
+      realm: "/src/folder-one/",
+      variants: [{
+        template: "/src/folder-one/default.lynx.yml",
+        name: "default"
+      }]
+    }],
+    options: {},
+    inputValue: 'Should be "escaped"',
+    expected: [
+      '{"spec":{"hints":[] },"value":"Should be \\"escaped\\"" }\n'
+    ],
+    description: "when string contains characters that should be escaped",
+    should: "should have content that contains escaped characters"
+  },
+  {
+    realms: [{
+      root: "/src/",
+      realm: "/src/folder-one/",
+      variants: [{
+        template: "/src/folder-one/default.lynx.yml",
+        name: "default"
+      }]
+    }],
+    options: {},
+    expected: [
+      '{"spec":{"hints":[] },"value":"Hello world!" }\n'
+    ],
+    description: "when string does not contain characters that should be escaped",
+    should: "should have content that does not contain escaped characters"
   }
 ];
 
-function runTest(test) {
+function runTest(test, stubs) {
   var count = 0;
 
   function onFile(path, content) {
-    path.should.equal(test.expected[count]);
+    if(test.files) path.should.equal(test.files[count]);
+    if(test.expected) content.should.equal(test.expected[count]);
+
     count++;
   }
 
+  if(test.inputValue) stubs.readFileSync.returns(parseYaml(test.inputValue));
+
   variantsToLynx(test.realms, onFile, test.options);
-  count.should.equal(test.expected.length);
 }
 
 describe("when exporting templates to lynx", function () {
+  var dependencies = {};
   beforeEach(function () {
-    sinon.stub(fs, "readFileSync").returns(parseYaml(kvp));
+    dependencies.readFileSync = sinon.stub(fs, "readFileSync").returns(parseYaml(inputValue));
   });
 
   afterEach(function () {
@@ -88,7 +125,7 @@ describe("when exporting templates to lynx", function () {
   tests.forEach(test => {
     describe(test.description, function () {
       it(test.should, function () {
-        runTest(test);
+        runTest(test, dependencies);
       });
     });
   });
