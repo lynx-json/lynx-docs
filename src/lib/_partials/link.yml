@@ -3,6 +3,5 @@ spec~:
   labeledBy?label: label
   ~spec.*:
 value~:
-  label>~?label:
   type~: application/lynx+json
   ~*:
