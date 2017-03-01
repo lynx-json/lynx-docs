@@ -12,17 +12,17 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/danmork/lynx-docs.git"
+    "url": "git+https://github.com/lynx-json/lynx-docs.git"
   },
   "keywords": [
     "Lynx+JSON"
   ],
-  "author": "Dan Mork",
+  "author": "Dan Mork, John Howes, Anson Goldade",
   "license": "UNLICENSED",
   "bugs": {
-    "url": "https://github.com/danmork/lynx-docs/issues"
+    "url": "https://github.com/lynx-json/lynx-docs/issues"
   },
-  "homepage": "https://github.com/danmork/lynx-docs#readme",
+  "homepage": "https://github.com/lynx-json/lynx-docs#readme",
   "dependencies": {
     "chokidar": "^1.6.1",
     "deep-diff": "^0.3.4",
