@@ -19,6 +19,7 @@ var excludes = [
   keyMatches(/^method$/),
   keyMatches(/^type$/),
   keyMatches(/^enctype$/),
+  keyMatches(/^encoding$/),
   keyMatches(/^height$/),
   keyMatches(/^width$/),
   keyMatches(/^realm$/),

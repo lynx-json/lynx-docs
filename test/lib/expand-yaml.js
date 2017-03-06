@@ -379,6 +379,7 @@ var reserveKeywords = [
   "method",
   "type",
   "enctype",
+  "encoding",
   "height",
   "width",
   "realm",
