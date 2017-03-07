@@ -212,12 +212,31 @@ describe("when using additional finishing functions", function () {
     describe("for object templates", function () {
       var kvp = {
         key: "greeting#",
-        value: vsp({})
+        value: vsp({ "scope": "/relative/" })
       };
 
       it("should add a 'container' hint", function () {
         finishYaml.containers(kvp);
         kvp.value.spec.hints.should.contain("container");
+      });
+
+      it("should resolve scope value", function () {
+        finishYaml.containers(kvp, { realm: { realm: "http://example.com/" } });
+        kvp.value.value.scope.should.equal("http://example.com/relative/");
+      });
+    });
+
+    describe("for optimized object templates", function () {
+      var kvp = {
+        key: "greeting",
+        value: vsp({ "scope": "/relative/" })
+      };
+      kvp["value#greeting"] = kvp.value; //mimicing optimization code from expand-yaml.js
+      delete kvp.value;
+
+      it("should resolve scope value", function () {
+        finishYaml.containers(kvp, { realm: { realm: "http://example.com/" } });
+        kvp["value#greeting"].value.scope.should.equal("http://example.com/relative/");
       });
     });
 

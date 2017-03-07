@@ -74,7 +74,7 @@ var tests = [{
     options: {},
     inputValue: 'Should be "escaped"',
     expected: [
-      '{"spec":{"hints":[] },"value":"Should be \\"escaped\\"" }\n'
+      '{"spec":{"hints":["text"],"children":[] },"value":"Should be \\\"escaped\\\"","realm":"/src/folder-one/" }\n'
     ],
     description: "when string contains characters that should be escaped",
     should: "should have content that contains escaped characters"
@@ -90,7 +90,7 @@ var tests = [{
     }],
     options: {},
     expected: [
-      '{"spec":{"hints":[] },"value":"Hello world!" }\n'
+      '{"spec":{"hints":["text"],"children":[] },"value":"Hello world!","realm":"/src/folder-one/" }\n'
     ],
     description: "when string does not contain characters that should be escaped",
     should: "should have content that does not contain escaped characters"
