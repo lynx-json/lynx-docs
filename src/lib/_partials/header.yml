@@ -2,5 +2,5 @@ spec~:
   hints: [ header, container ]
   ~spec.*:
 value:
-  label~value:
+  label>~value:
   ~*:
