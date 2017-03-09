@@ -4,7 +4,7 @@ var should = require("chai").should();
 var kvpToHandlebars = require("../../../../src/lib/export/to-handlebars/kvp");
 
 function runTest(test) {
-  var actual = kvpToHandlebars({ key: test.key, value: test.value });
+  var actual = kvpToHandlebars({ key: test.key, value: test.value }, test.options || {});
   actual.should.equal(test.expected);
 }
 
@@ -143,7 +143,7 @@ var tests = [{
     value: {
       greeting: "Hi"
     },
-    expected: '"key":{{#with key}}{"greeting":"Hi" }{{/with}}{{#unless key}}{"spec":{"hints":["container"]},"value":null}{{/unless}}',
+    expected: '"key":{{#key}}{"greeting":"Hi" }{{/key}}{{^key}}{"spec":{"hints":["container"]},"value":null}{{/key}}',
     should: "a kvp with a single object template should export a kvp with an object value template and a null fallback value"
   },
   {
@@ -151,7 +151,7 @@ var tests = [{
     value: {
       "greeting<": "Hi"
     },
-    expected: '"key":{{#with key}}{"greeting":{{#if greeting}}"{{greeting}}"{{else}}"Hi"{{/if}} }{{/with}}{{#unless key}}{"spec":{"hints":["container"]},"value":null}{{/unless}}',
+    expected: '"key":{{#key}}{"greeting":{{#if greeting}}"{{greeting}}"{{else}}"Hi"{{/if}} }{{/key}}{{^key}}{"spec":{"hints":["container"]},"value":null}{{/key}}',
     should: "a kvp with a single object template with a single value template should export correctly"
   },
   {
@@ -160,7 +160,7 @@ var tests = [{
       "greeting<": null,
       "greeting<alternateGreeting": null
     },
-    expected: '"key":{{#with key}}{"greeting":{{#if greeting}}"{{greeting}}"{{/if}}{{#if alternateGreeting}}"{{alternateGreeting}}"{{/if}} }{{/with}}{{#unless key}}{"spec":{"hints":["container"]},"value":null}{{/unless}}',
+    expected: '"key":{{#key}}{"greeting":{{#if greeting}}"{{greeting}}"{{/if}}{{#if alternateGreeting}}"{{alternateGreeting}}"{{/if}} }{{/key}}{{^key}}{"spec":{"hints":["container"]},"value":null}{{/key}}',
     should: "a kvp with a single object template with multiple value templates should export correctly without a value template fallback/default value"
   },
   {
@@ -168,7 +168,7 @@ var tests = [{
     value: {
       greeting: "Hi"
     },
-    expected: '"key":{{#unless key}}{"greeting":"Hi" }{{/unless}}{{#with key}}{"spec":{"hints":["container"]},"value":null}{{/with}}',
+    expected: '"key":{{^key}}{"greeting":"Hi" }{{/key}}{{#key}}{"spec":{"hints":["container"]},"value":null}{{/key}}',
     should: "a kvp with a single negative object template should export a kvp with an object value template and a null fallback value"
   },
   {
@@ -181,7 +181,7 @@ var tests = [{
         label: "Secondary Contact"
       }
     },
-    expected: '{"contact":{{#with isPrimary}}{"label":"Primary Contact" }{{/with}}{{#with isSecondary}}{"label":"Secondary Contact" }{{/with}} }',
+    expected: '{"contact":{{#isPrimary}}{"label":"Primary Contact" }{{/isPrimary}}{{#isSecondary}}{"label":"Secondary Contact" }{{/isSecondary}} }',
     should: "a kvp with a multiple object templates should export a kvp with multiple object templates"
   },
   {
@@ -194,7 +194,7 @@ var tests = [{
         label: "Secondary Contact"
       }
     },
-    expected: '{"contact":{{#with isPrimary}}{"label":"Primary Contact" }{{/with}}{{#unless isPrimary}}{"label":"Secondary Contact" }{{/unless}} }',
+    expected: '{"contact":{{#isPrimary}}{"label":"Primary Contact" }{{/isPrimary}}{{^isPrimary}}{"label":"Secondary Contact" }{{/isPrimary}} }',
     should: "a kvp with a multiple object templates should export a kvp with multiple object templates"
   },
   {
@@ -207,7 +207,7 @@ var tests = [{
         name: "One"
       }
     },
-    expected: '{"spec":{"hints":["container"] },"value":{{#with v1}}{"name":"One" }{{/with}}{{#unless v1}}null{{/unless}} }',
+    expected: '{"spec":{"hints":["container"] },"value":{{#v1}}{"name":"One" }{{/v1}}{{^v1}}null{{/v1}} }',
     should: "a kvp with a dynamic value template with no inverse should export a kvp with null inverse"
   },
   {
@@ -223,7 +223,7 @@ var tests = [{
         name: "None"
       }
     },
-    expected: '{"spec":{"hints":["container"] },"value":{{#with v1}}{"name":"One" }{{/with}}{{#unless v1}}{"name":"None" }{{/unless}} }',
+    expected: '{"spec":{"hints":["container"] },"value":{{#v1}}{"name":"One" }{{/v1}}{{^v1}}{"name":"None" }{{/v1}} }',
     should: "a kvp with a dynamic value template with explicit inverse should export a kvp with explicit inverse"
   },
   {
@@ -239,7 +239,7 @@ var tests = [{
         name: "None"
       }
     },
-    expected: '{"spec":{"hints":["container"] },"flag":{{#with flag}}{"name":"One" }{{/with}}{{#unless flag}}{"name":"None" }{{/unless}} }',
+    expected: '{"spec":{"hints":["container"] },"flag":{{#flag}}{"name":"One" }{{/flag}}{{^flag}}{"name":"None" }{{/flag}} }',
     should: "a kvp with a dynamic value template with explicit inverse and with no variable should export a kvp with explicit inverse"
   },
   {
@@ -255,8 +255,138 @@ var tests = [{
         name: "Two"
       }
     },
-    expected: '{"spec":{"hints":["container"] },"value":{{#with v1}}{"name":"One" }{{/with}}{{#with v2}}{"name":"Two" }{{/with}} }',
+    expected: '{"spec":{"hints":["container"] },"value":{{#v1}}{"name":"One" }{{/v1}}{{#v2}}{"name":"Two" }{{/v2}} }',
     should: "a kvp with a multiple value templates should export a kvp with values in blocks"
+  },
+  {
+    key: "key#",
+    value: {
+      greeting: "Hi"
+    },
+    options: { hbStyleSections: true },
+    expected: '"key":{{#with key}}{"greeting":"Hi" }{{/with}}{{#unless key}}{"spec":{"hints":["container"]},"value":null}{{/unless}}',
+    should: "with handlebars style sections a kvp with a single object template should export a kvp with an object value template and a null fallback value"
+  },
+  {
+    key: "key#",
+    value: {
+      "greeting<": "Hi"
+    },
+    options: { hbStyleSections: true },
+    expected: '"key":{{#with key}}{"greeting":{{#if greeting}}"{{greeting}}"{{else}}"Hi"{{/if}} }{{/with}}{{#unless key}}{"spec":{"hints":["container"]},"value":null}{{/unless}}',
+    should: "with handlebars style sections a kvp with a single object template with a single value template should export correctly"
+  },
+  {
+    key: "key#",
+    value: {
+      "greeting<": null,
+      "greeting<alternateGreeting": null
+    },
+    options: { hbStyleSections: true },
+    expected: '"key":{{#with key}}{"greeting":{{#if greeting}}"{{greeting}}"{{/if}}{{#if alternateGreeting}}"{{alternateGreeting}}"{{/if}} }{{/with}}{{#unless key}}{"spec":{"hints":["container"]},"value":null}{{/unless}}',
+    should: "with handlebars style sections a kvp with a single object template with multiple value templates should export correctly without a value template fallback/default value"
+  },
+  {
+    key: "key^",
+    value: {
+      greeting: "Hi"
+    },
+    options: { hbStyleSections: true },
+    expected: '"key":{{#unless key}}{"greeting":"Hi" }{{/unless}}{{#with key}}{"spec":{"hints":["container"]},"value":null}{{/with}}',
+    should: "with handlebars style sections a kvp with a single negative object template should export a kvp with an object value template and a null fallback value"
+  },
+  {
+    key: undefined,
+    value: {
+      "contact#isPrimary": {
+        label: "Primary Contact"
+      },
+      "contact#isSecondary": {
+        label: "Secondary Contact"
+      }
+    },
+    options: { hbStyleSections: true },
+    expected: '{"contact":{{#with isPrimary}}{"label":"Primary Contact" }{{/with}}{{#with isSecondary}}{"label":"Secondary Contact" }{{/with}} }',
+    should: "with handlebars style sections a kvp with a multiple object templates should export a kvp with multiple object templates"
+  },
+  {
+    key: undefined,
+    value: {
+      "contact#isPrimary": {
+        label: "Primary Contact"
+      },
+      "contact^isPrimary": {
+        label: "Secondary Contact"
+      }
+    },
+    options: { hbStyleSections: true },
+    expected: '{"contact":{{#with isPrimary}}{"label":"Primary Contact" }{{/with}}{{#unless isPrimary}}{"label":"Secondary Contact" }{{/unless}} }',
+    should: "with handlebars style sections a kvp with a multiple object templates should export a kvp with multiple object templates"
+  },
+  {
+    key: undefined,
+    value: {
+      spec: {
+        hints: ["container"]
+      },
+      "value#v1": {
+        name: "One"
+      }
+    },
+    options: { hbStyleSections: true },
+    expected: '{"spec":{"hints":["container"] },"value":{{#with v1}}{"name":"One" }{{/with}}{{#unless v1}}null{{/unless}} }',
+    should: "with handlebars style sections a kvp with a dynamic value template with no inverse should export a kvp with null inverse"
+  },
+  {
+    key: undefined,
+    value: {
+      spec: {
+        hints: ["container"]
+      },
+      "value#v1": {
+        name: "One"
+      },
+      "value^v1": {
+        name: "None"
+      }
+    },
+    options: { hbStyleSections: true },
+    expected: '{"spec":{"hints":["container"] },"value":{{#with v1}}{"name":"One" }{{/with}}{{#unless v1}}{"name":"None" }{{/unless}} }',
+    should: "with handlebars style sections a kvp with a dynamic value template with explicit inverse should export a kvp with explicit inverse"
+  },
+  {
+    key: undefined,
+    value: {
+      spec: {
+        hints: ["container"]
+      },
+      "flag#": {
+        name: "One"
+      },
+      "flag^": {
+        name: "None"
+      }
+    },
+    options: { hbStyleSections: true },
+    expected: '{"spec":{"hints":["container"] },"flag":{{#with flag}}{"name":"One" }{{/with}}{{#unless flag}}{"name":"None" }{{/unless}} }',
+    should: "with handlebars style sections a kvp with a dynamic value template with explicit inverse and with no variable should export a kvp with explicit inverse"
+  },
+  {
+    key: undefined,
+    value: {
+      spec: {
+        hints: ["container"]
+      },
+      "value#v1": {
+        name: "One"
+      },
+      "value#v2": {
+        name: "Two"
+      }
+    },
+    options: { hbStyleSections: true },
+    expected: '{"spec":{"hints":["container"] },"value":{{#with v1}}{"name":"One" }{{/with}}{{#with v2}}{"name":"Two" }{{/with}} }',
+    should: "with handlebars style sections a kvp with a multiple value templates should export a kvp with values in blocks"
   },
   {
     key: "items@",

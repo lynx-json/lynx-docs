@@ -15,6 +15,10 @@ function buildCommand(yargs) {
       describe: "Root folder(s) for the web site",
       default: "."
     })
+    .option("hb-style-sections", {
+      describe: "Export explicit object sections. Default is implicit sections",
+      default: false
+    })
     .option("config", {
       alias: "c",
       describe: "External configuration file to require"
