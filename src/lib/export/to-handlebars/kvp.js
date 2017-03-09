@@ -46,28 +46,18 @@ function exportLiteralTemplate(meta, cb, options) {
   cb("{{/if}}");
 }
 
-function getInverseObjectTemplate(template) {
-  var inverseSymbol = template.symbol === "#" ? "^" : "#";
-  var inverseSection = template.section.replace(template.symbol, inverseSymbol);
-  return {
-    type: "object",
-    symbol: inverseSymbol,
-    section: inverseSection,
-    variable: template.variable
-  };
-}
-
 function exportObjectTemplate(meta, cb, options) {
-  cb("{{" + meta.template.section + "}}");
+  var block = meta.template.symbol === "#" ? "with" : "unless";
+  cb("{{#" + block + " " + meta.template.variable + "}}");
   exportObject(meta, cb);
-  cb("{{/" + meta.template.variable + "}}");
+  cb("{{/" + block + "}}");
 
   if(!options.noDefault) {
+    var inverseBlock = meta.template.symbol === "#" ? "unless" : "with";
     var defaultValue = meta.key === "value" ? null : emptyVsp();
-    var inverse = getInverseObjectTemplate(meta.template);
-    cb("{{" + inverse.section + "}}");
+    cb("{{#" + inverseBlock + " " + meta.template.variable + "}}");
     cb(JSON.stringify(defaultValue));
-    cb("{{/" + inverse.variable + "}}");
+    cb("{{/" + inverseBlock + "}}");
   }
 }
 

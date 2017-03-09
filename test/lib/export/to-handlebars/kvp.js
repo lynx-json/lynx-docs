@@ -143,7 +143,7 @@ var tests = [{
     value: {
       greeting: "Hi"
     },
-    expected: '"key":{{#key}}{"greeting":"Hi" }{{/key}}{{^key}}{"spec":{"hints":["container"]},"value":null}{{/key}}',
+    expected: '"key":{{#with key}}{"greeting":"Hi" }{{/with}}{{#unless key}}{"spec":{"hints":["container"]},"value":null}{{/unless}}',
     should: "a kvp with a single object template should export a kvp with an object value template and a null fallback value"
   },
   {
@@ -151,7 +151,7 @@ var tests = [{
     value: {
       "greeting<": "Hi"
     },
-    expected: '"key":{{#key}}{"greeting":{{#if greeting}}"{{greeting}}"{{else}}"Hi"{{/if}} }{{/key}}{{^key}}{"spec":{"hints":["container"]},"value":null}{{/key}}',
+    expected: '"key":{{#with key}}{"greeting":{{#if greeting}}"{{greeting}}"{{else}}"Hi"{{/if}} }{{/with}}{{#unless key}}{"spec":{"hints":["container"]},"value":null}{{/unless}}',
     should: "a kvp with a single object template with a single value template should export correctly"
   },
   {
@@ -160,7 +160,7 @@ var tests = [{
       "greeting<": null,
       "greeting<alternateGreeting": null
     },
-    expected: '"key":{{#key}}{"greeting":{{#if greeting}}"{{greeting}}"{{/if}}{{#if alternateGreeting}}"{{alternateGreeting}}"{{/if}} }{{/key}}{{^key}}{"spec":{"hints":["container"]},"value":null}{{/key}}',
+    expected: '"key":{{#with key}}{"greeting":{{#if greeting}}"{{greeting}}"{{/if}}{{#if alternateGreeting}}"{{alternateGreeting}}"{{/if}} }{{/with}}{{#unless key}}{"spec":{"hints":["container"]},"value":null}{{/unless}}',
     should: "a kvp with a single object template with multiple value templates should export correctly without a value template fallback/default value"
   },
   {
@@ -168,7 +168,7 @@ var tests = [{
     value: {
       greeting: "Hi"
     },
-    expected: '"key":{{^key}}{"greeting":"Hi" }{{/key}}{{#key}}{"spec":{"hints":["container"]},"value":null}{{/key}}',
+    expected: '"key":{{#unless key}}{"greeting":"Hi" }{{/unless}}{{#with key}}{"spec":{"hints":["container"]},"value":null}{{/with}}',
     should: "a kvp with a single negative object template should export a kvp with an object value template and a null fallback value"
   },
   {
@@ -181,7 +181,7 @@ var tests = [{
         label: "Secondary Contact"
       }
     },
-    expected: '{"contact":{{#isPrimary}}{"label":"Primary Contact" }{{/isPrimary}}{{#isSecondary}}{"label":"Secondary Contact" }{{/isSecondary}} }',
+    expected: '{"contact":{{#with isPrimary}}{"label":"Primary Contact" }{{/with}}{{#with isSecondary}}{"label":"Secondary Contact" }{{/with}} }',
     should: "a kvp with a multiple object templates should export a kvp with multiple object templates"
   },
   {
@@ -194,7 +194,7 @@ var tests = [{
         label: "Secondary Contact"
       }
     },
-    expected: '{"contact":{{#isPrimary}}{"label":"Primary Contact" }{{/isPrimary}}{{^isPrimary}}{"label":"Secondary Contact" }{{/isPrimary}} }',
+    expected: '{"contact":{{#with isPrimary}}{"label":"Primary Contact" }{{/with}}{{#unless isPrimary}}{"label":"Secondary Contact" }{{/unless}} }',
     should: "a kvp with a multiple object templates should export a kvp with multiple object templates"
   },
   {
@@ -207,7 +207,7 @@ var tests = [{
         name: "One"
       }
     },
-    expected: '{"spec":{"hints":["container"] },"value":{{#v1}}{"name":"One" }{{/v1}}{{^v1}}null{{/v1}} }',
+    expected: '{"spec":{"hints":["container"] },"value":{{#with v1}}{"name":"One" }{{/with}}{{#unless v1}}null{{/unless}} }',
     should: "a kvp with a dynamic value template with no inverse should export a kvp with null inverse"
   },
   {
@@ -223,7 +223,7 @@ var tests = [{
         name: "None"
       }
     },
-    expected: '{"spec":{"hints":["container"] },"value":{{#v1}}{"name":"One" }{{/v1}}{{^v1}}{"name":"None" }{{/v1}} }',
+    expected: '{"spec":{"hints":["container"] },"value":{{#with v1}}{"name":"One" }{{/with}}{{#unless v1}}{"name":"None" }{{/unless}} }',
     should: "a kvp with a dynamic value template with explicit inverse should export a kvp with explicit inverse"
   },
   {
@@ -239,7 +239,7 @@ var tests = [{
         name: "None"
       }
     },
-    expected: '{"spec":{"hints":["container"] },"flag":{{#flag}}{"name":"One" }{{/flag}}{{^flag}}{"name":"None" }{{/flag}} }',
+    expected: '{"spec":{"hints":["container"] },"flag":{{#with flag}}{"name":"One" }{{/with}}{{#unless flag}}{"name":"None" }{{/unless}} }',
     should: "a kvp with a dynamic value template with explicit inverse and with no variable should export a kvp with explicit inverse"
   },
   {
@@ -255,7 +255,7 @@ var tests = [{
         name: "Two"
       }
     },
-    expected: '{"spec":{"hints":["container"] },"value":{{#v1}}{"name":"One" }{{/v1}}{{#v2}}{"name":"Two" }{{/v2}} }',
+    expected: '{"spec":{"hints":["container"] },"value":{{#with v1}}{"name":"One" }{{/with}}{{#with v2}}{"name":"Two" }{{/with}} }',
     should: "a kvp with a multiple value templates should export a kvp with values in blocks"
   },
   {
