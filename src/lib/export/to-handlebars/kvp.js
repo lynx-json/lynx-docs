@@ -3,6 +3,10 @@
 const util = require("util");
 const getMetadata = require("../../metadata-yaml");
 
+function createNewExportOptionsContext(options) {
+  return { hbStyleSections: options.hbStyleSections };
+}
+
 function exportObject(meta, cb, options) {
   var propertyNames = Object.getOwnPropertyNames(meta.children);
   var len = propertyNames.length;
@@ -11,20 +15,20 @@ function exportObject(meta, cb, options) {
   propertyNames.forEach((ckey, idx) => {
     let cmeta = meta.children[ckey];
     if(cmeta.more) cmeta = cmeta.more();
-    exportHandlebars(cmeta, cb);
+    exportHandlebars(cmeta, cb, createNewExportOptionsContext(options));
     if(idx + 1 !== len) cb(",");
   });
   cb(" }");
 }
 
-function exportArray(meta, cb) {
+function exportArray(meta, cb, options) {
   var kvp = meta.src;
   var len = kvp.value.length;
 
   cb("[");
   kvp.value.forEach((val, idx) => {
     let ckvp = { value: val };
-    exportHandlebars(getMetadata(ckvp), cb);
+    exportHandlebars(getMetadata(ckvp), cb, createNewExportOptionsContext(options));
     if(idx + 1 !== len) cb(",");
   });
   cb("]");
@@ -46,20 +50,20 @@ function exportLiteralTemplate(meta, cb, options) {
   cb("{{/if}}");
 }
 
-function getInverseObjectTemplate(template) {
-  var inverseSymbol = template.symbol === "#" ? "^" : "#";
-  var inverseSection = template.section.replace(template.symbol, inverseSymbol);
-  return {
-    type: "object",
-    symbol: inverseSymbol,
-    section: inverseSection,
-    variable: template.variable
-  };
-}
+function exportImplicitObjectTemplate(meta, cb, options) {
+  function getInverseObjectTemplate(template) {
+    var inverseSymbol = template.symbol === "#" ? "^" : "#";
+    var inverseSection = template.section.replace(template.symbol, inverseSymbol);
+    return {
+      type: "object",
+      symbol: inverseSymbol,
+      section: inverseSection,
+      variable: template.variable
+    };
+  }
 
-function exportObjectTemplate(meta, cb, options) {
   cb("{{" + meta.template.section + "}}");
-  exportObject(meta, cb);
+  exportObject(meta, cb, createNewExportOptionsContext(options));
   cb("{{/" + meta.template.variable + "}}");
 
   if(!options.noDefault) {
@@ -69,6 +73,26 @@ function exportObjectTemplate(meta, cb, options) {
     cb(JSON.stringify(defaultValue));
     cb("{{/" + inverse.variable + "}}");
   }
+}
+
+function exportExplicitObjectTemplate(meta, cb, options) {
+  var block = meta.template.symbol === "#" ? "with" : "unless";
+  cb("{{#" + block + " " + meta.template.variable + "}}");
+  exportObject(meta, cb, createNewExportOptionsContext(options));
+  cb("{{/" + block + "}}");
+
+  if(!options.noDefault) {
+    var inverseBlock = meta.template.symbol === "#" ? "unless" : "with";
+    var defaultValue = meta.key === "value" ? null : emptyVsp();
+    cb("{{#" + inverseBlock + " " + meta.template.variable + "}}");
+    cb(JSON.stringify(defaultValue));
+    cb("{{/" + inverseBlock + "}}");
+  }
+}
+
+function exportObjectTemplate(meta, cb, options) {
+  if(options.hbStyleSections) exportExplicitObjectTemplate(meta, cb, options);
+  else exportImplicitObjectTemplate(meta, cb, options);
 }
 
 function emptyVsp() {
@@ -86,7 +110,7 @@ function exportArrayTemplate(meta, cb, options) {
   meta.src.value.forEach(itemTemplate => {
     let ckvp = { value: itemTemplate };
     let cmeta = getMetadata(ckvp);
-    exportHandlebars(cmeta, cb);
+    exportHandlebars(cmeta, cb, createNewExportOptionsContext(options));
   });
   cb("{{#unless @last}},{{/unless}}");
   cb("{{/each}}");
@@ -94,7 +118,6 @@ function exportArrayTemplate(meta, cb, options) {
 }
 
 function exportHandlebars(meta, cb, options) {
-  options = options || {};
 
   if(meta.key && !options.noKey) {
     cb(JSON.stringify(meta.key) + ":");
@@ -104,7 +127,7 @@ function exportHandlebars(meta, cb, options) {
     let len = meta.templates.length;
 
     meta.templates.forEach((cmeta, idx) => {
-      let coptions = {};
+      let coptions = createNewExportOptionsContext(options);
 
       if(len > 1) {
         coptions.noDefault = true;
@@ -125,16 +148,17 @@ function exportHandlebars(meta, cb, options) {
   } else if(util.isPrimitive(meta.src.value)) {
     cb(JSON.stringify(meta.src.value));
   } else if(Array.isArray(meta.src.value)) {
-    exportArray(meta, cb);
+    exportArray(meta, cb, options);
   } else if(meta.children) {
-    exportObject(meta, cb);
+    exportObject(meta, cb, options);
   }
 }
 
-function kvpToHandlebars(kvp) {
+function kvpToHandlebars(kvp, options) {
   var buffer = "";
   var meta = getMetadata(kvp);
-  exportHandlebars(meta, data => buffer += data);
+  var exportOptions = createNewExportOptionsContext(options);
+  exportHandlebars(meta, data => buffer += data, exportOptions);
   return buffer;
 }
 

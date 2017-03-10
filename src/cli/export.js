@@ -24,6 +24,10 @@ function buildCommand(yargs) {
       describe: "The format to export to",
       default: "handlebars"
     })
+    .option("hb-style-sections", {
+      describe: "Export explicit object sections. Default is implicit sections",
+      default: false
+    })
     .option("config", {
       alias: "c",
       describe: "External configuration file to require"
@@ -35,7 +39,6 @@ function buildCommand(yargs) {
 }
 
 var exportCli = function (options) {
-
   commonCli(options);
 
   var output = options.output === "stdout" ? process.stdout : options.output;
