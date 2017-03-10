@@ -263,21 +263,21 @@ users:
   - User Two
 ```
 
-## Scratch Area for Lynx Yaml Template Rules
-- Names should be resolved recursively. Binding names should not include paths. Will need rules for this.
-- Must bind to words in model, not in implementation of destination template language (e.g. @last, this, @index, etc.).
-- How do we bind to the current value in a string array? Since it doesn't have a name, we'll need a special token that indicates current context.
+## Scratch Area for Lynx YAML Template Rules
+- Names should be resolved recursively. Will need rules for this.
+- If engine does not support recursive resolution than data needs to be structured so the name evaluates in the current context
 
 ### Object template conditionals `#`
 - Allowed values are true, false, null, undefined, string, or an object
 - True and object result is rendering of template
-- All other values are interpreted as false
+- All other values are interpreted as falsey and result it template not being rendered
 - If value is an object then it is set as the data context for the section
 
 ### List binding `@`
-- Allowed values are arrays(lists), null?, undefined?
-- Bound value is set as the binding context of the section.
+- Allowed values are arrays(lists), null, or undefined
 - Each item in the list is set as the binding context for the item template
+#### Potential future list binding rules. Support for mustache
+- ??Each item must have a key named "xxxx" which evaluates to true only for last item in the list??
 
 ### Quoted `<` and unquoted `=` literal binding
 - Allowed values are true, false, null, undefined, string, or number
