@@ -2,6 +2,20 @@
 
 Lynx templates are authored using YAML. For details see [http://yaml.org/](http://yaml.org/).
 
+## File Naming Conventions
+Template names are in the form of `<template>.lynx.yml` (e.g. default.lynx.yml). The <template> value must not contain a dot/period character (`.`).
+
+Templates are combined with data files to create variants of a resource. A single combination of a template and a data files results in a named variant.
+
+### Data Files
+Data files that are bound to templates are discovered in two ways. As sibling files to the template file or as a sibling folder to the template file.
+
+#### Sibling Data Files
+Sibling data file names are in the form of `<template>.<variant>.data.(yml|json,js)` (e.g. default.invalid.data.yml)
+
+#### Sibling Data Folders
+Sibling data folder names are in the form of `<template>.data` (e.g. default.data). Each file within the folder is a data file used to create a variant. The names are in the form of `<variant>.(yml|json|js)` (e.g. invalid.yml).
+
 ## Static Content
 Static content is embedded in the template and does not change.
 
