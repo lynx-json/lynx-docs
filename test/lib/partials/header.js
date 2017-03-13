@@ -22,7 +22,7 @@ var tests = [
   expected: {
     spec: { hints: ["header", "container"] },
     value: {
-      "label": "Label"
+      "label>": "Label"
     }
   }
 }];
