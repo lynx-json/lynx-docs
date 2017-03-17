@@ -88,3 +88,18 @@ When bound to the `default.lynx.yml` document template, each of the data files r
 Since our search form resource now has more than one variation, the Lynx Docs web server needs to decide which variation to return when a request is made to the URL `/search/`. Since one of the variations is named "default", the web server will return that variation. The web server also needs to allow the user to select the other variations. To allow the user to do so, the web server will return hyperlinks to the other variations.
 
 > If there is no "default" variation, the web server will return hyperlinks to the variations for the resource.
+
+### Partials
+
+Partials allow you to capture common YAML values in reusable blocks and reference
+them from templates or other partials.
+
+To create a partial, place a YAML file in a `_partials` folder somewhere in
+the folder ancestry of your template.
+
+> During partial resolution, lynx-docs looks for the referenced partial
+in a `_partials` folder in the same folder as the referencing template. 
+If it does not find it there, it moves up, until it reaches the current 
+working directory, checking for the partial in a `_partials` folder at each 
+level. Finally, lynx-docs checks for the partial in its own core `_partials`
+folder.
