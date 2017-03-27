@@ -1,5 +1,5 @@
 {
-  "name": "lynx-docs",
+  "name": "@lynx-json/lynx-docs",
   "version": "0.12.0",
   "description": "Lynx templates in YAML",
   "main": "src/index.js",
@@ -47,5 +47,8 @@
     "jshint": "^2.9.4",
     "mocha": "^3.1.2",
     "sinon": "^1.17.6"
+  },
+  "directories": {
+    "test": "test"
   }
 }
