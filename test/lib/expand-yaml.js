@@ -373,10 +373,12 @@ var tests = [{
 
 var reserveKeywords = [
   "href",
+  "follow",
   "src",
   "data",
   "action",
   "method",
+  "send",
   "type",
   "enctype",
   "encoding",
