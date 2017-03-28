@@ -13,10 +13,12 @@ function keyMatches(regex) {
 var excludes = [
   keyMatches(/^spec$/),
   keyMatches(/^href$/),
+  keyMatches(/^follow$/),
   keyMatches(/^src$/),
   keyMatches(/^data$/),
   keyMatches(/^action$/),
   keyMatches(/^method$/),
+  keyMatches(/^send$/),
   keyMatches(/^type$/),
   keyMatches(/^enctype$/),
   keyMatches(/^encoding$/),
