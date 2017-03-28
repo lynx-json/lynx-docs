@@ -4,6 +4,8 @@ const util = require("util");
 const url = require("url");
 const expandYaml = require("./lib/expand-yaml");
 
+const docProperties = ["base", "focus", "context", "realm"];
+
 module.exports = exports = function (lynxDocs) {
   var finishYaml = lynxDocs.lib.finish;
 
@@ -16,7 +18,7 @@ module.exports = exports = function (lynxDocs) {
   finishYaml.add(finishYaml.containers);
   finishYaml.add(finishYaml.text);
 
-  finishYaml.add(function addRealm(kvp, options) {
+  finishYaml.add(function addDocumentProperties(kvp, options) {
     // only do this for the root document kvp
     if(kvp.key) return;
     if(!util.isObject(kvp.value)) return;
@@ -25,11 +27,17 @@ module.exports = exports = function (lynxDocs) {
     var meta = lynxDocs.lib.meta(kvp);
     if(meta.children.realm && meta.children.realm.templates) return;
 
-    if(kvp.value.realm) {
-      kvp.value.realm = url.resolve(options.realm.realm, kvp.value.realm);
-    } else {
-      kvp.value.realm = options.realm.realm;
+    if(util.isObject(kvp.value.value)) {
+      docProperties.forEach(p => {
+        if(kvp.value.value[p]) {
+          if(p === "focus") kvp.value[p] = kvp.value.value[p];
+          else kvp.value[p] = url.resolve(options.realm.realm, kvp.value.value[p]);
+          delete kvp.value.value[p];
+        }
+      });
     }
+
+    if(!kvp.value.realm) kvp.value.realm = options.realm.realm;
   });
 
   function expandMeta(meta) {
