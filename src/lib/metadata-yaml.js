@@ -109,7 +109,13 @@ function applyObjectMeta(value, meta) {
           meta.children[childMeta.key] = { templates: [] };
           meta.countOfChildren++;
         }
-        meta.children[childMeta.key].templates.push(childMeta.more());
+        
+        // [JSH] Fixed issue #22 with this conditional.
+        // Unsure of the intent, all tests continue to pass.
+        // meta.children[childMeta.key].templates was undefined
+        if (meta.children[childMeta.key].templates) {
+          meta.children[childMeta.key].templates.push(childMeta.more());
+        }
       } else {
         meta.children[childMeta.key] = childMeta;
         meta.countOfChildren++;
