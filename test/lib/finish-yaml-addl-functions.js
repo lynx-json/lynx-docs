@@ -5,6 +5,7 @@ var should = chai.should();
 var expect = chai.expect;
 var sinon = require("sinon");
 var finishYaml = require("../../src/lib/finish-yaml");
+var url = require("url");
 
 function vsp(value) {
   return {
@@ -233,7 +234,7 @@ describe("when using additional finishing functions", function () {
       };
       kvp["value#greeting"] = kvp.value; //mimicing optimization code from expand-yaml.js
       delete kvp.value;
-      
+
       it("should resolve scope value");
 
       // it("should resolve scope value", function () {
@@ -353,5 +354,49 @@ describe("when using additional finishing functions", function () {
       finishYaml.markers(kvp, { realm: { realm: "http://example.com" } });
       kvp.value.value.for.should.equal("http://other.com/a/b/");
     });
+  });
+
+  describe("for document properties", function () {
+    var options = { realm: { realm: "http://example.com/" } };
+
+    it("should move 'realm', 'context', 'base', and 'focus' to document", function () {
+      var kvp = {
+        key: undefined,
+        value: vsp({ realm: "http://example.com", context: "http://example.com/context", base: "http://example.com/base/", focus: "name" })
+      };
+
+      finishYaml.documentProperties(kvp, options);
+      expect(kvp.value.realm).to.exist;
+      expect(kvp.value.value.realm).to.not.exist;
+      expect(kvp.value.context).to.exist;
+      expect(kvp.value.value.context).to.not.exist;
+      expect(kvp.value.base).to.exist;
+      expect(kvp.value.value.base).to.not.exist;
+      expect(kvp.value.focus).to.exist;
+      expect(kvp.value.value.focus).to.not.exist;
+    });
+
+    it("should resolve 'realm' and 'context' values", function () {
+      var kvp = {
+        key: undefined,
+        value: vsp({ realm: "/", context: "/context" })
+      };
+
+      finishYaml.documentProperties(kvp, options);
+      expect(kvp.value.realm).to.equal(url.resolve(options.realm.realm, "/"));
+      expect(kvp.value.context).to.equal(url.resolve(options.realm.realm, "/context"));
+    });
+
+    it("should not resolve 'base'", function () {
+      var kvp = {
+        key: undefined,
+        value: vsp({ realm: "/", base: "/context" })
+      };
+
+      finishYaml.documentProperties(kvp, options);
+      expect(kvp.value.realm).to.equal(url.resolve(options.realm.realm, "/"));
+      expect(kvp.value.base).to.equal("/context");
+    });
+
   });
 });

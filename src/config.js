@@ -4,8 +4,6 @@ const util = require("util");
 const url = require("url");
 const expandYaml = require("./lib/expand-yaml");
 
-const docProperties = ["base", "focus", "context", "realm"];
-
 module.exports = exports = function (lynxDocs) {
   var finishYaml = lynxDocs.lib.finish;
 
@@ -17,33 +15,7 @@ module.exports = exports = function (lynxDocs) {
   finishYaml.add(finishYaml.markers);
   finishYaml.add(finishYaml.containers);
   finishYaml.add(finishYaml.text);
-
-  finishYaml.add(function addDocumentProperties(kvp, options) {
-    // only do this for the root document kvp
-    if(kvp.key) return;
-    if(!util.isObject(kvp.value)) return;
-    if(!options || !options.realm) return;
-
-    var meta = lynxDocs.lib.meta(kvp);
-    if(meta.children.realm && meta.children.realm.templates) return;
-
-    if(util.isObject(kvp.value.value)) {
-      docProperties.forEach(p => {
-        if(kvp.value.value[p]) {
-          if(p === "focus") kvp.value[p] = kvp.value.value[p];
-          else kvp.value[p] = url.resolve(options.realm.realm, kvp.value.value[p]);
-          delete kvp.value.value[p];
-        }
-      });
-    }
-
-    if(!kvp.value.realm) kvp.value.realm = options.realm.realm;
-  });
-
-  function expandMeta(meta) {
-    if("more" in meta) return meta.more();
-    throw new Error("Unable to expand meta");
-  }
+  finishYaml.add(finishYaml.documentProperties);
 
   finishYaml.add(function addSpecChildren(kvp) {
     function isNode(meta) {
