@@ -40,15 +40,15 @@ restOfDocument:
 ```
 
 ### Context
-Absolute `realm` example
+Absolute `context` example
 ``` yaml
 context: http://www.example.com/employees/john.doe/
 restOfDocument:  
 ```
 
-Relative `realm` example. Absolute value is calculated relative to the realm of the current template.
+Relative `context` example. Absolute value is calculated relative to the realm of the current template.
 ```yaml
-realm: ./employees/john.doe/
+context: ./employees/john.doe/
 restOfDocument:  
 ```
 
