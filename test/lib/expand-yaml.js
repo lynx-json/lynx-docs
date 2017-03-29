@@ -387,6 +387,8 @@ var reserveKeywords = [
   "realm",
   "scope",
   "context",
+  "base",
+  "focus",
   "alt",
   "for",
   "href<",

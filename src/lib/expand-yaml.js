@@ -27,6 +27,8 @@ var excludes = [
   keyMatches(/^realm$/),
   keyMatches(/^scope$/),
   keyMatches(/^context$/),
+  keyMatches(/^base$/),
+  keyMatches(/^focus$/),
   keyMatches(/^alt$/),
   keyMatches(/^for$/)
 ];

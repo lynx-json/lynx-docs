@@ -15,27 +15,7 @@ module.exports = exports = function (lynxDocs) {
   finishYaml.add(finishYaml.markers);
   finishYaml.add(finishYaml.containers);
   finishYaml.add(finishYaml.text);
-
-  finishYaml.add(function addRealm(kvp, options) {
-    // only do this for the root document kvp
-    if(kvp.key) return;
-    if(!util.isObject(kvp.value)) return;
-    if(!options || !options.realm) return;
-
-    var meta = lynxDocs.lib.meta(kvp);
-    if(meta.children.realm && meta.children.realm.templates) return;
-
-    if(kvp.value.realm) {
-      kvp.value.realm = url.resolve(options.realm.realm, kvp.value.realm);
-    } else {
-      kvp.value.realm = options.realm.realm;
-    }
-  });
-
-  function expandMeta(meta) {
-    if("more" in meta) return meta.more();
-    throw new Error("Unable to expand meta");
-  }
+  finishYaml.add(finishYaml.documentProperties);
 
   finishYaml.add(function addSpecChildren(kvp) {
     function isNode(meta) {

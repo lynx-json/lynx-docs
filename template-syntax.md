@@ -16,6 +16,49 @@ Sibling data file names are in the form of `<template>.<variant>.data.(yml|json,
 #### Sibling Data Folders
 Sibling data folder names are in the form of `<template>.data` (e.g. default.data). Each file within the folder is a data file used to create a variant. The names are in the form of `<variant>.(yml|json|js)` (e.g. invalid.yml).
 
+## Document Properties
+Lynx documents have special properties at the root of the document. These properties are `realm`, `base`, `context`, and `focus`. For details on the meaning and constraints for these values review the [lynx-json specification](http://lynx-json.org/specification/content/).
+
+### Realm
+Absolute `realm` example
+``` yaml
+realm: http://www.example.com/process/step/
+restOfDocument:  
+```
+
+Relative `realm` example. Absolute value is calculated relative to the realm of the current template.
+```yaml
+realm: ./process/step/
+restOfDocument:  
+```
+
+### Base
+Base always needs to be an absolute URI
+```yaml
+base: http://www.example.com/
+restOfDocument:
+```
+
+### Context
+Absolute `context` example
+``` yaml
+context: http://www.example.com/employees/john.doe/
+restOfDocument:  
+```
+
+Relative `context` example. Absolute value is calculated relative to the realm of the current template.
+```yaml
+context: ./employees/john.doe/
+restOfDocument:  
+```
+
+### Focus
+Focus is used to instruct the user agent which element to set focus to when the document is displayed.
+```yaml
+focus: nameOfContentToFocus
+restOfDocument:
+```
+
 ## Static Content
 Static content is embedded in the template and does not change.
 

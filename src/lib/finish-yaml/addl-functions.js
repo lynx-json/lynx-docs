@@ -173,6 +173,32 @@ function markers(kvp, options) {
   }
 }
 
+function documentProperties(kvp, options) {
+  // only do this for the root document kvp
+  if(kvp.key) return;
+  if(!util.isObject(kvp.value)) return;
+  if(!options || !options.realm) return;
+
+  if(util.isObject(kvp.value.value)) {
+    ["base", "focus"].forEach(p => {
+      if(kvp.value.value[p]) {
+        kvp.value[p] = kvp.value.value[p];
+        delete kvp.value.value[p];
+      }
+    });
+    ["realm", "context"].forEach(p => {
+      if(kvp.value.value[p]) {
+        var meta = getMetadata(kvp);
+        if(meta.children[p] && meta.children[p].templates) kvp.value[p] = kvp.value.value[p];
+        else kvp.value[p] = url.resolve(options.realm.realm, kvp.value.value[p]);
+        delete kvp.value.value[p];
+      }
+    });
+  }
+
+  if(!kvp.value.realm) kvp.value.realm = options.realm.realm;
+}
+
 module.exports = exports = function (finish) {
   finish.addHint = addHint;
 
@@ -184,4 +210,5 @@ module.exports = exports = function (finish) {
   finish.containers = containers;
   finish.forms = forms;
   finish.submits = submits;
+  finish.documentProperties = documentProperties;
 };
