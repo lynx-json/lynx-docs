@@ -7,11 +7,11 @@ var getMetadata = require("../../src/lib/metadata-yaml");
 
 function runTest(test) {
   var actual = getMetadata(test.actual);
-  if (typeof test.expected === "function") {
+  if(typeof test.expected === "function") {
     test.expected(actual);
   } else {
     test.expected.src = actual.src;
-    actual.should.deep.equal(test.expected);  
+    actual.should.deep.equal(test.expected);
   }
 }
 
@@ -57,7 +57,20 @@ var tests = [{
     expected: { key: "normal" },
     description: "a key without templates/partials",
     should: "should return correct metadata"
-  }, {
+  },
+  {
+    actual: { key: "number2" },
+    expected: { key: "number2" },
+    description: "a key with letters and numbers",
+    should: "should return correct metadata"
+  },
+  {
+    actual: { key: "number2.3" },
+    expected: { key: "number2.3" },
+    description: "a key with letters, numbers, and period",
+    should: "should return correct metadata"
+  },
+  {
     actual: { key: "spec.hints" },
     expected: { key: "spec.hints" },
     description: "a namespaced key (for partials)",
@@ -113,18 +126,20 @@ var tests = [{
   },
   {
     actual: { key: ">partial", value: null },
-    expected: { partial: {
-      name: "partial",
-      params: null
-    } },
+    expected: {
+      partial: {
+        name: "partial",
+        params: null
+      }
+    },
     description: "a partial key without a key name",
     should: "should return correct metadata"
   },
   {
-    actual: { 
+    actual: {
       value: {
         ">partial": true
-      } 
+      }
     },
     expected: function (actual) {
       actual.partial.name.should.equal("partial");
@@ -202,7 +217,7 @@ var tests = [{
       value: {
         a: {
           "#a": {},
-          "#b": {}  
+          "#b": {}
         }
       }
     },
