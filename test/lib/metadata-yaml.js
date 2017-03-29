@@ -7,7 +7,7 @@ var getMetadata = require("../../src/lib/metadata-yaml");
 
 function runTest(test) {
   var actual = getMetadata(test.actual);
-  if(typeof test.expected === "function") {
+  if (typeof test.expected === "function") {
     test.expected(actual);
   } else {
     test.expected.src = actual.src;
@@ -42,7 +42,7 @@ function lt(variable, quoted) {
     type: "literal",
     variable: variable
   };
-  if(tag === "<") lt.quoted = true;
+  if (tag === "<") lt.quoted = true;
   return lt;
 }
 
