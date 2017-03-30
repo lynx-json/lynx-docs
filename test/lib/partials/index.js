@@ -8,6 +8,7 @@ const partials = require("../../../src/lib/partials-yaml");
 var partialsTests = [
   require("./card"),
   require("./complement"),
+  require("./content"),
   require("./form"),
   require("./group"),
   require("./link"),
