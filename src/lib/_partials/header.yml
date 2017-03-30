@@ -1,6 +1,5 @@
 spec~:
   hints: [ header, container ]
   ~spec.*:
-value~arrayValue:
-  label>~textValue:
+value~:
   ~*:
