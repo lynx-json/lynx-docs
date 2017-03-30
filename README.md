@@ -125,7 +125,8 @@ we may want to reference a partial without including a key.
 
 ```YAML
 >page:
-  header: Hello, World!
+  header>:
+    label>: Hello, World!
 ```
 
 #### Core Partials
@@ -137,8 +138,7 @@ The following partials are included with lynx-docs.
 Create a value with a [`header`](http://lynx-json.org/specification/specifications/properties/hints/header.html) hint:
   
 ```YAML
->header: My Label
-  
+
 >header:
   label>: My Label
   
@@ -147,9 +147,6 @@ Create a value with a [`header`](http://lynx-json.org/specification/specificatio
   - Two
   - Three
 ```
-
-> Note that you can create a header with a label by passing a text value
-> to the `header` partial, as in the first example above.
 
 ##### `content`
 

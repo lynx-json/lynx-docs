@@ -193,14 +193,6 @@ function isArrayOrPrimitive(value) {
   return Array.isArray(value) || util.isPrimitive(value);
 }
 
-function matchesValuePlaceholder(placeholder, params) {
-  if (placeholder === "value" && isArrayOrPrimitive(params)) return true;
-  if (placeholder === "arrayValue" && Array.isArray(params)) return true;
-  if (placeholder === "textValue" && util.isPrimitive(params)) return true;
-  
-  return false;
-}
-
 // Explicit placeholders (as opposed to wildcard placeholders)
 // are in the form 'key~param'.
 function replaceExplicitPlaceholders(partialResult, meta) {
@@ -212,7 +204,7 @@ function replaceExplicitPlaceholders(partialResult, meta) {
   var metaFromPlaceholder = getMetaKeyWithoutPlaceholder(partialResult.key);
   var placeholder = match[2] || match[1];
 
-  if(matchesValuePlaceholder(placeholder, meta.partial.params)) {
+  if (placeholder === "value" && isArrayOrPrimitive(meta.partial.params)) {
     let valueKey = metaFromPlaceholder.src.key;
 
     if(hasValueTemplate(meta)) {

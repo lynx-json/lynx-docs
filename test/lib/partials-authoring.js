@@ -60,40 +60,6 @@ var tests = [
 }, {
   kvp: {
     key: ">em",
-    value: "Hello, World!"
-  },
-  partial: {
-    value: {
-      "value~textValue": null
-    }
-  },
-  expected: {
-    value: {
-      value: "Hello, World!"
-    }
-  },
-  description: "a partial with the placeholder textValue~",
-  should: "should return a text value in place of the placeholder"
-}, {
-  kvp: {
-    key: ">em",
-    value: [ 1, 2, 3]
-  },
-  partial: {
-    value: {
-      "value~arrayValue": null
-    }
-  },
-  expected: {
-    value: {
-      value: [ 1, 2, 3]
-    }
-  },
-  description: "a partial with the placeholder arrayValue~",
-  should: "should return an array value in place of the placeholder"
-}, {
-  kvp: {
-    key: ">em",
     value: ["One", "Two", "Three"]
   },
   partial: {
