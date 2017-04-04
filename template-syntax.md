@@ -19,3 +19,102 @@
 
 ## Quoted `<` and unquoted `=` literal binding
 - Allowed values are true, false, null, undefined, string, or number
+
+# Proposed syntax examples for YAML JSON Templates
+```YAML
+literals:
+  static:
+    - description: static string value
+      template:
+        foo: bar
+    - description: static literal
+      template:
+        foo: true
+    - description: static number
+      template:
+        foo: 123
+  dynamic:
+    - description: Bind quoted `foo` value and provide default
+      template:
+        foo<: No Foo
+    - description: Bind unquoted `foo` value and provide default
+      template:
+        foo=: 123
+    - description: Bind quoted `bar` value and provide default
+      template:
+        foo<bar: No bar
+    - description: Bind unquoted `bar` value and provide default
+      template:
+        foo=bar: \"No bar\"
+iterators: #is there a scenario where an iterator has a key?
+  - description: iterator creates object values
+    template:
+      - @items:
+          header: Object with a header key
+  - description: iterator creates string values
+    template:
+      - @items:
+          <name: String array since only value is bound
+  - description: iterator calls creates result of group partial
+    template:
+      - @items:
+          >group:
+            message: Group partial called with object that contains description key
+sections:
+  - description: short hand for null inverse
+    template:
+      foo#:
+        header: Foo exists
+  - description: intermediate syntax for null inverse
+    template:
+      foo#: #
+        header: Foo exists
+      foo^: null
+  - description: full syntax for null inverse
+    template:
+      foo:
+        "#foo":
+          header: Foo exists
+        "^foo": null
+  - description: short hand for inverse with value
+    template:
+      foo#:
+        header: Foo exists
+      foo^:
+        message: Foo does not exist
+  - description: full syntax for inverse with value
+    template:
+      foo:
+        "#foo":
+          header: Foo exists
+        "^foo":
+          message: Foo does not exist
+  - description: short hand for null inverse
+    template:
+      foo#bar:
+        header: Bar exists
+  - description: intermediate syntax for null inverse
+    template:
+      foo#bar:
+        header: Bar exists
+      foo^bar: null
+  - description: full syntax for null inverse
+    template:
+      foo:
+        "#bar":
+          header: Bar exists
+        "^bar": null
+  - description: short hand for inverse with value
+    template:
+      foo#bar:
+        header: Bar exists
+      foo^bar:
+        message: Bar does not exist
+  - description: full syntax for inverse with value
+    template:
+      foo:
+        "#bar":
+          header: Bar exists
+        "^bar":
+          message: Bar does not exist
+```
