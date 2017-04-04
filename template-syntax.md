@@ -55,7 +55,7 @@ iterators: #is there a scenario where an iterator has a key?
     template:
       - @items:
           <name: String array since only value is bound
-  - description: iterator calls creates result of group partial
+  - description: iterator creates result of group partial
     template:
       - @items:
           >group:
@@ -67,7 +67,7 @@ sections:
         header: Foo exists
   - description: intermediate syntax for null inverse
     template:
-      foo#: #
+      foo#:
         header: Foo exists
       foo^: null
   - description: full syntax for null inverse
