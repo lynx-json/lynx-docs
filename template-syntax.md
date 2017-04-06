@@ -63,7 +63,7 @@ objects:
           header: Foo exists
     - description: intermediate syntax for null inverse
       template:
-        foo#: #
+        foo#:
           header: Foo exists
         foo^: null
     - description: full syntax for null inverse
@@ -85,16 +85,16 @@ objects:
             header: Foo exists
           "^foo":
             message: Foo does not exist
-    - description: short hand for null inverse
+    - description: short hand for null inverse with explicit variable
       template:
         foo#bar:
           header: Bar exists
-    - description: intermediate syntax for null inverse
+    - description: intermediate syntax for null inverse with explicit variable
       template:
         foo#bar:
           header: Bar exists
         foo^bar: null
-    - description: full syntax for null inverse
+    - description: full syntax for null inverse with explicit variable
       template:
         foo:
           "#bar":
@@ -113,6 +113,19 @@ objects:
             header: Bar exists
           "^bar":
             message: Bar does not exist
+    - description: nested conditionals
+      template:
+        foo:
+          "#foo":
+            "#bar":
+              header: Foo with bar
+            "^bar":
+              message: Foo with no bar
+          "^foo":
+            "#bar":
+              header: No foo with bar
+            "^bar":
+              message: No foo with no bar
 arrays:
   static:
     - description: Empty array
@@ -143,9 +156,47 @@ arrays:
       template:
         - @items:
             <name: String array since only value is bound
-    - description: iterator calls creates result of group partial
-      template:
-        - @items:
-            >group:
-              message: Group partial called with object that contains description key
+partials:
+  - description: Key and partial have name "foo"
+    template:
+      foo>: Value passed to partial
+  - description: Key "foo" and partial "bar"
+    template:
+      foo>bar: Value passed to partial
+  - description: Key, partial, and binding variable have name "foo"
+    template:
+      foo<>: Value passed to partial
+  - description: Key, partial, and binding variable have name "foo" (alternate syntax)
+    template:
+      foo><: Value passed to partial
+  - description: Key and partial have name "foo" and binding variable has name "bar"
+    template:
+      foo><bar: Value passed to partial
+  - description: Key and partial have name "foo" and binding variable has name "bar" (alternate syntax)
+    template:
+      foo<bar>: Value passed to partial
+  - description: Container with spec and conditional value
+    template:
+      foo>container:
+        "#foo":
+          header: Foo exists
+        "^foo":
+          header: Foo doesn't exist
+  - description: Container with conditional spec and value
+    template:
+      foo:
+        "#foo>container":
+          header: Foo exists
+        "^foo>container":
+          message: Foo doesn't exist
+  - description: iterator creates result of group partial
+    template:
+      - @items>group:
+          message: Group partial called with object that contains description key
+  - description: iterator creates result of group partial (alternate syntax)
+    template:
+      - @items:
+          ">group":
+            message: Group partial called with object that contains description key
+
 ```
