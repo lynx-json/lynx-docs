@@ -21,6 +21,20 @@
 - Allowed values are true, false, null, undefined, string, or number
 
 # Proposed syntax examples for YAML JSON Templates
+Key syntax `[name][<|=|#|^|@[variable]][>[partial]]`
+
+A key
+- MAY have a `name`. If the `name` exists in must be at the beginning of the value.
+- MAY have a binding token (<=@#^). If a binding token exists it MAY be followed by a variable name to bind. If the variable name does not exist, the variable name is assumed be be the `name` of the key. If the key does not have a `name`, the variable name is required.
+- MAY have a partial reference token (>). If a partial reference token exists it MAY be followed by a partial name. If the partial name does not exist, the partial name is assumed be be the `name` of the key. If the key does not have a `name`, the partial name is required.
+- Binding token and partial token may occur in any order.
+
+Other thoughts that informed the examples
+- Keys without a name only contain values. I think of a key without a name as a template section that provides a value only.
+- Keys without a name can be nested within other keys without a name.
+- Keys without a name can reference partials. The value is passed to partials just like they would be for keys with a name.
+- An object may contain multiple keys without names or multiple keys with names, but it cannot contain both.
+
 ```YAML
 stringsNumbersAndLiterals:
   static:
