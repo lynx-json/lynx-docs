@@ -259,17 +259,21 @@ var tests = [{
     should: "a kvp with a multiple value templates should export a kvp with values in blocks"
   },
   {
-    key: "items@",
+    key: "items",
     value: [
-      { label: "Hi" }
+      {
+        "@items": { label: "Hi" }
+      }
     ],
     expected: '"items":[{{#each items}}{"label":"Hi" }{{#unless @last}},{{/unless}}{{/each}}]',
     should: "a kvp with a single array item template for an object value should export a kvp with an array item template for an object value"
   },
   {
-    key: "items@",
+    key: "items",
     value: [
-      "{{foo}}"
+      {
+        "@items": "{{foo}}"
+      }
     ],
     expected: '"items":[{{#each items}}"{{foo}}"{{#unless @last}},{{/unless}}{{/each}}]',
     should: "a kvp with a single array item template for a string value should export a kvp with an array item template for a string value"

@@ -81,26 +81,12 @@ function emptyVsp() {
 }
 
 function exportArrayTemplate(meta, cb, options) {
-  // If we choose to do array-item only, remove this block.
-  if (Array.isArray(meta.src.value)) {
-    cb("[");
-    cb("{{#each " + meta.template.variable + "}}");
-    meta.src.value.forEach(itemTemplate => {
-      let ckvp = { value: itemTemplate };
-      let cmeta = getMetadata(ckvp);
-      exportHandlebars(cmeta, cb);
-    });
-    cb("{{#unless @last}},{{/unless}}");
-    cb("{{/each}}");
-    cb("]");
-  } else {
-    cb("{{#each " + meta.template.variable + "}}");
-    let ckvp = { value: meta.src.value };
-    let cmeta = getMetadata(ckvp);
-    exportHandlebars(cmeta, cb);
-    cb("{{#unless @last}},{{/unless}}");
-    cb("{{/each}}");
-  }
+  cb("{{#each " + meta.template.variable + "}}");
+  let ckvp = { value: meta.src.value };
+  let cmeta = getMetadata(ckvp);
+  exportHandlebars(cmeta, cb);
+  cb("{{#unless @last}},{{/unless}}");
+  cb("{{/each}}");
 }
 
 function exportHandlebars(meta, cb, options) {
