@@ -6,8 +6,8 @@ const expect = chai.expect;
 const sinon = require("sinon");
 const fs = require("fs");
 const path = require("path");
-const parseYaml = require("../../../../src/lib/parse-yaml");
-const templatesToHandlebars = require("../../../../src/lib/export/to-handlebars/templates").all;
+const parseYaml = require("../../../src/lib/parse-yaml");
+const templatesToHandlebars = require("../../../src/lib/export/to-handlebars").all;
 
 var kvp = { key: "key", value: "value" };
 var tests = [{

@@ -4,11 +4,11 @@ const fs = require("fs");
 const url = require("url");
 const path = require("path");
 const variantToLynx = require("../lib/export/variants-to-lynx").one;
-const templateToHandlebars = require("../lib/export/to-handlebars/templates").one;
+const templateToHandlebars = require("../lib/export/to-handlebars").one;
 
 function redirectToRealmIndex(req, res, next) {
   var realm = req.realms[0];
-  if(!realm) return next();
+  if (!realm) return next();
 
   var headers = {
     "Content-Type": "text/plain",
@@ -23,8 +23,8 @@ module.exports = exports = function createRealmHandler(options) {
   return function (req, res, next) {
     var realm = req.realms.find(r => url.parse(r.realm).pathname === url.parse(req.url).pathname);
 
-    if(!realm) {
-      if(req.url === "/" || req.url === "") return redirectToRealmIndex(req, res, next);
+    if (!realm) {
+      if (req.url === "/" || req.url === "") return redirectToRealmIndex(req, res, next);
       return next();
     }
 
@@ -68,23 +68,23 @@ module.exports = exports = function createRealmHandler(options) {
     }
 
     var template = req.query.template && realm.templates.find(t => t.path === req.query.template);
-    if(template) {
+    if (template) {
       return serveTemplate(template);
     }
 
     var variantName = req.query.variant || "default";
     var variant = realm.variants.find(v => v.name === variantName || v.content !== undefined);
 
-    if(variantName === "index" || !variant) {
+    if (variantName === "index" || !variant) {
       return serveRealmIndex();
     }
 
-    if(variant.content) {
+    if (variant.content) {
       req.filename = variant.content;
       return next();
     }
 
-    if(!req.query.direct) {
+    if (!req.query.direct) {
       return serveVariantWithAlternateIndex(variantName);
     }
 

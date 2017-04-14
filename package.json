@@ -34,6 +34,7 @@
     "stream-from-array": "^1.0.0",
     "through2": "^2.0.1",
     "to-title-case": "^1.0.0",
+    "traverse": "^0.6.6",
     "vinyl": "^2.0.0",
     "vinyl-buffer": "^1.0.0",
     "vinyl-fs": "^2.4.4",
@@ -46,7 +47,7 @@
     "chai-as-promised": "^6.0.0",
     "jshint": "^2.9.4",
     "mocha": "^3.1.2",
-    "sinon": "^1.17.6"
+    "sinon": "^2.1.0"
   },
   "directories": {
     "test": "test"

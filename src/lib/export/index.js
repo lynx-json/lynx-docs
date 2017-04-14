@@ -4,12 +4,12 @@ var Vinyl = require("vinyl");
 var streamFromArray = require("stream-from-array");
 
 var formats = {
-  handlebars: require("./to-handlebars/templates").all,
+  handlebars: require("./to-handlebars").all,
   lynx: require("./variants-to-lynx").all
 };
 
 function exportRealms(realms, options) {
-  if(!options.format) throw new Error("options.format is required");
+  if (!options.format) throw new Error("options.format is required");
 
   var files = [];
 
@@ -23,7 +23,7 @@ function exportRealms(realms, options) {
 }
 
 function exportFormat(realms, createFile, options) {
-  if(!formats[options.format]) throw new Error("Unsupported format: " + options.format);
+  if (!formats[options.format]) throw new Error("Unsupported format: " + options.format);
   formats[options.format](realms, createFile, options);
 }
 

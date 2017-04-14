@@ -39,9 +39,9 @@ describe("serve static module", function () {
     var handler = serveStatic({ root: ["a", "b"] });
 
     afterEach(function () {
-      if(fs.existsSync.restore) fs.existsSync.restore();
-      if(path.extname.restore) path.extname.restore();
-      if(fs.stat.restore) fs.stat.restore();
+      if (fs.existsSync.restore) fs.existsSync.restore();
+      if (path.extname.restore) path.extname.restore();
+      if (fs.stat.restore) fs.stat.restore();
     });
 
     it("should call next if path has no extension", function () {
@@ -80,7 +80,7 @@ describe("serve static module", function () {
 
     afterEach(function () {
       fs.stat.restore();
-      if(fs.readFile.restore) fs.readFile.restore();
+      if (fs.readFile.restore) fs.readFile.restore();
     });
 
     it("should check file system stats", function () {
@@ -92,7 +92,7 @@ describe("serve static module", function () {
 
     it("should call next on stat error", function () {
       var req = { filename: "test.bin" };
-      sinon.stub(fs, "stat", function (path, callback) {
+      sinon.stub(fs, "stat").callsFake(function (path, callback) {
         callback({}, null);
       });
       var spy = sinon.spy();
@@ -103,7 +103,7 @@ describe("serve static module", function () {
 
     it("should call next when path is directory", function () {
       var req = { filename: "test" };
-      sinon.stub(fs, "stat", function (path, callback) {
+      sinon.stub(fs, "stat").callsFake(function (path, callback) {
         callback(null, { isDirectory: function () { return true; } });
       });
       var spy = sinon.spy();
@@ -114,10 +114,10 @@ describe("serve static module", function () {
 
     it("should call next on readFile error", function () {
       var req = { filename: "test.txt" };
-      sinon.stub(fs, "stat", function (path, callback) {
+      sinon.stub(fs, "stat").callsFake(function (path, callback) {
         callback(null, { isDirectory: function () { return false; } });
       });
-      sinon.stub(fs, "readFile", function (path, encoding, callback) {
+      sinon.stub(fs, "readFile").callsFake(function (path, encoding, callback) {
         callback({}, null);
       });
       var spy = sinon.spy();
@@ -135,10 +135,10 @@ describe("serve static module", function () {
       var writeSpy = sinon.spy(res, "write");
       var writeHeadSpy = sinon.spy(res, "writeHead");
 
-      sinon.stub(fs, "stat", function (path, callback) {
+      sinon.stub(fs, "stat").callsFake(function (path, callback) {
         callback(null, { isDirectory: function () { return false; } });
       });
-      sinon.stub(fs, "readFile", function (path, encoding, callback) {
+      sinon.stub(fs, "readFile").callsFake(function (path, encoding, callback) {
         callback(null, contents);
       });
 

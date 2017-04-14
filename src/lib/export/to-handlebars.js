@@ -2,15 +2,15 @@
 
 const util = require("util");
 const path = require("path");
-const processTemplate = require("../process-template");
-const kvpToHandlebars = require("./kvp");
+const processTemplate = require("./process-template");
+const toHandlebars = require("../json-templates/to-handlebars");
 
 function exportTemplatesToHandlebars(realms, createFile, options) {
   realms.forEach(realm => realm.templates
     .forEach(templatePath => {
-      if(options.template) {
+      if (options.template) {
         var regex = new RegExp(options.template);
-        if(regex.test(templatePath) === false) return;
+        if (regex.test(templatePath) === false) return;
       }
 
       var templateOptions = Object.assign({}, options, { realm: realm });
@@ -20,12 +20,12 @@ function exportTemplatesToHandlebars(realms, createFile, options) {
     }));
 }
 
-function transformTemplateToHandlebars(template, options, createFile) {
+function transformTemplateToHandlebars(pathOrValue, options, createFile) {
   try {
-    var kvp = processTemplate(template, options, createFile);
-    return kvpToHandlebars(kvp, options) + "\n";
-  } catch(err) {
-    err.message = "Unable to export ".concat(util.inspect(template), " to handlebars format.\n\n", err.message);
+    var template = processTemplate(pathOrValue, options, createFile);
+    return toHandlebars(template, options) + "\n";
+  } catch (err) {
+    err.message = "Unable to export ".concat(util.inspect(pathOrValue), " to handlebars format.\n\n", err.message);
     throw err;
   }
 }

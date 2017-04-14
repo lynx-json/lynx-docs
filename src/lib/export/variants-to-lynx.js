@@ -3,14 +3,14 @@
 const util = require("util");
 const path = require("path");
 const processTemplate = require("./process-template");
-const kvpToHandlebars = require("./to-handlebars/kvp");
+const toHandlebars = require("../json-templates/to-handlebars");
 const templateData = require("./template-data");
 const handlebars = require("handlebars");
 const jsonLint = require("json-lint");
 
 handlebars.Utils.escapeExpression = function (val) {
-  if(val === null || val === undefined) return "";
-  if(typeof val !== "string") return val;
+  if (val === null || val === undefined) return "";
+  if (typeof val !== "string") return val;
 
   var temp = JSON.stringify(val);
   return temp.substr(1, temp.length - 2);
@@ -29,18 +29,17 @@ function exportLynxDocuments(realms, createFile, options) {
 
 function transformVariantToLynx(variant, options, createFile) {
   try {
-    var kvp = processTemplate(variant.template, options, createFile);
-    var content = kvpToHandlebars(kvp, options) + "\n";
+    var template = processTemplate(variant.template, options, createFile);
+    var content = toHandlebars(template, options) + "\n";
 
     var data;
-    if((typeof variant.data) === "string") {
+    if ((typeof variant.data) === "string") {
       data = templateData(variant.data);
     } else {
-      data = variant.data;
+      data = variant.data || null;
     }
-
     return lintContent(bindData(content, data), variant);
-  } catch(err) {
+  } catch (err) {
     err.message = "Unable to export ".concat(util.inspect(variant.template), " to lynx format.\n\n", err.message);
     throw err;
   }
@@ -53,7 +52,7 @@ function bindData(content, data) {
 
 function lintContent(content, variant) {
   var linted = jsonLint(content);
-  if(linted.error) {
+  if (linted.error) {
     var message = "Failed JSON linting when data binding '".concat(variant.data, "'.\n");
     message += "\nNote: <<ERROR>> token denotes location of linting failure.\n"
       .concat(content.substr(0, linted.character - 1), "<<ERROR>>", content.substr(linted.character - 1));

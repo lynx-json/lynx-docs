@@ -3,82 +3,59 @@
 const fs = require("fs");
 const util = require("util");
 const parseYaml = require("../parse-yaml");
-const expandYaml = require("../expand-yaml");
-const finishYaml = require("../finish-yaml");
-const getMetadata = require("../metadata-yaml");
-const flattenSpecForKvp = require("./flatten-yaml");
-const extractSpec = require("./extract-spec");
+const expandTemplates = require("../json-templates/expand-templates");
+const expandPartials = require("../json-templates/partials/expand").expand;
+const resolvePartial = require("../json-templates/partials/resolve").resolvePartial;
 
-function getKVP(yaml) {
-  if(!util.isObject(yaml)) return { key: undefined, value: yaml };
-
-  var props = Object.getOwnPropertyNames(yaml);
-
-  if(props.length === 1 && getMetadata(props[0]).key === undefined) {
-    return {
-      key: props[0],
-      value: yaml[props[0]]
-    };
-  }
-
-  return { key: undefined, value: yaml };
-}
-
-function getTemplateKvp(template) {
-  if(util.isString(template)) {
-    var buffer = fs.readFileSync(template);
+function getTemplate(pathOrValue) {
+  if (util.isString(pathOrValue)) {
+    let buffer = fs.readFileSync(pathOrValue);
     try {
-      return getKVP(parseYaml(buffer));
-    } catch(err) {
-      err.message = "Error parsing YAML:\n".concat(err.message)
+      return parseYaml(buffer);
+    } catch (err) {
+      err.message = "Error parsing YAML:\n".concat(err.message);
       throw err;
     }
   }
 
-  return getKVP(template);
+  return pathOrValue;
 }
 
-function processTemplate(template, options, createFile) {
-  var kvp = getTemplateKvp(template);
+function processTemplate(pathOrValue, options, createFile) {
+  let template = getTemplate(pathOrValue);
 
-  if(options.log) {
+  if (options.log) {
     console.log("### Template Options");
     console.log(JSON.stringify(options), "\n");
   }
 
-  var expandedYaml = expandYaml(kvp, options);
-
-  if(options.log) {
+  let expanded = expandTemplates(template, options);
+  let templatePath = util.isString(pathOrValue) ? pathOrValue : null;
+  expanded = expandPartials(template, resolvePartial, templatePath);
+  if (options.log) {
     console.log("### Expanded");
-    console.log(JSON.stringify(expandedYaml), "\n");
+    console.log(JSON.stringify(expanded), "\n");
   }
 
-  var finishedYaml = finishYaml(expandedYaml, options);
+  // if (options.flatten) {
+  //   finishedYaml = flattenSpecForKvp(finishedYaml);
+  // }
+  //
+  // if (options.log) {
+  //   console.log("### Flattened");
+  //   console.log(JSON.stringify(finishedYaml), "\n");
+  // }
+  //
+  // if (options.spec) {
+  //   finishedYaml = extractSpec(finishedYaml, options, createFile);
+  // }
+  //
+  // if (options.log) {
+  //   console.log("### Spec extracted");
+  //   console.log(JSON.stringify(finishedYaml), "\n");
+  // }
 
-  if(options.log) {
-    console.log("### Finished");
-    console.log(JSON.stringify(finishedYaml), "\n");
-  }
-
-  if(options.flatten) {
-    finishedYaml = flattenSpecForKvp(finishedYaml);
-  }
-
-  if(options.log) {
-    console.log("### Flattened");
-    console.log(JSON.stringify(finishedYaml), "\n");
-  }
-
-  if(options.spec) {
-    finishedYaml = extractSpec(finishedYaml, options, createFile);
-  }
-
-  if(options.log) {
-    console.log("### Spec extracted");
-    console.log(JSON.stringify(finishedYaml), "\n");
-  }
-
-  return finishedYaml;
+  return expanded;
 }
 
 module.exports = exports = processTemplate;

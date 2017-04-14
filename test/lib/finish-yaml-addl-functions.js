@@ -232,7 +232,7 @@ describe("when using additional finishing functions", function () {
         key: "greeting",
         value: vsp({ "scope": "/relative/" })
       };
-      kvp["value#greeting"] = kvp.value; //mimicing optimization code from expand-yaml.js
+      kvp["value#greeting"] = kvp.value; //mimicing optimization code from 
       delete kvp.value;
 
       it("should resolve scope value");

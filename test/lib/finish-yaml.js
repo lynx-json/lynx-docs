@@ -6,7 +6,7 @@ var expect = chai.expect;
 var sinon = require("sinon");
 var finishYaml = require("../../src/lib/finish-yaml");
 
-describe("when finishing YAML", function () {
+describe.skip("when finishing YAML", function () {
   describe("finishing without added functions", function () {
     describe("with a string value", function () {
       it("should return an equivalent kvp", function () {

@@ -1,9 +1,11 @@
-header: "Child Realms ({{{realms.length}}})"
-realms:
-  value@realms:
-    - content>link:
-        label<realm:
-        href<url:
-      meta>link:
-        label: Metadata
-        href<metaURL:
+">container":
+  header: "Child Realms ({{{realms.length}}})"
+  realms:
+    value:
+      - "@realms":
+          content>link:
+            label<realm:
+            href<url:
+          meta>link:
+            label: Metadata
+            href<metaURL:

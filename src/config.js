@@ -1,8 +1,10 @@
 "use strict";
 
+//TODO: Remove module since all lynxy stuff is supposed to be handled by partials
+
 const util = require("util");
 const url = require("url");
-const expandYaml = require("./lib/expand-yaml");
+//const expandYaml = require("./lib/expand-yaml");
 
 module.exports = exports = function (lynxDocs) {
   var finishYaml = lynxDocs.lib.finish;
@@ -24,16 +26,16 @@ module.exports = exports = function (lynxDocs) {
 
     function isArray(meta) {
       var valueMeta = meta.children.value;
-      if(valueMeta.more) valueMeta = valueMeta.more();
+      if (valueMeta.more) valueMeta = valueMeta.more();
 
-      if(valueMeta.template) return valueMeta.template.type === "array";
-      if(valueMeta.templates) return valueMeta.templates[0].template.type === "array";
-      if(Array.isArray(valueMeta.src.value)) return true;
+      if (valueMeta.template) return valueMeta.template.type === "array";
+      if (valueMeta.templates) return valueMeta.templates[0].template.type === "array";
+      if (Array.isArray(valueMeta.src.value)) return true;
       return false;
     }
 
     var meta = lynxDocs.lib.meta(kvp);
-    if(!isNode(meta) || isArray(meta)) return;
+    if (!isNode(meta) || isArray(meta)) return;
 
     var node = kvp.value;
     node.spec.children = node.spec.children || [];
@@ -43,38 +45,38 @@ module.exports = exports = function (lynxDocs) {
         return childSpec.name === childKey;
       }
 
-      if(childMeta.more) childMeta = childMeta.more();
+      if (childMeta.more) childMeta = childMeta.more();
 
-      if(!isNode(childMeta) && !childMeta.templates) return;
-      if(node.spec.children.some(match)) return;
+      if (!isNode(childMeta) && !childMeta.templates) return;
+      if (node.spec.children.some(match)) return;
 
       node.spec.children.push({ name: childKey });
     }
 
     function findTemplateWithChildren(templates) {
       var templatesWithChildren = templates.map(t => {
-          if(t.more) return t.more();
+          if (t.more) return t.more();
           return t;
         })
         .filter(t => t.children);
-      if(templatesWithChildren.length > 1) {
+      if (templatesWithChildren.length > 1) {
         var compare = Object.getOwnPropertyNames(templatesWithChildren[0].children).sort().join();
-        for(var i = 1; i < templatesWithChildren.length; i++) {
-          if(Object.getOwnPropertyNames(templatesWithChildren[i].children).sort().join() !== compare) {
+        for (var i = 1; i < templatesWithChildren.length; i++) {
+          if (Object.getOwnPropertyNames(templatesWithChildren[i].children).sort().join() !== compare) {
             throw new Error("Two value templates have different children. This is an authoring error.");
           }
         }
       }
-      if(templatesWithChildren.length === 0) return templates[0];
+      if (templatesWithChildren.length === 0) return templates[0];
       return templatesWithChildren[0];
     }
 
     var valueMeta = meta.children.value;
-    if(valueMeta.more) valueMeta = valueMeta.more();
+    if (valueMeta.more) valueMeta = valueMeta.more();
 
-    if(valueMeta.templates) valueMeta = findTemplateWithChildren(valueMeta.templates);
+    if (valueMeta.templates) valueMeta = findTemplateWithChildren(valueMeta.templates);
 
-    if(valueMeta.children) {
+    if (valueMeta.children) {
       Object.getOwnPropertyNames(valueMeta.children)
         .filter(childKey => !expandYaml.excludes.some(f => f({ key: childKey })))
         .forEach(childKey => {

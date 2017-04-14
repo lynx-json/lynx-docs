@@ -1,9 +1,10 @@
 const chai = require("chai");
-const chaiAsPromised = require("chai-as-promised");
+const expect = chai.expect;
+const handlebars = require("handlebars");
 
-const should = chai.should();
-chai.use(chaiAsPromised);
-const partials = require("../../../src/lib/partials-yaml");
+const resolvePartials = require("../../../src/lib/json-templates/partials/resolve");
+const expandPartials = require("../../../src/lib/json-templates/partials/expand");
+const toHandlebars = require("../../../src/lib/json-templates/to-handlebars");
 
 var partialsTests = [
   require("./card"),
@@ -19,11 +20,11 @@ var partialsTests = [
 
 describe("partials", function () {
   partialsTests.forEach(tests => {
-    describe(tests.description, function () {
+    describe(tests.partial + " partials", function () {
       tests.forEach(test => {
         describe(test.description, function () {
           it("should ".concat(test.should), function () {
-            runTest(test);
+            runTest(test, tests.partial);
           });
         });
       });
@@ -31,8 +32,13 @@ describe("partials", function () {
   });
 });
 
-function runTest(test) {
-  var actual = partials.getPartial(test.kvp, { realm: { folder: process.cwd() } });
-  actual.value.spec.should.deep.equal(test.expected.spec);
-  actual.value.value.should.deep.equal(test.expected.value);
+function runTest(test, partialName) {
+  var template = {};
+  template[">" + partialName] = test.parameters;
+
+  var expanded = expandPartials.expand(template, resolvePartials.resolvePartial);
+  let hbContent = toHandlebars(expanded);
+  let json = handlebars.compile(hbContent)(null);
+  let parsed = JSON.parse(json);
+  expect(parsed).to.deep.equal(test.expected);
 }

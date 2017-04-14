@@ -1,6 +1,7 @@
-header: "Variants ({{{variants.length}}})"
-variants>list:
-  value@variants:
-    - href<url:
-      label<name:
-      type<: application/lynx+json
+">container":
+  header: "Variants ({{{variants.length}}})"
+  variants>list:
+    - "@variants":
+        href<url:
+        label<name:
+        type<: application/lynx+json

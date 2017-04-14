@@ -1,6 +1,5 @@
-spec:
-  hints: [ http://lynx-json.org/docs/realm-index ]
-value:
+">lynx":
+  spec.hints: [ http://lynx-json.org/docs/realm-index ]
   scope<realm:
   header:
     label<realm: Realm
@@ -8,7 +7,8 @@ value:
       href<metaURL:
       label: ℹ︎
       type: application/lynx+json
-  variants@variants:
-      - header<title: ""
-        href<url: ""
-        type<: application/lynx+json
+  variants:
+      - "@variants":
+          header<title: ""
+          href<url: ""
+          type<: application/lynx+json
