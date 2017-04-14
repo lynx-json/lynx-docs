@@ -1,7 +1,6 @@
 const fs = require("fs");
 const path = require("path");
 const url = require("url");
-const fromYaml = require("./from-yaml");
 const partialExtensions = [".js", ".yml"];
 const lynxDocsPartialDirectory = path.join(__dirname, "../../_partials");
 const parseYaml = require("../../parse-yaml");
