@@ -60,7 +60,7 @@ function resolvePartial(partialUrl) { //some/path/to/templat.lynx.yml?partial=na
     return !!fileName ? path.join(directory, fileName) : acc;
   }, null);
 
-  if (!partialFile) throw Error("Unable to find partial '" + name + "'. The following directories where scanned. \n" + directories.join("\n"));
+  if (!partialFile) throw Error("Unable to find partial '" + parsed.query.partial + "'. The following directories where scanned. \n" + directories.join("\n"));
   if (path.extname(partialFile) === ".js") return exports.convertJsPartialToFunction(partialFile);
   else return exports.convertYamlPartialToFunction(partialFile);
 }
