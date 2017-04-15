@@ -34,6 +34,11 @@ function restoreStubs(stubs) {
   });
 }
 
+function getTests(tests) {
+  let filtered = tests.filter(test => test.include === true);
+  return filtered.length > 0 ? filtered : tests;
+}
+
 describe("resolve partials module", function () {
   describe("when calculating directories to scan for partials", function () {
     let tests = [{
@@ -68,7 +73,7 @@ describe("resolve partials module", function () {
       expect(result).to.deep.equal(test.expected);
     }
 
-    tests.forEach(test => {
+    getTests(tests).forEach(test => {
       describe("when calculating directories for partial '" + test.partialUrl + "'", function () {
         it("should result in expected directories", function () {
           runTest(test);
@@ -188,7 +193,7 @@ describe("resolve partials module", function () {
       expect(resolve.scanDirectoryForPartial(test.directory, test.partialName)).to.equal(test.expected);
     }
 
-    tests.forEach(test => {
+    getTests(tests).forEach(test => {
       describe(test.description, function () {
         beforeEach(function () {
           setupStubs(test.stubs);
@@ -258,7 +263,7 @@ describe("resolve partials module", function () {
       expect(partial).to.equal(test.expected);
     }
 
-    tests.forEach(test => {
+    getTests(tests).forEach(test => {
       describe(test.description, function () {
         beforeEach(function () {
           setupStubs(test.stubs);

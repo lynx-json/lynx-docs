@@ -2,8 +2,10 @@ const traverse = require("traverse");
 const keyMetadata = require("../json-templates/key-metadata");
 const lynxNodeKeys = ["spec", "value"];
 
-function isLynxNode(node) {
-  return node.keys && lynxNodeKeys.every(key => node.keys.includes(key));
+function isLynxNode(lynx) {
+  if (!lynx) return false
+  if (Object.prototype.toString.call(lynx) !== "[object Object]") return false;
+  return lynxNodeKeys.every(key => Object.keys(lynx).includes(key));
 }
 
 function calculateSpecName(node) {
@@ -14,6 +16,19 @@ function calculateSpecName(node) {
     context = context.parent;
   }
   return "";
+}
+
+function canAddChildToParent(childNode, parentNode) {
+  let context = childNode;
+  while (context) {
+    let meta = keyMetadata.parse(context.key);
+    if (meta.binding && keyMetadata.sectionTokens.includes(meta.binding.token)) return false;
+    if (context === parentNode) {
+      return !Array.isArray(context.node.value[""] || context.node.value);
+    }
+    context = context.parent;
+  }
+  return false;
 }
 
 function addSpecToParent(childNode, parentNode) {
@@ -31,11 +46,10 @@ function walkLynxAncestory(leaf) {
   let context = leaf;
   let lynxNode;
   while (context) {
-    if (isLynxNode(context)) {
-      let lynx = context.node;
-      if (!lynx.spec) console.log(context);
-      if (!lynx.spec.name) lynx.spec.name = calculateSpecName(context);
-      if (lynxNode && !Array.isArray(lynx.value[""] || lynx.value)) {
+    let pair = context.node;
+    if (isLynxNode(pair)) {
+      if (!pair.spec.name) pair.spec.name = calculateSpecName(context);
+      if (canAddChildToParent(lynxNode, context)) {
         addSpecToParent(lynxNode, context);
       }
       lynxNode = context;
@@ -46,13 +60,11 @@ function walkLynxAncestory(leaf) {
 
 function flatten(template) {
 
-  traverse(template).forEach(function (value) {
+  return traverse(template).forEach(function (value) {
     if (this.isLeaf && !this.path.includes("spec")) {
       walkLynxAncestory(this);
     }
   });
-
-  return template;
 }
 
 module.exports = exports = flatten;

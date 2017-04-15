@@ -205,8 +205,72 @@ let tests = [{
     description: "long syntax with different tokens and multiple variables should disable expansion",
     template: { foo: { "#bar": "Bar", "^baz": "Baz" } },
     expected: { foo: { "#bar": "Bar", "^baz": "Baz" } }
+  },
+  {
+    description: "intermediate syntax with nested templates and partials",
+    template: {
+      "foo#>container": {
+        "bar#>container": {
+          "fooBar>text": "Foo and bar"
+        },
+        "bar^>container": {
+          "fooNoBar>text": "Foo no bar"
+        }
+      },
+      "foo^>container": {
+        "bar#>container": {
+          "noFooBar>text": "No foo and bar"
+        },
+        "bar^>container": {
+          "noFooNoBar>text": "No foo and no bar"
+        }
+      }
+    },
+    expected: {
+      foo: {
+        ">container": {
+          "#foo": {
+            bar: {
+              ">container": {
+                "#bar": {
+                  fooBar: {
+                    ">text": "Foo and bar"
+                  }
+                },
+                "^bar": {
+                  fooNoBar: {
+                    ">text": "Foo no bar"
+                  }
+                }
+              }
+            }
+          },
+          "^foo": {
+            bar: {
+              ">container": {
+                "#bar": {
+                  noFooBar: {
+                    ">text": "No foo and bar"
+                  }
+                },
+                "^bar": {
+                  noFooNoBar: {
+                    ">text": "No foo and no bar"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
   }
 ];
+
+function getTests() {
+  let filtered = tests.filter(test => test.include === true);
+  return filtered.length > 0 ? filtered : tests;
+}
 
 function runTest(test) {
   let result = expandTemplates(test.template, test.inferInverse);
@@ -214,7 +278,7 @@ function runTest(test) {
 }
 
 describe("when expanding templates", function () {
-  tests.forEach(function (test) {
+  getTests().forEach(function (test) {
     describe("when ".concat(test.description), function () {
       let should = test.expected ? "should expand value" : "should not change value";
       it(should, function () {
@@ -223,6 +287,7 @@ describe("when expanding templates", function () {
     });
   });
 });
+
 describe("when expanding invalid templates", function () {
   function wrapTestRun(test) {
     return function () {

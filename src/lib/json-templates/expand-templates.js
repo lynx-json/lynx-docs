@@ -49,7 +49,7 @@ function convertForExpansion(metas, sourceValue, inferInverseTemplates) {
     return accumulator;
   }, []);
 
-  converted.forEach((item, index) => {
+  converted.forEach(item => {
     function pushTemplate(template) {
       item.keys.push(template.token + template.variable);
     }

@@ -7,7 +7,7 @@ const conditional = /^([^?]+)\?(.*)$/;
 const getType = (value) => Object.prototype.toString.call(value).slice(8, -1);
 
 function replacePlaceholderValue(partial, partialKey, parameters, parametersKey, newKey) {
-  if (parameters && parameters[parametersKey]) {
+  if (parameters && (parametersKey === "" || parameters[parametersKey])) {
     partial[newKey] = parameters[parametersKey];
     delete parameters[parametersKey];
   } else if (partial[partialKey]) {
@@ -44,7 +44,7 @@ function processPartial(partial, parameters) {
       if (placeholder.replace) {
         let match = placeholder.replace[1];
         let wildcard = match === "*";
-        if (wildcard && (getType(parameters) !== "Object")) {
+        if (wildcard && (parameters === null || (getType(parameters) !== "Object"))) {
           value[""] = parameters; //this is taking advantage of the fact that objects that have no keys
           //don't write the starting or ending braces. So these two representations are equal
           // { value: "string" }  { value: { "": "string" } }

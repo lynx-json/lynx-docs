@@ -8,7 +8,7 @@ const expandPartials = require("../json-templates/partials/expand").expand;
 const resolvePartial = require("../json-templates/partials/resolve").resolvePartial;
 
 function getTemplate(pathOrValue) {
-  if (util.isString(pathOrValue)) {
+  if (typeof pathOrValue === "string") {
     let buffer = fs.readFileSync(pathOrValue);
     try {
       return parseYaml(buffer);
@@ -23,7 +23,6 @@ function getTemplate(pathOrValue) {
 
 function processTemplate(pathOrValue, options, createFile) {
   let template = getTemplate(pathOrValue);
-
   if (options.log) {
     console.log("### Template Options");
     console.log(JSON.stringify(options), "\n");
@@ -31,7 +30,7 @@ function processTemplate(pathOrValue, options, createFile) {
 
   let expanded = expandTemplates(template, options);
   let templatePath = util.isString(pathOrValue) ? pathOrValue : null;
-  expanded = expandPartials(template, resolvePartial, templatePath);
+  expanded = expandPartials(expanded, resolvePartial, templatePath);
   if (options.log) {
     console.log("### Expanded");
     console.log(JSON.stringify(expanded), "\n");

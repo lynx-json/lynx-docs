@@ -13,7 +13,7 @@ function calculatePartialUrl(templatePath, partialName) {
 }
 
 function expandPartials(condensed, resolvePartial, templatePath) {
-  return traverse(condensed).map(function (value) {
+  var result = traverse(condensed).map(function (value) {
     if (!this.keys) return;
 
     let keys = this.keys;
@@ -22,7 +22,8 @@ function expandPartials(condensed, resolvePartial, templatePath) {
     let parseKey = (key) => keyMetadata.parse(key);
     let processPartialMeta = (meta) => {
       var partialUrl = exports.calculatePartialUrl(templatePath, meta.partial.variable);
-      let partial = resolvePartial(partialUrl)(value[meta.source]);
+      let partialFn = resolvePartial(partialUrl);
+      let partial = partialFn(value[meta.source]);
       let pattern = new RegExp(meta.partial.token + "(" + meta.partial.variable + ")?");
       let newKey = meta.source.replace(pattern, "");
       if (!newKey) {
@@ -41,11 +42,11 @@ function expandPartials(condensed, resolvePartial, templatePath) {
       // if (partialMetas.length > 1) throw Error("Multiple partials encountered. There should only be a single partial. Value must be processed by 'expand-templates' module prior to expanding partials.");
 
       partialMetas.forEach(processPartialMeta);
-
       this.update(value);
       keys = Object.keys(value);
     }
   });
+  return result;
 }
 
 exports.expand = expandPartials;

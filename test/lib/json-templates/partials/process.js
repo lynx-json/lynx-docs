@@ -221,13 +221,18 @@ let tests = [{
   }
 ];
 
+function getTests() {
+  let filtered = tests.filter(test => test.include === true);
+  return filtered.length > 0 ? filtered : tests;
+}
+
 function runTest(test) {
   let result = processPartial(test.partial, test.parameters);
   expect(result).to.deep.equal(test.expected);
 }
 
 describe("when processing partials", function () {
-  tests.forEach(function (test) {
+  getTests().forEach(function (test) {
     //if (test.only !== true) return;
     describe("when ".concat(test.description), function () {
       it(test.should, function () {

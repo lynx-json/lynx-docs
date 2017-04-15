@@ -69,7 +69,7 @@ var tests = [{
   },
   {
     description: "lynx object template and null inverse",
-    should: "add children",
+    should: "not add children",
     template: {
       "foo>container": {
         "#foo": { "bar>text": "Bar", "qux>text": "Qux" },
@@ -81,22 +81,18 @@ var tests = [{
       foo: {
         spec: {
           name: "foo",
-          hints: ["container"],
-          children: [
-            { name: "bar", hints: ["text"] },
-            { name: "qux", hints: ["text"] }
-          ]
+          hints: ["container"]
         },
         value: {
-          bar: "Bar",
-          qux: "Qux"
+          bar: { spec: { name: "bar", hints: ["text"] }, value: "Bar" },
+          qux: { spec: { name: "qux", hints: ["text"] }, value: "Qux" }
         }
       }
     }
   },
   {
     description: "lynx object with template and non null inverse - truthy",
-    should: "add children",
+    should: "not add children",
     template: {
       "foo": {
         "#foo>container": { "bar>text": "Bar", "qux>text": "Qux" },
@@ -108,22 +104,18 @@ var tests = [{
       foo: {
         spec: {
           name: "foo",
-          hints: ["container"],
-          children: [
-            { name: "bar", hints: ["text"] },
-            { name: "qux", hints: ["text"] }
-          ]
+          hints: ["container"]
         },
         value: {
-          bar: "Bar",
-          qux: "Qux"
+          bar: { spec: { name: "bar", hints: ["text"] }, value: "Bar" },
+          qux: { spec: { name: "qux", hints: ["text"] }, value: "Qux" }
         }
       }
     }
   },
   {
     description: "lynx object with template and non null inverse - falsey",
-    should: "add children",
+    should: "not add children",
     template: {
       "foo": {
         "#foo>container": { "bar>text": "Bar", "qux>text": "Qux" },
@@ -135,36 +127,32 @@ var tests = [{
       foo: {
         spec: {
           name: "foo",
-          hints: ["container"],
-          children: [
-            { name: "baz", hints: ["text"] }
-          ]
+          hints: ["container"]
         },
         value: {
-          baz: "Baz"
+          baz: { spec: { name: "baz", hints: ["text"] }, value: "Baz" }
         }
       }
     }
   },
   {
-    skip: true,
     description: "lynx object with nested templates and non null inverse - truthy",
     should: "add children to lowest nested level",
     template: {
       "foo#>container": {
         "bar#>container": {
-          "message>text": "Foo and bar"
+          "fooBar>text": "Foo and bar"
         },
         "bar^>container": {
-          "message>text": "Foo and bar"
+          "fooNoBar>text": "Foo no bar"
         }
       },
       "foo^>container": {
         "bar#>container": {
-          "message>text": "No foo and bar"
+          "noFooBar>text": "No foo and bar"
         },
         "bar^>container": {
-          "message>text": "No foo and no bar"
+          "noFooNoBar>text": "No foo and no bar"
         }
       }
     },
@@ -173,34 +161,57 @@ var tests = [{
       foo: {
         spec: {
           name: "foo",
-          hints: ["container"],
-          children: [
-            { name: "bar", hints: ["text"] },
-            { name: "qux", hints: ["text"] }
-          ]
+          hints: ["container"]
         },
         value: {
-          bar: "Bar",
-          qux: "Qux"
+          bar: {
+            spec: {
+              name: "bar",
+              hints: ["container"]
+            },
+            value: {
+              fooBar: {
+                spec: {
+                  name: "fooBar",
+                  hints: ["text"]
+                },
+                value: "Foo and bar"
+              }
+            }
+          }
         }
       }
     }
   }
 ];
 
-function runTest(test) {
-  var processed = processTemplate(test.template, {});
-  var result = flatten(processed);
-  let content = toHandlebars(result);
-  let json = handlebars.compile(content)(test.data);
-  let parsed = JSON.parse(json);
+function getTests() {
+  let filtered = tests.filter(test => test.include === true);
+  return filtered.length > 0 ? filtered : tests;
+}
 
+function runTest(test) {
+  let processed, result, content, json, parsed;
+  try {
+    processed = processTemplate(test.template, {});
+    result = flatten(processed);
+    content = toHandlebars(result);
+    json = handlebars.compile(content)(test.data);
+    parsed = JSON.parse(json);
+  } catch (err) {
+    test.log = true;
+  }
+  if (test.log) {
+    console.log("processed", "\n" + JSON.stringify(processed, null, 2));
+    console.log("flattened", "\n" + JSON.stringify(result, null, 2));
+    console.log("handlebars", "\n" + content);
+    console.log("json", "\n" + json);
+  }
   expect(parsed).to.deep.equal(test.expected);
 }
 
 describe("when flattening templates for lynx documents", function () {
-  tests.forEach(function (test) {
-    if (test.skip) return;
+  getTests().forEach(function (test) {
     describe("when " + test.description, function () {
       it("should " + test.should, function () {
         runTest(test);
