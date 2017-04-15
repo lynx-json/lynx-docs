@@ -26,10 +26,10 @@ function expandPartials(condensed, resolvePartial, templatePath) {
       let pattern = new RegExp(meta.partial.token + "(" + meta.partial.variable + ")?");
       let newKey = meta.source.replace(pattern, "");
       if (!newKey) {
-        value = expandTemplates(partial);
+        value = expandTemplates(partial, null, true);
       } else {
         delete value[meta.source];
-        value[newKey] = expandTemplates(partial);
+        value[newKey] = expandTemplates(partial, null, true);
       }
     };
 

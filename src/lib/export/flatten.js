@@ -1,28 +1,57 @@
 const traverse = require("traverse");
+const keyMetadata = require("../json-templates/key-metadata");
 const lynxNodeKeys = ["spec", "value"];
 
-function getLynxParent(node) {
+function isLynxNode(node) {
+  return node.keys && lynxNodeKeys.every(key => node.keys.includes(key));
+}
 
-  var candidate = node.parent;
-  while (candidate) {
-    let hasLynxKeys = candidate.keys && lynxNodeKeys.every(lnk => candidate.keys.includes(lnk));
-    if (hasLynxKeys && !candidate.path.includes("spec")) return candidate;
-    candidate = candidate.parent;
+function calculateSpecName(node) {
+  let context = node;
+  while (context) {
+    let meta = keyMetadata.parse(context.key);
+    if (meta.name) return meta.name;
+    context = context.parent;
+  }
+  return "";
+}
+
+function addSpecToParent(childNode, parentNode) {
+  var parent = parentNode.node;
+  var child = childNode.node;
+
+  if (!parent.spec.children) parent.spec.children = [];
+  parent.spec.children.push(child.spec);
+  child = child.value;
+  childNode.update(child);
+  parentNode.update(parent);
+}
+
+function walkLynxAncestory(leaf) {
+  let context = leaf;
+  let lynxNode;
+  while (context) {
+    if (isLynxNode(context)) {
+      let lynx = context.node;
+      if (!lynx.spec) console.log(context);
+      if (!lynx.spec.name) lynx.spec.name = calculateSpecName(context);
+      if (lynxNode && !Array.isArray(lynx.value[""] || lynx.value)) {
+        addSpecToParent(lynxNode, context);
+      }
+      lynxNode = context;
+    }
+    context = context.parent;
   }
 }
 
 function flatten(template) {
 
-  console.log(template);
-
-  var leafs = traverse(template).reduce(function (acc, value) {
+  traverse(template).forEach(function (value) {
     if (this.isLeaf && !this.path.includes("spec")) {
-      acc.push(this);
+      walkLynxAncestory(this);
     }
-    return acc;
-  }, []);
+  });
 
-  console.log("lynx parents", leafs.map(getLynxParent));
   return template;
 }
 

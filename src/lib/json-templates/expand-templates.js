@@ -73,7 +73,7 @@ function convertForExpansion(metas, sourceValue, inferInverseTemplates) {
   return converted;
 }
 
-function expandTemplates(condensed, inferInverseTemplates) {
+function expandTemplates(condensed, inferInverseTemplates, ignoreMixedKeys) {
 
   return traverse(condensed).map(function (value) {
     if (!this.keys) return; //nothing to expand. Always true for simple values
@@ -84,7 +84,7 @@ function expandTemplates(condensed, inferInverseTemplates) {
     if (expandMetas.length === 0) return; //nothing to expand.
 
     let invalid = expandMetas.length !== this.keys.length && expandMetas.filter(meta => !meta.name).length > 0;
-    if (invalid) throw Error("Named and unnamed keys cannot exist in the same object. The keys in error are ['" + this.keys.join("','") + "'].");
+    if (invalid && ignoreMixedKeys !== true) throw Error("Named and unnamed keys cannot exist in the same object. The keys in error are ['" + this.keys.join("','") + "'].");
 
     if (inferInverseTemplates !== false) {
       inferInverseTemplates = isInverseInferenceAllowed(expandMetas);
