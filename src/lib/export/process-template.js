@@ -1,15 +1,15 @@
 "use strict";
 
 const fs = require("fs");
-const util = require("util");
+const types = require("../../types");
 const parseYaml = require("../parse-yaml");
-const expandTemplates = require("../json-templates/expand-templates");
-const expandPartials = require("../json-templates/partials/expand").expand;
-const resolvePartial = require("../json-templates/partials/resolve").resolve;
+const expandTokens = require("../json-templates/expand-tokens");
+const expandPartials = require("../json-templates/partials/expand");
+const resolvePartials = require("../json-templates/partials/resolve");
 const flatten = require("./flatten");
 
 function getTemplate(pathOrValue) {
-  if (typeof pathOrValue === "string") {
+  if (types.isString(pathOrValue)) {
     let buffer = fs.readFileSync(pathOrValue);
     try {
       return parseYaml(buffer);
@@ -22,6 +22,10 @@ function getTemplate(pathOrValue) {
   return pathOrValue;
 }
 
+function addRealmToTemplate(realm, template) {
+  if (realm && !template.realm) template.realm = realm.realm;
+}
+
 function processTemplate(pathOrValue, options, createFile) {
   let template = getTemplate(pathOrValue);
   if (options.log) {
@@ -29,22 +33,27 @@ function processTemplate(pathOrValue, options, createFile) {
     console.log(JSON.stringify(options), "\n");
   }
 
-  template = expandTemplates(template, options);
-  let templatePath = util.isString(pathOrValue) ? pathOrValue : null;
-  template = expandPartials(template, resolvePartial, templatePath);
+  template = expandTokens.expand(template, options.inferInverse);
 
   if (options.log) {
-    console.log("### Expanded");
-    console.log(JSON.stringify(expanded), "\n");
+    console.log("### Tokens Expanded");
+    console.log(JSON.stringify(template), "\n");
   }
 
-  if (options.flatten) {
-    template = flatten(expanded);
+  let templatePath = types.isString(pathOrValue) ? pathOrValue : null;
+  template = expandPartials.expand(template, resolvePartials.resolve, templatePath, options.inferInverse);
+  if (options.log) {
+    console.log("### Partials Processed");
+    console.log(JSON.stringify(template), "\n");
+  }
+
+  if (options.flatten !== false) { //TODO: This is currently needed to calculate children
+    template = flatten(template);
   }
 
   if (options.log) {
     console.log("### Flattened");
-    console.log(JSON.stringify(finishedYaml), "\n");
+    console.log(JSON.stringify(template), "\n");
   }
   //
   // if (options.spec) {
@@ -55,8 +64,7 @@ function processTemplate(pathOrValue, options, createFile) {
   //   console.log("### Spec extracted");
   //   console.log(JSON.stringify(finishedYaml), "\n");
   // }
-
-  if (options.realm) template["realm"] = options.realm.realm;
+  addRealmToTemplate(options && options.realm, template);
 
   return template;
 }

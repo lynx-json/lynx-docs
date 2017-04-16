@@ -1,15 +1,16 @@
 ">container":
-  searchForm:
+  searchForm>form:
     q:
       spec:
-        hints: [ line ]
+        hints: [ line, text ]
         input: true
       value: ""
-    submit:
+    submit>:
       label: Search
       action: .
-  results:
+  results>list:
     - "@realms":
-        label<realm: Unknown
-        href<url: Unknown
-        type: application/lynx+json
+        ">link":
+          label<realm: Unknown
+          href<url: Unknown
+          type: application/lynx+json

@@ -1,7 +1,7 @@
 const chai = require("chai");
 const expect = chai.expect;
 
-const expandTemplates = require("../../../src/lib/json-templates/expand-templates");
+const expandTokens = require("../../../src/lib/json-templates/expand-tokens");
 
 let tests = [{
     description: "value has no template keys",
@@ -273,7 +273,7 @@ function getTests() {
 }
 
 function runTest(test) {
-  let result = expandTemplates(test.template, test.inferInverse);
+  let result = expandTokens.expand(test.template, test.inferInverse);
   expect(result).to.deep.equal(test.expected);
 }
 

@@ -6,11 +6,10 @@ const expect = chai.expect;
 const sinon = require("sinon");
 const fs = require("fs");
 const path = require("path");
-const parseYaml = require("../../../src/lib/parse-yaml");
 const templatesToHandlebars = require("../../../src/lib/export/to-handlebars").all;
 
-var kvp = { key: "key", value: "value" };
-var tests = [{
+let template = "foo: Bar";
+let tests = [{
     realms: [{
       root: "/src/",
       realm: "/src/folder-one/",
@@ -45,7 +44,7 @@ var tests = [{
 ];
 
 function runTest(test) {
-  var count = 0;
+  let count = 0;
 
   function onFile(path, content) {
     path.should.equal(test.expected[count]);
@@ -56,9 +55,9 @@ function runTest(test) {
   count.should.equal(test.expected.length);
 }
 
-describe.skip("when exporting templates to handlebars", function () {
+describe("when exporting templates to handlebars", function () {
   beforeEach(function () {
-    sinon.stub(fs, "readFileSync").returns(parseYaml(kvp));
+    sinon.stub(fs, "readFileSync").returns(template);
   });
 
   afterEach(function () {

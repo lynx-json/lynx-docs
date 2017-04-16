@@ -12,10 +12,7 @@ var tests = [{
     template: { "bar>text": "Bar" },
     expected: {
       bar: {
-        spec: {
-          name: "bar",
-          hints: ["text"]
-        },
+        spec: { hints: ["text"] },
         value: "Bar"
       }
     }
@@ -27,16 +24,15 @@ var tests = [{
     expected: {
       foo: {
         spec: {
-          name: "foo",
           hints: ["container"],
           children: [
-            { name: "bar", hints: ["text"] },
-            { name: "qux", hints: ["text"] }
+            { name: "bar" },
+            { name: "qux" }
           ]
         },
         value: {
-          bar: "Bar",
-          qux: "Qux"
+          bar: { spec: { hints: ["text"] }, value: "Bar" },
+          qux: { spec: { hints: ["text"] }, value: "Qux" }
         }
       }
     }
@@ -48,22 +44,69 @@ var tests = [{
     expected: {
       foo: {
         spec: {
-          name: "foo",
           hints: ["container"]
         },
         value: [{
             bar: {
-              spec: { hints: ["text"], name: "bar" },
+              spec: { hints: ["text"] },
               value: "Bar"
             }
           },
           {
             qux: {
-              spec: { hints: ["text"], name: "qux" },
+              spec: { hints: ["text"] },
               value: "Qux"
             }
           }
         ]
+      }
+    }
+  },
+  {
+    description: "lynx document",
+    should: "add children",
+    template: {
+      ">document": {
+        "realm": "http://foo",
+        ">container": {
+          "one>container": {
+            "oneOne>text": "One and one",
+            "oneTwo>text": "One and two"
+          },
+          "two>container": {
+            "oneOne>text": "One and one",
+            "oneTwo>text": "One and two"
+          }
+        }
+      }
+    },
+    expected: {
+      realm: "http://foo",
+      spec: {
+        hints: ["container"],
+        children: [{ name: "one" }, { name: "two" }]
+      },
+      value: {
+        one: {
+          spec: {
+            hints: ["container"],
+            children: [{ name: "oneOne" }, { name: "oneTwo" }]
+          },
+          value: {
+            oneOne: { spec: { hints: ["text"] }, value: "One and one" },
+            oneTwo: { spec: { hints: ["text"] }, value: "One and two" }
+          }
+        },
+        two: {
+          spec: {
+            hints: ["container"],
+            children: [{ name: "oneOne" }, { name: "oneTwo" }]
+          },
+          value: {
+            oneOne: { spec: { hints: ["text"] }, value: "One and one" },
+            oneTwo: { spec: { hints: ["text"] }, value: "One and two" }
+          }
+        }
       }
     }
   },
@@ -80,12 +123,11 @@ var tests = [{
     expected: {
       foo: {
         spec: {
-          name: "foo",
           hints: ["container"]
         },
         value: {
-          bar: { spec: { name: "bar", hints: ["text"] }, value: "Bar" },
-          qux: { spec: { name: "qux", hints: ["text"] }, value: "Qux" }
+          bar: { spec: { hints: ["text"] }, value: "Bar" },
+          qux: { spec: { hints: ["text"] }, value: "Qux" }
         }
       }
     }
@@ -103,12 +145,11 @@ var tests = [{
     expected: {
       foo: {
         spec: {
-          name: "foo",
           hints: ["container"]
         },
         value: {
-          bar: { spec: { name: "bar", hints: ["text"] }, value: "Bar" },
-          qux: { spec: { name: "qux", hints: ["text"] }, value: "Qux" }
+          bar: { spec: { hints: ["text"] }, value: "Bar" },
+          qux: { spec: { hints: ["text"] }, value: "Qux" }
         }
       }
     }
@@ -126,11 +167,10 @@ var tests = [{
     expected: {
       foo: {
         spec: {
-          name: "foo",
           hints: ["container"]
         },
         value: {
-          baz: { spec: { name: "baz", hints: ["text"] }, value: "Baz" }
+          baz: { spec: { hints: ["text"] }, value: "Baz" }
         }
       }
     }
@@ -160,19 +200,16 @@ var tests = [{
     expected: {
       foo: {
         spec: {
-          name: "foo",
           hints: ["container"]
         },
         value: {
           bar: {
             spec: {
-              name: "bar",
               hints: ["container"]
             },
             value: {
               fooBar: {
                 spec: {
-                  name: "fooBar",
                   hints: ["text"]
                 },
                 value: "Foo and bar"
@@ -192,16 +229,12 @@ function getTests() {
 
 function runTest(test) {
   let processed, result, content, json, parsed;
-  try {
-    processed = processTemplate(test.template, { flatten: false });
-    result = flatten(processed);
-    content = toHandlebars(result);
-    json = handlebars.compile(content)(test.data);
-    parsed = JSON.parse(json);
-  } catch (err) {
-    test.log = true;
-  }
-  if (test.log) {
+  processed = processTemplate(test.template, { flatten: false });
+  result = flatten(processed);
+  content = toHandlebars(result);
+  json = handlebars.compile(content)(test.data);
+  parsed = JSON.parse(json);
+  if (test.include) {
     console.log("processed", "\n" + JSON.stringify(processed, null, 2));
     console.log("flattened", "\n" + JSON.stringify(result, null, 2));
     console.log("handlebars", "\n" + content);

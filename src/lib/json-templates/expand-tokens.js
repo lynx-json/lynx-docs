@@ -2,6 +2,7 @@
 
 const traverse = require("traverse");
 const keyMetadata = require("./key-metadata");
+const types = require("../../types");
 
 function isInverseInferenceAllowed(metas) {
   let nameBindings = metas.reduce((acc, meta) => {
@@ -43,7 +44,7 @@ function addInverseSections(metas) {
     });
 }
 
-function convertForExpansion(metas, sourceValue, inferInverseTemplates) {
+function convertForExpansion(metas, sourceValue, inferInverseTokenValues) {
   let converted = metas.reduce((accumulator, meta) => {
     accumulator.push(convertMeta(meta, [], sourceValue[meta.source]));
     return accumulator;
@@ -68,30 +69,34 @@ function convertForExpansion(metas, sourceValue, inferInverseTemplates) {
     if (item.partial) pushTemplate(item.partial);
   });
 
-  if (inferInverseTemplates !== false) addInverseSections(converted);
+  if (inferInverseTokenValues !== false) addInverseSections(converted);
 
   return converted;
 }
 
-function expandTemplates(condensed, inferInverseTemplates, ignoreMixedKeys) {
+function expandTokens(condensed, inferInverseTokenValues) {
 
   return traverse(condensed).map(function (value) {
     if (!this.keys) return; //nothing to expand. Always true for simple values
-    if (Array.isArray(value)) return; //arrays are not expanded, only objects in array
+    if (types.isArray(value)) return; //arrays are not expanded, only objects in array
 
     let metas = this.keys.map(key => keyMetadata.parse(key));
     let expandMetas = metas.filter(meta => meta.partial || meta.binding);
     if (expandMetas.length === 0) return; //nothing to expand.
 
-    let invalid = expandMetas.length !== this.keys.length && expandMetas.filter(meta => !meta.name).length > 0;
-    if (invalid && ignoreMixedKeys !== true) throw Error("Named and unnamed keys cannot exist in the same object. The keys in error are ['" + this.keys.join("','") + "'].");
+    let mixedKeys = expandMetas.length !== this.keys.length && expandMetas.filter(meta => !meta.name).length > 0;
+    if (mixedKeys) {
+      //TODO: Don't know if we want to throw here or not. There are scenarios where we want mixed keys (document partial)
+      //however it may result in invalid documents if the author isn't careful.
+      //throw Error("Named and unnamed keys cannot exist in the same object. The keys in error are ['" + this.keys.join("','") + "'].");
+    }
 
-    if (inferInverseTemplates !== false) {
-      inferInverseTemplates = isInverseInferenceAllowed(expandMetas);
+    if (inferInverseTokenValues !== false) {
+      inferInverseTokenValues = isInverseInferenceAllowed(expandMetas);
     }
 
     let expanding = {};
-    convertForExpansion(expandMetas, value, inferInverseTemplates).forEach(meta => {
+    convertForExpansion(expandMetas, value, inferInverseTokenValues).forEach(meta => {
       let context = expanding;
       meta.keys.forEach((key, index) => {
         if (!context[key]) context[key] = {};
@@ -107,4 +112,4 @@ function expandTemplates(condensed, inferInverseTemplates, ignoreMixedKeys) {
   });
 }
 
-module.exports = exports = expandTemplates;
+exports.expand = expandTokens;

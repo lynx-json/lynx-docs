@@ -1,22 +1,27 @@
-const partials = require("../partials-yaml");
-const ignores = ["value", "key", "partial"];
-module.exports = exports = (params, options) => {
-  options = Object.assign({}, options, { contextFolder: params.folder });
+const expandPartials = require("../json-templates/partials/expand");
+const resolvePartials = require("../json-templates/partials/resolve");
 
-  var partial = {};
-  var raw = {};
+module.exports = exports = (params) => {
+
+  let partial = { ">container": {} };
+  let partials = {};
+  let raw = {};
   for (var p in params) {
-    if (ignores.some(i => i === p)) continue;
     if (p === "realm") {
-      raw.realmSection = { header: p, content: params[p] };
-      continue;
+      raw["realmSection>section"] = { "header>": { "label>": p + " info" }, "content>text": params[p] };
+    } else {
+      try {
+        let partialName = ".meta.realm." + p;
+        let metaPartialUrl = expandPartials.calculatePartialUrl(__dirname, partialName);
+        resolvePartials.resolve(metaPartialUrl);
+        partials[p + ">" + partialName] = params[p];
+      } catch (err) {
+        raw[p + ">container"] = { "header>": { "label>": p + " info" }, "content>text": params[p] };
+      }
     }
-
-    var childKVP = { key: p + ">.meta.realm." + p, value: params[p] };
-    var partialKVP = partials.getPartial(childKVP, options);
-    if (!partialKVP) raw[p] = { header: p, content: params[p] };
-    else partial[p] = partialKVP.value;
+    delete params[p];
   }
 
-  return Object.assign(partial, raw);
+  Object.assign(partial[">container"], partials, raw);
+  return partial;
 };

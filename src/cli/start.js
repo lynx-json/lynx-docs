@@ -15,6 +15,10 @@ function buildCommand(yargs) {
       describe: "Root folder(s) for the web site",
       default: "."
     })
+    .option("infer", {
+      describe: "Infer section tokens when inverse is not supplied in template",
+      default: false
+    })
     .option("config", {
       alias: "c",
       describe: "External configuration file to require"

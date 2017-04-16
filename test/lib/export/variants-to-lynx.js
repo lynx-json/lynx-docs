@@ -1,12 +1,10 @@
 "use strict";
 
 const chai = require("chai");
-const should = chai.should();
 const expect = chai.expect;
 const sinon = require("sinon");
 const fs = require("fs");
 const path = require("path");
-const parseYaml = require("../../../src/lib/parse-yaml");
 const variantsToLynx = require("../../../src/lib/export/variants-to-lynx").all;
 
 var tests = [{
@@ -61,42 +59,41 @@ var tests = [{
     description: "when realm with content variant",
     should: "should ignore content variant"
   },
-  // {
-  //   include: true,
-  //   realms: [{
-  //     root: "/src/",
-  //     realm: "/src/folder-one/",
-  //     variants: [{
-  //       template: "/src/folder-one/default.lynx.yml",
-  //       name: "default"
-  //     }]
-  //   }],
-  //   options: {},
-  //   template: "\"foo>text\": \"Should be \\\"escaped\\\"\"",
-  //   expected: [{
-  //     foo: {
-  //       spec: { hints: ["text"] },
-  //       value: { "": "Should be \\\"escaped\\\"" }
-  //     }
-  //   }],
-  //   description: "when string contains characters that should be escaped",
-  //   should: "should have content that contains escaped characters"
-  // }, {
-  //   realms: [{
-  //     root: "/src/",
-  //     realm: "/src/folder-one/",
-  //     variants: [{
-  //       template: "/src/folder-one/default.lynx.yml",
-  //       name: "default"
-  //     }]
-  //   }],
-  //   options: {},
-  //   expected: [
-  //     '{"spec":{"hints":["text"],"children":[] },"value":"Hello world!","realm":"/src/folder-one/" }\n'
-  //   ],
-  //   description: "when string does not contain characters that should be escaped",
-  //   should: "should have content that does not contain escaped characters"
-  // }
+  {
+    realms: [{
+      root: "/src/",
+      realm: "/src/folder-one/",
+      variants: [{
+        template: "/src/folder-one/default.lynx.yml",
+        name: "default"
+      }]
+    }],
+    options: {},
+    template: "foo: Should be \"escaped\"",
+    expected: [{
+      realm: "/src/folder-one/",
+      foo: "Should be \"escaped\""
+    }],
+    description: "when string contains characters that should be escaped",
+    should: "should have content that contains escaped characters"
+  }, {
+    realms: [{
+      root: "/src/",
+      realm: "/src/folder-one/",
+      variants: [{
+        template: "/src/folder-one/default.lynx.yml",
+        name: "default"
+      }]
+    }],
+    options: {},
+    template: "foo: Should not be escaped",
+    expected: [{
+      realm: "/src/folder-one/",
+      foo: "Should not be escaped"
+    }],
+    description: "when string does not contain characters that should be escaped",
+    should: "should have content that does not contain escaped characters"
+  }
 ];
 
 function getTests() {
@@ -111,7 +108,7 @@ function runTest(test) {
     if (test.files) path.should.equal(test.files[count]);
     if (test.expected) {
       let parsed = JSON.parse(content);
-      expect(parsed).to.deep.equal(test.expected[count])
+      expect(parsed).to.deep.equal(test.expected[count]);
     }
 
     count++;
@@ -132,8 +129,8 @@ describe("when exporting templates to lynx", function () {
               stub.withArgs(variant.template)
                 .returns(test.template || "foo: Hello World!");
             }
-          })
-        })
+          });
+        });
       });
 
       afterEach(function () {

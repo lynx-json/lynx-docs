@@ -6,7 +6,7 @@ const should = chai.should();
 const expect = chai.expect;
 const sinon = require("sinon");
 const fs = require("fs");
-const util = require("util");
+const types = require("../../src/types");
 const getRealms = require("../../src/lib/metadata-realm");
 const path = require("path");
 const YAML = require("yamljs");
@@ -361,12 +361,12 @@ var tests = [{
 ];
 
 function realmObject(realm, variants) {
-  if(variants && !util.isArray(variants)) {
+  if (variants && !types.isArray(variants)) {
     variants = [variants];
   }
 
   var realmObj = {};
-  if(realm) realmObj.realm = realm;
+  if (realm) realmObj.realm = realm;
   realmObj.variants = variants || [];
 
   return toYamlBuffer(realmObj);
@@ -374,9 +374,9 @@ function realmObject(realm, variants) {
 
 function variant(name, pathToTemplateFile, pathToDataFile) {
   var variant = { type: "application/lynx+json" };
-  if(name) variant.name = name;
-  if(pathToTemplateFile) variant.template = pathToTemplateFile;
-  if(pathToDataFile) variant.data = pathToDataFile;
+  if (name) variant.name = name;
+  if (pathToTemplateFile) variant.template = pathToTemplateFile;
+  if (pathToDataFile) variant.data = pathToDataFile;
   return variant;
 }
 
@@ -414,7 +414,7 @@ function containsVariant(realmUri, name, pathToTemplateFile, pathToDataFile) {
   desc += ", with name '" + name + "'";
   desc += ", with template '" + pathToTemplateFile + "'";
 
-  if(pathToDataFile) {
+  if (pathToDataFile) {
     desc += ", with data '" + pathToDataFile + "'";
   }
 
@@ -481,7 +481,7 @@ describe("when getting realm metadata", function () {
         fs.readdirSync.restore();
         fs.readFileSync.restore();
         fs.existsSync.restore();
-        if(fs.statSync.restore) fs.statSync.restore();
+        if (fs.statSync.restore) fs.statSync.restore();
       });
 
       test.assertions.forEach(function (assertion) {

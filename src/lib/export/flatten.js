@@ -1,70 +1,46 @@
 const traverse = require("traverse");
 const keyMetadata = require("../json-templates/key-metadata");
 const lynxNodeKeys = ["spec", "value"];
+const types = require("../../types");
 
-function isLynxNode(lynx) {
-  if (!lynx) return false
-  if (Object.prototype.toString.call(lynx) !== "[object Object]") return false;
-  return lynxNodeKeys.every(key => Object.keys(lynx).includes(key));
-}
+module.exports = exports = flatten;
 
-function calculateSpecName(node) {
-  let context = node;
-  while (context) {
-    let meta = keyMetadata.parse(context.key);
-    if (meta.name) return meta.name;
-    context = context.parent;
-  }
-  return "";
-}
-
-function canAddChildToParent(childNode, parentNode) {
-  let context = childNode;
-  while (context) {
-    let meta = keyMetadata.parse(context.key);
-    if (meta.binding && keyMetadata.sectionTokens.includes(meta.binding.token)) return false;
-    if (context === parentNode) {
-      return !Array.isArray(context.node.value[""] || context.node.value);
-    }
-    context = context.parent;
-  }
-  return false;
-}
-
-function addSpecToParent(childNode, parentNode) {
-  var parent = parentNode.node;
-  var child = childNode.node;
-
-  if (!parent.spec.children) parent.spec.children = [];
-  parent.spec.children.push(child.spec);
-  child = child.value;
-  childNode.update(child);
-  parentNode.update(parent);
-}
-
-function walkLynxAncestory(leaf) {
-  let context = leaf;
-  let lynxNode;
-  while (context) {
-    let pair = context.node;
-    if (isLynxNode(pair)) {
-      if (!pair.spec.name) pair.spec.name = calculateSpecName(context);
-      if (canAddChildToParent(lynxNode, context)) {
-        addSpecToParent(lynxNode, context);
-      }
-      lynxNode = context;
-    }
-    context = context.parent;
-  }
-}
-
-function flatten(template) {
-
-  return traverse(template).forEach(function (value) {
-    if (this.isLeaf && !this.path.includes("spec")) {
-      walkLynxAncestory(this);
-    }
+function resultsInLynxNode(node) {
+  if (!types.isObject(node)) return false;
+  //every key is section binding token or ""
+  return Object.keys(node).every(key => {
+    let meta = keyMetadata.parse(key);
+    if (!(meta.name === "" || (meta.binding && keyMetadata.sectionTokens.includes(meta.binding.token)))) return false;
+    return isLynxNodeOrResultsInLynxNode(node[key]);
   });
 }
 
-module.exports = exports = flatten;
+function isLynxNode(candidate) {
+  if (!types.isObject(candidate)) return false;
+  return lynxNodeKeys.every(key => Object.keys(candidate).includes(key));
+}
+
+function isLynxNodeOrResultsInLynxNode(candidate) {
+  return isLynxNode(candidate) || resultsInLynxNode(candidate);
+}
+
+function calculateSpecChildren(spec, value) {
+  if (!types.isObject(value)) return null;
+  let children = [];
+  Object.keys(value).forEach(key => {
+    var result = isLynxNodeOrResultsInLynxNode(value[key]);
+    if (result) children.push({ "name": key });
+  });
+  return children.length > 0 ? children : null;
+}
+
+function flatten(template) {
+  return traverse(template).forEach(function (value) {
+    if (this.key === "spec") { //spec node
+      var lynxValue = this.parent.keys.includes("value") ? this.parent.node.value : this.parent.node;
+      var children = calculateSpecChildren(this, lynxValue);
+      if (children) value.children = children;
+      this.update(value);
+    }
+  });
+}

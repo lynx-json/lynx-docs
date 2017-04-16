@@ -3,7 +3,9 @@ var tests = [{
     should: "have list hint and array value",
     parameters: ["one", "two", "three"],
     expected: {
-      spec: { hints: ["list"] },
+      spec: {
+        hints: ["list", "container"]
+      },
       value: ["one", "two", "three"]
     }
   },
@@ -12,7 +14,9 @@ var tests = [{
     should: "have list hint and object value",
     parameters: { one: "one", two: "two", three: "three" },
     expected: {
-      spec: { hints: ["list"] },
+      spec: {
+        hints: ["list", "container"]
+      },
       value: { one: "one", two: "two", three: "three" }
     }
   },
@@ -73,7 +77,9 @@ var tests = [{
     should: "copy to 'value' key",
     parameters: ["one", "two"],
     expected: {
-      spec: { hints: ["list"] },
+      spec: {
+        hints: ["list", "container"]
+      },
       value: ["one", "two"]
     }
   },
@@ -82,7 +88,9 @@ var tests = [{
     should: "copy input 'value' to 'value' key",
     parameters: { value: ["one", "two", "three"] },
     expected: {
-      spec: { hints: ["list"] },
+      spec: {
+        hints: ["list", "container"]
+      },
       value: ["one", "two", "three"]
     }
   },
