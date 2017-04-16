@@ -5,7 +5,8 @@ const util = require("util");
 const parseYaml = require("../parse-yaml");
 const expandTemplates = require("../json-templates/expand-templates");
 const expandPartials = require("../json-templates/partials/expand").expand;
-const resolvePartial = require("../json-templates/partials/resolve").resolvePartial;
+const resolvePartial = require("../json-templates/partials/resolve").resolve;
+const flatten = require("./flatten");
 
 function getTemplate(pathOrValue) {
   if (typeof pathOrValue === "string") {
@@ -28,22 +29,23 @@ function processTemplate(pathOrValue, options, createFile) {
     console.log(JSON.stringify(options), "\n");
   }
 
-  let expanded = expandTemplates(template, options);
+  template = expandTemplates(template, options);
   let templatePath = util.isString(pathOrValue) ? pathOrValue : null;
-  expanded = expandPartials(expanded, resolvePartial, templatePath);
+  template = expandPartials(template, resolvePartial, templatePath);
+
   if (options.log) {
     console.log("### Expanded");
     console.log(JSON.stringify(expanded), "\n");
   }
 
-  // if (options.flatten) {
-  //   finishedYaml = flattenSpecForKvp(finishedYaml);
-  // }
-  //
-  // if (options.log) {
-  //   console.log("### Flattened");
-  //   console.log(JSON.stringify(finishedYaml), "\n");
-  // }
+  if (options.flatten) {
+    template = flatten(expanded);
+  }
+
+  if (options.log) {
+    console.log("### Flattened");
+    console.log(JSON.stringify(finishedYaml), "\n");
+  }
   //
   // if (options.spec) {
   //   finishedYaml = extractSpec(finishedYaml, options, createFile);
@@ -54,7 +56,9 @@ function processTemplate(pathOrValue, options, createFile) {
   //   console.log(JSON.stringify(finishedYaml), "\n");
   // }
 
-  return expanded;
+  if (options.realm) template["realm"] = options.realm.realm;
+
+  return template;
 }
 
 module.exports = exports = processTemplate;

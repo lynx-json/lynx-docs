@@ -2,7 +2,7 @@ const chai = require("chai");
 const expect = chai.expect;
 const handlebars = require("handlebars");
 
-let toHandlebars = require("../../../src/lib/json-templates/to-handlebars");
+const toHandlebars = require("../../../src/lib/json-templates/to-handlebars");
 
 let tests = [{
     description: "converting literal null",

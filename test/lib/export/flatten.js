@@ -193,7 +193,7 @@ function getTests() {
 function runTest(test) {
   let processed, result, content, json, parsed;
   try {
-    processed = processTemplate(test.template, {});
+    processed = processTemplate(test.template, { flatten: false });
     result = flatten(processed);
     content = toHandlebars(result);
     json = handlebars.compile(content)(test.data);

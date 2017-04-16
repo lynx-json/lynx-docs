@@ -56,7 +56,7 @@ function runTest(test) {
   count.should.equal(test.expected.length);
 }
 
-describe("when exporting templates to handlebars", function () {
+describe.skip("when exporting templates to handlebars", function () {
   beforeEach(function () {
     sinon.stub(fs, "readFileSync").returns(parseYaml(kvp));
   });

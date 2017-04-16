@@ -5,14 +5,14 @@ const path = require("path");
 const url = require("url");
 const sinon = require("sinon");
 
-const resolve = require("../../../../src/lib/json-templates/partials/resolve");
+const resolvePartials = require("../../../../src/lib/json-templates/partials/resolve");
 
 function getStubSourceReference(stubName) {
   switch (stubName) {
   case "fs":
     return fs;
-  case "resolve":
-    return resolve;
+  case "resolvePartials":
+    return resolvePartials;
   }
 }
 
@@ -44,32 +44,32 @@ describe("resolve partials module", function () {
     let tests = [{
         partialUrl: "./f1/f2/template.lynx.yml?partial=part",
         expected: [
-          path.resolve(process.cwd(), "f1", "f2", resolve.partialDirectory),
-          path.resolve(process.cwd(), "f1", resolve.partialDirectory),
-          path.resolve(process.cwd(), resolve.partialDirectory),
-          resolve.lynxDocsPartialDirectory
+          path.resolve(process.cwd(), "f1", "f2", resolvePartials.partialDirectory),
+          path.resolve(process.cwd(), "f1", resolvePartials.partialDirectory),
+          path.resolve(process.cwd(), resolvePartials.partialDirectory),
+          resolvePartials.lynxDocsPartialDirectory
         ]
       },
       {
         partialUrl: "./f1/template.lynx.yml?partial=part",
         expected: [
-          path.resolve(process.cwd(), "f1", resolve.partialDirectory),
-          path.resolve(process.cwd(), resolve.partialDirectory),
-          resolve.lynxDocsPartialDirectory
+          path.resolve(process.cwd(), "f1", resolvePartials.partialDirectory),
+          path.resolve(process.cwd(), resolvePartials.partialDirectory),
+          resolvePartials.lynxDocsPartialDirectory
         ]
       },
       {
         partialUrl: "./template.lynx.yml?partial=part",
         expected: [
-          path.resolve(process.cwd(), resolve.partialDirectory),
-          resolve.lynxDocsPartialDirectory
+          path.resolve(process.cwd(), resolvePartials.partialDirectory),
+          resolvePartials.lynxDocsPartialDirectory
         ]
       }
     ];
 
     function runTest(test) {
       let parsed = url.parse(test.partialUrl);
-      let result = resolve.calculateSearchDirectories(parsed.path);
+      let result = resolvePartials.calculateSearchDirectories(parsed.path);
       expect(result).to.deep.equal(test.expected);
     }
 
@@ -190,7 +190,7 @@ describe("resolve partials module", function () {
     ];
 
     function runTest(test) {
-      expect(resolve.scanDirectoryForPartial(test.directory, test.partialName)).to.equal(test.expected);
+      expect(resolvePartials.scanDirectoryForPartial(test.directory, test.partialName)).to.equal(test.expected);
     }
 
     getTests(tests).forEach(test => {
@@ -215,7 +215,7 @@ describe("resolve partials module", function () {
         partialUrl: "./partial.js?partial=something",
         expected: dummyFn,
         stubs: {
-          resolve: {
+          resolvePartials: {
             scanDirectoryForPartial: "partial.js",
             convertJsPartialToFunction: dummyFn
           }
@@ -227,7 +227,7 @@ describe("resolve partials module", function () {
         partialUrl: "./partial.yml?partial=something",
         expected: dummyFn,
         stubs: {
-          resolve: {
+          resolvePartials: {
             scanDirectoryForPartial: "partial.yml",
             convertYamlPartialToFunction: dummyFn
           }
@@ -239,7 +239,7 @@ describe("resolve partials module", function () {
         partialUrl: "./partial.yml?partial=something",
         throws: Error,
         stubs: {
-          resolve: {
+          resolvePartials: {
             scanDirectoryForPartial: null
           }
         }
@@ -259,7 +259,7 @@ describe("resolve partials module", function () {
     ];
 
     function runTest(test) {
-      var partial = resolve.resolvePartial(test.partialUrl);
+      var partial = resolvePartials.resolve(test.partialUrl);
       expect(partial).to.equal(test.expected);
     }
 

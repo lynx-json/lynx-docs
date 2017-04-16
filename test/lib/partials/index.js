@@ -15,7 +15,8 @@ var partialsTests = [
   require("./link"),
   require("./submit"),
   require("./list"),
-  require("./header")
+  require("./header"),
+  require("./document")
 ];
 
 describe("partials", function () {
@@ -36,7 +37,7 @@ function runTest(test, partialName) {
   var template = {};
   template[">" + partialName] = test.parameters;
 
-  var expanded = expandPartials.expand(template, resolvePartials.resolvePartial);
+  var expanded = expandPartials.expand(template, resolvePartials.resolve);
   let hbContent = toHandlebars(expanded);
   let json = handlebars.compile(hbContent)(null);
   let parsed = JSON.parse(json);

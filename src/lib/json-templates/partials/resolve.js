@@ -1,3 +1,5 @@
+"use strict";
+
 const fs = require("fs");
 const path = require("path");
 const url = require("url");
@@ -65,7 +67,7 @@ function resolvePartial(partialUrl) { //some/path/to/templat.lynx.yml?partial=na
   else return exports.convertYamlPartialToFunction(partialFile);
 }
 
-exports.resolvePartial = resolvePartial;
+exports.resolve = resolvePartial;
 exports.calculateSearchDirectories = calculateSearchDirectories;
 exports.scanDirectoryForPartial = scanDirectoryForPartial;
 exports.convertJsPartialToFunction = convertJsPartialToFunction;

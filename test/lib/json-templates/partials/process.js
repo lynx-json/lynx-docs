@@ -184,10 +184,10 @@ let tests = [{
       message: "Required Input",
       "required?": "The value is required."
     },
-    parameters: { required: true },
+    parameters: { required: "Required input." },
     expected: {
       message: "Required Input",
-      required: "The value is required."
+      required: "Required input."
     }
   },
   //divider between migrated and new tests
@@ -199,22 +199,22 @@ let tests = [{
     expected: { spec: { hints: ["text"], visibility: "hidden" } }
   },
   {
-    description: "a partial with the placeholder value~",
-    should: "should return quoted binding key place of the placeholder",
+    description: "a partial with the wildcard placeholder",
+    should: "should return all parameter keys and values",
     partial: { value: { "~*": null } },
     parameters: { "message<": "Hello" },
     expected: { value: { "message<": "Hello" } }
   },
   {
     description: "a partial that returns a partial",
-    should: "should return ",
+    should: "should return result of second partial",
     partial: { ">lynx": { "spec.hints": ["container"], "~*": null } },
     parameters: { "spec.visibility": "hidden", one: "one" },
     expected: { ">lynx": { "spec.hints": ["container"], "spec.visibility": "hidden", one: "one" } }
   },
   {
     description: "a lynx partial",
-    should: "should return ",
+    should: "should return spec properties and value",
     partial: { "spec~": { "~spec.": null }, "value~": { "~*": null } },
     parameters: { "spec.hints": ["container"], "spec.visibility": "hidden", one: "one" },
     expected: { spec: { hints: ["container"], visibility: "hidden" }, "value": { one: "one" } }
