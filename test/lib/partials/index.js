@@ -15,8 +15,7 @@ var partialsTests = [
   require("./link"),
   require("./submit"),
   require("./list"),
-  require("./header"),
-  require("./document")
+  require("./header")
 ];
 
 describe("lynx-docs core partials", function () {

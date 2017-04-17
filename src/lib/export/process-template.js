@@ -6,7 +6,7 @@ const parseYaml = require("../parse-yaml");
 const expandTokens = require("../json-templates/expand-tokens");
 const expandPartials = require("../json-templates/partials/expand");
 const resolvePartials = require("../json-templates/partials/resolve");
-const flatten = require("./flatten");
+const lynxExport = require("./lynx");
 
 function getTemplate(pathOrValue) {
   if (types.isString(pathOrValue)) {
@@ -23,7 +23,7 @@ function getTemplate(pathOrValue) {
 }
 
 function addRealmToTemplate(realm, template) {
-  if (realm && !template.realm) template.realm = realm.realm;
+  if (realm && !template.realm) template.realm = realm;
 }
 
 function processTemplate(pathOrValue, options, createFile) {
@@ -47,14 +47,13 @@ function processTemplate(pathOrValue, options, createFile) {
     console.log(JSON.stringify(template), "\n");
   }
 
-  if (options.flatten !== false) { //TODO: This is currently needed to calculate children
-    template = flatten(template);
+  if (options && options.realm) {
+    addRealmToTemplate(options.realm.realm, template);
+    template = lynxExport.resolveRelativeUrls(options.realm.realm)(template);
   }
 
-  if (options.log) {
-    console.log("### Flattened");
-    console.log(JSON.stringify(template), "\n");
-  }
+  template = lynxExport.addChildren(template);
+
   //
   // if (options.spec) {
   //   finishedYaml = extractSpec(finishedYaml, options, createFile);
@@ -64,7 +63,6 @@ function processTemplate(pathOrValue, options, createFile) {
   //   console.log("### Spec extracted");
   //   console.log(JSON.stringify(finishedYaml), "\n");
   // }
-  addRealmToTemplate(options && options.realm, template);
 
   return template;
 }

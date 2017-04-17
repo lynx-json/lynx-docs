@@ -5,9 +5,10 @@ const keep = /^([^~]+)~$/;
 const replace = /^~([^~]+)$/;
 const conditional = /^([^?]+)\?(.*)$/;
 const types = require("../../../types");
+const emptyKey = "";
 
 function replacePlaceholderValue(partial, partialKey, parameters, parametersKey, newKey) {
-  if (parameters && (parametersKey === "" || parameters[parametersKey])) {
+  if (parameters && (parametersKey === emptyKey || parameters[parametersKey])) {
     partial[newKey] = parameters[parametersKey];
     delete parameters[parametersKey];
   } else if (partial[partialKey]) {
@@ -54,8 +55,9 @@ function processPartial(partial, parameters) {
         let match = placeholder.replace[1];
         let wildcard = placeholder.replace.wildcard;
         if (wildcard && !types.isObject(parameters)) {
-          value[""] = parameters; //this is taking advantage of the fact that objects that have no keys
-          //don't write the starting or ending braces. So these two representations are equal
+          value[emptyKey] = parameters; //this is taking advantage of the fact that objects that have
+          //keys with no names don't write the starting or ending braces.
+          // So these two representations are equal
           // { value: "string" }  { value: { "": "string" } }
         } else if (parameters) {
           Object.keys(parameters).forEach(key => {

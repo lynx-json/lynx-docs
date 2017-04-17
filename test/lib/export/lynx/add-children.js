@@ -2,9 +2,9 @@ const chai = require("chai");
 const expect = chai.expect;
 const handlebars = require("handlebars");
 
-const flatten = require("../../../src/lib/export/flatten");
-const processTemplate = require("../../../src/lib/export/process-template");
-const toHandlebars = require("../../../src/lib/json-templates/to-handlebars");
+const addChildren = require("../../../../src/lib/export/lynx/add-children");
+const processTemplate = require("../../../../src/lib/export/process-template");
+const toHandlebars = require("../../../../src/lib/json-templates/to-handlebars");
 
 var tests = [{
     description: "lynx text",
@@ -66,17 +66,15 @@ var tests = [{
     description: "lynx document",
     should: "add children",
     template: {
-      ">document": {
-        "realm": "http://foo",
-        ">container": {
-          "one>container": {
-            "oneOne>text": "One and one",
-            "oneTwo>text": "One and two"
-          },
-          "two>container": {
-            "oneOne>text": "One and one",
-            "oneTwo>text": "One and two"
-          }
+      "realm": "http://foo",
+      ">container": {
+        "one>container": {
+          "oneOne>text": "One and one",
+          "oneTwo>text": "One and two"
+        },
+        "two>container": {
+          "oneOne>text": "One and one",
+          "oneTwo>text": "One and two"
         }
       }
     },
@@ -230,7 +228,7 @@ function getTests() {
 function runTest(test) {
   let processed, result, content, json, parsed;
   processed = processTemplate(test.template, { flatten: false });
-  result = flatten(processed);
+  result = addChildren(processed);
   content = toHandlebars(result);
   json = handlebars.compile(content)(test.data);
   parsed = JSON.parse(json);
@@ -243,7 +241,7 @@ function runTest(test) {
   expect(parsed).to.deep.equal(test.expected);
 }
 
-describe("when flattening templates for lynx documents", function () {
+describe("add-children to lynx document templates", function () {
   getTests().forEach(function (test) {
     describe("when " + test.description, function () {
       it("should " + test.should, function () {

@@ -23,7 +23,8 @@ function parse(key) {
       }
     }
   }
-  if (!parsed.partial && !parsed.binding && parsed.name !== key) throw Error("'" + key + "' is not a valid key.");
+  if (!parsed.partial && !parsed.binding && !parsed.name) parsed.empty = true;
+  if (parsed.empty && parsed.name !== key) throw Error("'" + key + "' is not a valid key.");
   return parsed;
 }
 
