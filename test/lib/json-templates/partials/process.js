@@ -231,7 +231,7 @@ function runTest(test) {
   expect(result).to.deep.equal(test.expected);
 }
 
-describe("when processing partials", function () {
+describe("process partials module", function () {
   getTests().forEach(function (test) {
     //if (test.only !== true) return;
     describe("when ".concat(test.description), function () {

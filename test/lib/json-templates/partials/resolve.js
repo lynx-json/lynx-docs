@@ -75,7 +75,7 @@ describe("resolve partials module", function () {
 
     getTests(tests).forEach(test => {
       describe("when calculating directories for partial '" + test.partialUrl + "'", function () {
-        it("should result in expected directories", function () {
+        it("should result in directories \n'" + test.expected.join("'\n'") + "'", function () {
           runTest(test);
         });
       });
@@ -83,16 +83,16 @@ describe("resolve partials module", function () {
   });
   describe("when scanning directories for partials", function () {
     let tests = [{
-        description: "When directory does not exist",
-        should: "Return null",
+        description: "directory does not exist",
+        should: "return null",
         directory: "doesNotMatter",
         partialName: "doesNotMatter",
         stubs: { fs: { existsSync: false } },
         expected: null
       },
       {
-        description: "When path is not a directory",
-        should: "Return null",
+        description: "path is not a directory",
+        should: "return null",
         directory: "doesNotMatter",
         partialName: "doesNotMatter",
         stubs: {
@@ -104,8 +104,8 @@ describe("resolve partials module", function () {
         expected: null
       },
       {
-        description: "When directory contains no files",
-        should: "Return null",
+        description: "directory contains no files",
+        should: "return null",
         directory: "doesNotMatter",
         partialName: "doesNotMatter",
         stubs: {
@@ -118,8 +118,8 @@ describe("resolve partials module", function () {
         expected: null
       },
       {
-        description: "When directory contains no matching files",
-        should: "Return null",
+        description: "directory contains no matching files",
+        should: "return null",
         directory: "doesNotMatter",
         partialName: "doesNotMatter",
         stubs: {
@@ -132,8 +132,8 @@ describe("resolve partials module", function () {
         expected: null
       },
       {
-        description: "When directory contains one matching .yaml file",
-        should: "Returns file",
+        description: "directory contains one matching .yaml file",
+        should: "return file name",
         directory: "doesNotMatter",
         partialName: "partial",
         stubs: {
@@ -146,8 +146,8 @@ describe("resolve partials module", function () {
         expected: "partial.yml"
       },
       {
-        description: "When directory contains one matching .js file",
-        should: "Returns file",
+        description: "directory contains one matching .js file",
+        should: "return file name",
         directory: "doesNotMatter",
         partialName: "partial",
         stubs: {
@@ -160,8 +160,8 @@ describe("resolve partials module", function () {
         expected: "partial.js"
       },
       {
-        description: "When directory contains matching .js and .yml file",
-        should: "Returns first matching file",
+        description: "directory contains matching .yml and .js file",
+        should: "return first matching file name (.yml)",
         directory: "doesNotMatter",
         partialName: "partial",
         stubs: {
@@ -174,8 +174,8 @@ describe("resolve partials module", function () {
         expected: "partial.yml"
       },
       {
-        description: "When directory contains matching .js and .yml file",
-        should: "Returns first matching file",
+        description: "directory contains matching .js and .yml file",
+        should: "return first matching file name (.js)",
         directory: "doesNotMatter",
         partialName: "partial",
         stubs: {
@@ -194,14 +194,14 @@ describe("resolve partials module", function () {
     }
 
     getTests(tests).forEach(test => {
-      describe(test.description, function () {
+      describe("when " + test.description, function () {
         beforeEach(function () {
           setupStubs(test.stubs);
         });
         afterEach(function () {
           restoreStubs(test.stubs);
         });
-        it(test.should, function () {
+        it("should " + test.should, function () {
           runTest(test);
         });
       });

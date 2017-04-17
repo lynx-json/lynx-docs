@@ -19,9 +19,9 @@ var partialsTests = [
   require("./document")
 ];
 
-describe("partials", function () {
+describe("lynx-docs core partials", function () {
   partialsTests.forEach(tests => {
-    describe(tests.partial + " partials", function () {
+    describe(tests.partial + " partial", function () {
       tests.forEach(test => {
         describe(test.description, function () {
           it("should ".concat(test.should), function () {

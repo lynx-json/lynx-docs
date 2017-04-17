@@ -277,26 +277,28 @@ function runTest(test) {
   expect(result).to.deep.equal(test.expected);
 }
 
-describe("when expanding templates", function () {
-  getTests().forEach(function (test) {
-    describe("when ".concat(test.description), function () {
-      let should = test.expected ? "should expand value" : "should not change value";
-      it(should, function () {
-        runTest(test);
+describe("expand-tokens module", function () {
+  describe("when expanding tokens", function () {
+    getTests().forEach(function (test) {
+      describe("when ".concat(test.description), function () {
+        let should = test.expected ? "should expand value" : "should not change value";
+        it(should, function () {
+          runTest(test);
+        });
       });
     });
   });
-});
 
-describe("when expanding invalid templates", function () {
-  function wrapTestRun(test) {
-    return function () {
-      runTest(test);
-    };
-  }
+  describe("when expanding invalid compositions", function () {
+    function wrapTestRun(test) {
+      return function () {
+        runTest(test);
+      };
+    }
 
-  it("should throw error with mix of named and unnamed keys", function () {
-    let test = { template: { foo: "Foo", "#bar": "Yes Bar", "^bar": "No Bar" } };
-    expect(wrapTestRun(test)).to.throw(Error);
+    it("should throw error with mix of named and unnamed keys", function () {
+      let test = { template: { foo: "Foo", "#bar": "Yes Bar", "^bar": "No Bar" } };
+      expect(wrapTestRun(test)).to.throw(Error);
+    });
   });
 });
