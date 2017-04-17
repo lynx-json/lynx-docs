@@ -4,7 +4,7 @@ const chai = require("chai");
 const should = chai.should();
 const expect = chai.expect;
 const sinon = require("sinon");
-const partials = require("../../src/lib/partials-yaml");
+const partials = require("../../../src/deprecated/lib/partials-yaml");
 const YAML = require("yamljs");
 
 function runTest(test) {

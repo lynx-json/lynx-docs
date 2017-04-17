@@ -4,7 +4,7 @@ var chai = require("chai");
 var should = chai.should();
 var expect = chai.expect;
 var sinon = require("sinon");
-var finishYaml = require("../../src/lib/finish-yaml");
+var finishYaml = require("../../../src/lib/finish-yaml");
 var url = require("url");
 
 function vsp(value) {
@@ -232,7 +232,7 @@ describe("when using additional finishing functions", function () {
         key: "greeting",
         value: vsp({ "scope": "/relative/" })
       };
-      kvp["value#greeting"] = kvp.value; //mimicing optimization code from 
+      kvp["value#greeting"] = kvp.value; //mimicing optimization code from
       delete kvp.value;
 
       it("should resolve scope value");

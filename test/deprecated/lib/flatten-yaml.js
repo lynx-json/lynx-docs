@@ -4,7 +4,7 @@ var util = require("util");
 var chai = require("chai");
 var should = chai.should();
 var expect = chai.expect;
-var flattenYaml = require("../../src/lib/export/flatten-yaml");
+var flattenYaml = require("../../../src/deprecated/lib/export/flatten-yaml");
 
 var tests = [{
     description: "a non-container value",
