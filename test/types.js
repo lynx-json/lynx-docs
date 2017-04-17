@@ -3,6 +3,8 @@ const expect = chai.expect;
 
 var types = require("../src/types");
 var anon = function () {};
+var regex = /test/;
+var date = new Date();
 
 var allTests = {
   "Array": [{
@@ -18,11 +20,11 @@ var allTests = {
       expected: false
     },
     {
-      value: new Date(),
+      value: date,
       expected: false
     },
     {
-      value: /test/,
+      value: regex,
       expected: false
     },
     {
@@ -59,11 +61,11 @@ var allTests = {
       expected: false
     },
     {
-      value: new Date(),
+      value: date,
       expected: false
     },
     {
-      value: /test/,
+      value: regex,
       expected: false
     },
     {
@@ -100,11 +102,11 @@ var allTests = {
       expected: true
     },
     {
-      value: new Date(),
+      value: date,
       expected: false
     },
     {
-      value: /test/,
+      value: regex,
       expected: false
     },
     {
@@ -141,11 +143,11 @@ var allTests = {
       expected: false
     },
     {
-      value: new Date(),
+      value: date,
       expected: true
     },
     {
-      value: /test/,
+      value: regex,
       expected: false
     },
     {
@@ -182,11 +184,11 @@ var allTests = {
       expected: false
     },
     {
-      value: new Date(),
+      value: date,
       expected: false
     },
     {
-      value: /test/,
+      value: regex,
       expected: true
     },
     {
@@ -223,11 +225,11 @@ var allTests = {
       expected: false
     },
     {
-      value: new Date(),
+      value: date,
       expected: false
     },
     {
-      value: /test/,
+      value: regex,
       expected: false
     },
     {
@@ -264,11 +266,11 @@ var allTests = {
       expected: false
     },
     {
-      value: new Date(),
+      value: date,
       expected: false
     },
     {
-      value: /test/,
+      value: regex,
       expected: false
     },
     {
@@ -305,11 +307,11 @@ var allTests = {
       expected: false
     },
     {
-      value: new Date(),
+      value: date,
       expected: false
     },
     {
-      value: /test/,
+      value: regex,
       expected: false
     },
     {
@@ -346,11 +348,11 @@ var allTests = {
       expected: false
     },
     {
-      value: new Date(),
+      value: date,
       expected: false
     },
     {
-      value: /test/,
+      value: regex,
       expected: false
     },
     {
@@ -387,11 +389,11 @@ var allTests = {
       expected: false
     },
     {
-      value: new Date(),
+      value: date,
       expected: false
     },
     {
-      value: /test/,
+      value: regex,
       expected: false
     },
     {
@@ -427,12 +429,18 @@ function runTest(test, type) {
   expect(fn(test.value)).to.equal(test.expected);
 }
 
+function getValueDescription(test) {
+  if (test.value === anon) return "function";
+  if (test.value === regex) return "regex";
+  if (test.value === date) return "date";
+  return JSON.stringify(test.value);
+}
+
 describe("types module", function () {
   Object.keys(allTests).map(key => {
-    describe("when testing if vaule is " + key, function () {
+    describe("when testing if value is " + key, function () {
       getTests(allTests[key]).forEach(function (test) {
-        var equals = test.value === anon ? "function" : JSON.stringify(test.value);
-        it("should be " + test.expected + " when value equals " + equals, function () {
+        it("should be " + test.expected + " when value is " + getValueDescription(test), function () {
           runTest(test, key);
         });
       });
