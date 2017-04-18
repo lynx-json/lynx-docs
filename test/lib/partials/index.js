@@ -2,9 +2,7 @@ const chai = require("chai");
 const expect = chai.expect;
 const handlebars = require("handlebars");
 
-const resolvePartials = require("../../../src/lib/json-templates/partials/resolve");
-const expandPartials = require("../../../src/lib/json-templates/partials/expand");
-const toHandlebars = require("../../../src/lib/json-templates/to-handlebars");
+const jsonTemplates = require("../../../src/lib/json-templates");
 
 var partialsTests = [
   require("./card"),
@@ -36,9 +34,20 @@ function runTest(test, partialName) {
   var template = {};
   template[">" + partialName] = test.parameters;
 
-  var expanded = expandPartials.expand(template, resolvePartials.resolve);
-  let hbContent = toHandlebars(expanded);
+  if (test.log) console.log("template", "\n" + JSON.stringify(template, null, 2));
+
+  var expanded = jsonTemplates.partials.expand(template, jsonTemplates.partials.resolve);
+  if (test.log) console.log("expanded", "\n" + JSON.stringify(expanded, null, 2));
+
+  let hbContent = jsonTemplates.toHandlebars(expanded);
+  if (test.log) console.log("handlebars", "\n" + hbContent);
+  if (test.log) console.log("data", "\n" + JSON.stringify(data, null, 2));
+
   let json = handlebars.compile(hbContent)(null);
+  if (test.log) console.log("json", "\n" + json);
+
   let parsed = JSON.parse(json);
+  if (test.log) console.log("process template result", "\n" + JSON.stringify(parsed, null, 2));
+
   expect(parsed).to.deep.equal(test.expected);
 }

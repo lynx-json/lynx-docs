@@ -8,7 +8,7 @@ const types = require("../../../types");
 const emptyKey = "";
 
 function replacePlaceholderValue(partial, partialKey, parameters, parametersKey, newKey) {
-  if (parameters && (parametersKey === emptyKey || parameters[parametersKey])) {
+  if (types.isObject(parameters) && Object.keys(parameters).includes(parametersKey)) {
     partial[newKey] = parameters[parametersKey];
     delete parameters[parametersKey];
   } else if (partial[partialKey]) {

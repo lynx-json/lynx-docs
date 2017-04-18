@@ -259,7 +259,9 @@ describe("resolve partials module", function () {
     ];
 
     function runTest(test) {
+      if (test.include || test.log) console.log("patial url:", partialUrl);
       var partial = resolvePartials.resolve(test.partialUrl);
+      if (test.include || test.log) console.log("partial", "\n" + JSON.stringify(partial, null, 2));
       expect(partial).to.equal(test.expected);
     }
 

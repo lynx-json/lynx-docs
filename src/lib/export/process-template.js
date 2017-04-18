@@ -24,27 +24,23 @@ function addRealmToTemplate(realm, template) {
   if (realm && !template.realm) template.realm = realm;
 }
 
+function log(header, value) {
+  console.log(header);
+  console.log(JSON.stringify(value), "\n");
+
+}
+
 function processTemplate(pathOrValue, options, createFile) {
   let template = getTemplate(pathOrValue);
-  if (options.log) {
-    console.log("### Template Options");
-    console.log(JSON.stringify(options), "\n");
-  }
+  if (options.log) log("### Template Options", options);
 
   template = jsonTemplates.expandTokens(template, options.inferInverse);
-
-  if (options.log) {
-    console.log("### Tokens Expanded");
-    console.log(JSON.stringify(template), "\n");
-  }
+  if (options.log) log("### Tokens Expanded", template);
 
   let templatePath = types.isString(pathOrValue) ? pathOrValue : null;
   template = jsonTemplates.partials.expand(template, jsonTemplates.partials.resolve, templatePath, options.inferInverse);
 
-  if (options.log) {
-    console.log("### Partials Processed");
-    console.log(JSON.stringify(template), "\n");
-  }
+  if (options.log) log("### Partials Processed", template);
 
   if (options && options.realm) {
     addRealmToTemplate(options.realm.realm, template);
@@ -53,15 +49,13 @@ function processTemplate(pathOrValue, options, createFile) {
 
   template = lynxExport.calculateChildren(template);
 
-  //
-  // if (options.spec) {
-  //   finishedYaml = extractSpec(finishedYaml, options, createFile);
-  // }
-  //
-  // if (options.log) {
-  //   console.log("### Spec extracted");
-  //   console.log(JSON.stringify(finishedYaml), "\n");
-  // }
+  if (options.spec) {
+    template = lynxExport.rollupSpecs(template);
+    if (options.log) log("### Spec flattened", template);
+    template = lynxExport.extractSpecs(template, createFile);
+    if (options.log) log("### Spec extracted", template);
+
+  }
 
   return template;
 }

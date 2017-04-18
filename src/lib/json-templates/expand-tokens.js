@@ -51,22 +51,22 @@ function convertForExpansion(metas, sourceValue, inferInverseTokenValues) {
   }, []);
 
   converted.forEach(item => {
-    function pushTemplate(template) {
-      item.keys.push(template.token + template.variable);
+    function pushTemplateKey(template) {
+      return item.keys.push(template.token + template.variable);
     }
     if (item.name) item.keys.push(item.name);
-    if (item.partial) {
-      let partialsMatch = converted
-        .filter(candidate => candidate !== item && candidate.name === item.name && candidate.variable === item.variable)
-        .every(candidate => candidate.partial.variable === item.partial.variable);
-      if (partialsMatch) {
-        pushTemplate(item.partial);
-        if (item.binding) pushTemplate(item.binding);
-        return;
-      }
+
+    let matching = converted.filter(candidate => candidate !== item &&
+      candidate.name === item.name &&
+      candidate.variable === item.variable);
+
+    if (matching.length > 0) { //matching items, push bindings first
+      if (item.binding) pushTemplateKey(item.binding);
+      if (item.partial) pushTemplateKey(item.partial);
+    } else { //no matching items push partials first
+      if (item.partial) pushTemplateKey(item.partial);
+      if (item.binding) pushTemplateKey(item.binding);
     }
-    if (item.binding) pushTemplate(item.binding);
-    if (item.partial) pushTemplate(item.partial);
   });
 
   if (inferInverseTokenValues !== false) addInverseSections(converted);

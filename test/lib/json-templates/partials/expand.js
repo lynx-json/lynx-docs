@@ -81,6 +81,11 @@ describe("expand partials module", function () {
         expected: { foo: { spec: { hints: ["container"] }, value: { "": ["Foo", "Bar"] } } },
       },
       {
+        description: "container partial with positive and negative sections for value",
+        template: { foo: { ">container": { "#foo": { message: "Yes foo" }, "^foo": null } } },
+        expected: { foo: { spec: { hints: ["container"] }, value: { "#foo": { message: "Yes foo" }, "^foo": null } } },
+      },
+      {
         description: "partial with null parameter",
         template: { foo: { ">text": null } },
         expected: { foo: { spec: { hints: ["text"] }, value: { "": null } } },
@@ -179,12 +184,10 @@ describe("expand partials module", function () {
     }
 
     function runTest(test) {
+      if (test.include || test.log) console.log("partial", "\n" + JSON.stringify(test.template, null, 2));
       test.resolvePartial = test.resolvePartial || resolvePartial.resolve;
       let result = expandPartials.expand(test.template, test.resolvePartial, test.templatePath);
-      if (test.include) {
-        console.log("partial", "\n" + JSON.stringify(test.template, null, 2));
-        console.log("\nresult", "\n" + JSON.stringify(result, null, 2));
-      }
+      if (test.include || test.log) console.log("result", "\n" + JSON.stringify(result, null, 2));
       expect(result).to.deep.equal(test.expected);
     }
 

@@ -2,7 +2,7 @@
 
 const traverse = require("traverse");
 const keyMetadata = require("./key-metadata");
-const util = require("util");
+const types = require("../../types");
 const simpleTypes = ["number", "boolean", "string"];
 
 function toHandlebars(model) {
@@ -21,61 +21,81 @@ function toHandlebars(model) {
     } else if (keyMetadata.iteratorToken === binding.token) {
       writeContent("{{#each " + binding.variable + "}}");
     }
-    //ignore partials if they exist when writing to handlebars
   }
 
-  function writeCloseBinding(binding) {
+  function writeCloseBinding(binding, separate) {
     if (keyMetadata.simpleTokens.includes(binding.token)) writeContent("{{/if}}");
     else if (keyMetadata.sectionTokens.includes(binding.token)) writeContent("{{/" + binding.variable + "}}");
     else if (keyMetadata.iteratorToken === binding.token) writeContent("{{#unless @last}},{{/unless}}{{/each}}");
-    //ignore partials if they exist when writing to handlebars
   }
 
   function writeSimpleValue(value, binding, separate) {
     if (binding) writeOpenBinding(binding);
     writeContent(JSON.stringify(value));
-    if (binding) writeCloseBinding(binding);
+    if (binding) writeCloseBinding(binding, separate);
     if (separate) writeContent(",");
   }
 
-  function writeArrayValue(node, separate) {
-    node.before(function () {
+  function writeArrayValue(traverseNode, separate) {
+    traverseNode.before(function () {
       writeContent("[");
     });
 
-    node.after(function () {
+    traverseNode.after(function () {
       writeContent("]");
       if (separate) writeContent(",");
     });
   }
 
-  function writeObjectValue(node, binding, separate) {
-    let metas = node.keys.map(keyMetadata.parse);
-    let hasKeys = metas.every(child => !!child.name);
+  function writeObjectValue(traverseNode, binding, separate) {
+    let metas = traverseNode.keys.map(keyMetadata.parse);
+    let hasKeys = metas.some(child => !!child.name);
 
-    node.before(function () {
+    traverseNode.before(function () {
       if (binding) writeOpenBinding(binding);
       if (hasKeys) writeContent("{");
     });
 
-    node.after(function () {
+    traverseNode.after(function () {
       if (hasKeys) writeContent(" }");
-      if (binding) writeCloseBinding(binding);
-      if (separate) writeContent(",");
+      if (binding) {
+        writeCloseBinding(binding);
+        if (binding.token === keyMetadata.iteratorToken &&
+          shouldSeparate(traverseNode.parent) &&
+          isIteratorContainer(traverseNode.parent)) {
+          //this is to handle the situation where an iterator is mixed into
+          //the middle of an array but the value binding to the iterator doesn't exist
+          //only output the separator if we actually created output with the iterator
+          writeContent("{{#if " + binding.variable + "}},{{/if}}");
+        }
+      }
+      if (separate && !isIteratorContainer(traverseNode)) writeContent(",");
     });
   }
 
+  function isIteratorContainer(traverseNode) {
+    if (!traverseNode.keys || traverseNode.keys.length !== 1) return false;
+    let metas = traverseNode.keys.map(keyMetadata.parse);
+    return metas.every(meta => meta.binding && meta.binding.token === keyMetadata.iteratorToken);
+  }
+
+  function shouldSeparate(traverseNode, meta, binding) {
+    if (binding && keyMetadata.sectionTokens.includes(binding.token)) return false;
+    return traverseNode.parent &&
+      traverseNode.parent.keys.indexOf(traverseNode.key) !== traverseNode.parent.keys.length - 1;
+  }
+
   traverse(model).forEach(function (value) {
-    let meta = this.parent && !Array.isArray(this.parent.node) && this.key && keyMetadata.parse(this.key);
+    let inArray = this.parent && types.isArray(this.parent.node);
+    let meta = this.parent && !inArray && this.key && keyMetadata.parse(this.key);
     if (meta && meta.name) writeContent(JSON.stringify(meta.name) + ":");
 
-    let separate = this.parent && this.parent.keys.indexOf(this.key) !== this.parent.keys.length - 1;
     let binding = meta && meta.binding;
-    if (binding && !meta.name) separate = false;
+    let separate = shouldSeparate(this, meta, binding);
 
     if (value === null || simpleTypes.includes(typeof value)) return writeSimpleValue(value, binding, separate);
 
-    if (Array.isArray(value)) writeArrayValue(this, separate);
+    if (types.isArray(value)) writeArrayValue(this, separate);
     else writeObjectValue(this, binding, separate);
 
   });

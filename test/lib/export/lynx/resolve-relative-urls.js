@@ -52,6 +52,12 @@ function getTests() {
 
 function runTest(test) {
   let resolved = resolveRelativeUrls(testRealm)(test.template);
+  if (test.include || test.log) {
+    console.log("template", "\n" + JSON.stringify(test.template, null, 2));
+    console.log("testRealm:", testRealm);
+    console.log("resolved:", resolved);
+  }
+
   expect(resolved).to.deep.equal(test.expected);
 }
 

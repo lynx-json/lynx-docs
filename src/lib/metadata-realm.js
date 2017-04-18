@@ -107,7 +107,7 @@ function getMetaForFolder(folder) {
     return [];
   }
 
-  if (!Array.isArray(meta)) meta = [meta];
+  if (!types.isArray(meta)) meta = [meta];
   meta.forEach(m => {
     m.folder = folder;
   });

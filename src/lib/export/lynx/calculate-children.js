@@ -11,26 +11,12 @@ function deDupeChildren(children) {
   }, []);
 }
 
-function accumulateLynxChildren(jsValue) {
-  if (!types.isObject(jsValue)) return [];
-  return Object.keys(jsValue)
-    .map(keyMetadata.parse)
-    .reduce((acc, meta) => {
-      if (meta.name === specKey) return acc;
-      if (meta.name) acc.push({ "name": meta.name });
-      else if (meta.binding && keyMetadata.sectionTokens.includes(meta.binding.token)) {
-        acc = acc.concat(accumulateLynxChildren(jsValue[meta.source]));
-      }
-      return acc;
-    }, []);
-}
-
 function calculateLynxChildren(template) {
   return traverse(template).forEach(function (jsValue) {
     if (exportLynx.isLynxValue(jsValue)) {
-      let children = accumulateLynxChildren(jsValue.value || jsValue);
+      let children = exportLynx.accumulateLynxChildren(jsValue);
       if (children.length > 0) {
-        jsValue.spec.children = deDupeChildren(children);
+        jsValue.spec.children = deDupeChildren(children.map(item => { return { "name": item.meta.name }; }));
         this.update(jsValue);
       }
     }

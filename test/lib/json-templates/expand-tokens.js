@@ -91,12 +91,12 @@ let tests = [{
   {
     description: "intermediate syntax with partial",
     template: { "foo#>": "Yes foo", "foo^>": "No foo" },
-    expected: { foo: { ">foo": { "#foo": "Yes foo", "^foo": "No foo" } } }
+    expected: { foo: { "#foo": { ">foo": "Yes foo" }, "^foo": { ">foo": "No foo" } } }
   },
   {
     description: "intermediate syntax with explicit partial",
     template: { "foo#>partial": "Yes foo", "foo^>partial": "No foo" },
-    expected: { foo: { ">partial": { "#foo": "Yes foo", "^foo": "No foo" } } }
+    expected: { foo: { "#foo": { ">partial": "Yes foo" }, "^foo": { ">partial": "No foo" } } }
   },
   {
     description: "intermediate syntax with different partials",
@@ -126,12 +126,12 @@ let tests = [{
   {
     description: "intermediate syntax with variable and partial",
     template: { "foo#bar>": "Yes bar", "foo^bar>": "No bar" },
-    expected: { foo: { ">foo": { "#bar": "Yes bar", "^bar": "No bar" } } }
+    expected: { foo: { "#bar": { ">foo": "Yes bar" }, "^bar": { ">foo": "No bar" } } }
   },
   {
     description: "intermediate syntax with variable and explicit partial",
     template: { "foo#bar>partial": "Yes bar", "foo^bar>partial": "No bar" },
-    expected: { foo: { ">partial": { "#bar": "Yes bar", "^bar": "No bar" } } }
+    expected: { foo: { "#bar": { ">partial": "Yes bar" }, "^bar": { ">partial": "No bar" } } }
   },
   {
     description: "intermediate syntax with variable and different partials",
@@ -228,35 +228,33 @@ let tests = [{
     },
     expected: {
       foo: {
-        ">container": {
-          "#foo": {
+        "#foo": {
+          ">container": {
             bar: {
-              ">container": {
-                "#bar": {
-                  fooBar: {
-                    ">text": "Foo and bar"
-                  }
-                },
-                "^bar": {
-                  fooNoBar: {
-                    ">text": "Foo no bar"
-                  }
+              "#bar": {
+                ">container": {
+                  fooBar: { ">text": "Foo and bar" }
+                }
+              },
+              "^bar": {
+                ">container": {
+                  fooNoBar: { ">text": "Foo no bar" }
                 }
               }
             }
-          },
-          "^foo": {
+          }
+        },
+        "^foo": {
+          ">container": {
             bar: {
-              ">container": {
-                "#bar": {
-                  noFooBar: {
-                    ">text": "No foo and bar"
-                  }
-                },
-                "^bar": {
-                  noFooNoBar: {
-                    ">text": "No foo and no bar"
-                  }
+              "#bar": {
+                ">container": {
+                  noFooBar: { ">text": "No foo and bar" }
+                }
+              },
+              "^bar": {
+                ">container": {
+                  noFooNoBar: { ">text": "No foo and no bar" }
                 }
               }
             }
@@ -273,7 +271,9 @@ function getTests() {
 }
 
 function runTest(test) {
+  if (test.include || test.log) console.log("template", "\n" + JSON.stringify(test.template, null, 2));
   let result = expandTokens.expand(test.template, test.inferInverse);
+  if (test.include || test.log) console.log("result", "\n" + JSON.stringify(result, null, 2));
   expect(result).to.deep.equal(test.expected);
 }
 

@@ -59,49 +59,49 @@ let tests = [{
     expected: ["Foo", "Bar"]
   },
   {
-    description: "converting key with binding token '<' with default null value - if case",
+    description: "converting binding token '<' with default null value - if case",
     template: { "foo<": null },
     data: { foo: "bar" },
     expected: { foo: "bar" }
   },
   {
-    description: "converting key with binding token '<' with default null value - else case",
+    description: "converting binding token '<' with default null value - else case",
     template: { "foo<": null },
     data: {},
     expected: { foo: null }
   },
   {
-    description: "converting key with binding token '<' with default boolean value - if case",
+    description: "converting binding token '<' with default boolean value - if case",
     template: { "foo<": true },
     data: { foo: "bar" },
     expected: { foo: "bar" }
   },
   {
-    description: "converting key with binding token '<' with default boolean value - else case",
+    description: "converting binding token '<' with default boolean value - else case",
     template: { "foo<": true },
     data: {},
     expected: { foo: true }
   },
   {
-    description: "converting key with binding token '<' with default number value - if case",
+    description: "converting binding token '<' with default number value - if case",
     template: { "foo<": 2 },
     data: { foo: "bar" },
     expected: { foo: "bar" }
   },
   {
-    description: "converting key with binding token '<' with default number value - else case",
+    description: "converting binding token '<' with default number value - else case",
     template: { "foo<": 2 },
     data: {},
     expected: { foo: 2 }
   },
   {
-    description: "converting key with binding token '<' with default string value - if case",
+    description: "converting binding token '<' with default string value - if case",
     template: { "foo<": "No foo" },
     data: { foo: "bar" },
     expected: { foo: "bar" }
   },
   {
-    description: "converting key with binding token '<' with default string value - else case",
+    description: "converting binding token '<' with default string value - else case",
     template: { "foo<": "No foo" },
     data: {},
     expected: { foo: "No foo" }
@@ -113,91 +113,91 @@ let tests = [{
     expected: { foo: "No foo", bar: "Yes bar" }
   },
   {
-    description: "converting key with binding token '=' with default null value - if case",
+    description: "converting binding token '=' with default null value - if case",
     template: { "foo=": null },
     data: { foo: 42 },
     expected: { foo: 42 }
   },
   {
-    description: "converting key with binding token '=' with default null value - else case",
+    description: "converting binding token '=' with default null value - else case",
     template: { "foo=": null },
     data: {},
     expected: { foo: null }
   },
   {
-    description: "converting key with binding token '=' with default boolean value - if case",
+    description: "converting binding token '=' with default boolean value - if case",
     template: { "foo=": true },
     data: { foo: 42 },
     expected: { foo: 42 }
   },
   {
-    description: "converting key with binding token '=' with default boolean value - else case",
+    description: "converting binding token '=' with default boolean value - else case",
     template: { "foo=": true },
     data: {},
     expected: { foo: true }
   },
   {
-    description: "converting key with binding token '=' with default number value - if case",
+    description: "converting binding token '=' with default number value - if case",
     template: { "foo=": 2 },
     data: { foo: 42 },
     expected: { foo: 42 }
   },
   {
-    description: "converting key with binding token '=' with default number value - else case",
+    description: "converting binding token '=' with default number value - else case",
     template: { "foo=": 2 },
     data: {},
     expected: { foo: 2 }
   },
   {
-    description: "converting key with binding token '=' with default string value - if case",
+    description: "converting binding token '=' with default string value - if case",
     template: { "foo=": "No foo" },
     data: { foo: 42 },
     expected: { foo: 42 }
   },
   {
-    description: "converting key with binding token '=' with default string value - else case",
+    description: "converting binding token '=' with default string value - else case",
     template: { "foo=": "No foo" },
     data: {},
     expected: { foo: "No foo" }
   },
   {
-    description: "converting dynamic with token '=' and static sibling",
+    description: "converting binding token '=' and static sibling",
     template: { "foo=": "No foo", bar: "Yes bar" },
     data: {},
     expected: { foo: "No foo", bar: "Yes bar" }
   },
   {
-    description: "converting key with binding token '#' with no inverse - truthy case",
+    description: "converting binding token '#' with no inverse - truthy case",
     template: { foo: { "#foo": { message: "Yes foo" } } },
     data: { foo: true },
     expected: { foo: { message: "Yes foo" } }
   },
   {
-    description: "converting key with binding token '^' with no inverse - falsey case",
+    description: "converting binding token '^' with no inverse - falsey case",
     template: { foo: { "^foo": { message: "No foo" } } },
     data: { foo: false },
     expected: { foo: { message: "No foo" } }
   },
   {
-    description: "converting key with binding token '#' with null inverse - truthy case",
+    description: "converting binding token '#' with null inverse - truthy case",
     template: { foo: { "#foo": { message: "Yes foo" }, "^foo": null } },
     data: { foo: true },
     expected: { foo: { message: "Yes foo" } }
   },
   {
-    description: "converting key with binding token '#' with null inverse - falsey case",
+    description: "converting binding token '#' with null inverse - falsey case",
     template: { foo: { "#foo": { message: "Yes foo" }, "^foo": null } },
     data: { foo: false },
     expected: { foo: null }
   },
   {
-    description: "converting key with binding token '#' with object inverse - truthy case",
+    description: "converting binding token '#' with object inverse - truthy case",
     template: { foo: { "#foo": { message: "Yes foo" }, "^foo": { message: "No foo" } } },
     data: { foo: true },
     expected: { foo: { message: "Yes foo" } }
   },
   {
-    description: "converting key with binding token '#' with object inverse - falsey case",
+    description: "converting binding token '#' with object inverse - falsey case",
     template: { foo: { "#foo": { message: "Yes foo" }, "^foo": { message: "No foo" } } },
     data: { foo: false },
     expected: { foo: { message: "No foo" } }
@@ -215,19 +215,19 @@ let tests = [{
     expected: { message: "No foo" }
   },
   {
-    description: "converting key with nested binding tokens '#' with null inverse - inner truthy case",
+    description: "converting nested binding tokens '#' with null inverse - inner truthy case",
     template: { foo: { "#foo": { "#bar": { message: "Yes bar" }, "^bar": null }, "^foo": null } },
     data: { foo: { bar: true } },
     expected: { foo: { message: "Yes bar" } }
   },
   {
-    description: "converting key with nested binding tokens '#' with null inverse - inner falsey case",
+    description: "converting nested binding tokens '#' with null inverse - inner falsey case",
     template: { foo: { "#foo": { "#bar": { message: "Yes bar" }, "^bar": null }, "^foo": null } },
     data: { foo: { bar: false } },
     expected: { foo: null }
   },
   {
-    description: "converting key with nested binding tokens '#' with null inverse - outer falsey case",
+    description: "converting nested binding tokens '#' with null inverse - outer falsey case",
     template: { foo: { "#foo": { "#bar": { message: "Yes bar" }, "^bar": null }, "^foo": null } },
     data: { foo: false },
     expected: { foo: null }
@@ -279,19 +279,48 @@ let tests = [{
     template: [{ "@items": { "<name": "Foo" } }],
     data: { items: [] },
     expected: []
-  }
+  },
+  {
+    description: "converting iterator token '@' when mixed with other content - one item",
+    template: ["Header", { "@items": { foo: "Foo" } }, "Footer"],
+    data: { items: ["one"] },
+    expected: ["Header", { foo: "Foo" }, "Footer"]
+  },
+  {
+    description: "converting iterator token '@' when mixed with other content - two items",
+    template: ["Header", { "@items": { foo: "Foo" } }, "Footer"],
+    data: { items: ["one", "two"] },
+    expected: ["Header", { foo: "Foo" }, { foo: "Foo" }, "Footer"]
+  },
+  {
+    description: "converting iterator token '@' when mixed with other content - no items",
+    template: ["Header", { "@items": { foo: "Foo" } }, "Footer"],
+    data: { items: null },
+    expected: ["Header", "Footer"]
+  },
 ];
 
+function getTests() {
+  let filtered = tests.filter(test => test.include === true);
+  return filtered.length > 0 ? filtered : tests;
+}
+
 function runTest(test) {
+  if (test.include || test.log) console.log("template", "\n" + JSON.stringify(test.template, null, 2));
   let result = toHandlebars(test.template);
+  if (test.include || test.log) console.log("handlebars", "\n" + result);
   let template = handlebars.compile(result);
+  if (test.include || test.log) console.log("data", "\n" + JSON.stringify(test.data, null, 2));
   let json = template(test.data);
+  if (test.include || test.log) console.log("json", "\n" + json);
   let parsed = JSON.parse(json);
+  if (test.include || test.log) console.log("parsed", "\n" + JSON.stringify(parsed, null, 2));
+
   expect(parsed).to.deep.equal(test.expected);
 }
 
 describe("when converting from templates to handlebars to JSON", function () {
-  tests.forEach(function (test) {
+  getTests().forEach(function (test) {
     describe("when ".concat(test.description), function () {
       it("should result in expected value", function () {
         runTest(test);

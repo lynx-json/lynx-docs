@@ -206,6 +206,13 @@ let tests = [{
     expected: { value: { "message<": "Hello", "name<": "Your name" } }
   },
   {
+    description: "a partial with the wildcard placeholder and null parameter values",
+    should: "should return all parameter keys and values",
+    partial: { value: { "~*": null } },
+    parameters: { "#foo": null, "^foo": null },
+    expected: { value: { "#foo": null, "^foo": null } }
+  },
+  {
     description: "a partial that returns a partial",
     should: "should return perform replacements and return partial",
     partial: { ">lynx": { "spec.hints": ["container"], "~*": null } },
@@ -227,7 +234,9 @@ function getTests() {
 }
 
 function runTest(test) {
+  if (test.include || test.log) console.log("partial", "\n" + JSON.stringify(test.partial, null, 2));
   let result = processPartial(test.partial, test.parameters);
+  if (test.include || test.log) console.log("result", "\n" + JSON.stringify(result, null, 2));
   expect(result).to.deep.equal(test.expected);
 }
 
