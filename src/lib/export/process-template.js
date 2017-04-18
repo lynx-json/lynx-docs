@@ -3,9 +3,7 @@
 const fs = require("fs");
 const types = require("../../types");
 const parseYaml = require("../parse-yaml");
-const expandTokens = require("../json-templates/expand-tokens");
-const expandPartials = require("../json-templates/partials/expand");
-const resolvePartials = require("../json-templates/partials/resolve");
+const jsonTemplates = require("../json-templates");
 const lynxExport = require("./lynx");
 
 function getTemplate(pathOrValue) {
@@ -33,7 +31,7 @@ function processTemplate(pathOrValue, options, createFile) {
     console.log(JSON.stringify(options), "\n");
   }
 
-  template = expandTokens.expand(template, options.inferInverse);
+  template = jsonTemplates.expandTokens(template, options.inferInverse);
 
   if (options.log) {
     console.log("### Tokens Expanded");
@@ -41,7 +39,8 @@ function processTemplate(pathOrValue, options, createFile) {
   }
 
   let templatePath = types.isString(pathOrValue) ? pathOrValue : null;
-  template = expandPartials.expand(template, resolvePartials.resolve, templatePath, options.inferInverse);
+  template = jsonTemplates.partials.expand(template, jsonTemplates.partials.resolve, templatePath, options.inferInverse);
+
   if (options.log) {
     console.log("### Partials Processed");
     console.log(JSON.stringify(template), "\n");
@@ -52,7 +51,7 @@ function processTemplate(pathOrValue, options, createFile) {
     template = lynxExport.resolveRelativeUrls(options.realm.realm)(template);
   }
 
-  template = lynxExport.addChildren(template);
+  template = lynxExport.calculateChildren(template);
 
   //
   // if (options.spec) {

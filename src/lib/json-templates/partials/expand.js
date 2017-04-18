@@ -20,7 +20,6 @@ function expandPartials(template, resolvePartial, templatePath, inferInverseToke
     if (!this.keys || types.isArray(value)) return; //no keys that contain partial references
 
     //need to create the functions outside the while loop
-    let parseKey = (key) => keyMetadata.parse(key);
     let processPartialMeta = (meta, parameters) => {
       if (meta.name) throw Error("Template needs be expanded using 'expand-tokens' module for expanding partials.");
       let partialUrl = exports.calculatePartialUrl(templatePath, meta.partial.variable);
@@ -39,7 +38,7 @@ function expandPartials(template, resolvePartial, templatePath, inferInverseToke
     let result = Object.assign({}, value);
     let keys = this.keys;
     while (keys) { //while loop is necessary in case partial returns references to other partials
-      let metas = keys.map(parseKey);
+      let metas = keys.map(keyMetadata.parse);
       let partialMetas = metas.filter(meta => !!meta.partial);
       if (partialMetas.length === 0) return;
       //console.log("expanding", partialMetas.map(m => m.source).join());

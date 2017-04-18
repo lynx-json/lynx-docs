@@ -50,7 +50,7 @@ function toHandlebars(model) {
   }
 
   function writeObjectValue(node, binding, separate) {
-    let metas = node.keys.map(key => keyMetadata.parse(key));
+    let metas = node.keys.map(keyMetadata.parse);
     let hasKeys = metas.every(child => !!child.name);
 
     node.before(function () {

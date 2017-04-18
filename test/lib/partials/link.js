@@ -4,7 +4,7 @@ var tests = [{
     parameters: { href: "." },
     expected: {
       spec: { hints: ["link"] },
-      value: { href: ".", "type": "application/lynx+json" }
+      value: { href: ".", type: "application/lynx+json" }
     }
   },
   {
@@ -20,7 +20,7 @@ var tests = [{
       spec: {
         hints: ["whatever", "link"],
         visibility: "visible",
-        "input": true
+        input: true
       },
       value: { href: "." }
     }

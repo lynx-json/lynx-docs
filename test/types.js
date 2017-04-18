@@ -438,9 +438,9 @@ function getValueDescription(test) {
 
 describe("types module", function () {
   Object.keys(allTests).map(key => {
-    describe("when testing if value is " + key, function () {
+    describe("when testing is" + key, function () {
       getTests(allTests[key]).forEach(function (test) {
-        it("should be " + test.expected + " when value is " + getValueDescription(test), function () {
+        it("when value is " + getValueDescription(test) + ", result should be " + test.expected, function () {
           runTest(test, key);
         });
       });

@@ -54,8 +54,8 @@ let tests = [{
     },
     parameters: { header: "Hello, World!", visibility: "hidden" },
     expected: {
-      spec: { hints: ["section"], "visibility": "hidden" },
-      value: { "header": "Hello, World!" }
+      spec: { hints: ["section"], visibility: "hidden" },
+      value: { header: "Hello, World!" }
     }
   },
   {
@@ -133,9 +133,9 @@ let tests = [{
   {
     description: "a partial called with a data-bound string literal",
     should: "should bind the string literal template to the value parameter (because there's no point binding it to a spec/value pair)",
-    partial: { spec: { hints: ["header"] }, "value": { "~*": null } },
+    partial: { spec: { hints: ["header"] }, value: { "~*": null } },
     parameters: { "<label": "Default Label" },
-    expected: { spec: { hints: ["header"] }, "value": { "<label": "Default Label" } }
+    expected: { spec: { hints: ["header"] }, value: { "<label": "Default Label" } }
   },
   {
     description: "a partial called with a data-bound literal",
@@ -194,7 +194,7 @@ let tests = [{
   {
     description: "partial with replacement placeholders",
     should: "replace placeholders with parameters",
-    partial: { "spec": { "~spec.": null } },
+    partial: { spec: { "~spec.": null } },
     parameters: { "spec.hints": ["text"], "spec.visibility": "hidden" },
     expected: { spec: { hints: ["text"], visibility: "hidden" } }
   },
@@ -202,12 +202,12 @@ let tests = [{
     description: "a partial with the wildcard placeholder",
     should: "should return all parameter keys and values",
     partial: { value: { "~*": null } },
-    parameters: { "message<": "Hello" },
-    expected: { value: { "message<": "Hello" } }
+    parameters: { "message<": "Hello", "name<": "Your name" },
+    expected: { value: { "message<": "Hello", "name<": "Your name" } }
   },
   {
     description: "a partial that returns a partial",
-    should: "should return result of second partial",
+    should: "should return perform replacements and return partial",
     partial: { ">lynx": { "spec.hints": ["container"], "~*": null } },
     parameters: { "spec.visibility": "hidden", one: "one" },
     expected: { ">lynx": { "spec.hints": ["container"], "spec.visibility": "hidden", one: "one" } }
@@ -217,7 +217,7 @@ let tests = [{
     should: "should return spec properties and value",
     partial: { "spec~": { "~spec.": null }, "value~": { "~*": null } },
     parameters: { "spec.hints": ["container"], "spec.visibility": "hidden", one: "one" },
-    expected: { spec: { hints: ["container"], visibility: "hidden" }, "value": { one: "one" } }
+    expected: { spec: { hints: ["container"], visibility: "hidden" }, value: { one: "one" } }
   }
 ];
 
@@ -233,7 +233,6 @@ function runTest(test) {
 
 describe("process partials module", function () {
   getTests().forEach(function (test) {
-    //if (test.only !== true) return;
     describe("when ".concat(test.description), function () {
       it(test.should, function () {
         runTest(test);

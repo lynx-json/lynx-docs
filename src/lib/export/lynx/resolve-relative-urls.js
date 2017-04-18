@@ -2,7 +2,7 @@ const traverse = require("traverse");
 const types = require("../../../types");
 const exportLynx = require("./index");
 const shouldResolve = {
-  scope: function (node) { return !!exportLynx.getLynxParent(node); },
+  scope: function (node) { return !!exportLynx.getLynxParentNode(node); },
   realm: function (node) { return node.parent && node.parent.isRoot; }
 };
 

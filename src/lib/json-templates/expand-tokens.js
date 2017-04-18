@@ -74,13 +74,13 @@ function convertForExpansion(metas, sourceValue, inferInverseTokenValues) {
   return converted;
 }
 
-function expandTokens(condensed, inferInverseTokenValues) {
+function expandTokens(template, inferInverseTokenValues) {
 
-  return traverse(condensed).map(function (value) {
+  return traverse(template).map(function (value) {
     if (!this.keys) return; //nothing to expand. Always true for simple values
     if (types.isArray(value)) return; //arrays are not expanded, only objects in array
 
-    let metas = this.keys.map(key => keyMetadata.parse(key));
+    let metas = this.keys.map(keyMetadata.parse);
     let expandMetas = metas.filter(meta => meta.partial || meta.binding);
     if (expandMetas.length === 0) return; //nothing to expand.
 

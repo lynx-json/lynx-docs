@@ -26,25 +26,25 @@ describe("expand partials module", function () {
       },
       {
         description: "partial with simple value - string",
-        template: { "foo": { ">bar": "Bar" } },
+        template: { foo: { ">bar": "Bar" } },
         expected: { foo: "Bar" },
         resolvePartial: () => (value) => value
       },
       {
         description: "partial with simple value - number",
-        template: { "foo": { ">bar": 10 } },
+        template: { foo: { ">bar": 10 } },
         expected: { foo: 10 },
         resolvePartial: () => (value) => value
       },
       {
         description: "partial with simple value - boolean",
-        template: { "foo": { ">bar": true } },
+        template: { foo: { ">bar": true } },
         expected: { foo: true },
         resolvePartial: () => (value) => value
       },
       {
         description: "partial with array value",
-        template: { "foo": { ">bar": ["One", "Two"] } },
+        template: { foo: { ">bar": ["One", "Two"] } },
         expected: { foo: ["One", "Two"] },
         resolvePartial: () => (value) => value
       },
@@ -63,27 +63,27 @@ describe("expand partials module", function () {
       {
         description: "nested lynx partials",
         template: { foo: { ">container": { "spec.visibility": "hidden", one: "one" } } },
-        expected: { foo: { spec: { hints: ["container"], visibility: "hidden" }, "value": { one: "one" } } },
+        expected: { foo: { spec: { hints: ["container"], visibility: "hidden" }, value: { one: "one" } } },
       },
       {
         description: "nested lynx partials at root",
         template: { ">container": { "spec.visibility": "hidden", one: "one" } },
-        expected: { spec: { hints: ["container"], visibility: "hidden" }, "value": { one: "one" } },
+        expected: { spec: { hints: ["container"], visibility: "hidden" }, value: { one: "one" } },
       },
       {
         description: "lynx text partial with string parameter",
-        template: { "foo": { ">text": "Foo" } },
-        expected: { foo: { spec: { hints: ["text"] }, "value": { "": "Foo" } } },
+        template: { foo: { ">text": "Foo" } },
+        expected: { foo: { spec: { hints: ["text"] }, value: { "": "Foo" } } },
       },
       {
         description: "container partial with array parameter",
-        template: { "foo": { ">container": ["Foo", "Bar"] } },
-        expected: { foo: { spec: { hints: ["container"] }, "value": { "": ["Foo", "Bar"] } } },
+        template: { foo: { ">container": ["Foo", "Bar"] } },
+        expected: { foo: { spec: { hints: ["container"] }, value: { "": ["Foo", "Bar"] } } },
       },
       {
         description: "partial with null parameter",
-        template: { "foo": { ">text": null } },
-        expected: { foo: { spec: { hints: ["text"] }, "value": { "": null } } },
+        template: { foo: { ">text": null } },
+        expected: { foo: { spec: { hints: ["text"] }, value: { "": null } } },
       },
       {
         description: "deeply nested partials at root",
@@ -126,7 +126,7 @@ describe("expand partials module", function () {
           }
         },
         expected: {
-          "foo": {
+          foo: {
             spec: { hints: ["container"] },
             value: {
               "#foo": {

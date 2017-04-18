@@ -1,43 +1,42 @@
 const keyMetadata = require("../../json-templates/key-metadata");
-const lynxNodeKeys = ["spec", "value"];
 const types = require("../../../types");
+const specKey = "spec";
 
-function getLynxParent(traverseNode) {
+function getLynxParentNode(traverseNode) {
   let context = traverseNode.parent;
-  while (context && context.level + 2 >= traverseNode.level) {
-    if (isLynxNode(context.node)) return context;
+  while (context) {
+    if (isLynxValue(context.node)) return context;
     context = context.parent;
   }
   return null;
 }
 
-function isLynxNode(candidate) {
-  if (!types.isObject(candidate)) return false;
-  let keys = Object.keys(candidate);
-  return lynxNodeKeys.every(key => keys.includes(key));
+function isLynxValue(jsValue) {
+  if (!types.isObject(jsValue)) return false;
+  return Object.keys(jsValue).some(key => key === specKey);
 }
 
-function resultsInLynxNode(candidate) {
-  if (!types.isObject(candidate)) return false;
+function resultsInLynxNode(jsValue) {
+  if (!types.isObject(jsValue)) return false;
   //every key is section binding token or empty
-  return Object.keys(candidate).every(key => {
+  return Object.keys(jsValue).every(key => {
     let meta = keyMetadata.parse(key);
     let isTemplateForValue = meta.empty || (meta.binding &&
       keyMetadata.sectionTokens.includes(meta.binding.token));
 
     if (!isTemplateForValue) return false;
 
-    return exports.isLynxNodeOrResultsInLynxNode(candidate[key]);
+    return exports.isLynxOrResultsInLynx(jsValue[key]);
   });
 }
 
-function isLynxNodeOrResultsInLynxNode(candidate) {
-  return exports.isLynxNode(candidate) || exports.resultsInLynxNode(candidate);
+function isLynxOrResultsInLynx(jsValue) {
+  return exports.isLynxValue(jsValue) || exports.resultsInLynxNode(jsValue);
 }
 
-exports.getLynxParent = getLynxParent;
-exports.isLynxNode = isLynxNode;
-exports.isLynxNodeOrResultsInLynxNode = isLynxNodeOrResultsInLynxNode;
+exports.getLynxParentNode = getLynxParentNode;
+exports.isLynxValue = isLynxValue;
+exports.isLynxOrResultsInLynx = isLynxOrResultsInLynx;
 exports.resultsInLynxNode = resultsInLynxNode;
-exports.addChildren = require("./add-children");
+exports.calculateChildren = require("./calculate-children");
 exports.resolveRelativeUrls = require("./resolve-relative-urls");

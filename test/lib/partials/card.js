@@ -29,7 +29,7 @@ var tests = [{
       spec: {
         hints: ["whatever", "card"],
         visibility: "visible",
-        "input": true
+        input: true
       },
       value: ["one", "two"]
     }
@@ -52,7 +52,7 @@ var tests = [{
       spec: {
         hints: ["whatever"],
         visibility: "visible",
-        "input": true
+        input: true
       },
       value: ["one", "two"]
     },
@@ -60,7 +60,7 @@ var tests = [{
       spec: {
         hints: ["whatever"],
         visibility: "visible",
-        "input": true
+        input: true
       },
       value: ["one", "two"]
     }
