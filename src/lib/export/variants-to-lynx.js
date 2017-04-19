@@ -31,6 +31,7 @@ function transformVariantToLynx(variant, options, createFile) {
   try {
     var template = processTemplate(variant.template, options, createFile);
     var content = toHandlebars(template, options) + "\n";
+    if (options.log) console.log("\nhandlebars content\n" + content);
 
     var data;
     if ((typeof variant.data) === "string") {

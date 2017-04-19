@@ -56,6 +56,13 @@ function convertForExpansion(metas, sourceValue, inferInverseTokenValues) {
     }
     if (item.name) item.keys.push(item.name);
 
+    if (item.binding &&
+      item.binding.token === keyMetadata.iteratorToken) { //always put iterator ahead of parital
+      if (item.binding) pushTemplateKey(item.binding);
+      if (item.partial) pushTemplateKey(item.partial);
+      return;
+    }
+
     let matching = converted.filter(candidate => candidate !== item &&
       candidate.name === item.name &&
       candidate.variable === item.variable);

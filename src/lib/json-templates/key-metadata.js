@@ -7,7 +7,7 @@ function parse(key) {
   if (typeof key !== "string") throw new Error("key must be a number or a string");
 
   let match, keySection, parsed;
-  keySection = /([@#\^><=]){0,1}([a-zA-Z0-9.]*)/g;
+  keySection = /([@#\^><=]){0,1}([a-zA-Z0-9.\-]*)/g;
   parsed = { source: key };
   while ((match = keySection.exec(key)) !== null) {
     // This is necessary to avoid infinite loops with zero-width matches

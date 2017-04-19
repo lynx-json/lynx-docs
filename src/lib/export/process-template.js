@@ -32,7 +32,7 @@ function log(header, value) {
 
 function processTemplate(pathOrValue, options, createFile) {
   let template = getTemplate(pathOrValue);
-  if (options.log) log("### Template Options", options);
+  //if (options.log) log("### Template Options", options);
 
   template = jsonTemplates.expandTokens(template, options.inferInverse);
   if (options.log) log("### Tokens Expanded", template);
