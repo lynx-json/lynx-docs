@@ -111,7 +111,7 @@ function getTests() {
 
 function runTest(test) {
 
-  if (test.throws) return expect(() => lynxExport.extractSpecs(rolledUp, test.options, test.createFile)).to.throw(test.throws);
+  if (test.throws) return expect(() => lynxExport.extractSpecs(test.template, test.options, test.createFile)).to.throw(test.throws);
 
   let specs = getSpecsForTemplate(test.template);
   let createFileStub = new CreateFileFnStub(specs);
@@ -120,7 +120,7 @@ function runTest(test) {
   expect(specs.length).to.equal(createFileStub.getCount());
 }
 
-describe("rollup specs for lynx document templates", function () {
+describe("flatten lynx document templates", function () {
   getTests().forEach(function (test) {
     describe("when " + test.description, function () {
       it("should " + test.should, function () {

@@ -2,9 +2,10 @@ const traverse = require("traverse");
 const types = require("../../../types");
 const exportLynx = require("./index");
 const shouldResolve = {
-  scope: function (node) { return !!exportLynx.getLynxParentNode(node); },
-  realm: function (node) { return node.parent && node.parent.isRoot; }
+  scope: function (traverseNode) { return !!exportLynx.getLynxParentNode(traverseNode); },
+  realm: function (traverseNode) { return traverseNode.parent && traverseNode.parent.isRoot; }
 };
+const candidateKeys = Object.keys(shouldResolve);
 
 const url = require("url");
 
@@ -12,7 +13,7 @@ function resolveRelativeUrls(realm) {
   return function (template) {
     return traverse(template).forEach(function (value) {
       if (!types.isString(value)) return;
-      let update = Object.keys(shouldResolve).some(key => {
+      let update = candidateKeys.some(key => {
         return key === this.key && shouldResolve[key](this);
       });
 

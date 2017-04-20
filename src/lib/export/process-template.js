@@ -6,9 +6,10 @@ const parseYaml = require("../parse-yaml");
 const jsonTemplates = require("../json-templates");
 const lynxExport = require("./lynx");
 
-function getTemplate(pathOrValue) {
-  if (types.isString(pathOrValue)) {
-    let buffer = fs.readFileSync(pathOrValue);
+function getTemplate(pathOrTemplate) {
+  if (types.isObject(pathOrTemplate) || types.isArray(pathOrTemplate)) return pathOrTemplate;
+  if (types.isString(pathOrTemplate)) {
+    let buffer = fs.readFileSync(pathOrTemplate);
     try {
       return parseYaml(buffer);
     } catch (err) {
@@ -16,8 +17,7 @@ function getTemplate(pathOrValue) {
       throw err;
     }
   }
-
-  return pathOrValue;
+  throw Error("Unexpected template value. Expected path to template or template object. Received \n" + JSON.stringify(pathOrTemplate));
 }
 
 function addRealmToTemplate(realm, template) {
@@ -27,17 +27,16 @@ function addRealmToTemplate(realm, template) {
 function log(header, value) {
   console.log(header);
   console.log(JSON.stringify(value), "\n");
-
 }
 
-function processTemplate(pathOrValue, options, createFile) {
-  let template = getTemplate(pathOrValue);
+function processTemplate(pathOrTemplate, options, createFile) {
+  let template = getTemplate(pathOrTemplate);
   //if (options.log) log("### Template Options", options);
 
   template = jsonTemplates.expandTokens(template, options.inferInverse);
   if (options.log) log("### Tokens Expanded", template);
 
-  let templatePath = types.isString(pathOrValue) ? pathOrValue : null;
+  let templatePath = types.isString(pathOrTemplate) ? pathOrTemplate : null;
   template = jsonTemplates.partials.expand(template, jsonTemplates.partials.resolve, templatePath, options.inferInverse);
 
   if (options.log) log("### Partials Processed", template);
@@ -50,8 +49,8 @@ function processTemplate(pathOrValue, options, createFile) {
   template = lynxExport.calculateChildren(template);
 
   if (options.spec) {
-    template = lynxExport.rollupSpecs(template);
-    if (options.log) log("### Spec flattened", template);
+    template = lynxExport.flatten(template);
+    if (options.log) log("### Flattened", template);
     template = lynxExport.extractSpecs(template, createFile);
     if (options.log) log("### Spec extracted", template);
 

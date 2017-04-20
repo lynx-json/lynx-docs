@@ -66,166 +66,55 @@ let tests = [{
     expected: { message: "Hello, World!" }
   },
   {
-    description: "a parameter with a null default value",
-    should: "should not be included in the partial output",
+    description: "a partial with a null placeholder value and no matching parameters",
+    should: "should be included in the partial output",
     partial: { "message~": "Hello, World!", "missing~": null },
     parameters: null,
-    expected: { message: "Hello, World!" }
+    expected: { message: "Hello, World!", missing: null }
   },
   {
-    description: "a parameter with a templated key and a null default value",
-    should: "should output the templated key with a null default value",
-    partial: { "message~": "Hello, World!", "templated<": null },
-    parameters: null,
-    expected: { message: "Hello, World!", "templated<": null },
-  },
-  {
-    description: "a parameter with a partial reference key (key>partial) and a null default value",
-    should: "should output the partial reference key with a null default value",
-    partial: { "message~": "Hello, World!", "other>": null },
-    parameters: null,
-    expected: { message: "Hello, World!", "other>": null }
-  },
-  {
-    description: "a partial with an array value",
+    description: "a partial with an array value and wildcard",
     should: "should process each array item in the partial and apply parameters",
-    partial: [{ "~*": null }],
+    partial: [{ "*~": null }],
     parameters: { message: "Hello" },
     expected: [{ message: "Hello" }]
   },
   {
-    description: "a partial with a namespaced wildcard parameter ~spec.*",
-    should: "should add all unknown parameters within the namespace in place of the wildcard",
-    partial: {
-      spec: { hints: ["section"], "~spec.": null },
-      value: { "~*": null, message: "Hello, World!" }
-    },
-    parameters: { "spec.visibility": "visible", one: "A", two: "B", three: "C" },
-    expected: {
-      spec: { hints: ["section"], visibility: "visible" },
-      value: { one: "A", two: "B", three: "C", message: "Hello, World!" }
-    }
-  },
-  {
-    description: "a partial with a namespaced wildcard parameter spec.*~",
-    should: "should add all unknown parameters within the namespace in place of the wildcard",
-    partial: { "spec.*~": null, "~*": null, message: "Hello, World!" },
-    parameters: { "spec.visibility": "visible", one: "A", two: "B", three: "C" },
-    expected: { "spec.visibility": "visible", one: "A", two: "B", three: "C", message: "Hello, World!" }
-  },
-  {
-    description: "a partial with data-bound placeholders",
-    should: "should include the data templates in the result",
-    partial: {
-      "label<~": "string template",
-      "input#~": "object template",
-      "items@~": "array template",
-      "literal=~": "literal template"
-    },
-    parameters: {},
-    expected: {
-      "label<": "string template",
-      "input#": "object template",
-      "items@": "array template",
-      "literal=": "literal template"
-    }
-  },
-  {
     description: "a partial called with a data-bound string literal",
     should: "should bind the string literal template to the value parameter (because there's no point binding it to a spec/value pair)",
-    partial: { spec: { hints: ["header"] }, value: { "~*": null } },
+    partial: { spec: { hints: ["header"] }, value: { "*~": null } },
     parameters: { "<label": "Default Label" },
     expected: { spec: { hints: ["header"] }, value: { "<label": "Default Label" } }
   },
   {
     description: "a partial called with a data-bound literal",
     should: "should bind the literal template to the value parameter",
-    partial: { spec: { hints: ["money"] }, "value~": { "~*": null } },
+    partial: { spec: { hints: ["money"] }, "value~": { "*~": null } },
     parameters: { "=price": 43 },
     expected: { spec: { hints: ["money"] }, value: { "=price": 43 } }
   },
-  {
-    description: "a partial with a conditional '?param' placeholder",
-    should: "should not include the partial value if the named parameter is not supplied",
-    partial: {
-      message: "Required Input",
-      "requiredMessage?required": "The value is required."
-    },
-    parameters: null,
-    expected: { message: "Required Input" }
-  },
-  {
-    description: "a partial with a conditional placeholder with a regular expression",
-    should: "should not include the partial value if a parameter matching the pattern is not supplied",
-    partial: {
-      message: "Text Input",
-      "textInvalidMessage~?minLength|maxLength|pattern|format": "Invalid Format"
-    },
-    parameters: null,
-    expected: { message: "Text Input" }
-  },
-  {
-    description: "a partial with a conditional 'key?param' placeholder",
-    should: "should include the partial value if the named parameter is supplied",
-    partial: {
-      message: "Required Input",
-      "requiredMessage?required": "The value is required."
-    },
-    parameters: { required: true },
-    expected: {
-      message: "Required Input",
-      requiredMessage: "The value is required."
-    }
-  },
-  {
-    description: "a partial with a conditional 'param?' placeholder",
-    should: "should include the partial value if the parameter is supplied",
-    partial: {
-      message: "Required Input",
-      "required?": "The value is required."
-    },
-    parameters: { required: "Required input." },
-    expected: {
-      message: "Required Input",
-      required: "Required input."
-    }
-  },
   //divider between migrated and new tests
-  {
-    description: "partial with replacement placeholders",
-    should: "replace placeholders with parameters",
-    partial: { spec: { "~spec.": null } },
-    parameters: { "spec.hints": ["text"], "spec.visibility": "hidden" },
-    expected: { spec: { hints: ["text"], visibility: "hidden" } }
-  },
   {
     description: "a partial with the wildcard placeholder",
     should: "should return all parameter keys and values",
-    partial: { value: { "~*": null } },
+    partial: { value: { "*~": null } },
     parameters: { "message<": "Hello", "name<": "Your name" },
     expected: { value: { "message<": "Hello", "name<": "Your name" } }
   },
   {
     description: "a partial with the wildcard placeholder and null parameter values",
     should: "should return all parameter keys and values",
-    partial: { value: { "~*": null } },
+    partial: { value: { "*~": null } },
     parameters: { "#foo": null, "^foo": null },
     expected: { value: { "#foo": null, "^foo": null } }
   },
   {
     description: "a partial that returns a partial",
     should: "should return perform replacements and return partial",
-    partial: { ">lynx": { "spec.hints": ["container"], "~*": null } },
+    partial: { ">lynx": { "spec.hints": ["container"], "*~": null } },
     parameters: { "spec.visibility": "hidden", one: "one" },
     expected: { ">lynx": { "spec.hints": ["container"], "spec.visibility": "hidden", one: "one" } }
   },
-  {
-    description: "a lynx partial",
-    should: "should return spec properties and value",
-    partial: { "spec~": { "~spec.": null }, "value~": { "~*": null } },
-    parameters: { "spec.hints": ["container"], "spec.visibility": "hidden", one: "one" },
-    expected: { spec: { hints: ["container"], visibility: "hidden" }, value: { one: "one" } }
-  }
 ];
 
 function getTests() {
@@ -235,6 +124,7 @@ function getTests() {
 
 function runTest(test) {
   if (test.include || test.log) console.log("partial", "\n" + JSON.stringify(test.partial, null, 2));
+  if (test.include || test.log) console.log("parameters", "\n" + JSON.stringify(test.parameters, null, 2));
   let result = processPartial(test.partial, test.parameters);
   if (test.include || test.log) console.log("result", "\n" + JSON.stringify(result, null, 2));
   expect(result).to.deep.equal(test.expected);

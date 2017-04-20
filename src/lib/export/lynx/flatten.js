@@ -1,7 +1,6 @@
 const traverse = require("traverse");
 const types = require("../../../types");
 const exportLynx = require("./index");
-const keyMetadata = require("../../json-templates/key-metadata");
 const specKey = "spec";
 
 function condenseValue(lynxValue) {
@@ -27,7 +26,7 @@ function moveChildrenSpecToParent(jsValue) {
   if (accumulated.length > 0) condenseValue(jsValue);
 }
 
-function rollupSpecs(template) {
+function flattenLynx(template) {
   return traverse(template).map(function (jsValue) {
     if (exportLynx.isLynxValue(jsValue)) {
       moveChildrenSpecToParent(jsValue);
@@ -36,4 +35,4 @@ function rollupSpecs(template) {
   });
 }
 
-module.exports = exports = rollupSpecs;
+module.exports = exports = flattenLynx;

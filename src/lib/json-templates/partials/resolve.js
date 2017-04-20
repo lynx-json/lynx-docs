@@ -3,10 +3,11 @@
 const fs = require("fs");
 const path = require("path");
 const url = require("url");
-const partialExtensions = [".js", ".yml"];
+const partialExtensions = [".js", ".yml", ""];
 const lynxDocsPartialDirectory = path.join(__dirname, "../../_partials");
 const parseYaml = require("../../parse-yaml");
-const processPartial = require("./process").process;
+const partials = require("./index");
+const types = require("../../../types");
 
 function calculateSearchDirectories(templatePath) {
   let cwd = process.cwd();
@@ -16,11 +17,11 @@ function calculateSearchDirectories(templatePath) {
   let searchPaths = dirnames.reduce((acc, segment, index) => {
     acc.push(path.resolve(cwd, dirnames.slice(0, index).join(path.sep), segment, exports.partialDirectory));
     return acc;
-  }, []);
+  }, []).reverse(); //closest paths first
   let cwdPartialDir = path.resolve(cwd, exports.partialDirectory);
-  if (!searchPaths.includes(cwdPartialDir)) searchPaths.unshift(cwdPartialDir);
-  searchPaths.unshift(lynxDocsPartialDirectory);
-  return searchPaths.reverse();
+  if (!searchPaths.includes(cwdPartialDir)) searchPaths.push(cwdPartialDir);
+  searchPaths.push(lynxDocsPartialDirectory);
+  return searchPaths;
 }
 
 function scanDirectoryForPartial(directory, partialName) {
@@ -37,27 +38,27 @@ function scanDirectoryForPartial(directory, partialName) {
 
 function convertJsPartialToFunction(partialFile) {
   delete require.cache[require.resolve(partialFile)];
-  return require(partialFile);
-  //TODO: Resolve whether a JS partial should return a partial that goes through process
-  //or if it should export a function that takes parameters and returns the fully evaluated partial.
-  //right now it does the latter.
+  let partialFn = require(partialFile);
+  return (parameters) => {
+    let partial = partialFn(parameters);
+    return partials.process(partial, parameters);
+  };
 }
 
 function convertYamlPartialToFunction(partialFile) {
   let contents = fs.readFileSync(partialFile);
   let partial = parseYaml(contents);
-  return (parameters) => processPartial(partial, parameters);
+  return (parameters) => partials.process(partial, parameters);
 }
 
 function resolvePartial(partialUrl) { //some/path/to/templat.lynx.yml?partial=name
-  if (!partialUrl) throw Error();
+  if (!types.isString(partialUrl)) throw Error("partialUrl must be a string");
   let parsed = url.parse(partialUrl, true);
   if (!parsed.query || !parsed.pathname || !parsed.query.partial) throw Error("Invalid partial value. The partial format is expected to be the absolute path to the the template file with a query string for the partial name to resolve (e.g. '/full/path/to/template.lynx.yml?partial=partialName').");
 
   var directories = exports.calculateSearchDirectories(path.resolve(parsed.pathname));
   var partialFile = directories.reduce((acc, directory) => {
     if (acc) return acc; //partial already resolved, just move along
-
     let fileName = exports.scanDirectoryForPartial(directory, parsed.query.partial);
     return !!fileName ? path.join(directory, fileName) : acc;
   }, null);

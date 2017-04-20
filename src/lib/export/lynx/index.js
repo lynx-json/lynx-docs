@@ -1,14 +1,13 @@
-const keyMetadata = require("../../json-templates/key-metadata");
+const templateKey = require("../../json-templates/template-key");
 const types = require("../../../types");
 const specKey = "spec";
 
-function getValuePortionOfLynxValue(lynxValue) {
-  return Object.keys(lynxValue).includes("value") ? lynxValue.value : lynxValue;
+function getValuePortionOfLynxValue(lynxJsValue) {
+  return Object.keys(lynxJsValue).includes("value") ? lynxJsValue.value : lynxJsValue;
 }
 
 function validateAndAccumulateChildren(accumulator) {
   function sectionAndInverseCompatible(section, inverse) {
-    if (!section || !inverse) return true;
     if (section.length === 0 || inverse.length === 0) return true;
     if (section.length !== inverse.length) return false;
     return section.every((child, index) => {
@@ -30,29 +29,26 @@ function validateAndAccumulateChildren(accumulator) {
   }, []);
 
   let compatible = sections.every((section, index) => {
-    let areCompatible = true;
-    for (var compare = index + 1; compare < sections.length; compare++) {
-      areCompatible = areCompatible && sectionAndInverseCompatible(section, sections[compare]);
-    }
-    return areCompatible;
+    if (index + 1 === sections.length) return true;
+    return sectionAndInverseCompatible(section, sections[index + 1]);
   });
 
-  if (!compatible) throw Error("Children are not compatible between value templates. In order to correct this, each value template must be it's own value spec pair. Sections that are incompatible are '" + sectionKeys.join("','") + "'");
+  if (!compatible) throw Error("Children are not compatible between value templates. In order to correct this, each binding must be it's own value spec pair. Sections that are incompatible are '" + sectionKeys.join("','") + "'");
 
   let sectionWithChildren = sections.find(section => section.length > 0);
   return [].concat(accumulator.direct || [], sectionWithChildren || []);
 }
 
-function accumulateLynxChildren(lynxValue) {
-  if (!types.isObject(lynxValue)) return [];
-  let source = getValuePortionOfLynxValue(lynxValue);
+function accumulateLynxChildren(lynxJsValue) {
+  if (!types.isObject(lynxJsValue)) return [];
+  let source = getValuePortionOfLynxValue(lynxJsValue);
   let accumulator = Object.keys(source)
-    .map(keyMetadata.parse)
+    .map(templateKey.parse)
     .reduce((acc, meta) => {
       if (meta.name === specKey) return acc;
-      if (meta.name && isLynxValue(source[meta.source])) {
-        acc.direct.push({ meta: meta, value: source[meta.source], parent: lynxValue });
-      } else if (meta.binding && keyMetadata.sectionTokens.includes(meta.binding.token)) {
+      if (meta.name && isLynxOrResultsInLynx(source[meta.source])) {
+        acc.direct.push({ meta: meta, value: source[meta.source], parent: lynxJsValue });
+      } else if (meta.binding && templateKey.sectionTokens.includes(meta.binding.token)) {
         acc[meta.binding.token + meta.binding.variable] = accumulateLynxChildren(source[meta.source]);
       }
       return acc;
@@ -79,13 +75,13 @@ function resultsInLynxNode(jsValue) {
   if (!types.isObject(jsValue)) return false;
   //every key is section binding token or empty
   return Object.keys(jsValue).every(key => {
-    let meta = keyMetadata.parse(key);
+    let meta = templateKey.parse(key);
     let isTemplateForValue = meta.empty || (meta.binding &&
-      keyMetadata.sectionTokens.includes(meta.binding.token));
+      templateKey.sectionTokens.includes(meta.binding.token));
 
     if (!isTemplateForValue) return false;
 
-    return exports.isLynxOrResultsInLynx(jsValue[key]);
+    return jsValue[key] === null || exports.isLynxOrResultsInLynx(jsValue[key]);
   });
 }
 
@@ -101,5 +97,5 @@ exports.accumulateLynxChildren = accumulateLynxChildren;
 exports.getValuePortionOfLynxValue = getValuePortionOfLynxValue;
 exports.calculateChildren = require("./calculate-children");
 exports.resolveRelativeUrls = require("./resolve-relative-urls");
-exports.rollUpSpecs = require("./rollup-specs");
+exports.flatten = require("./flatten");
 exports.extractSpecs = require("./extract-specs");

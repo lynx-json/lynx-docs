@@ -5,6 +5,7 @@ const expect = chai.expect;
 const sinon = require("sinon");
 const fs = require("fs");
 const path = require("path");
+const types = require("../../../src/types");
 const variantsToLynx = require("../../../src/lib/export/variants-to-lynx").all;
 
 var tests = [{
@@ -124,7 +125,7 @@ describe("when exporting templates to lynx", function () {
         var stub;
         test.realms.forEach(realm => {
           realm.variants.forEach(variant => {
-            if (typeof variant.template === "string") {
+            if (types.isString(variant.template)) {
               stub = stub || sinon.stub(fs, "readFileSync");
               stub.withArgs(variant.template)
                 .returns(test.template || "foo: Hello World!");

@@ -1,7 +1,7 @@
 const chai = require("chai");
 const expect = chai.expect;
 
-const keyMetadata = require("../../../src/lib/json-templates/key-metadata");
+const templateKey = require("../../../src/lib/json-templates/template-key");
 
 let tests = [{
     description: "key has name only",
@@ -9,11 +9,24 @@ let tests = [{
     expected: { name: "foo" }
   },
   {
+    description: "key has name with dashes",
+    key: "foo-name",
+    expected: { name: "foo-name" }
+  },
+  {
     description: "key with name and binding only",
     key: "foo#",
     expected: {
       name: "foo",
       binding: { token: "#", variable: "foo" }
+    }
+  },
+  {
+    description: "key with name with dashes and binding only",
+    key: "foo-name#",
+    expected: {
+      name: "foo-name",
+      binding: { token: "#", variable: "foo-name" }
     }
   },
   {
@@ -25,12 +38,29 @@ let tests = [{
     }
   },
   {
+    description: "key with name with dashes and named binding with dashes",
+    key: "foo-name#bar-name",
+    expected: {
+      name: "foo-name",
+      binding: { token: "#", variable: "bar-name" }
+    }
+  },
+  {
     description: "key with name, named binding, and named partial",
     key: "foo#bar>partial",
     expected: {
       name: "foo",
       binding: { token: "#", variable: "bar" },
       partial: { token: ">", variable: "partial" }
+    }
+  },
+  {
+    description: "key with name with dashes, named binding with dashes, and named partial with dashes",
+    key: "foo-name#bar-name>partial-name",
+    expected: {
+      name: "foo-name",
+      binding: { token: "#", variable: "bar-name" },
+      partial: { token: ">", variable: "partial-name" }
     }
   },
   {
@@ -64,12 +94,12 @@ let tests = [{
 ];
 
 function runTest(test) {
-  let result = keyMetadata.parse(test.key);
+  let result = templateKey.parse(test.key);
   test.expected.source = test.key;
   expect(result).to.deep.equal(test.expected);
 }
 
-describe("key-metadata module", function () {
+describe("template key module", function () {
   describe("when parsing keys", function () {
     describe("when keys are valid", function () {
 
@@ -84,7 +114,7 @@ describe("key-metadata module", function () {
     describe("when keys are invalid", function () {
       function parseKey(key) {
         return function () {
-          return keyMetadata.parse(key);
+          return templateKey.parse(key);
         };
       }
 
@@ -104,12 +134,12 @@ describe("key-metadata module", function () {
         expect(parseKey([])).to.throw(Error);
       });
       it("should throw with key that has token with no variable and no name", function () {
-        keyMetadata.allTokens.forEach(token => {
+        templateKey.allTokens.forEach(token => {
           expect(parseKey(token)).to.throw(Error);
         });
       });
       it("should throw with key that has token with illegal variable '()' and no name", function () {
-        keyMetadata.allTokens.forEach(token => {
+        templateKey.allTokens.forEach(token => {
           let key = token + "()";
           expect(parseKey(key)).to.throw(Error);
         });
@@ -121,31 +151,31 @@ describe("key-metadata module", function () {
   });
   describe("when asserting tokens", function () {
     it("should use '<' as simple quoted token", function () {
-      expect(keyMetadata.simpleQuotedToken).to.equal("<");
+      expect(templateKey.simpleQuotedToken).to.equal("<");
     });
     it("should use '=' as simple unquoted token", function () {
-      expect(keyMetadata.simpleUnquotedToken).to.equal("=");
+      expect(templateKey.simpleUnquotedToken).to.equal("=");
     });
     it("should use '#' as positive section token", function () {
-      expect(keyMetadata.positiveSectionToken).to.equal("#");
+      expect(templateKey.positiveSectionToken).to.equal("#");
     });
     it("should use '^' as negative section token", function () {
-      expect(keyMetadata.negativeSectionToken).to.equal("^");
+      expect(templateKey.negativeSectionToken).to.equal("^");
     });
     it("should use '@' as iterator token", function () {
-      expect(keyMetadata.iteratorToken).to.equal("@");
+      expect(templateKey.iteratorToken).to.equal("@");
     });
     it("should use '>' as partial token", function () {
-      expect(keyMetadata.partialToken).to.equal(">");
+      expect(templateKey.partialToken).to.equal(">");
     });
     it("should use ['<', '='] as simple value tokens", function () {
-      expect(keyMetadata.simpleTokens).to.deep.equal(["<", "="]);
+      expect(templateKey.simpleTokens).to.deep.equal(["<", "="]);
     });
     it("should use ['#', '^'] as section tokens", function () {
-      expect(keyMetadata.sectionTokens).to.deep.equal(["#", "^"]);
+      expect(templateKey.sectionTokens).to.deep.equal(["#", "^"]);
     });
     it("should use ['<', '=', '#', '^', '@', '>'] as template tokens", function () {
-      expect(keyMetadata.allTokens).to.deep.equal(["<", "=", "#", "^", "@", ">"]);
+      expect(templateKey.allTokens).to.deep.equal(["<", "=", "#", "^", "@", ">"]);
     });
   });
 });

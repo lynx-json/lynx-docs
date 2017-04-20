@@ -2,12 +2,12 @@ const chai = require("chai");
 const expect = chai.expect;
 
 const calculateChildren = require("../../../../src/lib/export/lynx/calculate-children");
-const rollupSpecs = require("../../../../src/lib/export/lynx/rollup-specs");
+const flatten = require("../../../../src/lib/export/lynx/flatten");
 const jsonTemplates = require("../../../../src/lib/json-templates");
 
 var tests = [{
     description: "text value only",
-    should: "not roll up",
+    should: "not flatten template",
     template: { "message>text": "Hello" },
     expected: {
       message: {
@@ -18,7 +18,7 @@ var tests = [{
   },
   {
     description: "object container with text values",
-    should: "roll up children",
+    should: "flatten template",
     template: { ">container": { "message>text": "Hello" } },
     expected: {
       spec: {
@@ -30,7 +30,7 @@ var tests = [{
   },
   {
     description: "nested object containers",
-    should: "roll up children to root",
+    should: "flatten template",
     template: { ">container": { "c1>container": { "message>text": "Hello" } } },
     expected: {
       spec: {
@@ -46,7 +46,7 @@ var tests = [{
   },
   {
     description: "array container with text values",
-    should: "not roll up",
+    should: "not flatten template",
     template: { ">container": [{ ">text": "Hello" }] },
     expected: {
       spec: { hints: ["container"] },
@@ -55,7 +55,7 @@ var tests = [{
   },
   {
     description: "array container with object containers values",
-    should: "not roll up",
+    should: "not flatten template",
     template: { ">container": [{ ">container": { "message>text": "Hello" } }] },
     expected: {
       spec: { hints: ["container"] },
@@ -72,7 +72,7 @@ var tests = [{
   },
   {
     description: "object container with text values",
-    should: "roll up children",
+    should: "flatten template",
     template: { ">container": { "message>text": "Hello" } },
     expected: {
       spec: {
@@ -94,12 +94,12 @@ function runTest(test) {
   if (test.include || test.log) console.log("processed", "\n" + JSON.stringify(processed, null, 2));
   let childrenAdded = calculateChildren(processed);
   if (test.include || test.log) console.log("children added", "\n" + JSON.stringify(childrenAdded, null, 2));
-  let result = rollupSpecs(processed);
+  let result = flatten(processed);
   if (test.include || test.log) console.log("result", "\n" + JSON.stringify(result, null, 2));
   expect(result).to.deep.equal(test.expected);
 }
 
-describe("rollup specs for lynx document templates", function () {
+describe("flatten lynx document templates", function () {
   getTests().forEach(function (test) {
     describe("when " + test.description, function () {
       it("should " + test.should, function () {

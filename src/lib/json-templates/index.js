@@ -1,6 +1,5 @@
 exports.partials = require("./partials");
 exports.expandTokens = require("./expand-tokens").expand;
-exports.keyMetadata = require("./key-metadata");
 exports.toHandlebars = require("./to-handlebars");
 
 exports.process = function (template, inferInverseTokenValues, templatePath) {

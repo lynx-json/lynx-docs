@@ -9,4 +9,4 @@
         meta>link:
           label: Metadata
           href<metaURL:
-  ~*
+  *~

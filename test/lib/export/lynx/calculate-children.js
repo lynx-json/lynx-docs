@@ -171,6 +171,48 @@ var tests = [{
     }
   },
   {
+    description: "container with static and templated keys with",
+    should: "add children from positive section",
+    template: {
+      ">container": {
+        "message>text": "Static content",
+        "foo#>container": { "bar>text": "Bar", "qux>text": "Qux" },
+        "foo^": null
+      }
+    },
+    expected: {
+      spec: {
+        hints: ["container"],
+        children: [{ name: "message" }, { name: "foo" }]
+      },
+      value: {
+        message: {
+          spec: { hints: ["text"] },
+          value: { "": "Static content" }
+        },
+        foo: {
+          "#foo": {
+            spec: {
+              hints: ["container"],
+              children: [{ name: "bar" }, { name: "qux" }]
+            },
+            value: {
+              bar: {
+                spec: { hints: ["text"] },
+                value: { "": "Bar" }
+              },
+              qux: {
+                spec: { hints: ["text"] },
+                value: { "": "Qux" }
+              }
+            }
+          },
+          "^foo": null
+        }
+      }
+    }
+  },
+  {
     description: "template for container with binding and inverse with different children",
     should: "throw error because sections are incompatible",
     template: {

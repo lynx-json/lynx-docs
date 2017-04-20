@@ -1,7 +1,7 @@
 "use strict";
 
 const traverse = require("traverse");
-const keyMetadata = require("./key-metadata");
+const templateKey = require("./template-key");
 const types = require("../../types");
 
 function isInverseInferenceAllowed(metas) {
@@ -19,24 +19,28 @@ function isInverseInferenceAllowed(metas) {
   });
 }
 
-function convertMeta(meta, keys, value) {
+function createMetaForExpansion(meta, keys, value) {
   return Object.assign({}, meta, { value: value, keys: keys });
+}
+
+function findInverseMeta(metas, reference) {
+  return metas.find(candidate => candidate !== reference &&
+    candidate.binding && reference.binding && candidate.binding.variable === reference.binding.variable);
 }
 
 function addInverseSections(metas) {
   metas.reduce((inverseMetas, meta) => {
-      if (!meta.binding || !keyMetadata.sectionTokens.includes(meta.binding.token)) return inverseMetas;
-      let inverseExists = metas.find(candidate => candidate !== meta &&
-        candidate.binding && candidate.binding.variable === meta.binding.variable);
-      if (inverseExists) return inverseMetas;
+      if (!meta.binding || !templateKey.sectionTokens.includes(meta.binding.token)) return inverseMetas;
+      let inverse = findInverseMeta(metas, meta);
+      if (inverse) return inverseMetas;
 
-      let inverseToken = keyMetadata.sectionTokens.find(token => token !== meta.binding.token);
+      let inverseToken = templateKey.sectionTokens.find(token => token !== meta.binding.token);
       let keys = meta.keys.reduce((inverseKeys, key) => {
         if (key === meta.binding.token + meta.binding.variable) inverseKeys.push(inverseToken + meta.binding.variable);
         else inverseKeys.push(key);
         return inverseKeys;
       }, []);
-      inverseMetas.push(convertMeta(meta, keys, null));
+      inverseMetas.push(createMetaForExpansion(meta, keys, null));
       return inverseMetas;
     }, [])
     .forEach(inverseMeta => {
@@ -45,10 +49,7 @@ function addInverseSections(metas) {
 }
 
 function convertForExpansion(metas, sourceValue, inferInverseTokenValues) {
-  let converted = metas.reduce((accumulator, meta) => {
-    accumulator.push(convertMeta(meta, [], sourceValue[meta.source]));
-    return accumulator;
-  }, []);
+  let converted = metas.map(meta => createMetaForExpansion(meta, [], sourceValue[meta.source]));
 
   converted.forEach(item => {
     function pushTemplateKey(template) {
@@ -57,17 +58,14 @@ function convertForExpansion(metas, sourceValue, inferInverseTokenValues) {
     if (item.name) item.keys.push(item.name);
 
     if (item.binding &&
-      item.binding.token === keyMetadata.iteratorToken) { //always put iterator ahead of parital
+      item.binding.token === templateKey.iteratorToken) { //always put iterator ahead of parital
       if (item.binding) pushTemplateKey(item.binding);
       if (item.partial) pushTemplateKey(item.partial);
       return;
     }
 
-    let matching = converted.filter(candidate => candidate !== item &&
-      candidate.name === item.name &&
-      candidate.variable === item.variable);
-
-    if (matching.length > 0) { //matching items, push bindings first
+    let inverse = findInverseMeta(converted, item);
+    if (inverse) { //matching items, push bindings first
       if (item.binding) pushTemplateKey(item.binding);
       if (item.partial) pushTemplateKey(item.partial);
     } else { //no matching items push partials first
@@ -87,7 +85,7 @@ function expandTokens(template, inferInverseTokenValues) {
     if (!this.keys) return; //nothing to expand. Always true for simple values
     if (types.isArray(value)) return; //arrays are not expanded, only objects in array
 
-    let metas = this.keys.map(keyMetadata.parse);
+    let metas = this.keys.map(templateKey.parse);
     let expandMetas = metas.filter(meta => meta.partial || meta.binding);
     if (expandMetas.length === 0) return; //nothing to expand.
 

@@ -2,10 +2,9 @@
 
 const url = require("url");
 const traverse = require("traverse");
-const keyMetadata = require("../key-metadata");
+const templateKey = require("../template-key");
 const expandTokens = require("../expand-tokens");
 const types = require("../../../types");
-const util = require("util");
 
 function calculatePartialUrl(templatePath, partialName) {
   if (!partialName) throw Error("partialName is required to calculate a partialUrl");
@@ -16,7 +15,7 @@ function calculatePartialUrl(templatePath, partialName) {
 }
 
 function expandPartials(template, resolvePartial, templatePath, inferInverseTokenValues) {
-  let expandedPartial = traverse(template).map(function (value) {
+  return traverse(template).map(function (value) {
     if (!this.keys || types.isArray(value)) return; //no keys that contain partial references
 
     //need to create the functions outside the while loop
@@ -38,17 +37,15 @@ function expandPartials(template, resolvePartial, templatePath, inferInverseToke
     let result = Object.assign({}, value);
     let keys = this.keys;
     while (keys) { //while loop is necessary in case partial returns references to other partials
-      let metas = keys.map(keyMetadata.parse);
+      let metas = keys.map(templateKey.parse);
       let partialMetas = metas.filter(meta => !!meta.partial);
       if (partialMetas.length === 0) return;
       //console.log("expanding", partialMetas.map(m => m.source).join());
       partialMetas.forEach(processPartialMeta);
       this.update(result);
-      if (!types.isObject(result)) return;
-      keys = Object.keys(result);
+      keys = types.isObject(result) && Object.keys(result);
     }
   });
-  return expandedPartial;
 }
 
 exports.expand = expandPartials;

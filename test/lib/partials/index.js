@@ -41,7 +41,7 @@ function runTest(test, partialName) {
 
   let hbContent = jsonTemplates.toHandlebars(expanded);
   if (test.log) console.log("handlebars", "\n" + hbContent);
-  if (test.log) console.log("data", "\n" + JSON.stringify(data, null, 2));
+  if (test.log) console.log("data", "\n" + JSON.stringify(test.data, null, 2));
 
   let json = handlebars.compile(hbContent)(null);
   if (test.log) console.log("json", "\n" + json);

@@ -1,14 +1,15 @@
 "use strict";
 
+const types = require("../../types");
+const keySection = /([@#\^><=]){0,1}([a-zA-Z0-9.\-]*)/g;
+
 function parse(key) {
   // key, key@, key#, key^, key<, key@foo, key#foo, key^foo, key<foo, should all yield 'key'
-  if (key === null) throw new Error("key must have a value");
-  if (typeof key === "number") return { name: key };
-  if (typeof key !== "string") throw new Error("key must be a number or a string");
+  if (types.isNumber(key)) return { name: key };
+  if (!types.isString(key)) throw Error("key must be a number or a string");
 
-  let match, keySection, parsed;
-  keySection = /([@#\^><=]){0,1}([a-zA-Z0-9.\-]*)/g;
-  parsed = { source: key };
+  let parsed = { source: key };
+  let match;
   while ((match = keySection.exec(key)) !== null) {
     // This is necessary to avoid infinite loops with zero-width matches
     if (match.index === keySection.lastIndex) keySection.lastIndex++;

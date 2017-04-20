@@ -1,5 +1,0 @@
-">lynx":
-  spec.hints: [ link ]
-  spec.labeledBy?label: label
-  type~: application/lynx+json
-  ~*:

@@ -1,4 +1,0 @@
-">lynx":
-  spec.hints: [ submit ]
-  spec.labeledBy?label: label
-  ~*:

@@ -20,12 +20,12 @@ function exportTemplatesToHandlebars(realms, createFile, options) {
     }));
 }
 
-function transformTemplateToHandlebars(pathOrValue, options, createFile) {
+function transformTemplateToHandlebars(pathOrTemplate, options, createFile) {
   try {
-    var template = processTemplate(pathOrValue, options, createFile);
+    var template = processTemplate(pathOrTemplate, options, createFile);
     return toHandlebars(template, options) + "\n";
   } catch (err) {
-    err.message = "Unable to export ".concat(util.inspect(pathOrValue), " to handlebars format.\n\n", err.message);
+    err.message = "Unable to export ".concat(util.inspect(pathOrTemplate), " to handlebars format.\n\n", err.message);
     throw err;
   }
 }

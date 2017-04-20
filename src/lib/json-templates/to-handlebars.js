@@ -1,7 +1,7 @@
 "use strict";
 
 const traverse = require("traverse");
-const keyMetadata = require("./key-metadata");
+const templateKey = require("./template-key");
 const types = require("../../types");
 const simpleTypes = ["number", "boolean", "string"];
 
@@ -13,20 +13,20 @@ function toHandlebars(model) {
   }
 
   function writeOpenBinding(binding) {
-    if (keyMetadata.simpleTokens.includes(binding.token)) {
+    if (templateKey.simpleTokens.includes(binding.token)) {
       let quote = binding.token === "<" ? "\"" : "";
       writeContent("{{#if " + binding.variable + "}}" + quote + "{{" + binding.variable + "}}" + quote + "{{else}}");
-    } else if (keyMetadata.sectionTokens.includes(binding.token)) {
+    } else if (templateKey.sectionTokens.includes(binding.token)) {
       writeContent("{{" + binding.token + binding.variable + "}}");
-    } else if (keyMetadata.iteratorToken === binding.token) {
+    } else if (templateKey.iteratorToken === binding.token) {
       writeContent("{{#each " + binding.variable + "}}");
     }
   }
 
   function writeCloseBinding(binding, separate) {
-    if (keyMetadata.simpleTokens.includes(binding.token)) writeContent("{{/if}}");
-    else if (keyMetadata.sectionTokens.includes(binding.token)) writeContent("{{/" + binding.variable + "}}");
-    else if (keyMetadata.iteratorToken === binding.token) writeContent("{{#unless @last}},{{/unless}}{{/each}}");
+    if (templateKey.simpleTokens.includes(binding.token)) writeContent("{{/if}}");
+    else if (templateKey.sectionTokens.includes(binding.token)) writeContent("{{/" + binding.variable + "}}");
+    else if (templateKey.iteratorToken === binding.token) writeContent("{{#unless @last}},{{/unless}}{{/each}}");
   }
 
   function writeSimpleValue(value, binding, separate) {
@@ -48,7 +48,7 @@ function toHandlebars(model) {
   }
 
   function writeObjectValue(traverseNode, binding, separate) {
-    let metas = traverseNode.keys.map(keyMetadata.parse);
+    let metas = traverseNode.keys.map(templateKey.parse);
     let hasKeys = metas.some(child => !!child.name);
 
     traverseNode.before(function () {
@@ -60,7 +60,7 @@ function toHandlebars(model) {
       if (hasKeys) writeContent(" }");
       if (binding) {
         writeCloseBinding(binding);
-        if (binding.token === keyMetadata.iteratorToken &&
+        if (binding.token === templateKey.iteratorToken &&
           shouldSeparate(traverseNode.parent) &&
           isIteratorContainer(traverseNode.parent)) {
           //this is to handle the situation where an iterator is mixed into
@@ -75,19 +75,19 @@ function toHandlebars(model) {
 
   function isIteratorContainer(traverseNode) {
     if (!traverseNode.keys || traverseNode.keys.length !== 1) return false;
-    let metas = traverseNode.keys.map(keyMetadata.parse);
-    return metas.every(meta => meta.binding && meta.binding.token === keyMetadata.iteratorToken);
+    let metas = traverseNode.keys.map(templateKey.parse);
+    return metas.every(meta => meta.binding && meta.binding.token === templateKey.iteratorToken);
   }
 
   function shouldSeparate(traverseNode, meta, binding) {
-    if (binding && keyMetadata.sectionTokens.includes(binding.token)) return false;
+    if (binding && templateKey.sectionTokens.includes(binding.token)) return false;
     return traverseNode.parent &&
       traverseNode.parent.keys.indexOf(traverseNode.key) !== traverseNode.parent.keys.length - 1;
   }
 
   traverse(model).forEach(function (value) {
     let inArray = this.parent && types.isArray(this.parent.node);
-    let meta = this.parent && !inArray && this.key && keyMetadata.parse(this.key);
+    let meta = this.parent && !inArray && this.key && templateKey.parse(this.key);
     if (meta && meta.name) writeContent(JSON.stringify(meta.name) + ":");
 
     let binding = meta && meta.binding;
@@ -97,7 +97,6 @@ function toHandlebars(model) {
 
     if (types.isArray(value)) writeArrayValue(this, separate);
     else writeObjectValue(this, binding, separate);
-
   });
 
   return buffer;
