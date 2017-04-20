@@ -5,11 +5,11 @@ function lynxPartial(parameters) {
   let result = { spec: {}, value: { "*~": null } };
 
   if (types.isObject(parameters)) {
-    if (parameters.value) {
+    if (Object.keys(parameters).includes("value")) {
       result.value = parameters.value;
       delete parameters.value;
     }
-    if (parameters.spec) {
+    if (Object.keys(parameters).includes("spec")) {
       result.spec = parameters.spec;
       delete parameters.spec;
     } else {

@@ -95,8 +95,15 @@ let tests = [{
   },
   //divider between migrated and new tests
   {
+    description: "a partial with named placeholder and wildcard placeholder nested",
+    should: "should replace named placeholder at root and only use remaining parameters for wildcard",
+    partial: { "value": { "*~": null }, "message~": "Goodbye" },
+    parameters: { "message": "Hello", "name<": "Your name" },
+    expected: { value: { "name<": "Your name" }, "message": "Hello" }
+  },
+  {
     description: "a partial with the wildcard placeholder",
-    should: "should return all parameter keys and values",
+    should: "should return all parameter keys and values in place of wildcard",
     partial: { value: { "*~": null } },
     parameters: { "message<": "Hello", "name<": "Your name" },
     expected: { value: { "message<": "Hello", "name<": "Your name" } }
@@ -115,8 +122,46 @@ let tests = [{
     parameters: { "spec.visibility": "hidden", one: "one" },
     expected: { ">lynx": { "spec.hints": ["container"], "spec.visibility": "hidden", one: "one" } }
   },
+  /*
+  previous#>link:
+  label>: "←"
+  href<: ../slots/
+
+  */
+  {
+    description: "placeholders that are nested",
+    should: "should return perform replacements and return partial",
+    partial: {
+      ">section": {
+        "spec.hints": ["http://uncategorized/listing/item", "card", "section", "container"],
+        "symbol>lynx": { "spec.hints": ["http://uncategorized/listing/item/symbol", "container"], "symbol~": "●" },
+        "*~": null
+      }
+    },
+    parameters: { "symbol": 1 },
+    expected: {
+      ">section": {
+        "spec.hints": [
+          "http://uncategorized/listing/item", "card", "section", "container"
+        ],
+        "symbol>lynx": {
+          "spec.hints": ["http://uncategorized/listing/item/symbol", "container"],
+          "symbol": 1
+        }
+      }
+    }
+  },
 ];
 
+/*
+>section:
+  spec.hints: [ "http://uncategorized/listing/item", card, section, container ]
+  symbol>lynx:
+    spec.hints: [ "http://uncategorized/listing/item/symbol", container]
+    symbol~: ●
+  ~*:
+
+*/
 function getTests() {
   let filtered = tests.filter(test => test.include === true);
   return filtered.length > 0 ? filtered : tests;

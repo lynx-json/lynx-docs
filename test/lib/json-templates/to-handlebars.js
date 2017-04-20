@@ -35,6 +35,12 @@ let tests = [{
     expected: "This is a string"
   },
   {
+    description: "converting an object with no key",
+    template: {},
+    data: null,
+    expected: {}
+  },
+  {
     description: "converting an object with single key",
     template: { foo: "Foo" },
     data: null,
@@ -45,6 +51,12 @@ let tests = [{
     template: { foo: "Foo", bar: "Bar" },
     data: null,
     expected: { foo: "Foo", bar: "Bar" }
+  },
+  {
+    description: "converting an array with no values",
+    template: [],
+    data: null,
+    expected: []
   },
   {
     description: "converting an array with single value",

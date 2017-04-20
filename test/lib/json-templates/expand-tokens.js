@@ -76,12 +76,14 @@ let tests = [{
   }, {
     description: "short syntax with partial",
     template: { "foo#>": "Yes foo" },
-    expected: { foo: { ">foo": { "#foo": "Yes foo", "^foo": null } } }
-  }, {
+    expected: { foo: { "#foo": { ">foo": "Yes foo" }, "^foo": { ">foo": null } } }
+  },
+  {
     description: "short syntax with explicit partial",
     template: { "foo#>partial": "Yes foo" },
-    expected: { foo: { ">partial": { "#foo": "Yes foo", "^foo": null } } }
-  }, {
+    expected: { foo: { "#foo": { ">partial": "Yes foo" }, "^foo": { ">partial": null } } }
+  },
+  {
     description: "intermediate syntax with partial",
     template: { "foo#>": "Yes foo", "foo^>": "No foo" },
     expected: { foo: { "#foo": { ">foo": "Yes foo" }, "^foo": { ">foo": "No foo" } } }
@@ -104,11 +106,11 @@ let tests = [{
   }, {
     description: "short syntax with variable and partial",
     template: { "foo#bar>": "Yes bar" },
-    expected: { foo: { ">foo": { "#bar": "Yes bar", "^bar": null } } }
+    expected: { foo: { "#bar": { ">foo": "Yes bar" }, "^bar": { ">foo": null } } }
   }, {
     description: "short syntax with variable and explicit partial",
     template: { "foo#bar>partial": "Yes bar" },
-    expected: { foo: { ">partial": { "#bar": "Yes bar", "^bar": null } } }
+    expected: { foo: { "#bar": { ">partial": "Yes bar" }, "^bar": { ">partial": null } } }
   }, {
     description: "intermediate syntax with variable and partial",
     template: { "foo#bar>": "Yes bar", "foo^bar>": "No bar" },

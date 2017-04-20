@@ -49,15 +49,15 @@ function toHandlebars(model) {
 
   function writeObjectValue(traverseNode, binding, separate) {
     let metas = traverseNode.keys.map(templateKey.parse);
-    let hasKeys = metas.some(child => !!child.name);
+    let writeBraces = metas.length === 0 || metas.some(child => !!child.name);
 
     traverseNode.before(function () {
       if (binding) writeOpenBinding(binding);
-      if (hasKeys) writeContent("{");
+      if (writeBraces) writeContent("{");
     });
 
     traverseNode.after(function () {
-      if (hasKeys) writeContent(" }");
+      if (writeBraces) writeContent(" }");
       if (binding) {
         writeCloseBinding(binding);
         if (binding.token === templateKey.iteratorToken &&

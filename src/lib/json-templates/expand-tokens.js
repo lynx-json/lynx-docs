@@ -56,21 +56,13 @@ function convertForExpansion(metas, sourceValue, inferInverseTokenValues) {
       return item.keys.push(template.token + template.variable);
     }
     if (item.name) item.keys.push(item.name);
-
-    if (item.binding &&
-      item.binding.token === templateKey.iteratorToken) { //always put iterator ahead of parital
-      if (item.binding) pushTemplateKey(item.binding);
-      if (item.partial) pushTemplateKey(item.partial);
-      return;
-    }
-
-    let inverse = findInverseMeta(converted, item);
-    if (inverse) { //matching items, push bindings first
-      if (item.binding) pushTemplateKey(item.binding);
-      if (item.partial) pushTemplateKey(item.partial);
-    } else { //no matching items push partials first
+    if (item.binding && templateKey.simpleTokens.includes(item.binding.token)) {
       if (item.partial) pushTemplateKey(item.partial);
       if (item.binding) pushTemplateKey(item.binding);
+    } else {
+      //always put section ahead of the partial
+      if (item.binding) pushTemplateKey(item.binding);
+      if (item.partial) pushTemplateKey(item.partial);
     }
   });
 
