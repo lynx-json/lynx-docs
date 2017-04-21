@@ -1,7 +1,7 @@
 "use strict";
 
 const types = require("../../types");
-const keySection = /([@#\^><=]){0,1}([a-zA-Z0-9.\-]*)/g;
+const keySection = /([@#\^><=]){0,1}([a-zA-Z0-9.\-~*]*)/g;
 
 function parse(key) {
   // key, key@, key#, key^, key<, key@foo, key#foo, key^foo, key<foo, should all yield 'key'

@@ -1,6 +1,7 @@
 "use strict";
 
 const traverse = require("traverse");
+const expandTokens = require("../expand-tokens");
 const partialKey = require("./partial-key");
 const types = require("../../../types");
 const emptyKey = "";
@@ -41,7 +42,9 @@ function getPartialKeys(sourceKeys) {
 }
 
 function processPartial(partial, parameters) {
-  let replacements = traverse(partial).reduce(function (acc, value) {
+  //Expand tokens in case the partial author did not
+  let expanded = expandTokens.expand(partial, false);
+  let replacements = traverse(expanded).reduce(function (acc, value) {
     if (!this.keys || types.isArray(value)) return acc;
     let partialKeys = getPartialKeys(this.keys).filter(key => !!key.variable);
     if (partialKeys.length === 0) return acc;
@@ -56,7 +59,7 @@ function processPartial(partial, parameters) {
 
   processReplacements(replacements, parameters);
 
-  return partial;
+  return expanded;
 }
 
 exports.process = processPartial;

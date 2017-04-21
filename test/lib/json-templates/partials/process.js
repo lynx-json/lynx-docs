@@ -144,9 +144,11 @@ let tests = [{
         "spec.hints": [
           "http://uncategorized/listing/item", "card", "section", "container"
         ],
-        "symbol>lynx": {
-          "spec.hints": ["http://uncategorized/listing/item/symbol", "container"],
-          "symbol": 1
+        "symbol": {
+          ">lynx": {
+            "spec.hints": ["http://uncategorized/listing/item/symbol", "container"],
+            "symbol": 1
+          }
         }
       }
     }
