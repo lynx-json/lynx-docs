@@ -6,8 +6,8 @@ function getValuePortionOfLynxValue(lynxJsValue) {
   return Object.keys(lynxJsValue).includes("value") ? lynxJsValue.value : lynxJsValue;
 }
 
-function validateAndAccumulateChildren(accumulator) {
-  function sectionAndInverseCompatible(section, inverse) {
+function validateSectionChildren(children) {
+  function childrenAreCompatible(section, inverse) {
     if (section.length === 0 || inverse.length === 0) return true;
     if (section.length !== inverse.length) return false;
     return section.every((child, index) => {
@@ -20,41 +20,51 @@ function validateAndAccumulateChildren(accumulator) {
     });
   }
 
-  let sectionKeys = Object.keys(accumulator).filter(key => key !== "direct");
-
-  let sections = sectionKeys.reduce((acc, key) => {
-    if (key === "direct") return acc;
-    acc.push(accumulator[key]);
+  let sections = children.reduce((acc, current) => {
+    if (current.section) acc.push(current);
     return acc;
   }, []);
 
   let compatible = sections.every((section, index) => {
     if (index + 1 === sections.length) return true;
-    return sectionAndInverseCompatible(section, sections[index + 1]);
+    return childrenAreCompatible(section.children, sections[index + 1].children);
   });
 
   if (!compatible) throw Error("Children are not compatible between value templates. In order to correct this, each binding must be it's own value spec pair. Sections that are incompatible are '" + sectionKeys.join("','") + "'");
-
-  let sectionWithChildren = sections.find(section => section.length > 0);
-  return [].concat(accumulator.direct || [], sectionWithChildren || []);
 }
 
 function accumulateLynxChildren(lynxJsValue) {
   if (!types.isObject(lynxJsValue)) return [];
   let source = getValuePortionOfLynxValue(lynxJsValue);
-  let accumulator = Object.keys(source)
+  let children = Object.keys(source)
     .map(templateKey.parse)
+    .filter(meta => meta.name !== specKey)
     .reduce((acc, meta) => {
-      if (meta.name === specKey) return acc;
       if (meta.name && isLynxOrResultsInLynx(source[meta.source])) {
-        acc.direct.push({ meta: meta, value: source[meta.source], parent: lynxJsValue });
+        acc.push({ meta: meta, value: source[meta.source] });
       } else if (meta.binding && templateKey.sectionTokens.includes(meta.binding.token)) {
-        acc[meta.binding.token + meta.binding.variable] = accumulateLynxChildren(source[meta.source]);
+        acc.push({
+          meta: meta,
+          section: meta.binding.token + meta.binding.variable,
+          children: accumulateLynxChildren(source[meta.source])
+        });
       }
       return acc;
-    }, { direct: [] });
+    }, []);
 
-  return validateAndAccumulateChildren(accumulator);
+  validateSectionChildren(children);
+  let sectionWithChildren = children.find(item => item.children && item.children.length > 0);
+
+  //merge the children with names with the section that has children
+  return children.reduce((acc, child) => {
+    if (child.section && sectionWithChildren) {
+      acc = acc.concat(sectionWithChildren.children); //add children from section
+      sectionWithChildren = null; //only add children once
+    } else if (!child.section) {
+      acc.push(child);
+    }
+    return acc;
+  }, []);
 }
 
 function getLynxParentNode(traverseNode) {

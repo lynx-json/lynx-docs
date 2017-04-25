@@ -33,6 +33,8 @@ function processTemplate(pathOrTemplate, options, createFile) {
   let template = getTemplate(pathOrTemplate);
   //if (options.log) log("### Template Options", options);
 
+  if (options.log) log("### Template Source", template);
+
   template = jsonTemplates.expandTokens(template, options.inferInverse);
   if (options.log) log("### Tokens Expanded", template);
 

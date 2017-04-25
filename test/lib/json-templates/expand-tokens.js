@@ -1,6 +1,6 @@
 const chai = require("chai");
 const expect = chai.expect;
-
+const types = require("../../../src/types");
 const expandTokens = require("../../../src/lib/json-templates/expand-tokens");
 
 let tests = [{
@@ -142,7 +142,7 @@ let tests = [{
   }, {
     description: "intermediate syntax with nested template",
     template: { "foo#bar": { "#baz": "Yes baz" }, "foo^bar": { "^baz": "No baz" } },
-    expected: { foo: { "#bar": { "#baz": "Yes baz", "^baz": null }, "^bar": { "#baz": null, "^baz": "No baz" } } }
+    expected: { foo: { "#bar": { "#baz": "Yes baz", "^baz": null }, "^bar": { "^baz": "No baz", "#baz": null } } }
   }, {
     description: "short syntax with no inverse",
     inferInverse: false,
@@ -242,11 +242,22 @@ function getTests() {
   return filtered.length > 0 ? filtered : tests;
 }
 
+function verifyKeyOrder(a, b) {
+  if (!types.isObject(a) || !types.isObject(b)) return;
+  let aKeys = Object.keys(a);
+  let bKeys = Object.keys(b);
+  aKeys.forEach((key, index) => {
+    expect(bKeys[index]).to.equal(key);
+    verifyKeyOrder(a[key], b[key]);
+  });
+}
+
 function runTest(test) {
   if (test.include || test.log) console.log("template", "\n" + JSON.stringify(test.template, null, 2));
   let result = expandTokens.expand(test.template, test.inferInverse);
   if (test.include || test.log) console.log("result", "\n" + JSON.stringify(result, null, 2));
   expect(result).to.deep.equal(test.expected);
+  verifyKeyOrder(result, test.expected);
 }
 
 describe("expand-tokens module", function () {

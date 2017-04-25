@@ -92,20 +92,19 @@ function expandTokens(template, inferInverseTokenValues) {
       inferInverseTokenValues = isInverseInferenceAllowed(expandMetas);
     }
 
-    let expanding = {};
-    convertForExpansion(expandMetas, value, inferInverseTokenValues).forEach(meta => {
-      let context = expanding;
+    let result = {};
+    convertForExpansion(metas, value, inferInverseTokenValues).forEach(meta => {
+      let context = result;
       meta.keys.forEach((key, index) => {
         if (!context[key]) context[key] = {};
         if (index === meta.keys.length - 1) {
           context[key] = meta.value;
-          delete value[meta.source];
         }
         context = context[key];
       });
     });
 
-    this.update(Object.assign(value, expanding));
+    this.update(result);
   });
 }
 

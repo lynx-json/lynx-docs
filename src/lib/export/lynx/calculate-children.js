@@ -12,8 +12,7 @@ function deDupeChildren(children) {
 
 function calculateLynxChildren(template) {
   return traverse(template).forEach(function (jsValue) {
-    if (this.key === "customerIcon") console.log("customerIcon", JSON.stringify(jsValue, null, 2));
-    if (exportLynx.isLynxValue(jsValue)) {
+    if (exportLynx.isLynxValue(jsValue) && !types.isArray(exportLynx.getValuePortionOfLynxValue(jsValue))) {
       let children = exportLynx.accumulateLynxChildren(jsValue);
       if (children.length > 0) {
         jsValue.spec.children = deDupeChildren(

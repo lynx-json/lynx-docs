@@ -23,18 +23,16 @@ module.exports = exports = function createMetaHandler(options) {
     }
 
     function convertRealmForTemplate() { //need this to break circular references
-      let parentKeysToKeep = ["realm", "url", "metaURL"];
-      let result = {};
-      Object.keys(realm).forEach(key => {
-        if (key === "parent") { //break circular references
-          result.parent = {};
-          parentKeysToKeep.forEach(parentKey => {
-            result.parent[parentKey] = realm.parent[parentKey];
-          });
-        } else {
-          result[key] = realm[key];
-        }
-      });
+      function getRealmData(realm) {
+        let keep = ["realm", "url", "metaURL"];
+        let result = {};
+        keep.forEach(key => result[key] = realm[key]);
+        return result;
+      }
+
+      let result = Object.assign({}, realm);
+      if (realm.parent) result.parent = getRealmData(realm.parent);
+      if (realm.realms) result.realms = realm.realms.map(getRealmData);
       return result;
     }
 

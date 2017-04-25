@@ -82,6 +82,31 @@ var tests = [{
     }
   },
   {
+    description: "lynx array explicit",
+    should: "not add children",
+    template: { foo: { spec: { hints: ["container"] }, value: [{ "bar>text": "Bar" }, { "qux>text": "Qux" }] } },
+    expected: {
+      foo: {
+        spec: {
+          hints: ["container"]
+        },
+        value: [{
+            bar: {
+              spec: { hints: ["text"] },
+              value: { "": "Bar" }
+            }
+          },
+          {
+            qux: {
+              spec: { hints: ["text"] },
+              value: { "": "Qux" }
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
     description: "lynx document with nested containers with compatible children",
     should: "add children to container",
     template: {
