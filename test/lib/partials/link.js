@@ -1,32 +1,26 @@
 var tests = [{
     description: "when no type",
     should: "add application/lynx+json to value",
-    kvp: {
-      key: ">link",
-      value: { href: "." }
-    },
+    parameters: { href: "." },
     expected: {
       spec: { hints: ["link"] },
-      value: { href: ".", "type": "application/lynx+json" }
+      value: { href: ".", type: "application/lynx+json" }
     }
   },
   {
     description: "when spec.* properties",
     should: "have specified spec.* properties in result",
-    kvp: {
-      key: ">link",
-      value: {
-        "spec.hints": ["whatever", "link"],
-        "spec.visibility": "visible",
-        "spec.input": true,
-        value: { href: "." }
-      }
+    parameters: {
+      "spec.hints": ["whatever", "link"],
+      "spec.visibility": "visible",
+      "spec.input": true,
+      value: { href: "." }
     },
     expected: {
       spec: {
         hints: ["whatever", "link"],
         visibility: "visible",
-        "input": true
+        input: true
       },
       value: { href: "." }
     }
@@ -34,12 +28,9 @@ var tests = [{
   {
     description: "when spec.hints",
     should: "override default hints",
-    kvp: {
-      key: ">link",
-      value: {
-        "spec.hints": ["whatever"],
-        value: { href: "." }
-      }
+    parameters: {
+      "spec.hints": ["whatever"],
+      value: { href: "." }
     },
     expected: {
       spec: {
@@ -51,15 +42,12 @@ var tests = [{
   {
     description: "when fully specified spec object",
     should: "use provided spec object. Don't default hints",
-    kvp: {
-      key: ">link",
-      value: {
-        spec: {
-          hints: ["link"],
-          visibility: "visible"
-        },
-        value: { href: "." }
-      }
+    parameters: {
+      spec: {
+        hints: ["link"],
+        visibility: "visible"
+      },
+      value: { href: "." }
     },
     expected: {
       spec: {
@@ -72,10 +60,7 @@ var tests = [{
   {
     description: "when flattened value",
     should: "copy to 'value' key",
-    kvp: {
-      key: ">link",
-      value: { href: ".", label: "A link" }
-    },
+    parameters: { href: ".", label: "A link" },
     expected: {
       spec: { hints: ["link"], labeledBy: "label" },
       value: { href: ".", label: "A link", type: "application/lynx+json" }
@@ -84,12 +69,7 @@ var tests = [{
   {
     description: "when expanded value",
     should: "copy input 'value' to 'value' key",
-    kvp: {
-      key: ">link",
-      value: {
-        value: { href: ".", label: "A link" }
-      }
-    },
+    parameters: { value: { href: ".", label: "A link" } },
     expected: {
       spec: { hints: ["link"] },
       value: { href: ".", label: "A link" }
@@ -97,6 +77,6 @@ var tests = [{
   }
 ];
 
-tests.description = "'link' partial";
+tests.partial = "link";
 
 module.exports = tests;

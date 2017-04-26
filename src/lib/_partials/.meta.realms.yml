@@ -1,13 +1,16 @@
-searchForm:
-  q:
-    spec:
-      hints: [ line ]
-      input: true
-    value: ""
-  submit:
-    label: Search
-    action: .
-results@realms:
-  - label<realm: Unknown
-    href<url: Unknown
-    type: application/lynx+json
+">container":
+  searchForm>form:
+    q:
+      spec:
+        hints: [ line, text ]
+        input: true
+      value: ""
+    submit>:
+      label: Search
+      action: .
+  results>list:
+    - "@realms":
+        ">link":
+          label<realm: Unknown
+          href<url: Unknown
+          type: application/lynx+json

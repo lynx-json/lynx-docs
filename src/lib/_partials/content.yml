@@ -1,5 +1,3 @@
-spec~:
-  hints: [ content ]
-  ~spec.*:
-value~:
-  ~*:
+">lynx":
+  spec.hints: [ content ]
+  *~:

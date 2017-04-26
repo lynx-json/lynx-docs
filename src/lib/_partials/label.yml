@@ -1,4 +1,3 @@
-spec~:
-  hints: [ label, text ]
-  ~spec.*:
-value~:
+">lynx":
+  "spec.hints": [ label, text ]
+  *~:

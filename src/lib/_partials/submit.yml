@@ -1,6 +1,0 @@
-spec~:
-  hints: [ submit ]
-  labeledBy?label: label
-  ~spec.*:
-value~:
-  ~*:

@@ -6,7 +6,7 @@ const should = chai.should();
 const expect = chai.expect;
 const sinon = require("sinon");
 const fs = require("fs");
-const util = require("util");
+const types = require("../../src/types");
 const getRealms = require("../../src/lib/metadata-realm");
 const path = require("path");
 const YAML = require("yamljs");
@@ -361,12 +361,12 @@ var tests = [{
 ];
 
 function realmObject(realm, variants) {
-  if(variants && !util.isArray(variants)) {
+  if (variants && !types.isArray(variants)) {
     variants = [variants];
   }
 
   var realmObj = {};
-  if(realm) realmObj.realm = realm;
+  if (realm) realmObj.realm = realm;
   realmObj.variants = variants || [];
 
   return toYamlBuffer(realmObj);
@@ -374,9 +374,9 @@ function realmObject(realm, variants) {
 
 function variant(name, pathToTemplateFile, pathToDataFile) {
   var variant = { type: "application/lynx+json" };
-  if(name) variant.name = name;
-  if(pathToTemplateFile) variant.template = pathToTemplateFile;
-  if(pathToDataFile) variant.data = pathToDataFile;
+  if (name) variant.name = name;
+  if (pathToTemplateFile) variant.template = pathToTemplateFile;
+  if (pathToDataFile) variant.data = pathToDataFile;
   return variant;
 }
 
@@ -414,7 +414,7 @@ function containsVariant(realmUri, name, pathToTemplateFile, pathToDataFile) {
   desc += ", with name '" + name + "'";
   desc += ", with template '" + pathToTemplateFile + "'";
 
-  if(pathToDataFile) {
+  if (pathToDataFile) {
     desc += ", with data '" + pathToDataFile + "'";
   }
 
@@ -449,44 +449,46 @@ function containsContentVariant(realmUri, name, pathToContentFile) {
   return assertion;
 }
 
-describe("when getting realm metadata", function () {
-  tests.forEach(function (test) {
-    describe(test.description, function () {
-      var realms;
+describe("metadata-realm module", function () {
+  describe("when getting realm metadata", function () {
+    tests.forEach(function (test) {
+      describe(test.description, function () {
+        var realms;
 
-      beforeEach(function () {
-        var readdirStub = sinon.stub(fs, "readdirSync");
-        var readFileStub = sinon.stub(fs, "readFileSync");
-        var existsSyncStub = sinon.stub(fs, "existsSync");
-        var statStub = sinon.stub(fs, "statSync");
+        beforeEach(function () {
+          var readdirStub = sinon.stub(fs, "readdirSync");
+          var readFileStub = sinon.stub(fs, "readFileSync");
+          var existsSyncStub = sinon.stub(fs, "existsSync");
+          var statStub = sinon.stub(fs, "statSync");
 
-        Object.getOwnPropertyNames(test.fs.dirs).forEach(function (dir) {
-          var rdir = path.resolve(dir);
-          existsSyncStub.withArgs(rdir).returns(true);
-          readdirStub.withArgs(rdir).returns(test.fs.dirs[dir]);
-          statStub.withArgs(rdir).returns(statsFake(true));
+          Object.getOwnPropertyNames(test.fs.dirs).forEach(function (dir) {
+            var rdir = path.resolve(dir);
+            existsSyncStub.withArgs(rdir).returns(true);
+            readdirStub.withArgs(rdir).returns(test.fs.dirs[dir]);
+            statStub.withArgs(rdir).returns(statsFake(true));
+          });
+
+          Object.getOwnPropertyNames(test.fs.files).forEach(function (file) {
+            var rfile = path.resolve(file);
+            existsSyncStub.withArgs(rfile).returns(true);
+            readFileStub.withArgs(rfile).returns(test.fs.files[file]);
+            statStub.withArgs(rfile).returns(statsFake(false));
+          });
+
+          realms = getRealms(test.root, test.realm);
         });
 
-        Object.getOwnPropertyNames(test.fs.files).forEach(function (file) {
-          var rfile = path.resolve(file);
-          existsSyncStub.withArgs(rfile).returns(true);
-          readFileStub.withArgs(rfile).returns(test.fs.files[file]);
-          statStub.withArgs(rfile).returns(statsFake(false));
+        afterEach(function () {
+          fs.readdirSync.restore();
+          fs.readFileSync.restore();
+          fs.existsSync.restore();
+          if (fs.statSync.restore) fs.statSync.restore();
         });
 
-        realms = getRealms(test.root, test.realm);
-      });
-
-      afterEach(function () {
-        fs.readdirSync.restore();
-        fs.readFileSync.restore();
-        fs.existsSync.restore();
-        if(fs.statSync.restore) fs.statSync.restore();
-      });
-
-      test.assertions.forEach(function (assertion) {
-        it(assertion.should, function () {
-          assertion(realms);
+        test.assertions.forEach(function (assertion) {
+          it(assertion.should, function () {
+            assertion(realms);
+          });
         });
       });
     });

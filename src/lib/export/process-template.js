@@ -1,84 +1,64 @@
 "use strict";
 
 const fs = require("fs");
-const util = require("util");
+const types = require("../../types");
 const parseYaml = require("../parse-yaml");
-const expandYaml = require("../expand-yaml");
-const finishYaml = require("../finish-yaml");
-const getMetadata = require("../metadata-yaml");
-const flattenSpecForKvp = require("./flatten-yaml");
-const extractSpec = require("./extract-spec");
+const jsonTemplates = require("../json-templates");
+const lynxExport = require("./lynx");
 
-function getKVP(yaml) {
-  if(!util.isObject(yaml)) return { key: undefined, value: yaml };
-
-  var props = Object.getOwnPropertyNames(yaml);
-
-  if(props.length === 1 && getMetadata(props[0]).key === undefined) {
-    return {
-      key: props[0],
-      value: yaml[props[0]]
-    };
-  }
-
-  return { key: undefined, value: yaml };
-}
-
-function getTemplateKvp(template) {
-  if(util.isString(template)) {
-    var buffer = fs.readFileSync(template);
+function getTemplate(pathOrTemplate) {
+  if (types.isObject(pathOrTemplate) || types.isArray(pathOrTemplate)) return pathOrTemplate;
+  if (types.isString(pathOrTemplate)) {
+    let buffer = fs.readFileSync(pathOrTemplate);
     try {
-      return getKVP(parseYaml(buffer));
-    } catch(err) {
-      err.message = "Error parsing YAML:\n".concat(err.message)
+      return parseYaml(buffer);
+    } catch (err) {
+      err.message = "Error parsing YAML:\n".concat(err.message);
       throw err;
     }
   }
-
-  return getKVP(template);
+  throw Error("Unexpected template value. Expected path to template or template object. Received \n" + JSON.stringify(pathOrTemplate));
 }
 
-function processTemplate(template, options, createFile) {
-  var kvp = getTemplateKvp(template);
+function addRealmToTemplate(realm, template) {
+  if (realm && !template.realm) template.realm = realm;
+}
 
-  if(options.log) {
-    console.log("### Template Options");
-    console.log(JSON.stringify(options), "\n");
+function log(header, value) {
+  console.log(header);
+  console.log(JSON.stringify(value), "\n");
+}
+
+function processTemplate(pathOrTemplate, options, createFile) {
+  let template = getTemplate(pathOrTemplate);
+  //if (options.log) log("### Template Options", options);
+
+  if (options.log) log("### Template Source", template);
+
+  template = jsonTemplates.expandTokens(template, options.inferInverse);
+  if (options.log) log("### Tokens Expanded", template);
+
+  let templatePath = types.isString(pathOrTemplate) ? pathOrTemplate : null;
+  template = jsonTemplates.partials.expand(template, jsonTemplates.partials.resolve, templatePath, options.inferInverse);
+
+  if (options.log) log("### Partials Processed", template);
+
+  if (options && options.realm) {
+    addRealmToTemplate(options.realm.realm, template);
+    template = lynxExport.resolveRelativeUrls(options.realm.realm)(template);
   }
 
-  var expandedYaml = expandYaml(kvp, options);
+  template = lynxExport.calculateChildren(template);
 
-  if(options.log) {
-    console.log("### Expanded");
-    console.log(JSON.stringify(expandedYaml), "\n");
+  if (options.spec) {
+    template = lynxExport.flatten(template);
+    if (options.log) log("### Flattened", template);
+    template = lynxExport.extractSpecs(template, createFile);
+    if (options.log) log("### Spec extracted", template);
+
   }
 
-  var finishedYaml = finishYaml(expandedYaml, options);
-
-  if(options.log) {
-    console.log("### Finished");
-    console.log(JSON.stringify(finishedYaml), "\n");
-  }
-
-  if(options.flatten) {
-    finishedYaml = flattenSpecForKvp(finishedYaml);
-  }
-
-  if(options.log) {
-    console.log("### Flattened");
-    console.log(JSON.stringify(finishedYaml), "\n");
-  }
-
-  if(options.spec) {
-    finishedYaml = extractSpec(finishedYaml, options, createFile);
-  }
-
-  if(options.log) {
-    console.log("### Spec extracted");
-    console.log(JSON.stringify(finishedYaml), "\n");
-  }
-
-  return finishedYaml;
+  return template;
 }
 
 module.exports = exports = processTemplate;

@@ -1,14 +1,10 @@
-var tests = [
-  {
+var tests = [{
     description: "when spec.* properties",
     should: "have specified spec.* properties in result",
-    kvp: {
-      key: ">submit",
-      value: {
-        "spec.hints": ["whatever", "submit"],
-        "spec.visibility": "visible",
-        action: "."
-      }
+    parameters: {
+      "spec.hints": ["whatever", "submit"],
+      "spec.visibility": "visible",
+      action: "."
     },
     expected: {
       spec: {
@@ -21,12 +17,9 @@ var tests = [
   {
     description: "when spec.hints",
     should: "override default hints",
-    kvp: {
-      key: ">submit",
-      value: {
-        "spec.hints": ["whatever"],
-        value: { action: "." }
-      }
+    parameters: {
+      "spec.hints": ["whatever"],
+      value: { action: "." }
     },
     expected: {
       spec: {
@@ -38,15 +31,12 @@ var tests = [
   {
     description: "when fully specified spec object",
     should: "use provided spec object. Don't default hints",
-    kvp: {
-      key: ">submit",
-      value: {
-        spec: {
-          hints: ["submit"],
-          visibility: "visible"
-        },
-        value: { action: "." }
-      }
+    parameters: {
+      spec: {
+        hints: ["submit"],
+        visibility: "visible"
+      },
+      value: { action: "." }
     },
     expected: {
       spec: {
@@ -58,6 +48,6 @@ var tests = [
   }
 ];
 
-tests.description = "'link' partial";
+tests.partial = "submit";
 
 module.exports = tests;

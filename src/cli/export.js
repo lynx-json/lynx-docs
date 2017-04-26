@@ -19,6 +19,10 @@ function buildCommand(yargs) {
       describe: "Output folder or stream",
       default: "stdout"
     })
+    .option("infer", {
+      describe: "Infer section tokens when inverse is not supplied in template",
+      default: false
+    })
     .option("format", {
       alias: "f",
       describe: "The format to export to",

@@ -3,8 +3,8 @@ spec:
 value:
   src<variantURL:
   type: application/lynx+json
-  alt: Realm Default 
-  index:
+  alt: Realm Default
+  index>content:
     src<indexURL:
     alt: Realm Index
     type: application/lynx+json

@@ -1,15 +1,13 @@
 "use strict";
 
 const chai = require("chai");
-const should = chai.should();
 const expect = chai.expect;
 const sinon = require("sinon");
 const fs = require("fs");
 const path = require("path");
-const parseYaml = require("../../../src/lib/parse-yaml");
+const types = require("../../../src/types");
 const variantsToLynx = require("../../../src/lib/export/variants-to-lynx").all;
 
-var inputValue = "Hello world!";
 var tests = [{
     realms: [{
       root: "/src/",
@@ -72,14 +70,14 @@ var tests = [{
       }]
     }],
     options: {},
-    inputValue: 'Should be "escaped"',
-    expected: [
-      '{"spec":{"hints":["text"],"children":[] },"value":"Should be \\\"escaped\\\"","realm":"/src/folder-one/" }\n'
-    ],
+    template: "foo: Should be \"escaped\"",
+    expected: [{
+      realm: "/src/folder-one/",
+      foo: "Should be \"escaped\""
+    }],
     description: "when string contains characters that should be escaped",
     should: "should have content that contains escaped characters"
-  },
-  {
+  }, {
     realms: [{
       root: "/src/",
       realm: "/src/folder-one/",
@@ -89,43 +87,59 @@ var tests = [{
       }]
     }],
     options: {},
-    expected: [
-      '{"spec":{"hints":["text"],"children":[] },"value":"Hello world!","realm":"/src/folder-one/" }\n'
-    ],
+    template: "foo: Should not be escaped",
+    expected: [{
+      realm: "/src/folder-one/",
+      foo: "Should not be escaped"
+    }],
     description: "when string does not contain characters that should be escaped",
     should: "should have content that does not contain escaped characters"
   }
 ];
 
-function runTest(test, stubs) {
+function getTests() {
+  let filtered = tests.filter(test => test.include === true);
+  return filtered.length > 0 ? filtered : tests;
+}
+
+function runTest(test) {
   var count = 0;
 
   function onFile(path, content) {
-    if(test.files) path.should.equal(test.files[count]);
-    if(test.expected) content.should.equal(test.expected[count]);
+    if (test.files) path.should.equal(test.files[count]);
+    if (test.expected) {
+      let parsed = JSON.parse(content);
+      expect(parsed).to.deep.equal(test.expected[count]);
+    }
 
     count++;
   }
-
-  if(test.inputValue) stubs.readFileSync.returns(parseYaml(test.inputValue));
 
   variantsToLynx(test.realms, onFile, test.options);
 }
 
 describe("when exporting templates to lynx", function () {
-  var dependencies = {};
-  beforeEach(function () {
-    dependencies.readFileSync = sinon.stub(fs, "readFileSync").returns(parseYaml(inputValue));
-  });
-
-  afterEach(function () {
-    fs.readFileSync.restore();
-  });
-
-  tests.forEach(test => {
+  getTests().forEach(test => {
     describe(test.description, function () {
+      beforeEach(function () {
+        var stub;
+        test.realms.forEach(realm => {
+          realm.variants.forEach(variant => {
+            if (types.isString(variant.template)) {
+              stub = stub || sinon.stub(fs, "readFileSync");
+              stub.withArgs(variant.template)
+                .returns(test.template || "foo: Hello World!");
+            }
+          });
+        });
+      });
+
+      afterEach(function () {
+        if (fs.readFileSync.restore) fs.readFileSync.restore();
+      });
+
       it(test.should, function () {
-        runTest(test, dependencies);
+        runTest(test);
       });
     });
   });

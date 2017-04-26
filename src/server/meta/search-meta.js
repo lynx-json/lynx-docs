@@ -1,6 +1,6 @@
 const url = require("url");
 const path = require("path");
-const util = require("util");
+const types = require("../../types");
 const variantToLynx = require("../../lib/export/variants-to-lynx").one;
 const searchUrlPattern = /\/meta\/search\/$/i;
 
@@ -22,7 +22,7 @@ module.exports = exports = function createSearchHandler(options) {
 
   function renderRealms(res, realms) {
     var template = {
-      ">.meta.realms": ""
+      ">.meta.realms": {}
     };
 
     var variant = {
@@ -60,7 +60,7 @@ module.exports = exports = function createSearchHandler(options) {
   function buildVariantPredicate(term) {
     return function (realm) {
       return realm.variants.some(v => {
-        return(v.template && v.template.indexOf(term) !== -1) ||
+        return (v.template && v.template.indexOf(term) !== -1) ||
           (v.data && v.data.indexOf(term) !== -1) ||
           (v.content && v.content.indexOf(term) !== -1);
       });
@@ -69,10 +69,10 @@ module.exports = exports = function createSearchHandler(options) {
 
   function buildCustomPredicate(search) {
     return function (realm) {
-      if(!(search.scope in realm)) return false;
+      if (!(search.scope in realm)) return false;
 
       var value = realm[search.scope];
-      if(!util.isString(value)) return false;
+      if (!types.isString(value)) return false;
 
       return value.indexOf(search.term) !== -1;
     };
@@ -81,7 +81,7 @@ module.exports = exports = function createSearchHandler(options) {
   function parseTerm(term) {
     var parts = term.split(":");
 
-    if(parts.length === 1) return { term: parts[0] };
+    if (parts.length === 1) return { term: parts[0] };
 
     return {
       scope: parts[0],
@@ -98,14 +98,14 @@ module.exports = exports = function createSearchHandler(options) {
   function buildPredicateForTerm(term) {
     var search = parseTerm(term);
 
-    if(search.scope) {
-      if(search.scope in buildersByScope) return buildersByScope[search.scope](search.term);
+    if (search.scope) {
+      if (search.scope in buildersByScope) return buildersByScope[search.scope](search.term);
       return buildCustomPredicate(search);
     } else {
       var predicates = [];
 
-      for(var scope in buildersByScope) {
-        if(!buildersByScope.hasOwnProperty(scope)) continue;
+      for (var scope in buildersByScope) {
+        if (!buildersByScope.hasOwnProperty(scope)) continue;
         predicates.push(buildersByScope[scope](search.term));
       }
 
@@ -123,17 +123,17 @@ module.exports = exports = function createSearchHandler(options) {
   }
 
   return function searchRealms(req, res, next) {
-    if(!searchUrlPattern.test(req.pathname)) return next();
+    if (!searchUrlPattern.test(req.pathname)) return next();
 
-    if(!req.query || !req.query.q) return renderRealms(res, req.realms);
+    if (!req.query || !req.query.q) return renderRealms(res, req.realms);
 
     var terms = req.query.q.split(/\s+/).filter(t => t !== "");
-    if(terms.length === 0) return renderRealms(res, req.realms);
+    if (terms.length === 0) return renderRealms(res, req.realms);
 
     var predicate = buildPredicate(terms);
     var realms = req.realms.filter(predicate);
 
-    if(realms.length === 1) {
+    if (realms.length === 1) {
       return renderRedirectToRealm(res, realms[0].url);
     }
 

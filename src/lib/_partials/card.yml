@@ -1,5 +1,3 @@
-spec~:
-  hints: [ card ]
-  ~spec.*:
-value~:
-  ~*:
+">lynx":
+  spec.hints: [ card, container ]
+  *~:
