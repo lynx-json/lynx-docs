@@ -22,6 +22,12 @@ var tests = [{
     data: { name: { first: "Foo", last: "Bar" } },
     expected: { message: "Hello", name: { first: "Foo", last: "Bar" } }
   },
+  {
+    description: "issue #42",
+    template: { array: [{ "@arrayVar": { "#boolVar": { label: "Truthy" }, "^boolVar": { label: "Falsey" } } }] },
+    data: { arrayVar: [{ boolVar: true }, { boolVar: false }, { boolVar: true }] },
+    expected: { array: [{ label: "Truthy" }, { label: "Falsey" }, { label: "Truthy" }] }
+  }
 ];
 
 tests.suite = "mixed content (static and dynamic)";
