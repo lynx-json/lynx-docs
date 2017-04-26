@@ -71,15 +71,62 @@ var tests = [{
     }
   },
   {
-    description: "object container with text values",
+    description: "object container with keys and dynamic container sections",
     should: "flatten template",
-    template: { ">container": { "message>text": "Hello" } },
+    template: { ">container": { "message>text": "Hello", "foo#>container": { "name>text": "Foo" }, "foo^>container": { "name>text": "No foo" } } },
     expected: {
       spec: {
         hints: ["container"],
-        children: [{ name: "message", hints: ["text"] }]
+        children: [
+          { name: "message", hints: ["text"] },
+          { name: "foo" }
+        ]
       },
-      message: { "": "Hello" }
+      message: { "": "Hello" },
+      foo: {
+        "#foo": {
+          spec: {
+            hints: ["container"],
+            children: [{ name: "name", hints: ["text"] }]
+          },
+          "name": { "": "Foo" }
+        },
+        "^foo": {
+          spec: {
+            hints: ["container"],
+            children: [{ name: "name", hints: ["text"] }]
+          },
+          "name": { "": "No foo" }
+        }
+      }
+    }
+  },
+  {
+    include: true,
+    description: "object container with keys and dynamic sections",
+    should: "flatten template",
+    template: { ">container": { "message>lynx": "Hello", "foo>lynx": { "#foo": { "name>lynx": "Foo" }, "^foo": { "name>lynx": "No foo" } } } },
+    expected: {
+      spec: {
+        hints: ["container"],
+        children: [
+          { name: "message", hints: ["text"] },
+          {
+            name: "foo",
+            hints: ["container"],
+            children: [{ name: "name", hints: ["text"] }]
+          }
+        ]
+      },
+      message: "Hello",
+      foo: {
+        "#foo": {
+          "name": "Foo"
+        },
+        "^foo": {
+          "name": "No foo"
+        }
+      }
     }
   }
 ];
@@ -90,6 +137,7 @@ function getTests() {
 }
 
 function runTest(test) {
+  if (test.include || test.log) console.log("template", "\n" + JSON.stringify(test.template, null, 2));
   let processed = jsonTemplates.process(test.template, false);
   if (test.include || test.log) console.log("processed", "\n" + JSON.stringify(processed, null, 2));
   let childrenAdded = calculateChildren(processed);

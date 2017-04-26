@@ -6,7 +6,8 @@ const processTemplates = require("../../src/lib/export/process-template");
 const jsonTemplates = require("../../src/lib/json-templates");
 
 var suites = [
-  require("./static-content")
+  require("./static-content"),
+  require("./mixed-content")
 ];
 
 describe("lynx-docs authoring scenarios", function () {

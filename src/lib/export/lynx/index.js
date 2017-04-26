@@ -41,7 +41,7 @@ function accumulateLynxChildren(lynxJsValue) {
     .filter(meta => meta.name !== specKey)
     .reduce((acc, meta) => {
       if (meta.name && isLynxOrResultsInLynx(source[meta.source])) {
-        acc.push({ meta: meta, value: source[meta.source] });
+        acc.push({ meta: meta, value: source[meta.source], updateValue: function (newValue) { source[meta.source] = newValue; } });
       } else if (meta.binding && templateKey.sectionTokens.includes(meta.binding.token)) {
         acc.push({
           meta: meta,
@@ -53,18 +53,7 @@ function accumulateLynxChildren(lynxJsValue) {
     }, []);
 
   validateSectionChildren(children);
-  let sectionWithChildren = children.find(item => item.children && item.children.length > 0);
-
-  //merge the children with names with the section that has children
-  return children.reduce((acc, child) => {
-    if (child.section && sectionWithChildren) {
-      acc = acc.concat(sectionWithChildren.children); //add children from section
-      sectionWithChildren = null; //only add children once
-    } else if (!child.section) {
-      acc.push(child);
-    }
-    return acc;
-  }, []);
+  return children;
 }
 
 function getLynxParentNode(traverseNode) {
@@ -78,7 +67,7 @@ function getLynxParentNode(traverseNode) {
 
 function isLynxValue(jsValue) {
   if (!types.isObject(jsValue)) return false;
-  return Object.keys(jsValue).some(key => key === specKey);
+  return Object.keys(jsValue).includes(specKey);
 }
 
 function resultsInLynxNode(jsValue) {
