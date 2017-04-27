@@ -7,42 +7,59 @@ const resolveRelativeUrls = require("../../../../src/lib/export/lynx/resolve-rel
 let testRealm = "http://example.com/foo/";
 
 var tests = [{
-    description: "relative realm value",
+    description: "relative 'realm' value",
     should: "resolve realm relative to test realm",
     template: { realm: "./bar" },
     expected: { realm: url.resolve(testRealm, "./bar") }
   },
   {
-    description: "absolute realm value",
+    description: "absolute 'realm' value",
     should: "be absolute realm",
     template: { realm: "http://google.com/bar" },
     expected: { realm: "http://google.com/bar" }
   },
   {
-    description: "relative realm value not at root",
+    description: "relative 'realm' value not at root",
     should: "should not change value",
     template: { root: { realm: "./bar" } },
     expected: { root: { realm: "./bar" } }
   },
   {
-    description: "relative scope value",
+    description: "relative 'scope' value",
     should: "resolve scope relative to test realm",
     template: { spec: {}, value: { scope: "./bar" } },
     expected: { spec: {}, value: { scope: url.resolve(testRealm, "./bar") } },
   },
   {
-    description: "absolute scope value",
+    description: "absolute 'scope' value",
     should: "not change value",
     template: { spec: {}, value: { scope: "http://google.com/" } },
     expected: { spec: {}, value: { scope: "http://google.com/" } },
   },
   {
-    description: "relative scope that is not a lynx node child",
+    description: "relative 'scope' that is not a lynx node child",
     should: "not change value",
     template: { root: { scope: "./bar" } },
     expected: { root: { scope: "./bar" } }
   },
-
+  {
+    description: "relative 'for' value",
+    should: "resolve for relative to test realm",
+    template: { spec: {}, value: { for: "./bar" } },
+    expected: { spec: {}, value: { for: url.resolve(testRealm, "./bar") } },
+  },
+  {
+    description: "absolute 'for' value",
+    should: "not change value",
+    template: { spec: {}, value: { for: "http://google.com/" } },
+    expected: { spec: {}, value: { for: "http://google.com/" } },
+  },
+  {
+    description: "relative 'for' value that is not a lynx node child",
+    should: "not change value",
+    template: { root: { for: "./bar" } },
+    expected: { root: { for: "./bar" } }
+  }
 ];
 
 function getTests() {

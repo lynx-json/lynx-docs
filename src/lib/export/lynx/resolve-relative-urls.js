@@ -3,7 +3,8 @@ const types = require("../../../types");
 const exportLynx = require("./index");
 const shouldResolve = {
   scope: function (traverseNode) { return !!exportLynx.getLynxParentNode(traverseNode); },
-  realm: function (traverseNode) { return traverseNode.parent && traverseNode.parent.isRoot; }
+  realm: function (traverseNode) { return traverseNode.parent && traverseNode.parent.isRoot; },
+  for: function (traverseNode) { return !!exportLynx.getLynxParentNode(traverseNode); }
 };
 const candidateKeys = Object.keys(shouldResolve);
 
