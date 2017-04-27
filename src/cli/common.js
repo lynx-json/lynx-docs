@@ -54,6 +54,7 @@ function applyRunControlToOptions(rc, options) {
   }
   let rcOptions = {};
   if (rc.inferInverseSections !== undefined) rcOptions.infer = rc.inferInverseSections;
+  if (rc.root) rcOptions.root = rc.root;
   if (rc.log && rc.log.level) rcOptions.log = rc.log.level;
   if (rc.spec) rcOptions.spec = rc.spec;
 
