@@ -3,13 +3,22 @@
 const lynxDocs = require("../index");
 const path = require("path");
 const types = require("../types");
+const log = require("logatim");
 
 function handleOptions(options) {
   processConfig(options.config);
   normalizeRoot(options);
   normalizeSpecHandling(options);
+  normalizeLogging(options);
 
-  if (options.log) console.log("Options\n=======\n", options);
+  log.blue.debug("Options\n=======");
+  log.debug(JSON.stringify(options, null, 2));
+}
+
+function normalizeLogging(options) {
+  if (!options.log && process.env.LOG_LEVEL) options.log = process.env.LOG_LEVEL;
+  if (!types.isString(options.log)) options.log = "error";
+  log.setLevel(options.log);
 }
 
 function normalizeSpecHandling(options) {

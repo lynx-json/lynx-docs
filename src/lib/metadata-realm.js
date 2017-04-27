@@ -6,6 +6,7 @@ const url = require("url");
 const mime = require("mime");
 const types = require("../types");
 const parseYaml = require("./parse-yaml");
+const log = require("logatim");
 
 function getRealms(roots, realm) {
   var realms = [];
@@ -103,7 +104,7 @@ function getMetaForFolder(folder) {
 
   var meta = parseYaml(fs.readFileSync(pathToMeta));
   if (!meta) {
-    console.log("Empty metadata file was ignored: '" + pathToMeta + "'");
+    log.warn("Empty metadata file was ignored: '" + pathToMeta + "'");
     return [];
   }
 

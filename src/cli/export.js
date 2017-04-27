@@ -8,7 +8,7 @@ const getRealmMetadata = require("../lib/metadata-realm");
 
 function buildCommand(yargs) {
   return yargs
-    .usage("$0 export [--root OR root..] [--output] [--format] [--config]")
+    .usage("$0 export [--root OR root..] [--output] [--format] [--config] [--infer] [--log]")
     .option("root", {
       alias: "r",
       describe: "Root folder(s) for the web site",
@@ -27,6 +27,11 @@ function buildCommand(yargs) {
       alias: "f",
       describe: "The format to export to",
       default: "handlebars"
+    })
+    .option("log", {
+      alias: "l",
+      describe: "Set console logging level (error|warn|info|debug|trace)",
+      default: false
     })
     .option("config", {
       alias: "c",

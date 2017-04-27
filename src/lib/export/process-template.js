@@ -5,6 +5,7 @@ const types = require("../../types");
 const parseYaml = require("../parse-yaml");
 const jsonTemplates = require("../json-templates");
 const lynxExport = require("./lynx");
+const log = require("logatim");
 
 function getTemplate(pathOrTemplate) {
   if (types.isObject(pathOrTemplate) || types.isArray(pathOrTemplate)) return pathOrTemplate;
@@ -24,24 +25,23 @@ function addRealmToTemplate(realm, template) {
   if (realm && !template.realm) template.realm = realm;
 }
 
-function log(header, value) {
-  console.log(header);
-  console.log(JSON.stringify(value), "\n");
+function logInfo(header, value) {
+  log.blue.debug("# " + header + " #");
+  log.debug(JSON.stringify(value));
 }
 
 function processTemplate(pathOrTemplate, options, createFile) {
-  let template = getTemplate(pathOrTemplate);
-  //if (options.log) log("### Template Options", options);
+  logInfo("Processing Template", pathOrTemplate);
 
-  if (options.log) log("### Template Source", template);
+  let template = getTemplate(pathOrTemplate);
+  logInfo("Template Object", template);
 
   template = jsonTemplates.expandTokens(template, options.inferInverse);
-  if (options.log) log("### Tokens Expanded", template);
+  logInfo("Tokens Expanded", template);
 
   let templatePath = types.isString(pathOrTemplate) ? pathOrTemplate : null;
   template = jsonTemplates.partials.expand(template, jsonTemplates.partials.resolve, templatePath, options.inferInverse);
-
-  if (options.log) log("### Partials Processed", template);
+  logInfo("Partials Processed", template);
 
   if (options && options.realm) {
     addRealmToTemplate(options.realm.realm, template);
@@ -52,10 +52,10 @@ function processTemplate(pathOrTemplate, options, createFile) {
 
   if (options.spec) {
     template = lynxExport.flatten(template);
-    if (options.log) log("### Flattened", template);
-    template = lynxExport.extractSpecs(template, createFile);
-    if (options.log) log("### Spec extracted", template);
+    logInfo("Flattened", template);
 
+    template = lynxExport.extractSpecs(template, createFile);
+    logInfo("Spec extracted", template);
   }
 
   return template;

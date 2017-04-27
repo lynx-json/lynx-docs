@@ -7,6 +7,7 @@ const serveStatic = require("./serve-static");
 const serveRealm = require("./serve-realm");
 const searchMeta = require("./meta/search-meta");
 const serveMeta = require("./meta/serve-meta");
+const log = require("logatim");
 
 function serveNotFound(req, res) {
   res.writeHead(404, { "Content-Type": "text/plain" });
@@ -17,8 +18,8 @@ function serveNotFound(req, res) {
 function serveError(req, res) {
   res.writeHead(500, { "Content-Type": "text/plain" });
   res.write("500 Server Error");
-  if(req.error) {
-    if(req.error.stack) res.write("\n\n" + req.error.stack);
+  if (req.error) {
+    if (req.error.stack) res.write("\n\n" + req.error.stack);
     else {
       res.write("\n\n".concat(req.error.message));
       res.write("\n\nError object details:\n".concat(JSON.stringify(req.error, null, 2)));
@@ -50,7 +51,7 @@ function startServer(options) {
   function addErrorHandler(req, res, next) {
     try {
       next();
-    } catch(e) {
+    } catch (e) {
       req.error = e;
       serveError(req, res);
     }
@@ -67,7 +68,7 @@ function startServer(options) {
 
   var handler = handlers.reverse().reduce(reduction, serveNotFound);
   var server = http.createServer(handler).listen(port);
-  console.log("Lynx Docs server is running at http://localhost:" + port);
+  console.log(log.green("Lynx Docs server is running at http://localhost:" + port).raw());
 
   return server;
 }
