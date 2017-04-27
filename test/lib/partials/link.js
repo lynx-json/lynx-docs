@@ -1,4 +1,13 @@
 var tests = [{
+    description: "when null value",
+    should: "not add anything to value",
+    parameters: null,
+    expected: {
+      spec: { hints: ["link"] },
+      value: null
+    }
+  },
+  {
     description: "when no type",
     should: "add application/lynx+json to value",
     parameters: { href: "." },

@@ -1,4 +1,22 @@
 var tests = [{
+    description: "when null value",
+    should: "not add anything to value",
+    parameters: null,
+    expected: {
+      spec: { hints: ["submit"] },
+      value: null
+    }
+  },
+  {
+    description: "when label exists",
+    should: "add labeledBy to spec",
+    parameters: { action: ".", label: "A submit" },
+    expected: {
+      spec: { hints: ["submit"], labeledBy: "label" },
+      value: { action: ".", label: "A submit" }
+    }
+  },
+  {
     description: "when spec.* properties",
     should: "have specified spec.* properties in result",
     parameters: {

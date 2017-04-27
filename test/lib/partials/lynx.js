@@ -99,7 +99,7 @@ var tests = [{
   },
   {
     description: "when spec.* keys mixed with value key",
-    should: "have copy spec.* properties to spec and set value",
+    should: "copy spec.* properties to spec and set value",
     parameters: {
       "spec.input": true,
       "spec.hints": ["line", "text"],
@@ -113,6 +113,26 @@ var tests = [{
         hints: ["line", "text"],
         labeledBy: "label",
         validation: {}
+      },
+      value: ""
+    }
+  },
+  {
+    description: "when spec.* keys include qualified namespace. Issue #31",
+    should: "copy spec.* properties to spec and set value",
+    parameters: {
+      "spec.input": true,
+      "spec.hints": ["line", "text"],
+      "spec.labeledBy": "label",
+      "spec.http://www.example.com/spec/property": "whatever",
+      "value": ""
+    },
+    expected: {
+      spec: {
+        input: true,
+        hints: ["line", "text"],
+        labeledBy: "label",
+        "http://www.example.com/spec/property": "whatever"
       },
       value: ""
     }

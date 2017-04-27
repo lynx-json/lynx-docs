@@ -1,7 +1,7 @@
 "use strict";
 
 const types = require("../../../types");
-const keySection = /^([@#\^><=]?[a-zA-Z0-9.\-*]+[@#\^><=]?)(~{0,1})([a-zA-Z0-9.\-\*]+)?$/;
+const keySection = /^([@#\^><=]?[a-zA-Z0-9.\-*:\/]+[@#\^><=]?)(~{0,1})([a-zA-Z0-9.\-*:\/]+)?$/;
 const wildcardCar = "*";
 
 function parse(key) {

@@ -1,12 +1,12 @@
-function linkPartial(parameters) {
-  let result = { ">lynx": { "spec.hints": ["submit"], "*~": null } };
-  let value = result[">lynx"];
+const types = require("../../types");
 
-  if (parameters.label) {
-    value["spec.labeledBy"] = "label";
-  }
+function submitPartial(parameters) {
+  let result = { ">lynx": { "spec.hints": ["submit"], "*~": null } };
+  let partial = result[">lynx"];
+
+  if (types.isObject(parameters) && parameters.label) partial["spec.labeledBy"] = "label";
 
   return result;
 }
 
-module.exports = exports = linkPartial;
+module.exports = exports = submitPartial;
