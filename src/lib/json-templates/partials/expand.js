@@ -40,7 +40,6 @@ function expandPartials(template, resolvePartial, templatePath, inferInverseToke
       let metas = keys.map(templateKey.parse);
       let partialMetas = metas.filter(meta => !!meta.partial);
       if (partialMetas.length === 0) return;
-      //console.log("expanding", partialMetas.map(m => m.source).join());
       partialMetas.forEach(processPartialMeta);
       this.update(result);
       keys = types.isObject(result) && Object.keys(result);

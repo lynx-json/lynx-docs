@@ -8,6 +8,7 @@ const templateData = require("./template-data");
 const handlebars = require("handlebars");
 const jsonLint = require("json-lint");
 const types = require("../../types");
+const log = require("logatim");
 
 handlebars.Utils.escapeExpression = function (toEscape) {
   if (toEscape === null || toEscape === undefined) return "";
@@ -32,7 +33,8 @@ function transformVariantToLynx(variant, options, createFile) {
   try {
     let template = processTemplate(variant.template, options, createFile);
     let hbContent = toHandlebars(template, options) + "\n";
-    if (options.log) console.log("\nhandlebars content\n" + hbContent);
+    log.blue.debug("# Handlebars Content #");
+    log.debug(hbContent);
 
     let data = types.isString(variant.data) ? templateData(variant.data) : variant.data || null;
     let json = handlebars.compile(hbContent)(data);
@@ -46,9 +48,14 @@ function transformVariantToLynx(variant, options, createFile) {
 function lintContent(json, variant) {
   let linted = jsonLint(json);
   if (linted.error) {
-    let message = "Failed JSON linting when data binding '".concat(variant.data, "'.\n");
-    message += "\nNote: <<ERROR>> token denotes location of linting failure.\n"
-      .concat(json.substr(0, linted.character - 1), "<<ERROR>>", json.substr(linted.character - 1));
+    let beforeError = json.substr(0, linted.character - 1);
+    let afterError = json.substr(linted.character - 1);
+    let message = "Failed JSON linting when data binding '".concat(variant.data, "'");
+    log.red.bold.error("! " + message + " !");
+    log.green(beforeError).red(afterError).error();
+
+    message += "\n\nNote: <<ERROR>> token denotes location of linting failure.\n"
+      .concat(beforeError, "<<ERROR>>", afterError);
     throw new Error(message);
   }
   return json;

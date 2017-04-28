@@ -8,29 +8,25 @@ const getRealmMetadata = require("../lib/metadata-realm");
 
 function buildCommand(yargs) {
   return yargs
-    .usage("$0 export [--root OR root..] [--output] [--format] [--config]")
+    .usage("$0 export [--root OR root..] [--output] [--format] [--config] [--infer] [--log]")
     .option("root", {
       alias: "r",
-      describe: "Root folder(s) for the web site",
-      default: "."
+      describe: "Root folder(s) for the web site. [default '.']"
     })
     .option("output", {
       alias: "o",
-      describe: "Output folder or stream",
-      default: "stdout"
+      describe: "Output folder or stream. [default 'stdout']"
     })
     .option("infer", {
-      describe: "Infer section tokens when inverse is not supplied in template",
-      default: false
+      describe: "Infer section tokens when inverse is not supplied in template. [default false]"
     })
     .option("format", {
       alias: "f",
-      describe: "The format to export to",
-      default: "handlebars"
+      describe: "The format to export to. [default 'handlebars']"
     })
-    .option("config", {
-      alias: "c",
-      describe: "External configuration file to require"
+    .option("log", {
+      alias: "l",
+      describe: "Set console logging level (error|warn|info|debug|trace). [default 'error']"
     })
     .example("$0 export -r src -o views -f handlebars")
     .example("$0 export -r src")

@@ -2,17 +2,18 @@ const url = require("url");
 const path = require("path");
 const fs = require("fs");
 const mime = require("mime");
+const log = require("logatim");
 
 mime.define({
   "application/lynx+json": ["lnx"],
-  "application/lynx-spec+json": ["lnxs"]  
+  "application/lynx-spec+json": ["lnxs"]
 });
 
 function createServeStatic(options) {
   function serveFile(req, res, next) {
     function onFileContents(err, contents) {
       if (err) {
-        if(options.log) console.log(err);
+        log.error(err);
         return next();
       }
 
@@ -23,7 +24,7 @@ function createServeStatic(options) {
 
     function onFileStat(err, stat) {
       if (err) {
-        if(options.log) console.log(err);
+        log.error(err);
         return next();
       }
 
@@ -40,11 +41,11 @@ function createServeStatic(options) {
     var relativePathToFile = "." + url.parse(req.url).pathname;
     if (!path.extname(relativePathToFile)) return next();
 
-    var pathsToFile = options.root.map(function(root) {
+    var pathsToFile = options.root.map(function (root) {
       return path.resolve(root, relativePathToFile);
     });
 
-    var pathToFile = pathsToFile.find(function(p) {
+    var pathToFile = pathsToFile.find(function (p) {
       return fs.existsSync(p);
     });
 
