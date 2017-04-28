@@ -43,7 +43,7 @@ function getPartialKeys(sourceKeys) {
 
 function processPartial(partial, parameters) {
   //Expand tokens in case the partial author did not
-  let expanded = expandTokens.expand(partial, false);
+  let expanded = expandTokens.expand(partial);
   let replacements = traverse(expanded).reduce(function (acc, value) {
     if (!this.keys || types.isArray(value)) return acc;
     let partialKeys = getPartialKeys(this.keys).filter(key => !!key.variable);

@@ -34,14 +34,6 @@ let tests = [{
     expected: { "@foo": { ">partial": { "<bar": "Yes bar" } } }
   },
   {
-    description: "short syntax",
-    template: { "foo#": "Yes foo" },
-    expected: { foo: { "#foo": "Yes foo", "^foo": null } }
-  }, {
-    description: "short syntax with static and dynamic values",
-    template: { "foo#": "Yes foo", bar: "Yes bar" },
-    expected: { foo: { "#foo": "Yes foo", "^foo": null }, bar: "Yes bar" }
-  }, {
     description: "intermediate syntax",
     template: { "foo#": "Yes foo", "foo^": "No foo" },
     expected: { foo: { "#foo": "Yes foo", "^foo": "No foo" } }
@@ -54,14 +46,6 @@ let tests = [{
     template: { foo: { "#foo": "Yes foo", "^foo": "No foo" } },
     expected: { foo: { "#foo": "Yes foo", "^foo": "No foo" } }
   }, {
-    description: "short syntax with variable",
-    template: { "foo#bar": "Yes bar" },
-    expected: { foo: { "#bar": "Yes bar", "^bar": null } }
-  }, {
-    description: "short syntax with variable and static value",
-    template: { "foo#bar": "Yes bar", bar: "Yes bar" },
-    expected: { foo: { "#bar": "Yes bar", "^bar": null }, bar: "Yes bar" }
-  }, {
     description: "intermediate syntax with variable",
     template: { "foo#bar": "Yes bar", "foo^bar": "No bar" },
     expected: { foo: { "#bar": "Yes bar", "^bar": "No bar" } }
@@ -73,15 +57,6 @@ let tests = [{
     description: "long syntax with variable",
     template: { foo: { "#bar": "Yes bar", "^bar": "No bar" } },
     expected: { foo: { "#bar": "Yes bar", "^bar": "No bar" } }
-  }, {
-    description: "short syntax with partial",
-    template: { "foo#>": "Yes foo" },
-    expected: { foo: { "#foo": { ">foo": "Yes foo" }, "^foo": { ">foo": null } } }
-  },
-  {
-    description: "short syntax with explicit partial",
-    template: { "foo#>partial": "Yes foo" },
-    expected: { foo: { "#foo": { ">partial": "Yes foo" }, "^foo": { ">partial": null } } }
   },
   {
     description: "intermediate syntax with partial",
@@ -104,14 +79,6 @@ let tests = [{
     template: { "foo>partial": { "#foo": "Yes foo", "^foo": "No foo" } },
     expected: { foo: { ">partial": { "#foo": "Yes foo", "^foo": "No foo" } } }
   }, {
-    description: "short syntax with variable and partial",
-    template: { "foo#bar>": "Yes bar" },
-    expected: { foo: { "#bar": { ">foo": "Yes bar" }, "^bar": { ">foo": null } } }
-  }, {
-    description: "short syntax with variable and explicit partial",
-    template: { "foo#bar>partial": "Yes bar" },
-    expected: { foo: { "#bar": { ">partial": "Yes bar" }, "^bar": { ">partial": null } } }
-  }, {
     description: "intermediate syntax with variable and partial",
     template: { "foo#bar>": "Yes bar", "foo^bar>": "No bar" },
     expected: { foo: { "#bar": { ">foo": "Yes bar" }, "^bar": { ">foo": "No bar" } } }
@@ -131,54 +98,8 @@ let tests = [{
     description: "long syntax with variable and explicit partial",
     template: { "foo>partial": { "#bar": "Yes bar", "^bar": "No bar" } },
     expected: { foo: { ">partial": { "#bar": "Yes bar", "^bar": "No bar" } } }
-  }, {
-    description: "long syntax partially expressed with variable",
-    template: { foo: { "#bar": "Yes bar" } },
-    expected: { foo: { "#bar": "Yes bar", "^bar": null } }
-  }, {
-    description: "short syntax with nested template",
-    template: { "foo#bar": { "#baz": "Yes baz" } },
-    expected: { foo: { "#bar": { "#baz": "Yes baz", "^baz": null }, "^bar": null } }
-  }, {
-    description: "intermediate syntax with nested template",
-    template: { "foo#bar": { "#baz": "Yes baz" }, "foo^bar": { "^baz": "No baz" } },
-    expected: { foo: { "#bar": { "#baz": "Yes baz", "^baz": null }, "^bar": { "^baz": "No baz", "#baz": null } } }
-  }, {
-    description: "short syntax with no inverse",
-    inferInverse: false,
-    template: { "foo#": "Yes foo" },
-    expected: { foo: { "#foo": "Yes foo" } }
-  }, {
-    description: "long syntax partially expressed with variable and no inverse",
-    inferInverse: false,
-    template: { foo: { "#bar": "Yes bar" } },
-    expected: { foo: { "#bar": "Yes bar" } }
-  }, {
-    description: "short syntax with nested template and no inverse",
-    inferInverse: false,
-    template: { "foo#bar": { "#baz": "Yes baz" } },
-    expected: { foo: { "#bar": { "#baz": "Yes baz" } } }
-  }, {
-    description: "array with templated values",
-    template: { foo: [{ "#baz": "Yes baz" }] },
-    expected: { foo: [{ "#baz": "Yes baz", "^baz": null }] }
-  }, {
-    description: "intermediate syntax with same token and multiple variables should disable expansion",
-    template: { "foo#bar": "Bar", "foo#baz": "Baz", "foo#qux": "Qux" },
-    expected: { foo: { "#bar": "Bar", "#baz": "Baz", "#qux": "Qux" } }
-  }, {
-    description: "long syntax with same token and multiple variables should disable expansion",
-    template: { foo: { "#bar": "Bar", "#baz": "Baz", "#qux": "Qux" } },
-    expected: { foo: { "#bar": "Bar", "#baz": "Baz", "#qux": "Qux" } }
-  }, {
-    description: "intermediate syntax with different tokens and multiple variables should disable expansion",
-    template: { "foo#bar": "Bar", "foo^baz": "Baz" },
-    expected: { foo: { "#bar": "Bar", "^baz": "Baz" } }
-  }, {
-    description: "long syntax with different tokens and multiple variables should disable expansion",
-    template: { foo: { "#bar": "Bar", "^baz": "Baz" } },
-    expected: { foo: { "#bar": "Bar", "^baz": "Baz" } }
-  }, {
+  },
+  {
     description: "intermediate syntax with nested templates and partials",
     template: {
       "foo#>container": {
@@ -254,7 +175,7 @@ function verifyKeyOrder(a, b) {
 
 function runTest(test) {
   if (test.include || test.log) console.log("template", "\n" + JSON.stringify(test.template, null, 2));
-  let result = expandTokens.expand(test.template, test.inferInverse);
+  let result = expandTokens.expand(test.template);
   if (test.include || test.log) console.log("result", "\n" + JSON.stringify(result, null, 2));
   expect(result).to.deep.equal(test.expected);
   verifyKeyOrder(result, test.expected);

@@ -13,7 +13,6 @@ function handleOptions(options) {
   normalizeLogging(options);
   normalizeRoot(options);
   normalizeSpecHandling(options);
-  normalizeInferInverseSections(options);
 
   log.blue.debug("Options\n=======");
   log.debug(JSON.stringify(options, null, 2));
@@ -22,7 +21,6 @@ function handleOptions(options) {
 function applyDefaults(options) {
   if (options.root === undefined) options.root = ".";
   if (options.log === undefined) options.log = "error";
-  if (options.infer === undefined) options.infer = false;
   let command = options._[0];
   if (command.toLowerCase() === "start") {
     if (options.port === undefined) options.port = 3000;
@@ -69,10 +67,6 @@ function applyRunControlToOptions(rc, options) {
 
   if (command === "start" && rcOptions.spec) delete rcOptions.spec; //spec doesn't apply to 'start'
   Object.keys(rcOptions).forEach(key => setIfNotPresent(key, rcOptions[key]));
-}
-
-function normalizeInferInverseSections(options) {
-  if (options.infer === undefined) options.infer = false;
 }
 
 function normalizeLogging(options) {
