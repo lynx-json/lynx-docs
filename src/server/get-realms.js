@@ -34,7 +34,7 @@ function expandTemplate(realm, template) {
 }
 
 function reloadRealms(target, options) {
-  log.blue.info("Loading realm information.");
+  log.blue("Loading realm information.").info();
   var realms = getRealmMetadata(options.root);
 
   realms.forEach(realm => {
@@ -57,7 +57,7 @@ function getRealms(options) {
     return function () {
       reloadRealms(realms, options);
       watcher.on("all", function (event, path) {
-        log.blue.info(event, path, "Reloading realm information.");
+        log.blue(event + " to " + path + "\nReloading realm information.").info();
         reloadRealms(realms, options);
       });
     };

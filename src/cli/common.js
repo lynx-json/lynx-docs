@@ -15,7 +15,7 @@ function handleOptions(options) {
   normalizeSpecHandling(options);
   normalizeInferInverseSections(options);
 
-  log.blue.debug("Options\n=======");
+  log.blue("Options\n=======").debug();
   log.debug(JSON.stringify(options, null, 2));
 }
 
@@ -43,7 +43,7 @@ function processRunControl(options) {
       let runControl = parseYaml(fs.readFileSync(rcFile));
       applyRunControlToOptions(runControl, options);
     } catch (err) {
-      log.red("Unable to process run control file '" + rcFile + "'. File must be a valid yaml file");
+      log.red("Unable to process run control file '" + rcFile + "'. File must be a valid yaml file").error();
     }
   }
 }

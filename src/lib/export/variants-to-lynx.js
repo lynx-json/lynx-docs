@@ -33,7 +33,7 @@ function transformVariantToLynx(variant, options, createFile) {
   try {
     let template = processTemplate(variant.template, options, createFile);
     let hbContent = toHandlebars(template, options) + "\n";
-    log.blue.debug("# Handlebars Content #");
+    log.blue("# Handlebars Content #").debug();
     log.debug(hbContent);
 
     let data = types.isString(variant.data) ? templateData(variant.data) : variant.data || null;
@@ -51,7 +51,7 @@ function lintContent(json, variant) {
     let beforeError = json.substr(0, linted.character - 1);
     let afterError = json.substr(linted.character - 1);
     let message = "Failed JSON linting when data binding '".concat(variant.data, "'");
-    log.red.bold.error("! " + message + " !");
+    log.red.bold("! " + message + " !").error();
     log.green(beforeError).red(afterError).error();
 
     message += "\n\nNote: <<ERROR>> token denotes location of linting failure.\n"

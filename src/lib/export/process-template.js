@@ -26,7 +26,7 @@ function addRealmToTemplate(realm, template) {
 }
 
 function logDebug(header, value) {
-  log.blue.debug("# " + header + " #");
+  log.blue("# " + header + " #").debug();
   log.debug(JSON.stringify(value));
 }
 

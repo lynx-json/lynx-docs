@@ -13,8 +13,8 @@ yargs
   .example("$0 export -r src -o views")
   .example("$0 start -r src")
   .fail(function (msg, err, yargs) {
-    log.red.bold.error(err || msg);
-    log.yellow.error("\nUse 'lynx-docs --help' for usage information");
+    log.red.bold(err || msg).error();
+    log.yellow("\nUse 'lynx-docs --help' for usage information").error();
     process.exit(1);
   })
   .argv;
