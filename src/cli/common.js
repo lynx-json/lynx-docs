@@ -49,14 +49,14 @@ function processRunControl(options) {
 }
 
 function applyRunControlToOptions(rc, options) {
-  function setIfNotPresent(key, value) { //cli arguments win over run control values
+  function setIfNotPresent(key, value) { //arguments already set win over run control values
+    if (value === null) return;
     if (options[key] === undefined) options[key] = value;
   }
   let rcOptions = {};
-  if (rc.inferInverseSections !== undefined) rcOptions.infer = rc.inferInverseSections;
-  if (rc.root) rcOptions.root = rc.root;
-  if (rc.log && rc.log.level) rcOptions.log = rc.log.level;
-  if (rc.spec) rcOptions.spec = rc.spec;
+  ["root", "log", "spec"].forEach(key => {
+    if (rc[key] !== undefined) rcOptions[key] = rc[key];
+  });
 
   //based on command (start or export) apply run control settings if they exist
   let command = options._[0];
@@ -67,6 +67,7 @@ function applyRunControlToOptions(rc, options) {
     });
   }
 
+  if (command === "start" && rcOptions.spec) delete rcOptions.spec; //spec doesn't apply to 'start'
   Object.keys(rcOptions).forEach(key => setIfNotPresent(key, rcOptions[key]));
 }
 
@@ -93,7 +94,7 @@ function normalizeRoot(options) {
     roots = types.isArray(options.root) ? options.root : [options.root];
   }
 
-  options.root = options.r = roots;
+  options.root = roots;
 }
 
 module.exports = exports = handleOptions;

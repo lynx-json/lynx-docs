@@ -9,19 +9,29 @@ const yaml = require("yamljs");
 
 const commonCli = require("../../src/cli/common");
 
+function defaultSettings(command) {
+  let settings = { _: [command], root: ["."], log: "error", infer: false };
+  if (command === "export") {
+    Object.assign(settings, { "output": "stdout", format: "handlebars" });
+  } else {
+    Object.assign(settings, { "port": 3000 });
+  }
+  return settings;
+}
+
 describe("common cli module", function () {
   describe("when applying defaults", function () {
     let tests = [{
         description: "when no values provided by cli for export",
         should: "should apply defaults",
         input: { _: ["export"] },
-        expected: { root: ["."], log: "error", infer: false, output: "stdout", format: "handlebars" }
+        expected: defaultSettings("export")
       },
       {
         description: "when no values provided by cli for start",
         should: "should apply defaults",
         input: { _: ["start"] },
-        expected: { root: ["."], log: "error", infer: false, port: 3000 }
+        expected: defaultSettings("start")
       },
       {
         description: "when values provided environment for export",
@@ -29,7 +39,7 @@ describe("common cli module", function () {
         before: function () { process.env.LOG_LEVEL = "warn"; },
         after: function () { delete process.env.LOG_LEVEL; },
         input: { _: ["export"] },
-        expected: { root: ["."], log: "warn", infer: false, output: "stdout", format: "handlebars" }
+        expected: Object.assign(defaultSettings("export"), { log: "warn" })
       },
       {
         description: "when values provided environment for start",
@@ -37,13 +47,13 @@ describe("common cli module", function () {
         before: function () { process.env.LOG_LEVEL = "warn"; },
         after: function () { delete process.env.LOG_LEVEL; },
         input: { _: ["start"] },
-        expected: { root: ["."], log: "warn", infer: false, port: 3000 }
+        expected: Object.assign(defaultSettings("start"), { log: "warn" })
       },
       {
         description: "when values provided run control for export",
         should: "should not override values from run control",
         before: function () {
-          let rc = { log: { level: "info" } };
+          let rc = { log: "info" };
           sinon.stub(fs, "existsSync").returns(true);
           sinon.stub(fs, "readFileSync").returns(yaml.stringify(rc));
         },
@@ -52,7 +62,7 @@ describe("common cli module", function () {
           fs.readFileSync.restore();
         },
         input: { _: ["export"] },
-        expected: { root: ["."], log: "info", infer: false, output: "stdout", format: "handlebars" }
+        expected: Object.assign(defaultSettings("export"), { log: "info" })
       }
     ];
 
@@ -60,9 +70,7 @@ describe("common cli module", function () {
       if (test.before) test.before();
       commonCli(test.input);
       if (test.after) test.after();
-      Object.keys(test.expected).forEach(key => {
-        expect(test.expected[key]).to.deep.equal(test.input[key]);
-      });
+      expect(test.expected).to.deep.equal(test.input);
     }
 
     runTests(tests, runner);
@@ -158,7 +166,7 @@ describe("common cli module", function () {
         expected: { log: "error" }
       },
       {
-        description: "when logging switch set with 'ward' value",
+        description: "when logging switch set with 'warn' value",
         should: "should set logging level to 'warn'",
         input: { _: ["export"], log: "warn" },
         expected: { log: "warn" }
@@ -197,56 +205,63 @@ describe("common cli module", function () {
         description: "when no run control file present",
         should: "should not set any options",
         input: { _: ["export"] },
-        expected: { _: ["export"], infer: false, log: "error" }
+        expected: Object.assign(defaultSettings("export"))
       },
       {
         description: "when run control file present",
         should: "should set options from run control",
-        runControl: { inferInverseSections: true, log: { level: "warn" }, spec: true },
+        runControl: { log: "warn", spec: true },
         input: { _: ["export"] },
-        expected: { _: ["export"], infer: true, log: "warn", spec: { dir: ".", url: "/" } }
+        expected: Object.assign(defaultSettings("export"), { log: "warn", spec: { dir: ".", url: "/" } })
       },
       {
-        description: "when run control file present with spec values",
+        description: "when run control file present with spec values and 'export'",
         should: "should set options from run control",
-        runControl: { spec: { dir: "specs", url: "/specs/" } },
+        runControl: { log: "warn", spec: { dir: "specs", url: "/specs/" } },
         input: { _: ["export"] },
-        expected: { _: ["export"], spec: { dir: "specs", url: "/specs/" } }
+        expected: Object.assign(defaultSettings("export"), { log: "warn", spec: { dir: "specs", url: "/specs/" } })
+      },
+      {
+        description: "when run control file present with spec values and 'start'",
+        should: "should set options from run control but delete 'spec'",
+        runControl: { log: "warn", spec: { dir: "specs", url: "/specs/" } },
+        input: { _: ["start"] },
+        expected: Object.assign(defaultSettings("start"), { log: "warn" })
       },
       {
         description: "when run control file present with export values",
         should: "should set options from run control",
-        runControl: { log: { level: "warn" }, export: { root: "foo", output: "bar", format: "baz" } },
+        runControl: { log: "warn", export: { root: "foo", output: "bar", format: "baz" } },
         input: { _: ["export"] },
-        expected: { _: ["export"], log: "warn", root: ["foo"], output: "bar", format: "baz" }
+        expected: Object.assign(defaultSettings("export"), { log: "warn", root: ["foo"], output: "bar", format: "baz" })
       },
       {
         description: "when run control file present with start values",
         should: "should set options from run control",
-        runControl: { log: { level: "warn" }, start: { root: "foo", port: 9000 } },
+        runControl: { log: "warn", start: { root: "foo", port: 9000 } },
         input: { _: ["start"] },
-        expected: { _: ["start"], log: "warn", root: ["foo"], port: 9000 }
+        expected: Object.assign(defaultSettings("start"), { log: "warn", root: ["foo"], port: 9000 })
       },
       {
         description: "when run control file present with export values and overrides",
         should: "should set options from run control and override values from export",
-        runControl: { log: { level: "warn" }, spec: true, export: { root: "foo", output: "bar", format: "baz", log: "info", spec: { dir: "specs", url: "/specs/" } } },
+        runControl: { log: "warn", spec: true, export: { root: "foo", output: "bar", format: "baz", log: "info", spec: { dir: "specs", url: "/specs/" } } },
         input: { _: ["export"] },
-        expected: { _: ["export"], log: "info", root: ["foo"], output: "bar", format: "baz", spec: { dir: "specs", url: "/specs/" } }
+        expected: Object.assign(defaultSettings("export"), { log: "info", root: ["foo"], output: "bar", format: "baz", spec: { dir: "specs", url: "/specs/" } })
       },
       {
         description: "when run control file present with start values and overrides",
         should: "should set options from run control and override values from start",
-        runControl: { log: { level: "warn" }, start: { root: "foo", port: 9000, log: "info" } },
+        runControl: { log: "warn", start: { root: "foo", port: 9000, log: "info" } },
         input: { _: ["start"] },
-        expected: { _: ["start"], log: "info", root: ["foo"], port: 9000 }
+        expected: Object.assign(defaultSettings("start"), { log: "info", root: ["foo"], port: 9000 })
       },
       {
         description: "when run control file and cli switches present",
         should: "should set options from cli switches",
-        runControl: { log: { level: "warn" }, export: { root: "foo", output: "bar", format: "baz", log: "info", spec: { dir: "specs", url: "/specs/" } } },
+        runControl: { log: "warn", export: { root: "foo", output: "bar", format: "baz", log: "info", spec: { dir: "specs", url: "/specs/" } } },
         input: { _: ["export"], log: "error", root: ["no foo"], output: "no bar", format: "no baz", spec: { dir: "no-specs", url: "/no-specs/" } },
-        expected: { _: ["export"], log: "error", root: ["no foo"], output: "no bar", format: "no baz", spec: { dir: "no-specs", url: "/no-specs/" } }
+        expected: Object.assign(defaultSettings("export"), { log: "error", root: ["no foo"], output: "no bar", format: "no baz", spec: { dir: "no-specs", url: "/no-specs/" } })
       },
 
     ];
@@ -260,10 +275,7 @@ describe("common cli module", function () {
       commonCli(test.input);
       fs.existsSync.restore();
       if (fs.readFileSync.restore) fs.readFileSync.restore();
-
-      Object.keys(test.expected).forEach(key => {
-        expect(test.expected[key]).to.deep.equal(test.input[key]);
-      });
+      expect(test.expected).to.deep.equal(test.input);
     }
 
     runTests(tests, runner);

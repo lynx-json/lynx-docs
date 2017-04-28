@@ -25,23 +25,23 @@ function addRealmToTemplate(realm, template) {
   if (realm && !template.realm) template.realm = realm;
 }
 
-function logInfo(header, value) {
+function logDebug(header, value) {
   log.blue.debug("# " + header + " #");
   log.debug(JSON.stringify(value));
 }
 
 function processTemplate(pathOrTemplate, options, createFile) {
-  logInfo("Processing Template", pathOrTemplate);
+  logDebug("Processing Template", pathOrTemplate);
 
   let template = getTemplate(pathOrTemplate);
-  logInfo("Template Object", template);
+  logDebug("Template Object", template);
 
   template = jsonTemplates.expandTokens(template, options.inferInverse);
-  logInfo("Tokens Expanded", template);
+  logDebug("Tokens Expanded", template);
 
   let templatePath = types.isString(pathOrTemplate) ? pathOrTemplate : null;
   template = jsonTemplates.partials.expand(template, jsonTemplates.partials.resolve, templatePath, options.inferInverse);
-  logInfo("Partials Processed", template);
+  logDebug("Partials Processed", template);
 
   if (options && options.realm) {
     addRealmToTemplate(options.realm.realm, template);
@@ -52,10 +52,10 @@ function processTemplate(pathOrTemplate, options, createFile) {
 
   if (options.spec) {
     template = lynxExport.flatten(template);
-    logInfo("Flattened", template);
+    logDebug("Flattened", template);
 
     template = lynxExport.extractSpecs(template, createFile);
-    logInfo("Spec extracted", template);
+    logDebug("Spec extracted", template);
   }
 
   return template;
