@@ -293,23 +293,62 @@ let tests = [{
     expected: []
   },
   {
-    description: "converting iterator token '@' when mixed with other content - one item",
+    description: "converting iterator token '@' with object value when mixed with other content - one item",
     template: ["Header", { "@items": { foo: "Foo" } }, "Footer"],
     data: { items: ["one"] },
     expected: ["Header", { foo: "Foo" }, "Footer"]
   },
   {
-    description: "converting iterator token '@' when mixed with other content - two items",
+    description: "converting iterator token '@' with object value when mixed with other content - two items",
     template: ["Header", { "@items": { foo: "Foo" } }, "Footer"],
     data: { items: ["one", "two"] },
     expected: ["Header", { foo: "Foo" }, { foo: "Foo" }, "Footer"]
   },
   {
-    description: "converting iterator token '@' when mixed with other content - no items",
+    description: "converting iterator token '@' with object value when mixed with other content - no items",
     template: ["Header", { "@items": { foo: "Foo" } }, "Footer"],
     data: { items: null },
     expected: ["Header", "Footer"]
   },
+  {
+    description: "converting iterator token '@' with simple value when mixed with other content - one item",
+    template: ["Header", { "@items": "Foo" }, "Footer"],
+    data: { items: ["one"] },
+    expected: ["Header", "Foo", "Footer"]
+  },
+  {
+    description: "converting iterator token '@' with simple value when mixed with other content - two items",
+    template: ["Header", { "@items": "Foo" }, "Footer"],
+    data: { items: ["one", "two"] },
+    expected: ["Header", "Foo", "Foo", "Footer"]
+  },
+  {
+    description: "converting iterator token '@' with simple value when mixed with other content - no items",
+    template: ["Header", { "@items": "Foo" }, "Footer"],
+    data: { items: null },
+    expected: ["Header", "Footer"]
+  },
+  {
+    description: "converting iterator token '@' with array value when mixed with other content - one item",
+    template: ["Header", { "@items": ["Foo"] }, "Footer"],
+    data: { items: ["one"] },
+    expected: ["Header", ["Foo"], "Footer"]
+  },
+  {
+    description: "converting iterator token '@' with array value when mixed with other content - two items",
+    template: ["Header", { "@items": ["Foo"] }, "Footer"],
+    data: { items: ["one", "two"] },
+    expected: ["Header", ["Foo"],
+      ["Foo"], "Footer"
+    ]
+  },
+  {
+    description: "converting iterator token '@' with array value when mixed with other content - no items",
+    template: ["Header", { "@items": ["Foo"] }, "Footer"],
+    data: { items: null },
+    expected: ["Header", "Footer"]
+  }
+
 ];
 
 function getTests() {

@@ -29,21 +29,44 @@ function toHandlebars(model) {
     else if (templateKey.iteratorToken === binding.token) writeContent("{{#unless @last}},{{/unless}}{{/each}}");
   }
 
-  function writeSimpleValue(value, binding, separate) {
-    if (binding) writeOpenBinding(binding);
-    writeContent(JSON.stringify(value));
-    if (binding) writeCloseBinding(binding, separate);
-    if (separate) writeContent(",");
+  function writeIteratorSeperatorIfNecessary(binding, traverseNode) {
+    if (binding.token === templateKey.iteratorToken &&
+      shouldSeparate(traverseNode.parent) &&
+      isIteratorContainer(traverseNode.parent)) {
+      //this is to handle the situation where an iterator is mixed into
+      //the middle of an array but the value binding to the iterator doesn't exist
+      //only output the separator if we actually created output with the iterator
+      writeContent("{{#if " + binding.variable + "}},{{/if}}");
+    }
   }
 
-  function writeArrayValue(traverseNode, separate) {
+  function beforeValue(traverseNode, binding) {
+    if (binding) writeOpenBinding(binding);
+  }
+
+  function afterValue(traverseNode, binding, separate) {
+    if (binding) {
+      writeCloseBinding(binding, separate);
+      writeIteratorSeperatorIfNecessary(binding, traverseNode);
+    }
+    if (separate && !isIteratorContainer(traverseNode)) writeContent(",");
+  }
+
+  function writeSimpleValue(traverseNode, value, binding, separate) {
+    beforeValue(traverseNode, binding);
+    writeContent(JSON.stringify(value));
+    afterValue(traverseNode, binding, separate);
+  }
+
+  function writeArrayValue(traverseNode, binding, separate) {
     traverseNode.before(function () {
+      beforeValue(traverseNode, binding);
       writeContent("[");
     });
 
     traverseNode.after(function () {
       writeContent("]");
-      if (separate) writeContent(",");
+      afterValue(traverseNode, binding, separate);
     });
   }
 
@@ -52,24 +75,13 @@ function toHandlebars(model) {
     let writeBraces = metas.length === 0 || metas.some(child => !!child.name);
 
     traverseNode.before(function () {
-      if (binding) writeOpenBinding(binding);
+      beforeValue(traverseNode, binding);
       if (writeBraces) writeContent("{");
     });
 
     traverseNode.after(function () {
       if (writeBraces) writeContent(" }");
-      if (binding) {
-        writeCloseBinding(binding);
-        if (binding.token === templateKey.iteratorToken &&
-          shouldSeparate(traverseNode.parent) &&
-          isIteratorContainer(traverseNode.parent)) {
-          //this is to handle the situation where an iterator is mixed into
-          //the middle of an array but the value binding to the iterator doesn't exist
-          //only output the separator if we actually created output with the iterator
-          writeContent("{{#if " + binding.variable + "}},{{/if}}");
-        }
-      }
-      if (separate && !isIteratorContainer(traverseNode)) writeContent(",");
+      afterValue(traverseNode, binding, separate);
     });
   }
 
@@ -93,9 +105,9 @@ function toHandlebars(model) {
     let binding = meta && meta.binding;
     let separate = shouldSeparate(this, meta, binding);
 
-    if (value === null || simpleTypes.includes(typeof value)) return writeSimpleValue(value, binding, separate);
+    if (value === null || simpleTypes.includes(typeof value)) return writeSimpleValue(this, value, binding, separate);
 
-    if (types.isArray(value)) writeArrayValue(this, separate);
+    if (types.isArray(value)) writeArrayValue(this, binding, separate);
     else writeObjectValue(this, binding, separate);
   });
 
