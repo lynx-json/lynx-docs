@@ -5,10 +5,10 @@ function validateCompatibleSections(metas) {
   if (sections.length === 0) return { valid: true };
 
   let positives = sections
-    .filter(meta => meta.binding && meta.binding.token === templateKey.positiveSectionToken)
+    .filter(meta => meta.binding.token === templateKey.positiveSectionToken)
     .map(meta => meta.binding.variable);
   let negatives = sections
-    .filter(meta => meta.binding && meta.binding.token === templateKey.negativeSectionToken)
+    .filter(meta => meta.binding.token === templateKey.negativeSectionToken)
     .map(meta => meta.binding.variable);
 
   let pass = positives.length === negatives.length && positives.every(name => negatives.includes(name));
