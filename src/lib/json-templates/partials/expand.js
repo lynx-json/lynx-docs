@@ -14,7 +14,7 @@ function calculatePartialUrl(templatePath, partialName) {
   return url.format(parsed);
 }
 
-function expandPartials(template, resolvePartial, templatePath, inferInverseTokenValues) {
+function expandPartials(template, resolvePartial, templatePath) {
   return traverse(template).map(function (value) {
     if (!this.keys || types.isArray(value)) return; //no keys that contain partial references
 
@@ -24,7 +24,7 @@ function expandPartials(template, resolvePartial, templatePath, inferInverseToke
       let partialUrl = exports.calculatePartialUrl(templatePath, meta.partial.variable);
       let processPartial = resolvePartial(partialUrl);
       let partial = processPartial(result[meta.source]);
-      let expanded = expandTokens.expand(partial, inferInverseTokenValues);
+      let expanded = expandTokens.expand(partial);
 
       if (types.isObject(expanded)) {
         delete result[meta.source];

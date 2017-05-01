@@ -8,7 +8,7 @@ const getRealmMetadata = require("../lib/metadata-realm");
 
 function buildCommand(yargs) {
   return yargs
-    .usage("$0 export [--root OR root..] [--output] [--format] [--config] [--infer] [--log]")
+    .usage("$0 export [--root OR root..] [--output] [--format] [--config] [--log]")
     .option("root", {
       alias: "r",
       describe: "Root folder(s) for the web site. [default '.']"
@@ -16,9 +16,6 @@ function buildCommand(yargs) {
     .option("output", {
       alias: "o",
       describe: "Output folder or stream. [default 'stdout']"
-    })
-    .option("infer", {
-      describe: "Infer section tokens when inverse is not supplied in template. [default false]"
     })
     .option("format", {
       alias: "f",
