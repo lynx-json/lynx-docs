@@ -20,6 +20,56 @@ let tests = [{
     expected: { name: "foo", wildcard: false, variable: "foo" }
   },
   {
+    description: "key with name '<' binding and variable",
+    key: "foo<~",
+    expected: { name: "foo<", wildcard: false, variable: "foo<" }
+  },
+  {
+    description: "key with name '=' binding and variable",
+    key: "foo=~",
+    expected: { name: "foo=", wildcard: false, variable: "foo=" }
+  },
+  {
+    description: "key with name '#' binding and variable",
+    key: "foo#~",
+    expected: { name: "foo#", wildcard: false, variable: "foo#" }
+  },
+  {
+    description: "key with name '^' binding and variable",
+    key: "foo^~",
+    expected: { name: "foo^", wildcard: false, variable: "foo^" }
+  },
+  {
+    description: "key with name '>' binding and variable",
+    key: "foo>~",
+    expected: { name: "foo>", wildcard: false, variable: "foo>" }
+  },
+  {
+    description: "key with name '<' binding and named variable",
+    key: "foo<~foo",
+    expected: { name: "foo<", wildcard: false, variable: "foo" }
+  },
+  {
+    description: "key with name '=' binding and named variable",
+    key: "foo=~foo",
+    expected: { name: "foo=", wildcard: false, variable: "foo" }
+  },
+  {
+    description: "key with name '#' binding and named variable",
+    key: "foo#~foo",
+    expected: { name: "foo#", wildcard: false, variable: "foo" }
+  },
+  {
+    description: "key with name '^' binding and named variable",
+    key: "foo^~foo",
+    expected: { name: "foo^", wildcard: false, variable: "foo" }
+  },
+  {
+    description: "key with name '>' binding and named variable",
+    key: "foo>~foo",
+    expected: { name: "foo>", wildcard: false, variable: "foo" }
+  },
+  {
     description: "key with name with dashes and variable",
     key: "foo-name~",
     expected: { name: "foo-name", wildcard: false, variable: "foo-name" }
