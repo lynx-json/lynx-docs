@@ -50,7 +50,7 @@ describe("expand partials module", function () {
       },
       {
         description: "partial and bindings. Bindings expanded",
-        template: { foo: { ">bar": { "#foo": "Bar" } } },
+        template: { foo: { ">bar": { "#foo": "Bar", "^foo": null } } },
         expected: { foo: { "#foo": "Bar", "^foo": null } },
         resolvePartial: () => (value) => value
       },

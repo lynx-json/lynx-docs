@@ -4,7 +4,7 @@ const commonCli = require("./common");
 
 function buildCommand(yargs) {
   return yargs
-    .usage("$0 start [--root OR root..] [--config] [--port] [--infer] [--log]")
+    .usage("$0 start [--root OR root..] [--config] [--port] [--log]")
     .option("port", {
       alias: "p",
       describe: "Port to listen on. [default 3000]"
@@ -12,9 +12,6 @@ function buildCommand(yargs) {
     .option("root", {
       alias: "r",
       describe: "Root folder(s) for the web site. [default '.']"
-    })
-    .option("infer", {
-      describe: "Infer section tokens when inverse is not supplied in template. [default false]"
     })
     .option("log", {
       alias: "l",

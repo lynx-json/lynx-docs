@@ -102,7 +102,6 @@ var tests = [{
     }
   },
   {
-    include: true,
     description: "object container with keys and dynamic sections",
     should: "flatten template",
     template: { ">container": { "message>lynx": "Hello", "foo>lynx": { "#foo": { "name>lynx": "Foo" }, "^foo": { "name>lynx": "No foo" } } } },

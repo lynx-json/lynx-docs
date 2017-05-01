@@ -10,7 +10,7 @@ const yaml = require("yamljs");
 const commonCli = require("../../src/cli/common");
 
 function defaultSettings(command) {
-  let settings = { _: [command], root: ["."], log: "error", infer: false };
+  let settings = { _: [command], root: ["."], log: "error" };
   if (command === "export") {
     Object.assign(settings, { "output": "stdout", format: "handlebars" });
   } else {
