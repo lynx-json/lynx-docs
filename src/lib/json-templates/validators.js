@@ -13,9 +13,9 @@ function validateCompatibleSections(metas) {
 
   let pass = positives.length === negatives.length && positives.every(name => negatives.includes(name));
   if (!pass) {
-    let message = "Incompatible template sections. Every section should have a matching inverse section.\n";
-    message += "Positive sections: '" + positives.join("','") + "'\n";
-    message += "Negative sections: '" + negatives.join("','") + "'\n";
+    let message = "Detected section(s) without matching inverse.\n";
+    message += "Positive section(s): '" + (positives.length === 0 ? "[none]" : positives.join("','")) + "'\n";
+    message += "Negative section(s): '" + (negatives.length === 0 ? "[none]" : negatives.join("','")) + "'\n";
     return { valid: false, message: message };
   }
   return { valid: true };

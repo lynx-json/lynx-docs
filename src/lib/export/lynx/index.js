@@ -30,7 +30,10 @@ function validateSectionChildren(children) {
     return childrenAreCompatible(section.children, sections[index + 1].children);
   });
 
-  if (!compatible) throw Error("Children are not compatible between value templates. In order to correct this, each binding must be it's own value spec pair. Sections that are incompatible are '" + sectionKeys.join("','") + "'");
+  if (!compatible) {
+    let sectionKeys = sections.map(item => item.meta.source);
+    throw Error("Children are not compatible between value templates. In order to correct this, each binding must be it's own value spec pair. Sections that are incompatible are '" + sectionKeys.join("','") + "'");
+  }
 }
 
 function accumulateLynxChildren(lynxJsValue) {
