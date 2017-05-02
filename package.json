@@ -17,8 +17,8 @@
   "keywords": [
     "Lynx+JSON"
   ],
-  "author": "Dan Mork, John Howes, Anson Goldade",
-  "license": "UNLICENSED",
+  "author": "lynx-json.org",
+  "license": "MIT",
   "bugs": {
     "url": "https://github.com/lynx-json/lynx-docs/issues"
   },
