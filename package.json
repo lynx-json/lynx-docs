@@ -23,9 +23,11 @@
     "url": "https://github.com/lynx-json/lynx-docs/issues"
   },
   "homepage": "https://github.com/lynx-json/lynx-docs#readme",
+  "engines": {
+    "node": ">=6.4.0"
+  },
   "dependencies": {
     "chokidar": "^1.6.1",
-    "deep-diff": "^0.3.4",
     "handlebars": "^4.0.5",
     "isstream": "^0.1.2",
     "json-lint": "^0.1.0",
