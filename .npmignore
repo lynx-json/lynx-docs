@@ -1,0 +1,4 @@
+.jsbeautifyrc
+.jshintrc
+.travis.yml
+test
