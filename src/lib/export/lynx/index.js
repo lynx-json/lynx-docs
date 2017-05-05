@@ -39,7 +39,7 @@ function validateSectionChildren(children) {
 function accumulateLynxChildren(lynxJsValue) {
   if (!types.isObject(lynxJsValue)) return [];
   let source = getValuePortionOfLynxValue(lynxJsValue);
-  let children = Object.keys(source)
+  let children = Object.keys(source || {})
     .map(templateKey.parse)
     .filter(meta => meta.name !== specKey)
     .reduce((acc, meta) => {
