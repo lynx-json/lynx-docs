@@ -7,12 +7,12 @@ function getValuePortionOfLynxValue(lynxJsValue) {
 }
 
 function validateSectionChildren(children) {
-  function childrenAreCompatible(section, inverse) {
-    if (section.length === 0 || inverse.length === 0) return true;
-    if (section.length !== inverse.length) return false;
-    return section.every((child, index) => {
+  function childrenAreCompatible(reference, comparison) {
+    if (reference.length === 0 || comparison.length === 0) return true;
+    if (reference.length !== comparison.length) return false;
+    return reference.every((child, index) => {
       let childMeta = child.meta;
-      let checkMeta = inverse[index].meta;
+      let checkMeta = comparison[index].meta;
       if (!checkMeta.binding && !childMeta.binding) return checkMeta.name === childMeta.name;
       if (checkMeta.binding && !childMeta.binding) return false;
       if (childMeta.binding && !checkMeta.binding) return false;
@@ -21,7 +21,7 @@ function validateSectionChildren(children) {
   }
 
   let sections = children.reduce((acc, current) => {
-    if (current.section) acc.push(current);
+    if (current.children) acc.push(current);
     return acc;
   }, []);
 
@@ -39,7 +39,8 @@ function validateSectionChildren(children) {
 function accumulateLynxChildren(lynxJsValue) {
   if (!types.isObject(lynxJsValue)) return [];
   let source = getValuePortionOfLynxValue(lynxJsValue);
-  let children = Object.keys(source || {})
+  if (!types.isObject(source)) return [];
+  let children = Object.keys(source)
     .map(templateKey.parse)
     .filter(meta => meta.name !== specKey)
     .reduce((acc, meta) => {
@@ -48,7 +49,7 @@ function accumulateLynxChildren(lynxJsValue) {
       } else if (meta.binding && templateKey.sectionTokens.includes(meta.binding.token)) {
         acc.push({
           meta: meta,
-          section: meta.binding.token + meta.binding.variable,
+          section: true,
           children: accumulateLynxChildren(source[meta.source])
         });
       }
@@ -76,7 +77,8 @@ function isLynxValue(jsValue) {
 function resultsInLynxNode(jsValue) {
   if (!types.isObject(jsValue)) return false;
   //every key is section binding token or empty
-  return Object.keys(jsValue).every(key => {
+  let keys = Object.keys(jsValue);
+  return keys.length > 0 && keys.every(key => {
     let meta = templateKey.parse(key);
     let isTemplateForValue = meta.empty || (meta.binding &&
       templateKey.sectionTokens.includes(meta.binding.token));

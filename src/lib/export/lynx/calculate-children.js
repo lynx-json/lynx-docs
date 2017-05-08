@@ -5,7 +5,7 @@ const specKey = "spec";
 
 function getLynxChildren(lynxJsValue) {
   let children = exportLynx.accumulateLynxChildren(lynxJsValue);
-  let sectionWithChildren = children.find(item => item.section && item.children && item.children.length > 0);
+  let sectionWithChildren = children.find(item => item.children && item.children.length > 0);
 
   //merge the named children with children from sections that have children
   let unique = children.reduce((acc, child) => {
