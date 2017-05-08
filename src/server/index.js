@@ -3,6 +3,7 @@
 const http = require("http");
 const url = require("url");
 const getRealms = require("./get-realms");
+const serveCors = require("./serve-cors");
 const serveStatic = require("./serve-static");
 const serveRealm = require("./serve-realm");
 const searchMeta = require("./meta/search-meta");
@@ -60,6 +61,7 @@ function startServer(options) {
   var handlers = [
     addRequestContext,
     addErrorHandler,
+  //  serveCors(options),
     serveMeta(options),
     searchMeta(options),
     serveRealm(options),
