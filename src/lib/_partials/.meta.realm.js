@@ -3,12 +3,16 @@ const resolvePartials = require("../json-templates/partials/resolve");
 
 module.exports = exports = (params) => {
 
+  function createMetaContent(name) {
+    return { "header>": { "label>": "\"" + name + "\" info" }, "content>text": params[name] };
+  }
+
   let partial = { ">container": {} };
   let partials = {};
   let raw = {};
   for (var p in params) {
     if (p === "realm") {
-      raw["realmSection>section"] = { "header>": { "label>": p + " info" }, "content>text": params[p] };
+      raw["realmSection>section"] = createMetaContent(p);
     } else {
       try {
         let partialName = ".meta.realm." + p;
@@ -16,7 +20,7 @@ module.exports = exports = (params) => {
         resolvePartials.resolve(metaPartialUrl);
         partials[p + ">" + partialName] = params[p];
       } catch (err) {
-        raw[p + ">container"] = { "header>": { "label>": p + " info" }, "content>text": params[p] };
+        raw[p + ">container"] = createMetaContent(p);
       }
     }
     delete params[p];

@@ -3,7 +3,8 @@
     label>: "Templates ({{{templates.length}}})"
   templates>list:
     - "@templates>group":
-        path<>text:
+        path>text:
+          value<path: 
         handlebars>link:
           label>: View as Handlebars
           href<url:

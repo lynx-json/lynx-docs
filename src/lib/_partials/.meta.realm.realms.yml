@@ -1,12 +1,14 @@
 ">container":
   header>:
     label>: "Child Realms ({{{realms.length}}})"
-  realms>list:
-    - "@realms":
-        content>link:
-          label<realm:
+  realms>container:
+    - "@realms>group":
+        uri>text:
+          value<realm:
+        link>:
+          label>: Go To Child
           href<url:
+        separator>text: " |"
         meta>link:
-          label: Metadata
+          label>: Go To Child Metadata
           href<metaURL:
-  *~

@@ -1,7 +1,10 @@
 ">container":
-  header: "Variants ({{{variants.length}}})"
+  header>:
+    label>: "Variants ({{{variants.length}}})"
   variants>list:
-    - "@variants":
-        href<url:
-        label<name:
-        type<: application/lynx+json
+    - "@variants>group":
+        name>text:
+          value<name:
+        link>:
+          href<url:
+          label>: Go To Variant
