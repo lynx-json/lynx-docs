@@ -14,6 +14,7 @@ var partialsTests = [
   require("./submit"),
   require("./list"),
   require("./header"),
+  require("./footer"),
   require("./lynx"),
   require("./text"),
   require("./line")
