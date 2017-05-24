@@ -38,12 +38,10 @@ module.exports = exports = function createRealmHandler(options) {
       res.end();
     }
 
-    function serveVariant(variant) {
+    function serveVariant(variant, includeIndexHeader) {
       res.setHeader("Content-Type", "application/lynx+json");
       res.setHeader("Cache-control", "no-cache");
-      if (realm.variants.length > 1) {
-        res.setHeader("X-Variant-Index", url.parse(req.url).pathname + "?variant=index");
-      }
+      if (includeIndexHeader === true) res.setHeader("X-Variant-Index", url.parse(req.url).pathname + "?variant=index");
 
       var variantOptions = Object.assign({}, options, { realm: realm });
 
@@ -75,6 +73,6 @@ module.exports = exports = function createRealmHandler(options) {
       return next();
     }
 
-    return serveVariant(variant);
+    return serveVariant(variant, realm.variants.length > 1);
   };
 };
