@@ -41,6 +41,9 @@ module.exports = exports = function createRealmHandler(options) {
     function serveVariant(variant) {
       res.setHeader("Content-Type", "application/lynx+json");
       res.setHeader("Cache-control", "no-cache");
+      if (realm.variants.length > 1) {
+        res.setHeader("X-Variant-Index", url.parse(req.url).pathname + "?variant=index");
+      }
 
       var variantOptions = Object.assign({}, options, { realm: realm });
 
@@ -52,18 +55,6 @@ module.exports = exports = function createRealmHandler(options) {
       serveVariant({
         template: path.join(__dirname, "realm-index.lynx.yml"),
         data: realm
-      });
-    }
-
-    function serveVariantWithAlternateIndex(variantName) {
-      var data = {
-        variantURL: url.parse(req.url).pathname + "?variant=" + variantName + "&direct=true",
-        indexURL: url.parse(req.url).pathname + "?variant=index"
-      };
-
-      serveVariant({
-        template: path.join(__dirname, "variant-with-alternate-index.lynx.yml"),
-        data: Object.assign(data, realm)
       });
     }
 
@@ -82,10 +73,6 @@ module.exports = exports = function createRealmHandler(options) {
     if (variant.content) {
       req.filename = variant.content;
       return next();
-    }
-
-    if (!req.query.direct) {
-      return serveVariantWithAlternateIndex(variantName);
     }
 
     return serveVariant(variant);
