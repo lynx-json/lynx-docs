@@ -61,7 +61,7 @@ function startServer(options) {
   var handlers = [
     addRequestContext,
     addErrorHandler,
-  //  serveCors(options),
+    serveCors(options),
     serveMeta(options),
     searchMeta(options),
     serveRealm(options),
