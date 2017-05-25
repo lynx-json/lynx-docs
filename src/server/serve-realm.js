@@ -41,7 +41,7 @@ module.exports = exports = function createRealmHandler(options) {
     function serveVariant(variant, includeIndexHeader) {
       res.setHeader("Content-Type", "application/lynx+json");
       res.setHeader("Cache-control", "no-cache");
-      if (includeIndexHeader === true) res.setHeader("X-Variant-Index", url.parse(req.url).pathname + "?variant=index");
+      if (includeIndexHeader) res.setHeader("X-Variant-Index", url.parse(req.url).pathname + "?variant=index");
 
       var variantOptions = Object.assign({}, options, { realm: realm });
 
