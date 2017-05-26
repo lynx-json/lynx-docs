@@ -72,7 +72,6 @@ var tests = [{
     options: {},
     template: "foo: Should be \"escaped\"",
     expected: [{
-      realm: "/src/folder-one/",
       foo: "Should be \"escaped\""
     }],
     description: "when string contains characters that should be escaped",
@@ -89,7 +88,6 @@ var tests = [{
     options: {},
     template: "foo: Should not be escaped",
     expected: [{
-      realm: "/src/folder-one/",
       foo: "Should not be escaped"
     }],
     description: "when string does not contain characters that should be escaped",

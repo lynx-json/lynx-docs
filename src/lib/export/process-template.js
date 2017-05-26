@@ -21,10 +21,6 @@ function getTemplate(pathOrTemplate) {
   throw Error("Unexpected template value. Expected path to template or template object. Received \n" + JSON.stringify(pathOrTemplate));
 }
 
-function addRealmToTemplate(realm, template) {
-  if (realm && !template.realm) template.realm = realm;
-}
-
 function logDebug(header, value) {
   log.blue("# " + header + " #").debug();
   log.debug(JSON.stringify(value));
@@ -44,7 +40,7 @@ function processTemplate(pathOrTemplate, options, createFile) {
   logDebug("Partials Processed", template);
 
   if (options && options.realm) {
-    addRealmToTemplate(options.realm.realm, template);
+    template = lynxExport.addRealm(options.realm.realm)(template);
     template = lynxExport.resolveRelativeUrls(options.realm.realm)(template);
   }
 

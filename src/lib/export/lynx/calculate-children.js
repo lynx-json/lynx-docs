@@ -1,7 +1,6 @@
 const traverse = require("traverse");
 const types = require("../../../types");
 const exportLynx = require("./index");
-const specKey = "spec";
 
 function getLynxChildren(lynxJsValue) {
   let children = exportLynx.accumulateLynxChildren(lynxJsValue);

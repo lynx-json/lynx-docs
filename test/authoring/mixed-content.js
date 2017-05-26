@@ -27,6 +27,13 @@ var tests = [{
     template: { array: [{ "@arrayVar": { "#boolVar": { label: "Truthy" }, "^boolVar": { label: "Falsey" } } }] },
     data: { arrayVar: [{ boolVar: true }, { boolVar: false }, { boolVar: true }] },
     expected: { array: [{ label: "Truthy" }, { label: "Falsey" }, { label: "Truthy" }] }
+  },
+  {
+    description: "different value spec pairs at root",
+    template: { "#boolVar>text": "Truthy", "^boolVar>text": "Falsey" },
+    options: { realm: { realm: "http://whatever" } },
+    data: { boolVar: false },
+    expected: { value: "Falsey", spec: { hints: ["text"] }, realm: "http://whatever" }
   }
 ];
 

@@ -103,3 +103,4 @@ exports.calculateChildren = require("./calculate-children");
 exports.resolveRelativeUrls = require("./resolve-relative-urls");
 exports.flatten = require("./flatten");
 exports.extractSpecs = require("./extract-specs");
+exports.addRealm = require("./add-realm");
