@@ -1,4 +1,5 @@
 .jsbeautifyrc
 .jshintrc
 .travis.yml
+.vscode
 test

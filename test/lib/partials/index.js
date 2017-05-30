@@ -17,7 +17,8 @@ var partialsTests = [
   require("./footer"),
   require("./lynx"),
   require("./text"),
-  require("./line")
+  require("./line"),
+  require("./input")
 ];
 
 describe("lynx-docs core partials", function () {
@@ -26,7 +27,9 @@ describe("lynx-docs core partials", function () {
       tests.forEach(test => {
         describe(test.description, function () {
           it("should ".concat(test.should), function () {
-            runTest(test, tests.partial);
+            if (test.throws) {
+              return expect(() => runTest(test)).to.throw(test.throws);
+            } else runTest(test, tests.partial);
           });
         });
       });
@@ -47,7 +50,7 @@ function runTest(test, partialName) {
   if (test.log) console.log("handlebars", "\n" + hbContent);
   if (test.log) console.log("data", "\n" + JSON.stringify(test.data, null, 2));
 
-  let json = handlebars.compile(hbContent)(null);
+  let json = handlebars.compile(hbContent)(test.data);
   if (test.log) console.log("json", "\n" + json);
 
   let parsed = JSON.parse(json);
