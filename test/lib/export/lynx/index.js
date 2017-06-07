@@ -174,17 +174,60 @@ describe("lynx export module", function () {
         expected: []
       },
       {
+        description: "when value contains nested sections",
+        should: "have children from nested section",
+        value: {
+          spec: { hints: ["container"] },
+          value: {
+            "#foo": {
+              "#bar": {
+                message: {
+                  spec: { hints: ["text"] },
+                  value: "Foo and bar"
+                }
+              },
+              "^bar": {
+                message: {
+                  spec: { hints: ["text"] },
+                  value: "Foo and no bar"
+                }
+              }
+            },
+            "^foo": {
+              "#bar": {
+                message: {
+                  spec: { hints: ["text"] },
+                  value: "No foo and bar"
+                }
+              },
+              "^bar": {
+                message: {
+                  spec: { hints: ["text"] },
+                  value: "No foo and no bar"
+                }
+              }
+            }
+          }
+        },
+        expected: ["message", "message", "message", "message"]
+      },
+      {
         description: "when value contains incompatible sections for lynx value",
         should: "throw error",
         value: {
-          "#foo": {
-            one: {
-              spec: {}
-            }
-          },
-          "^foo": {
-            two: {
-              spec: {}
+          spec: {},
+          value: {
+            "#foo": {
+              one: {
+                spec: {},
+                value: "one"
+              }
+            },
+            "^foo": {
+              two: {
+                spec: {},
+                value: "two"
+              }
             }
           }
         },
@@ -201,7 +244,7 @@ describe("lynx export module", function () {
             let children = lynxExport.accumulateLynxChildren(test.value);
             if (test.log) console.log(JSON.stringify(children, null, 2));
             expect(children.map(child => child.meta.name)).to.deep.equal(test.expected);
-            children.forEach(child => expect(child).itself.to.respond.respondTo("update"));
+            children.forEach(child => expect(child).itself.to.respondTo("updateValue"));
           }
         });
       });

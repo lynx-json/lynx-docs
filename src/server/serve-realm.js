@@ -6,6 +6,11 @@ const path = require("path");
 const variantToLynx = require("../lib/export/variants-to-lynx").one;
 const templateToHandlebars = require("../lib/export/to-handlebars").one;
 
+function createFile(path, content) {
+  if (fs.existsSync(path)) return;
+  fs.writeFileSync(path, content);
+}
+
 function redirectToRealmIndex(req, res, next) {
   var realm = req.realms[0];
   if (!realm) return next();
@@ -34,7 +39,7 @@ module.exports = exports = function createRealmHandler(options) {
 
       var templateOptions = Object.assign({}, options, { realm: realm });
 
-      res.write(templateToHandlebars(template.path, templateOptions));
+      res.write(templateToHandlebars(template.path, templateOptions, createFile));
       res.end();
     }
 
@@ -45,7 +50,7 @@ module.exports = exports = function createRealmHandler(options) {
 
       var variantOptions = Object.assign({}, options, { realm: realm });
 
-      res.write(variantToLynx(variant, variantOptions));
+      res.write(variantToLynx(variant, variantOptions, createFile));
       res.end();
     }
 

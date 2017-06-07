@@ -104,7 +104,7 @@ var tests = [{
   {
     description: "object container with keys and dynamic sections",
     should: "flatten template",
-    template: { ">container": { "message>lynx": "Hello", "foo>lynx": { "#foo": { "name>lynx": "Foo" }, "^foo": { "name>lynx": "No foo" } } } },
+    template: { ">container": { "message>lynx": "Hello", "foo>container": { "#foo": { "name>lynx": "Foo" }, "^foo": { "name>lynx": "No foo" } } } },
     expected: {
       spec: {
         hints: ["container"],
@@ -119,11 +119,13 @@ var tests = [{
       },
       message: "Hello",
       foo: {
-        "#foo": {
-          "name": "Foo"
-        },
-        "^foo": {
-          "name": "No foo"
+        value: {
+          "#foo": {
+            "name": "Foo"
+          },
+          "^foo": {
+            "name": "No foo"
+          }
         }
       }
     }

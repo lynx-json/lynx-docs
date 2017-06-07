@@ -226,7 +226,7 @@ describe("common cli module", function () {
         should: "should set options from run control but delete 'spec'",
         runControl: { log: "warn", spec: { dir: "specs", url: "/specs/" } },
         input: { _: ["start"] },
-        expected: Object.assign(defaultSettings("start"), { log: "warn" })
+        expected: Object.assign(defaultSettings("start"), { log: "warn", spec: { dir: "specs", url: "/specs/" } })
       },
       {
         description: "when run control file present with export values",
