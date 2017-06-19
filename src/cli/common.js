@@ -65,7 +65,6 @@ function applyRunControlToOptions(rc, options) {
     });
   }
 
-  if (command === "start" && rcOptions.spec) delete rcOptions.spec; //spec doesn't apply to 'start'
   Object.keys(rcOptions).forEach(key => setIfNotPresent(key, rcOptions[key]));
 }
 

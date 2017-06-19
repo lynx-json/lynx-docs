@@ -1,29 +1,27 @@
 const traverse = require("traverse");
 const types = require("../../../types");
 const exportLynx = require("./index");
-const specKey = "spec";
+const templateKey = require("../../json-templates/template-key");
 
-function condenseValue(lynxValue, updateValue) {
-  if (Object.keys(lynxValue).includes("value")) {
-    if (types.isObject(lynxValue.value)) {
-      Object.assign(lynxValue, lynxValue.value);
-      delete lynxValue.value;
+function condenseValue(jsValue, updateValue) {
+  if (Object.keys(jsValue).includes("value")) {
+    if (types.isObject(jsValue.value)) {
+      var dynamicValue = Object.keys(jsValue.value)
+        .map(templateKey.parse)
+        .every(meta => meta.binding && templateKey.sectionTokens.includes(meta.binding.token));
+      if (dynamicValue) return; //if the value is dynamic, then we need to keep the value key
+
+      Object.assign(jsValue, jsValue.value);
+      delete jsValue.value;
     } else {
-      updateValue(lynxValue.value); //condense to non object value (string, array, etc.)
+      updateValue(jsValue.value); //condense to non object value (string, array, etc.)
     }
   }
 }
 
 function moveChildrenSpecToParent(jsValue) {
   let specChildren = jsValue.spec && jsValue.spec.children;
-  let accumulated = exportLynx.accumulateLynxChildren(jsValue)
-    .reduce((acc, item) => {
-      if (!item.section) acc.push(item);
-      else {
-        acc = acc.concat(item.children);
-      }
-      return acc;
-    }, []);
+  let accumulated = exportLynx.accumulateLynxChildren(jsValue);
 
   accumulated.forEach(child => {
     moveChildrenSpecToParent(child.value);

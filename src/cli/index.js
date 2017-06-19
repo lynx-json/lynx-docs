@@ -1,9 +1,12 @@
 #!/usr/bin/env node
 
+/* jshint expr: true */
+
 const yargs = require("yargs");
 const log = require("logatim");
 
 yargs
+  .epilogue("For detailed cli documentation refer to https://github.com/lynx-json/lynx-docs/wiki/Command-Line-Parameters")
   .command(require("./export"))
   .command(require("./start"))
   .usage("$0 [command] [<args>]")

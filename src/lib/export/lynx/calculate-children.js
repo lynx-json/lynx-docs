@@ -3,21 +3,13 @@ const types = require("../../../types");
 const exportLynx = require("./index");
 
 function getLynxChildren(lynxJsValue) {
-  let children = exportLynx.accumulateLynxChildren(lynxJsValue);
-  let sectionWithChildren = children.find(item => item.children && item.children.length > 0);
+  let children = exportLynx.accumulateLynxChildren(lynxJsValue)
+    .reduce((acc, child) => {
+      if (acc.every(item => item.name !== child.meta.name)) acc.push({ name: child.meta.name });
+      return acc;
+    }, []);
 
-  //merge the named children with children from sections that have children
-  let unique = children.reduce((acc, child) => {
-    if (child.section && sectionWithChildren) {
-      acc = acc.concat(sectionWithChildren.children); //add section children
-      sectionWithChildren = null; //only add section children once
-    } else if (!child.section) {
-      acc.push(child);
-    }
-    return acc;
-  }, []);
-
-  return unique.map(item => { return { name: item.meta.name }; });
+  return children;
 }
 
 function calculateLynxChildren(template) {

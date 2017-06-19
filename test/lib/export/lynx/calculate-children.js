@@ -347,6 +347,65 @@ var tests = [{
         }
       }
     }
+  },
+  {
+    description: "nested templates for containers with same children in nested templates",
+    should: "add children to container",
+    template: {
+      "foo>container": {
+        "#foo": {
+          "#bar": {
+            "fooBar>text": "Foo and bar"
+          },
+          "^bar": {
+            "fooBar>text": "Foo no bar"
+          }
+        },
+        "^foo": {
+          "#bar": {
+            "fooBar>text": "No foo and bar"
+          },
+          "^bar": {
+            "fooBar>text": "No foo and no bar"
+          }
+        }
+      }
+    },
+    expected: {
+      foo: {
+        spec: { hints: ["container"], children: [{ name: "fooBar" }] },
+        value: {
+          "#foo": {
+            "#bar": {
+              fooBar: {
+                spec: { hints: ["text"] },
+                value: { "": "Foo and bar" }
+              }
+            },
+            "^bar": {
+              fooBar: {
+                spec: { hints: ["text"] },
+                value: { "": "Foo no bar" }
+              }
+            }
+          },
+          "^foo": {
+            "#bar": {
+              fooBar: {
+                spec: { hints: ["text"] },
+                value: { "": "No foo and bar" }
+              }
+            },
+            "^bar": {
+              fooBar: {
+                spec: { hints: ["text"] },
+                value: { "": "No foo and no bar" }
+              }
+            }
+          }
+        }
+      }
+    }
   }
 ];
 
