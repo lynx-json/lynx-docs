@@ -17,7 +17,12 @@ function createServeStatic(options) {
         return next();
       }
 
-      res.writeHead(200, { "Content-Type": mime.lookup(req.filename) });
+      var headers = { "Content-Type": mime.lookup(req.filename) };
+      if (options.spec.cache && path.extname(req.filename) === ".lnxs") {
+        headers["Cache-Control"] = "max-age=31536000";
+      }
+      
+      res.writeHead(200, headers);
       res.write(contents, "binary");
       res.end();
     }
