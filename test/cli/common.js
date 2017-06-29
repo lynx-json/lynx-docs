@@ -10,7 +10,7 @@ const yaml = require("yamljs");
 const commonCli = require("../../src/cli/common");
 
 function defaultSettings(command) {
-  let settings = { _: [command], root: ["."], log: "error" };
+  let settings = { _: [command], root: ["."], log: "error", flatten: false };
   if (command === "export") {
     Object.assign(settings, { "output": "stdout", format: "handlebars" });
   } else {
@@ -117,6 +117,18 @@ describe("common cli module", function () {
         should: "should default spec parameters",
         input: { _: ["export"], spec: true },
         expected: { spec: { dir: ".", url: "/" } }
+      },
+      {
+        description: "when spec is false",
+        should: "should remove spec parameters",
+        input: { _: ["export"], spec: false },
+        expected: { spec: undefined }
+      },
+      {
+        description: "when spec is 'false'",
+        should: "should remove spec parameters",
+        input: { _: ["export"], spec: 'false' },
+        expected: { spec: undefined }
       },
       {
         description: "when spec.dir is set and spec.url is not",

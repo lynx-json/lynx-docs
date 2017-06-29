@@ -47,10 +47,12 @@ function processTemplate(pathOrTemplate, options, createFile) {
   template = lynxExport.calculateChildren(template);
   logDebug("Children calculated", template);
 
-  if (options.spec) {
+  if (options.flatten) {
     template = lynxExport.flatten(template);
     logDebug("Flattened", template);
+  }
 
+  if (options.spec) {
     template = lynxExport.extractSpecs(template, options, createFile);
     logDebug("Spec extracted", template);
   }
