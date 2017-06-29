@@ -8,7 +8,7 @@ function condenseValue(jsValue, updateValue) {
     if (types.isObject(jsValue.value)) {
       var dynamicValue = Object.keys(jsValue.value)
         .map(templateKey.parse)
-        .every(meta => meta.binding && templateKey.sectionTokens.includes(meta.binding.token));
+        .every(meta => meta.binding && (templateKey.sectionTokens.includes(meta.binding.token) || templateKey.simpleTokens.includes(meta.binding.token)));
       if (dynamicValue) return; //if the value is dynamic, then we need to keep the value key
 
       Object.assign(jsValue, jsValue.value);
@@ -25,6 +25,7 @@ function moveChildrenSpecToParent(jsValue) {
 
   accumulated.forEach(child => {
     moveChildrenSpecToParent(child.value);
+    if (exportLynx.containsDynamicContent(child.value.spec)) return;
     let childSpec = specChildren && specChildren.find(item => item.name === child.meta.name);
     if (childSpec) {
       Object.assign(childSpec, child.value.spec);
