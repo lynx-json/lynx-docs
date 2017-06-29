@@ -81,6 +81,8 @@ function normalizeSpecHandling(options) {
   }
   if (options.spec === undefined) return;
 
+  options.flatten = true; //infer flattening when extracting specs
+
   if (!options.spec.dir) options.spec.dir = ".";
   if (!options.spec.url) options.spec.url = "/";
 }
