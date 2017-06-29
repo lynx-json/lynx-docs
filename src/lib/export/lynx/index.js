@@ -1,3 +1,4 @@
+const traverse = require("traverse");
 const templateKey = require("../../json-templates/template-key");
 const types = require("../../../types");
 const specKey = "spec";
@@ -88,12 +89,23 @@ function isLynxOrResultsInLynx(jsValue) {
   return exports.isLynxValue(jsValue) || exports.resultsInLynxNode(jsValue);
 }
 
+function containsDynamicContent(value) {
+  let dynamicNodes = traverse(value).reduce(function (acc, jsValue) {
+    let meta = this.key && templateKey.parse(this.key);
+    if (meta && meta.binding) acc.push(jsValue);
+    if (types.isString(jsValue) && jsValue.indexOf("{{") > -1) acc.push(jsValue);
+    return acc;
+  }, []);
+  return dynamicNodes.length > 0;
+}
+
 exports.getLynxParentNode = getLynxParentNode;
 exports.isLynxValue = isLynxValue;
 exports.isLynxOrResultsInLynx = isLynxOrResultsInLynx;
 exports.resultsInLynxNode = resultsInLynxNode;
 exports.accumulateLynxChildren = accumulateLynxChildren;
 exports.getValuePortionOfLynxValue = getValuePortionOfLynxValue;
+exports.containsDynamicContent = containsDynamicContent;
 exports.calculateChildren = require("./calculate-children");
 exports.resolveRelativeUrls = require("./resolve-relative-urls");
 exports.flatten = require("./flatten");

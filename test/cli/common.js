@@ -10,7 +10,7 @@ const yaml = require("yamljs");
 const commonCli = require("../../src/cli/common");
 
 function defaultSettings(command) {
-  let settings = { _: [command], root: ["."], log: "error" };
+  let settings = { _: [command], root: ["."], log: "error", flatten: false };
   if (command === "export") {
     Object.assign(settings, { "output": "stdout", format: "handlebars" });
   } else {
@@ -119,6 +119,18 @@ describe("common cli module", function () {
         expected: { spec: { dir: ".", url: "/" } }
       },
       {
+        description: "when spec is false",
+        should: "should remove spec parameters",
+        input: { _: ["export"], spec: false },
+        expected: { spec: undefined }
+      },
+      {
+        description: "when spec is 'false'",
+        should: "should remove spec parameters",
+        input: { _: ["export"], spec: 'false' },
+        expected: { spec: undefined }
+      },
+      {
         description: "when spec.dir is set and spec.url is not",
         should: "should default url parameter",
         input: { _: ["export"], spec: { dir: "test" } },
@@ -212,21 +224,21 @@ describe("common cli module", function () {
         should: "should set options from run control",
         runControl: { log: "warn", spec: true },
         input: { _: ["export"] },
-        expected: Object.assign(defaultSettings("export"), { log: "warn", spec: { dir: ".", url: "/" } })
+        expected: Object.assign(defaultSettings("export"), { log: "warn", spec: { dir: ".", url: "/" }, flatten: true })
       },
       {
         description: "when run control file present with spec values and 'export'",
         should: "should set options from run control",
         runControl: { log: "warn", spec: { dir: "specs", url: "/specs/" } },
         input: { _: ["export"] },
-        expected: Object.assign(defaultSettings("export"), { log: "warn", spec: { dir: "specs", url: "/specs/" } })
+        expected: Object.assign(defaultSettings("export"), { log: "warn", spec: { dir: "specs", url: "/specs/" }, flatten: true })
       },
       {
         description: "when run control file present with spec values and 'start'",
         should: "should set options from run control but delete 'spec'",
         runControl: { log: "warn", spec: { dir: "specs", url: "/specs/" } },
         input: { _: ["start"] },
-        expected: Object.assign(defaultSettings("start"), { log: "warn", spec: { dir: "specs", url: "/specs/" } })
+        expected: Object.assign(defaultSettings("start"), { log: "warn", spec: { dir: "specs", url: "/specs/" }, flatten: true })
       },
       {
         description: "when run control file present with export values",
@@ -247,7 +259,7 @@ describe("common cli module", function () {
         should: "should set options from run control and override values from export",
         runControl: { log: "warn", spec: true, export: { root: "foo", output: "bar", format: "baz", log: "info", spec: { dir: "specs", url: "/specs/" } } },
         input: { _: ["export"] },
-        expected: Object.assign(defaultSettings("export"), { log: "info", root: ["foo"], output: "bar", format: "baz", spec: { dir: "specs", url: "/specs/" } })
+        expected: Object.assign(defaultSettings("export"), { log: "info", root: ["foo"], output: "bar", format: "baz", spec: { dir: "specs", url: "/specs/" }, flatten: true })
       },
       {
         description: "when run control file present with start values and overrides",
@@ -261,7 +273,7 @@ describe("common cli module", function () {
         should: "should set options from cli switches",
         runControl: { log: "warn", export: { root: "foo", output: "bar", format: "baz", log: "info", spec: { dir: "specs", url: "/specs/" } } },
         input: { _: ["export"], log: "error", root: ["no foo"], output: "no bar", format: "no baz", spec: { dir: "no-specs", url: "/no-specs/" } },
-        expected: Object.assign(defaultSettings("export"), { log: "error", root: ["no foo"], output: "no bar", format: "no baz", spec: { dir: "no-specs", url: "/no-specs/" } })
+        expected: Object.assign(defaultSettings("export"), { log: "error", root: ["no foo"], output: "no bar", format: "no baz", spec: { dir: "no-specs", url: "/no-specs/" }, flatten: true })
       },
 
     ];

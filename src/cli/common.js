@@ -21,6 +21,7 @@ function handleOptions(options) {
 function applyDefaults(options) {
   if (options.root === undefined) options.root = ".";
   if (options.log === undefined) options.log = "error";
+  if (options.flatten === undefined) options.flatten = false;
   let command = options._[0];
   if (command.toLowerCase() === "start") {
     if (options.port === undefined) options.port = 3000;
@@ -52,7 +53,7 @@ function applyRunControlToOptions(rc, options) {
     if (options[key] === undefined) options[key] = value;
   }
   let rcOptions = {};
-  ["root", "log", "spec"].forEach(key => {
+  ["root", "log", "spec", "flatten"].forEach(key => {
     if (rc[key] !== undefined) rcOptions[key] = rc[key];
   });
 
@@ -74,9 +75,14 @@ function normalizeLogging(options) {
 }
 
 function normalizeSpecHandling(options) {
-  if (!options.spec) return;
+  if (!types.isObject(options.spec)) {
+    if (options.spec === "false" || options.spec === false) options.spec = undefined;
+    if (options.spec) options.spec = {}; //overwrite existing non object value with empty object
+  }
+  if (options.spec === undefined) return;
 
-  if (options.spec === true) options.spec = {};
+  options.flatten = true; //infer flattening when extracting specs
+
   if (!options.spec.dir) options.spec.dir = ".";
   if (!options.spec.url) options.spec.url = "/";
 }

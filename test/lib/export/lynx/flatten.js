@@ -54,6 +54,61 @@ var tests = [{
     }
   },
   {
+    description: "dynamic spec in child",
+    should: "not flatten template",
+    template: {
+      ">list": {
+        "spec.labeledBy": "label",
+        "#firstName": {
+          "label>": "First Name",
+          "firstName>line": {
+            "value<value": "",
+            "spec.input": true,
+            "spec.validation": {
+              required: {
+                "state<requiredConstraintState": "",
+                invalid: "requiredError"
+              }
+            }
+          },
+          "requiredError>text": "Required"
+        },
+        "^firstName": null
+      }
+    },
+    expected: {
+      spec: {
+        hints: ["list", "container"],
+        labeledBy: "label",
+        children: [
+          { name: "label", hints: ["label", "text"] },
+          { name: "firstName" },
+          { name: "requiredError", hints: ["text"] }
+        ]
+      },
+      value: {
+        "#firstName": {
+          label: { "": "First Name" },
+          firstName: {
+            spec: {
+              hints: ["line", "text"],
+              input: true,
+              validation: {
+                required: {
+                  state: { "<requiredConstraintState": "" },
+                  invalid: "requiredError"
+                }
+              }
+            },
+            value: { "<value": "" }
+          },
+          requiredError: { "": "Required" }
+        },
+        "^firstName": null
+      }
+    }
+  },
+  {
     description: "array container with object containers values",
     should: "not flatten template",
     template: { ">container": [{ ">container": { "message>text": "Hello" } }] },

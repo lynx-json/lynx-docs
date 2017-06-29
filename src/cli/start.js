@@ -18,6 +18,10 @@ function buildCommand(yargs) {
       alias: "l",
       describe: "Set console logging level (error|warn|info|debug|trace). [default 'error']"
     })
+    .option("flatten", {
+      describe: "Move spec object to parent spec object if possible. [default: false]",
+      boolean: true
+    })
     .option("spec.dir", {
       describe: "The directory to write files representing the spec object(s) in the template that can be extracted"
     })

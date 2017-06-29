@@ -18,10 +18,10 @@ function createServeStatic(options) {
       }
 
       var headers = { "Content-Type": mime.lookup(req.filename) };
-      if (options.spec.cache && path.extname(req.filename) === ".lnxs") {
+      if (options.spec && options.spec.cache && path.extname(req.filename) === ".lnxs") {
         headers["Cache-Control"] = "max-age=31536000";
       }
-      
+
       res.writeHead(200, headers);
       res.write(contents, "binary");
       res.end();
