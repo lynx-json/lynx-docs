@@ -54,7 +54,7 @@ var tests = [{
     }
   },
   {
-    description: "dynamic spec in child",
+    description: "dynamic spec and value in child",
     should: "not flatten template",
     template: {
       ">list": {
@@ -101,6 +101,61 @@ var tests = [{
               }
             },
             value: { "<value": "" }
+          },
+          requiredError: { "": "Required" }
+        },
+        "^firstName": null
+      }
+    }
+  },
+  {
+    description: "dynamic spec and static value in child",
+    should: "not flatten template",
+    template: {
+      ">list": {
+        "spec.labeledBy": "label",
+        "#firstName": {
+          "label>": "First Name",
+          "firstName>line": {
+            "value": "",
+            "spec.input": true,
+            "spec.validation": {
+              required: {
+                "state<requiredConstraintState": "",
+                invalid: "requiredError"
+              }
+            }
+          },
+          "requiredError>text": "Required"
+        },
+        "^firstName": null
+      }
+    },
+    expected: {
+      spec: {
+        hints: ["list", "container"],
+        labeledBy: "label",
+        children: [
+          { name: "label", hints: ["label", "text"] },
+          { name: "firstName" },
+          { name: "requiredError", hints: ["text"] }
+        ]
+      },
+      value: {
+        "#firstName": {
+          label: { "": "First Name" },
+          firstName: {
+            spec: {
+              hints: ["line", "text"],
+              input: true,
+              validation: {
+                required: {
+                  state: { "<requiredConstraintState": "" },
+                  invalid: "requiredError"
+                }
+              }
+            },
+            value: ""
           },
           requiredError: { "": "Required" }
         },

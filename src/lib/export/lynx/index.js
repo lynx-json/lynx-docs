@@ -2,9 +2,10 @@ const traverse = require("traverse");
 const templateKey = require("../../json-templates/template-key");
 const types = require("../../../types");
 const specKey = "spec";
+const valueKey = "value";
 
 function getValuePortionOfLynxValue(lynxJsValue) {
-  return Object.keys(lynxJsValue).includes("value") ? lynxJsValue.value : lynxJsValue;
+  return valueKey in lynxJsValue ? lynxJsValue.value : lynxJsValue;
 }
 
 function validateSections(sections) {

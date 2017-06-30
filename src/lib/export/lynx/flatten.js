@@ -4,7 +4,7 @@ const exportLynx = require("./index");
 const templateKey = require("../../json-templates/template-key");
 
 function condenseValue(jsValue, updateValue) {
-  if (Object.keys(jsValue).includes("value")) {
+  if ("value" in jsValue) {
     if (types.isObject(jsValue.value)) {
       var dynamicValue = Object.keys(jsValue.value)
         .map(templateKey.parse)
@@ -14,6 +14,7 @@ function condenseValue(jsValue, updateValue) {
       Object.assign(jsValue, jsValue.value);
       delete jsValue.value;
     } else {
+      if (exportLynx.isLynxValue(jsValue)) return; //don't condense if spec still exists
       updateValue(jsValue.value); //condense to non object value (string, array, etc.)
     }
   }
