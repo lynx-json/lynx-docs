@@ -13,7 +13,8 @@ module.exports = exports = function createSearchHandler(options) {
       realm: {
         realm: "http://lynx-json.org/docs/meta/search/",
         folder: path.resolve(options.root[0])
-      }
+      },
+      spec: undefined
     });
 
     res.write(variantToLynx(variant, variantOptions));

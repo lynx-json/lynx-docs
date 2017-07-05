@@ -16,7 +16,7 @@ module.exports = exports = function createMetaHandler(options) {
       res.setHeader("Cache-control", "no-cache");
 
       var metaRealm = Object.assign({}, realm, { realm: "http://lynx-json.org/docs/meta/" });
-      var variantOptions = Object.assign({}, options, { realm: metaRealm });
+      var variantOptions = Object.assign({}, options, { realm: metaRealm, spec: undefined });
 
       res.write(variantToLynx(variant, variantOptions));
       res.end();
