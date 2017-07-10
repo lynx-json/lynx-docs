@@ -92,7 +92,12 @@ function toHandlebars(model) {
   }
 
   function shouldSeparate(traverseNode, meta, binding) {
-    if (binding && templateKey.sectionTokens.includes(binding.token)) return false;
+    if (binding) {
+      if (templateKey.sectionTokens.includes(binding.token)) return false;
+      if (templateKey.iteratorToken === binding.token &&
+        traverseNode.parent.keys.length === 2 &&
+        traverseNode.parent.keys.includes("^" + binding.variable)) return false;
+    }
     return traverseNode.parent &&
       traverseNode.parent.keys.indexOf(traverseNode.key) !== traverseNode.parent.keys.length - 1;
   }

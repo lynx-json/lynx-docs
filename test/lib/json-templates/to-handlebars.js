@@ -263,6 +263,12 @@ let tests = [{
     expected: []
   },
   {
+    description: "converting iterator token '@' - zero items with negative section",
+    template: [{ "@items": { foo: "Foo" }, "^items": { foo: "No Foo" } }],
+    data: { items: [] },
+    expected: [{ foo: "No Foo" }]
+  },
+  {
     description: "converting iterator token '@' for string array - one item if case",
     template: [{ "@items": { "<name": "Foo" } }],
     data: { items: [{ name: "Bar" }] },
@@ -311,6 +317,18 @@ let tests = [{
     expected: ["Header", "Footer"]
   },
   {
+    description: "converting iterator token '@' with object value and negative section when mixed with other content - no items",
+    template: ["Header", { "@items": { foo: "Foo" }, "^items": { foo: "No foo" } }, "Footer"],
+    data: { items: null },
+    expected: ["Header", { foo: "No foo" }, "Footer"]
+  },
+  {
+    description: "converting iterator token '@' with object value and negative section first when mixed with other content - no items",
+    template: ["Header", { "^items": { foo: "No foo" }, "@items": { foo: "Foo" } }, "Footer"],
+    data: { items: null },
+    expected: ["Header", { foo: "No foo" }, "Footer"]
+  },
+  {
     description: "converting iterator token '@' with simple value when mixed with other content - one item",
     template: ["Header", { "@items": "Foo" }, "Footer"],
     data: { items: ["one"] },
@@ -327,6 +345,18 @@ let tests = [{
     template: ["Header", { "@items": "Foo" }, "Footer"],
     data: { items: null },
     expected: ["Header", "Footer"]
+  },
+  {
+    description: "converting iterator token '@' with simple value and negative section when mixed with other content - no items",
+    template: ["Header", { "@items": "Foo", "^items": "No foo" }, "Footer"],
+    data: { items: null },
+    expected: ["Header", "No foo", "Footer"]
+  },
+  {
+    description: "converting iterator token '@' with simple value and negative section first when mixed with other content - no items",
+    template: ["Header", { "^items": "No foo", "@items": "Foo" }, "Footer"],
+    data: { items: null },
+    expected: ["Header", "No foo", "Footer"]
   },
   {
     description: "converting iterator token '@' with array value when mixed with other content - one item",
@@ -347,8 +377,19 @@ let tests = [{
     template: ["Header", { "@items": ["Foo"] }, "Footer"],
     data: { items: null },
     expected: ["Header", "Footer"]
+  },
+  {
+    description: "converting iterator token '@' with array value and negative section when mixed with other content - no items",
+    template: ["Header", { "@items": ["Foo"], "^items": ["No Foo"] }, "Footer"],
+    data: { items: null },
+    expected: ["Header", ["No Foo"], "Footer"]
+  },
+  {
+    description: "converting iterator token '@' with array value and negative section first when mixed with other content - no items",
+    template: ["Header", { "^items": ["No Foo"], "@items": ["Foo"] }, "Footer"],
+    data: { items: null },
+    expected: ["Header", ["No Foo"], "Footer"]
   }
-
 ];
 
 function getTests() {
