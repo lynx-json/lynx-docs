@@ -55,6 +55,42 @@ var tests = [{
     }
   },
   {
+    description: "lynx link w/data",
+    should: "add children",
+    template: {
+      "foo>link": {
+        "label>": "Click Me",
+        type: "application/json",
+        "data>link": { "label>": "Click Me Too", type: "text/plain", data: "Hello, World!" }
+      }
+    },
+    expected: {
+      foo: {
+        spec: {
+          hints: ["link"],
+          children: [{ name: "label" }],
+          labeledBy: "label"
+        },
+        value: {
+          label: { spec: { hints: ["label", "text"] }, value: { "": "Click Me" } },
+          data: {
+            spec: {
+              hints: ["link"],
+              children: [{ name: "label" }],
+              labeledBy: "label"
+            },
+            value: {
+              label: { spec: { hints: ["label", "text"] }, value: { "": "Click Me Too" } },
+              type: "text/plain",
+              data: "Hello, World!"
+            }
+          },
+          type: "application/json"
+        }
+      }
+    }
+  },
+  {
     description: "lynx array",
     should: "not add children",
     template: { "foo>container": [{ "bar>text": "Bar" }, { "qux>text": "Qux" }] },

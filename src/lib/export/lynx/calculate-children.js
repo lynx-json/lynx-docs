@@ -12,11 +12,17 @@ function getLynxChildren(lynxJsValue) {
   return children;
 }
 
+function filterDataProperties(jsValue, children) {
+  if (!jsValue.spec.hints.some(hint => hint === "link" || hint === "content")) return children;
+  return children.filter(child => child.name !== "data");
+}
+
 function calculateLynxChildren(template) {
   return traverse(template).forEach(function (jsValue) {
     if (exportLynx.isLynxValue(jsValue) && !types.isArray(exportLynx.getValuePortionOfLynxValue(jsValue))) {
       let children = getLynxChildren(jsValue);
       if (children.length > 0) {
+        children = filterDataProperties(jsValue, children);
         jsValue.spec.children = children;
         this.update(jsValue);
       }
