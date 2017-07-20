@@ -1,6 +1,7 @@
 const traverse = require("traverse");
 const templateKey = require("../../json-templates/template-key");
 const types = require("../../../types");
+const log = require("logatim");
 const specKey = "spec";
 const valueKey = "value";
 
@@ -68,7 +69,13 @@ function getLynxParentNode(traverseNode) {
 
 function isLynxValue(jsValue) {
   if (!types.isObject(jsValue)) return false;
-  return specKey in jsValue;
+  if (!(specKey in jsValue)) return false;
+  if (!types.isArray(jsValue[specKey].hints)) {
+    log.yellow("Value appears to be a lynx value but has no 'hints' array or 'spec' value.").warn();
+    log.yellow(JSON.stringify(jsValue)).warn();
+    return false;
+  }
+  return true;
 }
 
 function resultsInLynxNode(jsValue) {

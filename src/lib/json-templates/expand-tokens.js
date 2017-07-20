@@ -46,7 +46,7 @@ function expandTokens(template) {
     if (expandMetas.length === 0) return; //nothing to expand.
 
     let validate = validators.validateCompatibleSections(metas);
-    if (!validate.valid) log.yellow(validate.message).warn();
+    if (!validate.valid) log.yellow(validate.message).debug();
 
     let result = {};
     convertForExpansion(metas, value).forEach(meta => {

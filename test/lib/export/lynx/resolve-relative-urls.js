@@ -27,14 +27,14 @@ var tests = [{
   {
     description: "relative 'scope' value",
     should: "resolve scope relative to test realm",
-    template: { spec: {}, value: { scope: "./bar" } },
-    expected: { spec: {}, value: { scope: url.resolve(testRealm, "./bar") } },
+    template: { spec: { hints: ["content"] }, value: { scope: "./bar" } },
+    expected: { spec: { hints: ["content"] }, value: { scope: url.resolve(testRealm, "./bar") } },
   },
   {
     description: "absolute 'scope' value",
     should: "not change value",
-    template: { spec: {}, value: { scope: "http://google.com/" } },
-    expected: { spec: {}, value: { scope: "http://google.com/" } },
+    template: { spec: { hints: ["content"] }, value: { scope: "http://google.com/" } },
+    expected: { spec: { hints: ["content"] }, value: { scope: "http://google.com/" } },
   },
   {
     description: "relative 'scope' that is not a lynx node child",
@@ -45,14 +45,14 @@ var tests = [{
   {
     description: "relative 'for' value",
     should: "resolve for relative to test realm",
-    template: { spec: {}, value: { for: "./bar" } },
-    expected: { spec: {}, value: { for: url.resolve(testRealm, "./bar") } },
+    template: { spec: { hints: ["content"] }, value: { for: "./bar" } },
+    expected: { spec: { hints: ["content"] }, value: { for: url.resolve(testRealm, "./bar") } },
   },
   {
     description: "absolute 'for' value",
     should: "not change value",
-    template: { spec: {}, value: { for: "http://google.com/" } },
-    expected: { spec: {}, value: { for: "http://google.com/" } },
+    template: { spec: { hints: ["content"] }, value: { for: "http://google.com/" } },
+    expected: { spec: { hints: ["content"] }, value: { for: "http://google.com/" } },
   },
   {
     description: "relative 'for' value that is not a lynx node child",

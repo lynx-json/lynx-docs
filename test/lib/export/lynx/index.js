@@ -13,34 +13,47 @@ describe("lynx export module", function () {
       },
       {
         description: "when value is an array",
-        should: "not not be a lynx value",
+        should: "not be a lynx value",
         value: [],
         expected: false
       },
       {
         description: "when value is an empty object",
-        should: "not not be a lynx value",
+        should: "not be a lynx value",
         value: {},
         expected: false
       },
       {
         description: "when value is an object without a 'spec' key",
-        should: "not not be a lynx value",
+        should: "not be a lynx value",
         value: { value: "Hello" },
         expected: false
       },
       {
-        description: "when value is an object with a 'spec' key and no 'value' key",
-        should: "be a lynx value",
+        description: "when value is an object with a 'spec' key with no 'hints' and no 'value' key",
+        should: "not be a lynx value",
         value: { spec: {} },
+        expected: false
+      },
+      {
+        description: "when value is an object with a 'spec' key with 'hints' and no 'value' key",
+        should: "be a lynx value",
+        value: { spec: { hints: [] } },
         expected: true
       },
       {
-        description: "when value is an object with a 'spec' key and a 'value' key",
-        should: "be a lynx value",
+        description: "when value is an object with a 'spec' key with no 'hints' and a 'value' key",
+        should: "not be a lynx value",
         value: { spec: {}, value: "Hello" },
+        expected: false
+      },
+      {
+        description: "when value is an object with a 'spec' key with 'hints' and a 'value' key",
+        should: "be a lynx value",
+        value: { spec: { hints: [] }, value: "Hello" },
         expected: true
       }
+
     ];
     tests.forEach(test => {
       describe(test.description, function () {
@@ -94,31 +107,31 @@ describe("lynx export module", function () {
       {
         description: "when value is a template for lynx value",
         should: "be true",
-        value: { "": { spec: {}, value: {} } },
+        value: { "": { spec: { hints: [] }, value: {} } },
         expected: true
       },
       {
         description: "when value contains two sections that are templates for lynx values",
         should: "be true",
-        value: { "#true": { spec: {}, value: {} }, "#false": { spec: {}, value: {} } },
+        value: { "#true": { spec: { hints: [] }, value: {} }, "#false": { spec: { hints: [] }, value: {} } },
         expected: true
       },
       {
         description: "when value contains one section that is template for lynx value and another section that is null",
         should: "be true",
-        value: { "#true": { spec: {}, value: {} }, "#false": null },
+        value: { "#true": { spec: { hints: [] }, value: {} }, "#false": null },
         expected: true
       },
       {
         description: "when value contains one section that is template for lynx value and another section that is not null and not a lynx value",
         should: "be false",
-        value: { "#true": { spec: {}, value: {} }, "#false": "foo" },
+        value: { "#true": { spec: { hints: [] }, value: {} }, "#false": "foo" },
         expected: false
       },
       {
         description: "when value contains two sections that are templates for lynx values and another key",
         should: "be false",
-        value: { "#true": { spec: {}, value: {} }, "#false": { spec: {}, value: {} }, "other": "foo" },
+        value: { "#true": { spec: { hints: [] }, value: {} }, "#false": { spec: { hints: [] }, value: {} }, "other": "foo" },
         expected: false
       }
     ];
@@ -219,13 +232,13 @@ describe("lynx export module", function () {
           value: {
             "#foo": {
               one: {
-                spec: {},
+                spec: { hints: ["text"] },
                 value: "one"
               }
             },
             "^foo": {
               two: {
-                spec: {},
+                spec: { hints: ["text"] },
                 value: "two"
               }
             }
