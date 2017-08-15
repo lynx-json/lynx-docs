@@ -2,14 +2,26 @@ const traverse = require("traverse");
 const types = require("../../../types");
 const exportLynx = require("./index");
 const templateKey = require("../../json-templates/template-key");
+const valueKey = "value";
+
+function shouldCondenseObject(jsValue) {
+  var dynamicValue = Object.keys(jsValue.value)
+    .map(templateKey.parse)
+    .every(meta => meta.binding && (templateKey.sectionTokens.includes(meta.binding.token) || templateKey.simpleTokens.includes(meta.binding.token)));
+  if (dynamicValue) return false; //if the value is dynamic, then we need to keep the value key
+
+  if (exportLynx.isLynxValue(jsValue) &&
+    !exportLynx.getLynxParentNode(this) &&
+    (jsValue.value.realm || jsValue.value.base || jsValue.value.focus || jsValue.value.context)
+  ) return false;
+
+  return true;
+}
 
 function condenseValue(jsValue, updateValue) {
-  if ("value" in jsValue) {
+  if (valueKey in jsValue) {
     if (types.isObject(jsValue.value)) {
-      var dynamicValue = Object.keys(jsValue.value)
-        .map(templateKey.parse)
-        .every(meta => meta.binding && (templateKey.sectionTokens.includes(meta.binding.token) || templateKey.simpleTokens.includes(meta.binding.token)));
-      if (dynamicValue) return; //if the value is dynamic, then we need to keep the value key
+      if (!shouldCondenseObject(jsValue)) return;
 
       Object.assign(jsValue, jsValue.value);
       delete jsValue.value;
