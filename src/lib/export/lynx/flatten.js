@@ -2,7 +2,9 @@ const traverse = require("traverse");
 const types = require("../../../types");
 const exportLynx = require("./index");
 const templateKey = require("../../json-templates/template-key");
+const log = require("logatim");
 const valueKey = "value";
+const documentKeys = ["realm", "base", "focus", "context"];
 
 function shouldCondenseObject(jsValue) {
   var dynamicValue = Object.keys(jsValue.value)
@@ -10,10 +12,13 @@ function shouldCondenseObject(jsValue) {
     .every(meta => meta.binding && (templateKey.sectionTokens.includes(meta.binding.token) || templateKey.simpleTokens.includes(meta.binding.token)));
   if (dynamicValue) return false; //if the value is dynamic, then we need to keep the value key
 
-  if (exportLynx.isLynxValue(jsValue) &&
-    !exportLynx.getLynxParentNode(this) &&
-    (jsValue.value.realm || jsValue.value.base || jsValue.value.focus || jsValue.value.context)
-  ) return false;
+  if (exportLynx.isLynxValue(jsValue) && !exportLynx.getLynxParentNode(this)) {
+    var keys = documentKeys.filter(key => key in jsValue.value);
+    if (keys.length > 0) {
+      log.yellow("Unexpected document key(s) '" + keys.join("','") + "' exist in the 'value' component. Flattening disabled.").warn();
+      return false;
+    }
+  }
 
   return true;
 }
