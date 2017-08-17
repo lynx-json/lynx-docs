@@ -29,6 +29,78 @@ var tests = [{
     }
   },
   {
+    description: "document with realm in value component",
+    should: "not flatten template",
+    template: { realm: "http://example.com/bar", ">container": { "message>text": "Hello", "realm": "http://example.com/foo/" } },
+    expected: {
+      realm: "http://example.com/bar",
+      spec: {
+        hints: ["container"],
+        children: [
+          { name: "message", hints: ["text"] }
+        ]
+      },
+      value: {
+        message: { "": "Hello" },
+        realm: "http://example.com/foo/"
+      }
+    }
+  },
+  {
+    description: "document with base in value component",
+    should: "not flatten template",
+    template: { base: "http://example.com/bar", ">container": { "message>text": "Hello", "base": "http://example.com/foo/" } },
+    expected: {
+      base: "http://example.com/bar",
+      spec: {
+        hints: ["container"],
+        children: [
+          { name: "message", hints: ["text"] }
+        ]
+      },
+      value: {
+        message: { "": "Hello" },
+        base: "http://example.com/foo/"
+      }
+    }
+  },
+  {
+    description: "document with focus in value component",
+    should: "not flatten template",
+    template: { focus: "message", ">container": { "message>text": "Hello", "focus": "foo" } },
+    expected: {
+      focus: "message",
+      spec: {
+        hints: ["container"],
+        children: [
+          { name: "message", hints: ["text"] }
+        ]
+      },
+      value: {
+        message: { "": "Hello" },
+        focus: "foo"
+      }
+    }
+  },
+  {
+    description: "document with context in value component",
+    should: "not flatten template",
+    template: { context: "http://example.com/bar", ">container": { "message>text": "Hello", "context": "http://example.com/foo/" } },
+    expected: {
+      context: "http://example.com/bar",
+      spec: {
+        hints: ["container"],
+        children: [
+          { name: "message", hints: ["text"] }
+        ]
+      },
+      value: {
+        message: { "": "Hello" },
+        context: "http://example.com/foo/"
+      }
+    }
+  },
+  {
     description: "nested object containers",
     should: "flatten template",
     template: { ">container": { "c1>container": { "message>text": "Hello" } } },
