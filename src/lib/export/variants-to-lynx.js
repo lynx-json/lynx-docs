@@ -38,27 +38,83 @@ function transformVariantToLynx(variant, options, createFile) {
 
     let data = types.isString(variant.data) ? templateData(variant.data) : variant.data || null;
     let json = handlebars.compile(hbContent)(data);
-    return lintContent(json, variant);
+    return lintContent(json, variant, options);
   } catch (err) {
-    err.message = "Unable to export ".concat(util.inspect(variant.template), " to lynx format.\n\n", err.message);
-    throw err;
+    log.red(err).error();
+    return createErrorDocument(variant, options, err);
   }
 }
 
-function lintContent(json, variant) {
+function lintContent(json, variant, options) {
   let linted = jsonLint(json);
   if (linted.error) {
-    let beforeError = json.substr(0, linted.character - 1);
-    let afterError = json.substr(linted.character - 1);
-    let message = "Failed JSON linting when data binding '".concat(variant.data, "'");
-    log.red.bold("! " + message + " !").error();
-    log.green(beforeError).red(afterError).error();
+    let error = new Error(`Failed JSON linting when data binding '${variant.data}'`);
+    error.before = json.substr(0, linted.character - 1);
+    error.after = json.substr(linted.character - 1);
 
-    message += "\n\nNote: <<ERROR>> token denotes location of linting failure.\n"
-      .concat(beforeError, "<<ERROR>>", afterError);
-    throw new Error(message);
+    log.red.bold("! " + error.message + " !").error();
+    log.green(error.before).red(error.after).error();
+
+    return createErrorDocument(variant, options, error);
   }
   return json;
+}
+
+function createErrorDocument(variant, options, err) {
+
+  let doc = {
+    realm: options.realm.realm,
+    spec: { hints: ["section", "container"], children: [{ name: "header" }, { name: "message" }], labeledBy: "label" },
+    value: {
+      header: {
+        spec: { hints: ["header", "container"], children: [{ name: "label" }] },
+        value: {
+          label: {
+            spec: { hints: ["label", "text"] },
+            value: `Unable to export ${variant.template} to lynx format`
+          }
+        }
+      }
+    }
+  };
+
+  doc.value.message = createErrorDocumentSection("Error message", err.message);
+  if (err.stack) {
+    doc.value.stack = createErrorDocumentSection("Error stack", err.stack);
+    doc.spec.children.push({ name: "stack" });
+  }
+  if (err.snippet) {
+    doc.value.snippet = createErrorDocumentSection("YAML parse error details", `line ${err.parsedLine} near "${err.snippet}"`);
+    doc.spec.children.push({ name: "snippet" });
+  }
+  if (err.before) {
+    doc.value.before = createErrorDocumentSection("Content before JSON lint error", err.before);
+    doc.spec.children.push({ name: "before" });
+  }
+  if (err.after) {
+    doc.value.after = createErrorDocumentSection("Content after JSON lint error", err.after);
+    doc.spec.children.push({ name: "after" });
+  }
+  return JSON.stringify(doc);
+}
+
+function createErrorDocumentSection(label, content) {
+  return {
+    spec: { hints: ["section", "container"], children: [{ name: "header" }, { name: "contents" }], labeledBy: "label" },
+    header: {
+      spec: { hints: ["header", "container"], children: [{ name: "label" }] },
+      value: {
+        label: {
+          spec: { hints: ["label", "text"] },
+          value: label
+        }
+      }
+    },
+    contents: {
+      spec: { hints: ["text"] },
+      value: content
+    }
+  };
 }
 
 exports.one = transformVariantToLynx;
