@@ -6,6 +6,25 @@ const getRealmMetadata = require("../lib/metadata-realm");
 const titleCase = require("to-title-case");
 const log = require("logatim");
 
+function notifyMatchingRealms(matches) {
+  let result = matches.reduce((acc, realm) => {
+    acc.folders.push(realm.folder);
+    acc.variants = acc.variants.concat(realm.variants);
+    return acc;
+  }, { folders: [], variants: [] });
+
+  log.yellow(`Multiple folders detected with realm URI '${matches[0].url}' at paths\n\t'${result.folders.join("'\n\t'")}'`).warn();
+
+  let dupes = result.variants.reduce((acc, variant) => {
+    acc[variant.name] = variant.name in acc ? acc[variant.name] += 1 : 1;
+    return acc;
+  }, {});
+
+  Object.keys(dupes).forEach(key => {
+    if (dupes[key] > 1) log.red(`\tMultiple variants (${dupes[key]}) found with name '${key}'`).error();
+  });
+}
+
 function getPathSegments(realmURI) {
   return url.parse(realmURI).pathname.split("/").filter(segment => segment !== "");
 }
@@ -44,6 +63,8 @@ function reloadRealms(target, options) {
     realm.templates = realm.templates.map(template => expandTemplate(realm, template));
     realm.realms = realms.filter(isChildOfRealm(realm));
     realm.realms.forEach(child => child.parent = realm);
+    let matches = realms.filter(check => check.url === realm.url);
+    if (matches.length > 1) notifyMatchingRealms(matches);
   });
 
   target.length = 0;
