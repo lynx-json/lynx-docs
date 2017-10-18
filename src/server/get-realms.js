@@ -9,19 +9,17 @@ const log = require("logatim");
 function notifyMatchingRealms(matches) {
   let result = matches.reduce((acc, realm) => {
     acc.folders.push(realm.folder);
-    acc.variants = acc.variants.concat(realm.variants);
+    realm.variants.forEach(v => {
+      if (v.name in acc.variants) acc.variants[v.name] += 1;
+      else acc.variants[v.name] = 1;
+    });
     return acc;
-  }, { folders: [], variants: [] });
+  }, { folders: [], variants: {} });
 
   log.yellow(`Multiple folders detected with realm URI '${matches[0].url}' at paths\n\t'${result.folders.join("'\n\t'")}'`).warn();
 
-  let dupes = result.variants.reduce((acc, variant) => {
-    acc[variant.name] = variant.name in acc ? acc[variant.name] += 1 : 1;
-    return acc;
-  }, {});
-
-  Object.keys(dupes).forEach(key => {
-    if (dupes[key] > 1) log.red(`\tMultiple variants (${dupes[key]}) found with name '${key}'`).error();
+  Object.keys(result.variants).forEach(key => {
+    if (result.variants[key] > 1) log.red(`\tMultiple variants (${result.variants[key]}) found with name '${key}'`).error();
   });
 }
 
