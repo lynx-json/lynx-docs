@@ -42,8 +42,8 @@ module.exports = exports = function createRealmHandler(options) {
       res.write(templateToHandlebars(template.path, templateOptions, createFile));
       res.end();
     }
-
-    function serveVariant(variant, includeIndexHeader) {
+    
+    function serveTemplateDataVariant(variant, includeIndexHeader) {
       res.setHeader("Content-Type", "application/lynx+json");
       res.setHeader("Cache-control", "no-cache");
       if (includeIndexHeader) res.setHeader("X-Variant-Index", url.parse(req.url).pathname + "?variant=index");
@@ -52,6 +52,29 @@ module.exports = exports = function createRealmHandler(options) {
 
       res.write(variantToLynx(variant, variantOptions, createFile));
       res.end();
+    }
+    
+    function serveJavaScriptVariant(variant) {
+      var pkg = variant.js;
+      
+      if (pkg.indexOf(".") === 0) {
+        pkg = path.resolve(pkg);
+      }
+      
+      var handlerFactory = require(pkg);
+      
+      if (handlerFactory.nocache) {
+        delete require.cache[require.resolve(pkg)];
+      }
+      
+      var handler = handlerFactory(variant, realm);
+      handler(req, res, next);
+    }
+
+    function serveVariant(variant, includeIndexHeader) {
+      if (variant.template && variant.data) return serveTemplateDataVariant(variant, includeIndexHeader);
+      if (variant.js) return serveJavaScriptVariant(variant);
+      serveRealmIndex();
     }
 
     function serveRealmIndex() {
