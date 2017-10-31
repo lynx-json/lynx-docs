@@ -62,10 +62,7 @@ module.exports = exports = function createRealmHandler(options) {
       }
       
       var handlerFactory = require(pkg);
-      
-      if (handlerFactory.nocache) {
-        delete require.cache[require.resolve(pkg)];
-      }
+      delete require.cache[require.resolve(pkg)];
       
       var handler = handlerFactory(variant, realm);
       handler(req, res, next);
