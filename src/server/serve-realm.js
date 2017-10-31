@@ -5,6 +5,7 @@ const url = require("url");
 const path = require("path");
 const variantToLynx = require("../lib/export/variants-to-lynx").one;
 const templateToHandlebars = require("../lib/export/to-handlebars").one;
+const log = require("logatim");
 
 function createFile(path, content) {
   if (fs.existsSync(path)) return;
@@ -54,22 +55,29 @@ module.exports = exports = function createRealmHandler(options) {
     }
     
     function serveJavaScriptVariant(variant) {
-      var pkg = variant.js;
+      var javascriptModuleName = variant.jsmodule;
       
-      if (pkg.indexOf(".") === 0) {
-        pkg = path.resolve(pkg);
+      if (javascriptModuleName.indexOf(".") === 0) {
+        javascriptModuleName = path.resolve(javascriptModuleName);
       }
       
-      var handlerFactory = require(pkg);
-      delete require.cache[require.resolve(pkg)];
+      log.debug("Requiring JS variant module: ", javascriptModuleName);
+      var javascriptModule = require(javascriptModuleName);
+      delete require.cache[require.resolve(javascriptModuleName)];
       
+      log.debug("Getting JS variant handler factory function: ", variant.function || "default");
+      var handlerFactory = javascriptModule[variant.function] || javascriptModule;
+      
+      log.debug("Invoking JS variant handler factory function");
       var handler = handlerFactory(variant, realm);
+      
+      log.debug("Invoking JS variant handler");
       handler(req, res, next);
     }
 
     function serveVariant(variant) {
       if (variant.template && variant.data) return serveTemplateDataVariant(variant);
-      if (variant.js) return serveJavaScriptVariant(variant);
+      if (variant.jsmodule) return serveJavaScriptVariant(variant);
       serveRealmIndex();
     }
 
