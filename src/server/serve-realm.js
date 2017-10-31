@@ -43,10 +43,9 @@ module.exports = exports = function createRealmHandler(options) {
       res.end();
     }
     
-    function serveTemplateDataVariant(variant, includeIndexHeader) {
+    function serveTemplateDataVariant(variant) {
       res.setHeader("Content-Type", "application/lynx+json");
       res.setHeader("Cache-control", "no-cache");
-      if (includeIndexHeader) res.setHeader("X-Variant-Index", url.parse(req.url).pathname + "?variant=index");
 
       var variantOptions = Object.assign({}, options, { realm: realm });
 
@@ -68,8 +67,8 @@ module.exports = exports = function createRealmHandler(options) {
       handler(req, res, next);
     }
 
-    function serveVariant(variant, includeIndexHeader) {
-      if (variant.template && variant.data) return serveTemplateDataVariant(variant, includeIndexHeader);
+    function serveVariant(variant) {
+      if (variant.template && variant.data) return serveTemplateDataVariant(variant);
       if (variant.js) return serveJavaScriptVariant(variant);
       serveRealmIndex();
     }
