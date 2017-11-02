@@ -76,7 +76,7 @@ module.exports = exports = function createRealmHandler(options) {
     }
 
     function serveVariant(variant) {
-      if (variant.template && variant.data) return serveTemplateDataVariant(variant);
+      if (variant.template) return serveTemplateDataVariant(variant);
       if (variant.jsmodule) return serveJavaScriptVariant(variant);
       serveRealmIndex();
     }
