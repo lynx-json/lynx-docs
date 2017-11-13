@@ -5,6 +5,7 @@ const url = require("url");
 const path = require("path");
 const variantToLynx = require("../lib/export/variants-to-lynx").one;
 const templateToHandlebars = require("../lib/export/to-handlebars").one;
+const log = require("logatim");
 
 function createFile(path, content) {
   if (fs.existsSync(path)) return;
@@ -42,16 +43,42 @@ module.exports = exports = function createRealmHandler(options) {
       res.write(templateToHandlebars(template.path, templateOptions, createFile));
       res.end();
     }
-
-    function serveVariant(variant, includeIndexHeader) {
+    
+    function serveTemplateDataVariant(variant) {
       res.setHeader("Content-Type", "application/lynx+json");
       res.setHeader("Cache-control", "no-cache");
-      if (includeIndexHeader) res.setHeader("X-Variant-Index", url.parse(req.url).pathname + "?variant=index");
 
       var variantOptions = Object.assign({}, options, { realm: realm });
 
       res.write(variantToLynx(variant, variantOptions, createFile));
       res.end();
+    }
+    
+    function serveJavaScriptVariant(variant) {
+      var javascriptModuleName = variant.jsmodule;
+      
+      if (javascriptModuleName.indexOf(".") === 0) {
+        javascriptModuleName = path.resolve(javascriptModuleName);
+      }
+      
+      log.debug("Requiring JS variant module: ", javascriptModuleName);
+      var javascriptModule = require(javascriptModuleName);
+      delete require.cache[require.resolve(javascriptModuleName)];
+      
+      log.debug("Getting JS variant handler factory function: ", variant.function || "default");
+      var handlerFactory = javascriptModule[variant.function] || javascriptModule;
+      
+      log.debug("Invoking JS variant handler factory function");
+      var handler = handlerFactory(variant, realm);
+      
+      log.debug("Invoking JS variant handler");
+      handler(req, res, next);
+    }
+
+    function serveVariant(variant) {
+      if (variant.template) return serveTemplateDataVariant(variant);
+      if (variant.jsmodule) return serveJavaScriptVariant(variant);
+      serveRealmIndex();
     }
 
     function serveRealmIndex() {

@@ -39,7 +39,7 @@ function isChildOfRealm(parentRealm) {
 function expandVariant(realm, variant) {
   variant.title = variant.title || titleCase(variant.name);
   if (!variant.url) variant.url = realm.url + "?variant=" + encodeURIComponent(variant.name);
-  if (!variant.handlebarsUrl) variant.handlebarsUrl = variant.url + "&format=handlebars";
+  if (variant.template && variant.data && !variant.handlebarsUrl) variant.handlebarsUrl = variant.url + "&format=handlebars";
 }
 
 function expandTemplate(realm, template) {
