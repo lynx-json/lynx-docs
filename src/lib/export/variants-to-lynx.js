@@ -88,10 +88,6 @@ function createErrorDocument(variant, options, err) {
   };
 
   doc.value.message = createErrorDocumentSection("Error message", err.message);
-  if (err.stack) {
-    doc.value.stack = createErrorDocumentSection("Error stack", err.stack);
-    doc.spec.children.push({ name: "stack" });
-  }
   if (err.snippet) {
     doc.value.snippet = createErrorDocumentSection("YAML parse error details", `line ${err.parsedLine} near "${err.snippet}"`);
     doc.spec.children.push({ name: "snippet" });
@@ -107,6 +103,10 @@ function createErrorDocument(variant, options, err) {
   if (err.lynxValidation) {
     doc.value.lynxValidation = createErrorDocumentSection("Lynx validation errors", err.lynxValidation);
     doc.spec.children.push({ name: "lynxValidation" });
+  }
+  if (err.stack) {
+    doc.value.stack = createErrorDocumentSection("Error stack", err.stack);
+    doc.spec.children.push({ name: "stack" });
   }
   return JSON.stringify(doc);
 }
