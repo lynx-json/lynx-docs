@@ -9,6 +9,7 @@ const handlebars = require("handlebars");
 const jsonLint = require("json-lint");
 const types = require("../../types");
 const log = require("logatim");
+const validateLynxDocument = require("./lynx/validateDocument");
 
 handlebars.Utils.escapeExpression = function (toEscape) {
   if (toEscape === null || toEscape === undefined) return "";
@@ -57,6 +58,14 @@ function lintContent(json, variant, options) {
 
     return createErrorDocument(variant, options, error);
   }
+  let result = validateLynxDocument(JSON.parse(json) /*, domainSpecificHints */ );
+  if (!result.valid) {
+    let error = new Error(`Failed Lynx linting when data binding '${variant.data}'`);
+    error.lynxValidation = result.errors.map(e => {
+      return `Key: ${e.key}\nJSON:\n${e.json}\nErrors:\n${e.errors.join("\n")}`;
+    }).join("\n\n");
+    return createErrorDocument(variant, options, error);
+  }
   return json;
 }
 
@@ -94,6 +103,10 @@ function createErrorDocument(variant, options, err) {
   if (err.after) {
     doc.value.after = createErrorDocumentSection("Content after JSON lint error", err.after);
     doc.spec.children.push({ name: "after" });
+  }
+  if (err.lynxValidation) {
+    doc.value.lynxValidation = createErrorDocumentSection("Lynx validation errors", err.lynxValidation);
+    doc.spec.children.push({ name: "lynxValidation" });
   }
   return JSON.stringify(doc);
 }
