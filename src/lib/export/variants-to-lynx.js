@@ -62,7 +62,7 @@ function lintContent(json, variant, options) {
   if (!result.valid) {
     let error = new Error(`Failed Lynx linting when data binding '${variant.data}'`);
     error.lynxValidation = result.errors.map(e => {
-      return `Key: ${e.key}\nJSON:\n${e.json}\nErrors:\n${e.errors.join("\n")}`;
+      return `Key: ${e.key}\nErrors:\n• ${e.errors.join("\n• ")}\nJSON:\n${e.json}`;
     }).join("\n\n");
     return createErrorDocument(variant, options, error);
   }
