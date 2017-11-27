@@ -36,7 +36,7 @@ let tests = [{
     content: { src: ".", type: "text/plain", data: "Hello world" },
     expected: [
       "'content' value with an 'src' property must not have a 'data' property",
-      "'content' value with an 'data' property must not have an 'src' property"
+      "'content' value with a 'data' property must not have an 'src' property"
     ]
   },
   {

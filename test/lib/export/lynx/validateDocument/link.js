@@ -36,7 +36,7 @@ let tests = [{
     link: { href: ".", type: "text/plain", data: "Hello world" },
     expected: [
       "'link' value with an 'href' property must not have a 'data' property",
-      "'link' value with an 'data' property must not have an 'href' property"
+      "'link' value with a 'data' property must not have an 'href' property"
     ]
   },
   {
