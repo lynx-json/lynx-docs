@@ -3,7 +3,7 @@ const url = require("url");
 const contentTypeParser = require("content-type-parser");
 
 function validateSend(value, errors) {
-  if (value.send !== "change" || valeu.send !== "ready") errors.push("'send' must be either 'change' or 'ready'");
+  if (value.send !== "change" && value.send !== "ready") errors.push("'send' must be either 'change' or 'ready'");
 }
 
 function validateType(value, errors) {

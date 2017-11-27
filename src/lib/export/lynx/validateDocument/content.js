@@ -5,11 +5,11 @@ const contentTypeParser = require("content-type-parser");
 function validateData(value, errors) {
   if (value.src) errors.push("'content' value with an 'data' property must not have an 'src' property");
 
-  if (!value.data.type) return errors.push("'content' value with a 'data' property must have a 'type' property");
-  let parsed = contentTypeParser(value.data.type);
+  if (!value.type) return errors.push("'content' value with a 'data' property must have a 'type' property");
+  let parsed = contentTypeParser(value.type);
   if (!parsed) return errors.push("'type' must be a valid media type name");
-  if (parsed.subtype.indexOf("json") >= 0 && !types.isString(value.data)) errors.push("The value of 'data' must be a string if the 'type' is not application/json or a variant of application/json");
-  if (value.data.encoding && !(value.data.encoding === "utf-8" || value.data.encoding === "base64")) errors.push("'encoding' must be either 'utf-8' or 'base64'");
+  if (parsed.subtype.indexOf("json") < 0 && !types.isString(value.data)) errors.push("The value of 'data' must be a string if the 'type' is not application/json or a variant of application/json");
+  if (value.encoding && !(value.encoding === "utf-8" || value.encoding === "base64")) errors.push("'encoding' must be either 'utf-8' or 'base64'");
 }
 
 function validateSrc(value, errors) {
