@@ -68,18 +68,11 @@ module.exports = exports = function createRealmHandler(options) {
       log.debug("Getting JS variant handler factory function: ", variant.function || "default");
       var handlerFactory = javascriptModule[variant.function] || javascriptModule;
       
-      log.debug("Invoking JS variant handler factory function - FOFOOFOFOFOFO");
-      var util = {
-        getTemplateSource: function (pathToTemplate, format) {
-          var templateOptions = Object.assign({}, options, { realm: realm });
-          if (format) templateOptions.format = format;
-          return templateToHandlebars(pathToTemplate, templateOptions, createFile);
-        }
-      };
-      
-      var handler = handlerFactory(variant, realm, util);
+      log.debug("Invoking JS variant handler factory function");
+      var handler = handlerFactory(variant, realm);
       
       log.debug("Invoking JS variant handler");
+      res.serveVariant = serveTemplateDataVariant;
       handler(req, res, next);
     }
 
