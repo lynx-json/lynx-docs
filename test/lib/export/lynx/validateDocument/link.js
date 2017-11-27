@@ -26,7 +26,7 @@ let tests = [{
     expected: ["'link' value must be an object"]
   },
   {
-    description: "'link' with neither 'data' and 'href'",
+    description: "'link' with neither 'data' nor 'href'",
     should: "return errors",
     link: {},
     expected: ["'link' value must have an 'href' or 'data' property"]
@@ -78,7 +78,7 @@ let tests = [{
   {
     description: "'link' with base64 'encoding' ",
     should: "return no errors",
-    link: { data: "Hello world", type: "text/plain", encoding: "base64" },
+    link: { data: "SGVsbG8gV29ybGQ=", type: "text/plain", encoding: "base64" },
     expected: []
   },
   {

@@ -3,7 +3,7 @@ const url = require("url");
 const contentTypeParser = require("content-type-parser");
 
 function validateData(value, errors) {
-  if (value.src) errors.push("'content' value with an 'data' property must not have an 'src' property");
+  if (value.src) errors.push("'content' value with a 'data' property must not have an 'src' property");
 
   if (!value.type) return errors.push("'content' value with a 'data' property must have a 'type' property");
   let parsed = contentTypeParser(value.type);

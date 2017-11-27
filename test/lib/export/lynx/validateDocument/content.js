@@ -26,7 +26,7 @@ let tests = [{
     expected: ["'content' value must be an object"]
   },
   {
-    description: "'content' with neither 'data' and 'src'",
+    description: "'content' with neither 'data' nor 'src'",
     should: "return errors",
     content: {},
     expected: ["'content' value must have an 'src' or 'data' property"]
@@ -78,7 +78,7 @@ let tests = [{
   {
     description: "'content' with base64 'encoding' ",
     should: "return no errors",
-    content: { data: "Hello world", type: "text/plain", encoding: "base64" },
+    content: { data: "SGVsbG8gV29ybGQ=", type: "text/plain", encoding: "base64" },
     expected: []
   },
   {
