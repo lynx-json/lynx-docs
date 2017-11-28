@@ -12,7 +12,7 @@ let tests = [{
   {
     description: "no base hint",
     should: "return invalid",
-    document: { spec: { hints: ["foo"] }, value: null },
+    document: { spec: { hints: ["http://example.com/base-hint"] }, value: null },
     expected: {
       valid: false,
       errors: [{
@@ -20,7 +20,15 @@ let tests = [{
         errors: ["hints array must have a base hint as the last item"]
       }]
     }
+  },
+  {
+    description: "domain specific base hint",
+    should: "return valid",
+    document: { spec: { hints: ["http://example.com/base-hint"] }, value: null },
+    baseHints: ["http://example.com/base-hint"],
+    expected: { valid: true, errors: [] }
   }
+
 ];
 
 function getTests() {
@@ -30,7 +38,7 @@ function getTests() {
 
 function runTest(test) {
   let expected = test.expected;
-  let result = validateDocument(test.document);
+  let result = validateDocument(test.document, test.baseHints);
   result.errors = result.errors.map(e => { return { key: e.key, errors: e.errors }; });
   expect(result).to.deep.equal(expected);
 }

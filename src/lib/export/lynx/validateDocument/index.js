@@ -11,7 +11,6 @@ const validators = {
   submit: require("./submit")
 };
 
-//TODO: additional base hints from .lynxdocsrc
 const lynxBaseHints = ["text", "container", "form", "link", "submit", "content"];
 
 function createValidationError(key, jsValue, errors) {
@@ -20,7 +19,6 @@ function createValidationError(key, jsValue, errors) {
 
 function validateLynxDocument(document, domainSpecificBaseHints) {
   let baseHints = lynxBaseHints.concat(domainSpecificBaseHints || []);
-
   let validationErrors = traverse(document).reduce(function (acc, jsValue) {
     if (lynxHelpers.isLynxValue(jsValue)) {
       let hints = jsValue.spec.hints;

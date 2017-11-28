@@ -47,25 +47,33 @@ function transformVariantToLynx(variant, options, createFile) {
 }
 
 function lintContent(json, variant, options) {
-  let linted = jsonLint(json);
-  if (linted.error) {
-    let error = new Error(`Failed JSON linting when data binding '${variant.data}'`);
-    error.before = json.substr(0, linted.character - 1);
-    error.after = json.substr(linted.character - 1);
+  let linting = options.linting;
+  if (linting && linting.json) {
+    let linted = jsonLint(json);
+    if (linted.error) {
+      let error = new Error(`Failed JSON linting when data binding '${variant.data}'`);
+      error.before = json.substr(0, linted.character - 1);
+      error.after = json.substr(linted.character - 1);
 
-    log.red.bold("! " + error.message + " !").error();
-    log.green(error.before).red(error.after).error();
+      log.red.bold("! " + error.message + " !").error();
+      log.green(error.before).red(error.after).error();
 
-    return createErrorDocument(variant, options, error);
+      return createErrorDocument(variant, options, error);
+    }
   }
-  let result = validateLynxDocument(JSON.parse(json) /*, domainSpecificHints */ );
-  if (!result.valid) {
-    let error = new Error(`Failed Lynx linting when data binding '${variant.data}'`);
-    error.lynxValidation = result.errors.map(e => {
-      return `Key: ${e.key}\nErrors:\n• ${e.errors.join("\n• ")}\nJSON:\n${e.json}`;
-    }).join("\n\n");
-    return createErrorDocument(variant, options, error);
+
+  if (linting && linting.lynx) {
+    let baseHints = linting.lynx.baseHints || [];
+    let result = validateLynxDocument(JSON.parse(json), baseHints);
+    if (!result.valid) {
+      let error = new Error(`Failed Lynx linting when data binding '${variant.data}'`);
+      error.lynxValidation = result.errors.map(e => {
+        return `Key: ${e.key}\nErrors:\n• ${e.errors.join("\n• ")}\nJSON:\n${e.json}`;
+      }).join("\n\n");
+      return createErrorDocument(variant, options, error);
+    }
   }
+
   return json;
 }
 

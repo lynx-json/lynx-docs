@@ -18,6 +18,9 @@ function buildCommand(yargs) {
       alias: "l",
       describe: "Set console logging level (error|warn|info|debug|trace). [default 'error']"
     })
+    .option("linting", {
+      describe: "Lint json and lynx content (true, false). [default true]"
+    })
     .option("flatten", {
       describe: "Move spec object to parent spec object if possible. [default: false]",
       boolean: true
