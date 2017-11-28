@@ -10,7 +10,7 @@ const yaml = require("yamljs");
 const commonCli = require("../../src/cli/common");
 
 function defaultSettings(command) {
-  let settings = { _: [command], root: ["."], log: "error", flatten: false };
+  let settings = { _: [command], root: ["."], log: "error", flatten: false, linting: { json: true, lynx: true } };
   if (command === "export") {
     Object.assign(settings, { "output": "stdout", format: "handlebars" });
   } else {
@@ -207,6 +207,37 @@ describe("common cli module", function () {
       if (test.after) test.after();
       expect(test.input.log).to.equal(test.expected.log);
       expect(log.getLevel()).to.equal(test.expected.log.toUpperCase());
+    }
+
+    runTests(tests, runner);
+  });
+
+  describe("when normalizing linting", function () {
+    let tests = [{
+        description: "when no linting set",
+        should: "should set json and lynx linting to 'true'",
+        input: { _: ["export"] },
+        expected: { linting: { json: true, lynx: true } }
+      },
+      {
+        description: "when linting switch set to 'true'",
+        should: "should set json and lynx linting to 'true'",
+        input: { _: ["export"], linting: true },
+        expected: { linting: { json: true, lynx: true } }
+      },
+      {
+        description: "when linting switch set with 'false' value",
+        should: "should set json and lynx linting to 'false'",
+        input: { _: ["export"], linting: false },
+        expected: { linting: { json: false, lynx: false } }
+      }
+    ];
+
+    function runner(test) {
+      if (test.before) test.before();
+      commonCli(test.input);
+      if (test.after) test.after();
+      expect(test.input.linting).to.deep.equal(test.expected.linting);
     }
 
     runTests(tests, runner);

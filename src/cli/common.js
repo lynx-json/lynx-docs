@@ -11,6 +11,7 @@ function handleOptions(options) {
   processEnvironmentVariables(options); //fill in env values for empty switches
   applyDefaults(options); //apply defaults for empty switches
   normalizeLogging(options);
+  normalizeLinting(options);
   normalizeRoot(options);
   normalizeSpecHandling(options);
 
@@ -67,6 +68,11 @@ function applyRunControlToOptions(rc, options) {
   }
 
   Object.keys(rcOptions).forEach(key => setIfNotPresent(key, rcOptions[key]));
+}
+
+function normalizeLinting(options) {
+  if (options.linting === undefined || options.linting === true) options.linting = { json: true, lynx: true };
+  if (options.linting === false) options.linting = { json: false, lynx: false };
 }
 
 function normalizeLogging(options) {

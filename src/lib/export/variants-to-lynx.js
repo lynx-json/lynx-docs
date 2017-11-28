@@ -9,6 +9,7 @@ const handlebars = require("handlebars");
 const jsonLint = require("json-lint");
 const types = require("../../types");
 const log = require("logatim");
+const validateLynxDocument = require("./lynx/validateDocument");
 
 handlebars.Utils.escapeExpression = function (toEscape) {
   if (toEscape === null || toEscape === undefined) return "";
@@ -46,17 +47,33 @@ function transformVariantToLynx(variant, options, createFile) {
 }
 
 function lintContent(json, variant, options) {
-  let linted = jsonLint(json);
-  if (linted.error) {
-    let error = new Error(`Failed JSON linting when data binding '${variant.data}'`);
-    error.before = json.substr(0, linted.character - 1);
-    error.after = json.substr(linted.character - 1);
+  let linting = options.linting;
+  if (linting && linting.json) {
+    let linted = jsonLint(json);
+    if (linted.error) {
+      let error = new Error(`Failed JSON linting when data binding '${variant.data}'`);
+      error.before = json.substr(0, linted.character - 1);
+      error.after = json.substr(linted.character - 1);
 
-    log.red.bold("! " + error.message + " !").error();
-    log.green(error.before).red(error.after).error();
+      log.red.bold("! " + error.message + " !").error();
+      log.green(error.before).red(error.after).error();
 
-    return createErrorDocument(variant, options, error);
+      return createErrorDocument(variant, options, error);
+    }
   }
+
+  if (linting && linting.lynx) {
+    let baseHints = linting.lynx.baseHints || [];
+    let result = validateLynxDocument(JSON.parse(json), baseHints);
+    if (!result.valid) {
+      let error = new Error(`Failed Lynx linting when data binding '${variant.data}'`);
+      error.lynxValidation = result.errors.map(e => {
+        return `Key: ${e.key}\nErrors:\n• ${e.errors.join("\n• ")}\nJSON:\n${e.json}`;
+      }).join("\n\n");
+      return createErrorDocument(variant, options, error);
+    }
+  }
+
   return json;
 }
 
@@ -79,10 +96,6 @@ function createErrorDocument(variant, options, err) {
   };
 
   doc.value.message = createErrorDocumentSection("Error message", err.message);
-  if (err.stack) {
-    doc.value.stack = createErrorDocumentSection("Error stack", err.stack);
-    doc.spec.children.push({ name: "stack" });
-  }
   if (err.snippet) {
     doc.value.snippet = createErrorDocumentSection("YAML parse error details", `line ${err.parsedLine} near "${err.snippet}"`);
     doc.spec.children.push({ name: "snippet" });
@@ -94,6 +107,14 @@ function createErrorDocument(variant, options, err) {
   if (err.after) {
     doc.value.after = createErrorDocumentSection("Content after JSON lint error", err.after);
     doc.spec.children.push({ name: "after" });
+  }
+  if (err.lynxValidation) {
+    doc.value.lynxValidation = createErrorDocumentSection("Lynx validation errors", err.lynxValidation);
+    doc.spec.children.push({ name: "lynxValidation" });
+  }
+  if (err.stack) {
+    doc.value.stack = createErrorDocumentSection("Error stack", err.stack);
+    doc.spec.children.push({ name: "stack" });
   }
   return JSON.stringify(doc);
 }
