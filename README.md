@@ -27,7 +27,7 @@ lynx-docs is an [NPM package](https://www.npmjs.com/package/@lynx-json/lynx-docs
 
 ## Docs and Community
 
-- lynx-docs [wiki](./wiki)
+- lynx-docs [wiki](https://github.com/lynx-json/lynx-docs/wiki)
 - application/lynx+json [media type specification](http://lynx-json.org/specification/)
 
 ## Quick start
