@@ -12,20 +12,18 @@
 
 Use `lynx-docs --help` to get help or review [command line parameters reference](https://github.com/lynx-json/lynx-docs/wiki/Command-Line-Parameters)
 
-## Philosophy
+## Origin
 
-Lynx ([application/lynx+json](http://lynx-json.org/specification/)) is a hypertext media type that was created to fit a perceived space between data formats with no connections (.json, .xml, etc.) and display formats (HTML, iOS, Android, etc.). A primary goal of Lynx is to separate process (hypertext) and information (data, metadata) from display, thereby allowing different display contexts (web, mobile, desktop, other) to present the information in a way appropriate for that medium. The separation further allows for the process and information to change separately from the display.
+lynx-docs is an [NPM package](https://www.npmjs.com/package/@lynx-json/lynx-docs) we made to help us with the following:
 
-lynx-docs assists in creating application/lynx+json documents, the various states of those documents, and the connections between them.
+* Writing templates for [Lynx documents](http://lynx-json.org/specification/) (or any JSON document) using a [specific YAML syntax](https://github.com/lynx-json/lynx-docs/wiki/dynamic-content).
+* Exporting those templates to another template format via the [`export` command](https://github.com/lynx-json/lynx-docs/wiki/Command-Line-Parameters#export-command-parameters) (currently we only support exporting the YAML templates to Handlebars).
+* Viewing those templates in a web browser via the [`start` command](https://github.com/lynx-json/lynx-docs/wiki/Command-Line-Parameters#start-command-parameters).
 
-## Features
-- Model and understand an entire application before incurring the cost of building a dynamic server or integrating back-end systems.
-- Create templates and mock data that results in documents users will interact with using ONLY the file system.
-- Create multiple mock data sources for each template to understand all states of an application.
-- Move quickly to the dynamic application.
-  - Templates are exported and used directly on a dynamic server ... no translation. Design artifacts are run-time artifacts.
-  - Mock data identifies data requirements the dynamic server needs to fulfill. 
-- Cheaply, quickly, and easily experiment with different application flows.
+## Benefits
+
+* a better templating language for JSON templates - we didn't find a templating language that worked well with JSON, so we made our own on top of YAML.
+* a pre-built web server - verify your static files, templates, forms, and links before you begin to write your real web app.
 
 ## Docs and Community
 
