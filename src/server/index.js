@@ -1,5 +1,6 @@
 "use strict";
 
+const path = require("path");
 const http = require("http");
 const url = require("url");
 const getRealms = require("./get-realms");
@@ -61,12 +62,24 @@ function startServer(options) {
   var handlers = [
     addRequestContext,
     addErrorHandler,
-    serveCors(options),
+    serveCors(options)
+  ];
+  
+  if (Array.isArray(options.handlers)) {
+    options.handlers.forEach(function (handler) {
+      if (handler.indexOf(".") === 0) {
+        handler = path.resolve(handler);
+      }
+      handlers.push(require(handler));
+    });
+  }
+  
+  handlers = handlers.concat([
     serveMeta(options),
     searchMeta(options),
     serveRealm(options),
     serveStatic(options)
-  ];
+  ]);
 
   var handler = handlers.reverse().reduce(reduction, serveNotFound);
   var server = http.createServer(handler).listen(port);
