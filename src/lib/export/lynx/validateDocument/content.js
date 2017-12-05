@@ -27,7 +27,6 @@ function validateContent(value) {
   if (types.isNull(value)) return [];
   if (!types.isObject(value)) return ["'content' value must be an object"];
   let errors = [];
-  if (!value.src && !value.data) errors.push("'content' value must have an 'src' or 'data' property");
   if (value.src) validateSrc(value, errors);
   if (value.data) validateData(value, errors);
   return errors;
