@@ -26,11 +26,6 @@ let tests = [{
     expected: ["'content' value must be an object"]
   },
   {
-    description: "'content' with neither 'data' nor 'src'",
-    should: "return errors",
-    content: {},
-    expected: ["'content' value must have an 'src' or 'data' property"]
-  }, {
     description: "'content' with 'data' and 'src'",
     should: "return errors",
     content: { src: ".", type: "text/plain", data: "Hello world" },
