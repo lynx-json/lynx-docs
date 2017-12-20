@@ -56,7 +56,7 @@ function reloadRealms(target, options) {
 
   realms.forEach(realm => {
     realm.url = realm.url || url.parse(realm.realm).pathname;
-    realm.metaURL = "/meta/?realm=" + realm.realm;
+    realm.metaURL = "/meta/realm/?uri=" + realm.realm;
     realm.variants.forEach(variant => expandVariant(realm, variant));
     realm.templates = realm.templates.map(template => expandTemplate(realm, template));
     realm.realms = realms.filter(isChildOfRealm(realm));

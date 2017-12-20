@@ -12,28 +12,19 @@ function createFile(path, content) {
   fs.writeFileSync(path, content);
 }
 
-function redirectToRealmIndex(req, res, next) {
-  var realm = req.realms[0];
-  if (!realm) return next();
-
+function redirectToSearch(req, res, next) {
   var headers = {
     "Content-Type": "text/plain",
-    "Location": realm.url,
+    "Location": "/meta/search/?q=" + url.parse(req.url).pathname,
     "Cache-control": "no-cache"
   };
   res.writeHead(301, headers);
-  res.end("Redirecting to realm index");
+  res.end("Redirecting to search");
 }
 
 module.exports = exports = function createRealmHandler(options) {
   return function (req, res, next) {
-    var realm = req.realms.find(r => url.parse(r.realm).pathname === url.parse(req.url).pathname);
-
-    if (!realm) {
-      if (req.url === "/" || req.url === "") return redirectToRealmIndex(req, res, next);
-      return next();
-    }
-
+    
     function serveTemplate(template) {
       res.setHeader("Content-Type", "text/plain");
       res.setHeader("Cache-control", "no-cache");
@@ -79,26 +70,69 @@ module.exports = exports = function createRealmHandler(options) {
     function serveVariant(variant) {
       if (variant.template) return serveTemplateDataVariant(variant);
       if (variant.jsmodule) return serveJavaScriptVariant(variant);
-      serveRealmIndex();
+      serveVariantIndexForRealms([realm]);
     }
-
-    function serveRealmIndex() {
+    
+    function reduceToResults(accumulator, currentRealm) {
+      accumulator.push({
+        icon: "/meta/icons/meta-here.svg",
+        title: currentRealm.title || "Untitled",
+        url: currentRealm.metaURL,
+        details: [ `realm: ${currentRealm.realm}` ]
+      });
+      
+      currentRealm.variants.forEach(function (currentVariant) {
+        accumulator.push({
+          icon: "/meta/icons/app.svg",
+          title: currentVariant.title || "Untitled",
+          url: currentVariant.url
+        });
+      });
+      
+      return accumulator;
+    }
+    
+    function serveVariantIndexForRealms(realms) {
       serveVariant({
-        template: path.join(__dirname, "realm-index.lynx.yml"),
-        data: realm
+        template: { ">.meta.variants": null },
+        data: {
+          realm: realms[0].realm,
+          pageHeading: "Choose a Variant",
+          resultsHeading: "",
+          results: realms.reduce(reduceToResults, [])
+        }
       });
     }
+    
+    var realm, realms = req.realms.filter(r => url.parse(r.realm).pathname === url.parse(req.url).pathname);
 
-    var template = req.query.template && realm.templates.find(t => t.path === req.query.template);
-    if (template) {
-      return serveTemplate(template);
+    if (realms.length === 0) {
+      if (req.url === "/" || req.url === "") return redirectToSearch(req, res, next);
+      return next();
     }
-
+    
+    if (req.query.template) {
+      var template = realms.reduce(function (acc, r) {  
+        if (acc) return acc;
+        return r.templates.find(t => t.path === req.query.template);
+      }, null);
+      
+      if (template) {
+        return serveTemplate(template);
+      }  
+    }
+    
+    if (realms.length > 1) {
+      return serveVariantIndexForRealms(realms);
+    } else {
+      realm = realms[0];
+    }
+    
     var variantName = req.query.variant || "default";
     var variant = realm.variants.find(v => v.name === variantName || v.content !== undefined);
 
     if (variantName === "index" || !variant) {
-      return serveRealmIndex();
+      return serveVariantIndexForRealms([realm]);
     }
 
     if (variant.content) {

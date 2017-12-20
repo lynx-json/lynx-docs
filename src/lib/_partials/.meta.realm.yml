@@ -1,0 +1,42 @@
+realm: http://bestbuy.com/retail/oms/hd/
+">container":
+  spec.hints: [ http://lynx-json.org/docs/realm-details-page, http://lynx-json.org/docs/page, container ]
+  spec.labeledBy: label
+  header>:
+    icon-lynx>:
+    label>: 
+      value<pageHeading:
+    search>link:
+      label>: Search
+      href: /meta/search/
+  description>text:
+    value<description:
+  results>table:
+    - ">header":
+        label>:
+          value<resultsHeading:
+    - "^results":
+        ">group":
+          "text>": No data
+      "@results":
+        ">group":
+          icon:
+            "#icon":
+              ">icon":
+                src<.:
+            "^icon":
+              ">text": ""
+          details>list:
+            - "#url":
+                ">header":
+                    link>:
+                      label>:
+                        value<../title:
+                      href<.:
+              "^url":
+                ">header":
+                  label>:
+                    value<title:
+            - "^details>text": ""
+              "@details>text":
+                value<.:

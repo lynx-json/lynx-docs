@@ -9,6 +9,7 @@ const serveStatic = require("./serve-static");
 const serveRealm = require("./serve-realm");
 const searchMeta = require("./meta/search-meta");
 const serveMeta = require("./meta/serve-meta");
+const serveImages = require("./serve-images");
 const log = require("logatim");
 
 function serveNotFound(req, res) {
@@ -75,6 +76,7 @@ function startServer(options) {
   }
   
   handlers = handlers.concat([
+    serveImages,
     serveMeta(options),
     searchMeta(options),
     serveRealm(options),
