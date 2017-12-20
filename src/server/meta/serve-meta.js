@@ -1,47 +1,95 @@
 const path = require("path");
 const variantToLynx = require("../../lib/export/variants-to-lynx").one;
 const url = require("url");
+const metaUtil = require("./meta-util");
 
 module.exports = exports = function createMetaHandler(options) {
   return function (req, res, next) {
-    if (req.pathname !== "/meta/") return next();
-
-    var realm = req.realms.find(r => r.realm === req.query.realm);
-    // var metaRealm = req.realms.find(r => url.parse(r.realm).pathname === url.parse(req.url).pathname);
-
-    if (!realm) return next();
-
     function serveVariant(variant) {
       res.setHeader("Content-Type", "application/lynx+json");
       res.setHeader("Cache-control", "no-cache");
 
-      var metaRealm = Object.assign({}, realm, { realm: "http://lynx-json.org/docs/meta/" });
+      var metaRealm = Object.assign({}, realm, { realm: "http://lynx-json.org/docs/meta/realm/" });
       var variantOptions = Object.assign({}, options, { realm: metaRealm, spec: undefined });
 
       res.write(variantToLynx(variant, variantOptions));
       res.end();
     }
 
-    function convertRealmForTemplate() { //need this to break circular references
-      function getRealmData(realm) {
-        let keep = ["realm", "url", "metaURL"];
-        let result = {};
-        keep.forEach(key => result[key] = realm[key]);
-        return result;
+    function createResults(realm) {
+      function mapRealm(r, icon) {
+        return {
+          icon: icon,
+          title: r.title || "Untitled",
+          url: r.metaURL,
+          details: [ `realm: ${r.realm}` ]
+        };
       }
-
-      let result = Object.assign({}, realm);
-      if (realm.parent) result.parent = getRealmData(realm.parent);
-      if (realm.realms) result.realms = realm.realms.map(getRealmData);
+      
+      var result = [];
+      
+      realm.variants.forEach(function (variant) {
+        result.push({
+          icon: "/meta/icons/app.svg",
+          title: variant.title || "Untitled",
+          url: variant.url,
+          details: metaUtil.getObjectDetails(variant, metaUtil.variantDetailKeys)
+        });
+      });
+      
+      result.push({
+        icon: "/meta/icons/app.svg",
+        title: "View All Variants",
+        url: realm.url + "?variant=index"
+      });
+      
+      if (realm.parent) {
+        result.push(mapRealm(realm.parent, "/meta/icons/meta-up.svg"));
+      }
+      
+      if (realm.realms) {
+        realm.realms.forEach(function (child) {
+          result.push(mapRealm(child, "/meta/icons/meta-down.svg"));
+        });
+      }
+      
       return result;
     }
+    
+    if (req.pathname !== "/meta/realm/") return next();
 
-    let template = { ">.meta.realm": convertRealmForTemplate() };
+    var realms = req.realms.filter(r => r.realm === req.query.uri);
+
+    if (realms.length === 0) return next();
+    
+    var pageHeading, description, resultsHeading, results;
+    
+    if (realms.length > 1) {
+      pageHeading = "Choose a Realm (Not Implemented Yet)";
+      resultsHeading = "Realms";
+      description = `Multiple realms were found with the same realm URI: '${realms[0].realm}'`;
+      // TODO: handle a request for realm metadata when more than one 
+      // realm of info shares the same realm URI
+      results = [];
+    } else {
+      var realm = realms[0];
+      var realmTitle = realm.title || "Untitled";
+      pageHeading = `Details for Realm '${realmTitle}'`;
+      results = createResults(realm);
+    }
+
+    let template = { ">.meta.realm": null };
 
     var variant = {
       template: template,
-      data: realm
+      data: {
+        pageHeading: pageHeading,
+        description: description,
+        resultsHeading: resultsHeading,
+        results: results
+      }
     };
+    
     serveVariant(variant);
   };
 };

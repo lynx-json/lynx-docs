@@ -1,0 +1,47 @@
+">container":
+  spec.hints: [ http://lynx-json.org/docs/search-page, http://lynx-json.org/docs/page, container ]
+  spec.labeledBy: label
+  header>:
+    icon-lynx>:
+    label>: 
+      value<pageHeading:
+  description>text:
+    value<description:
+  searchForm>form:
+    searchQuery>list:
+      label>: Query
+      query>line:
+        spec.input: q
+        value<q: ""
+    submit>:
+      label>: Search
+      action: .
+  results>table:
+    - ">header":
+        label>:
+          value<resultsHeading:
+    - "^results":
+        ">group":
+          "text>": No results
+      "@results":
+        ">group":
+          icon:
+            "#icon":
+              ">icon":
+                src<.:
+            "^icon":
+              ">text": ""
+          details>list:
+            - "#url":
+                ">header":
+                    link>:
+                      label>:
+                        value<../title:
+                      href<.:
+              "^url":
+                ">header":
+                  label>:
+                    value<title:
+            - "^details>text": ""
+              "@details>text":
+                value<.:
