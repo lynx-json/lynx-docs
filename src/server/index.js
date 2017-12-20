@@ -12,6 +12,7 @@ const serveMeta = require("./meta/serve-meta");
 const serveLynxIcon = require("./serve-lynx-icon");
 const serveFavIcon = require("./serve-favicon");
 const serveMetaIcon = require("./meta/serve-meta-icon");
+const serveMetaHereIcon = require("./meta/serve-meta-here-icon");
 const serveMetaUpIcon = require("./meta/serve-meta-up-icon");
 const serveMetaDownIcon = require("./meta/serve-meta-down-icon");
 const serveAppIcon = require("./meta/serve-app-icon");
@@ -84,6 +85,7 @@ function startServer(options) {
     serveLynxIcon,
     serveFavIcon,
     serveMetaIcon,
+    serveMetaHereIcon,
     serveMetaUpIcon,
     serveMetaDownIcon,
     serveAppIcon,

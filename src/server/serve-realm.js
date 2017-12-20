@@ -75,7 +75,7 @@ module.exports = exports = function createRealmHandler(options) {
     
     function reduceToResults(accumulator, currentRealm) {
       accumulator.push({
-        icon: "/meta/icons/meta.svg",
+        icon: "/meta/icons/meta-here.svg",
         title: currentRealm.title || "Untitled",
         url: currentRealm.metaURL,
         details: [ `realm: ${currentRealm.realm}` ]
@@ -104,17 +104,17 @@ module.exports = exports = function createRealmHandler(options) {
       });
     }
     
-    var realm = req.realms.filter(r => url.parse(r.realm).pathname === url.parse(req.url).pathname);
+    var realm, realms = req.realms.filter(r => url.parse(r.realm).pathname === url.parse(req.url).pathname);
 
-    if (realm.length === 0) {
+    if (realms.length === 0) {
       if (req.url === "/" || req.url === "") return redirectToSearch(req, res, next);
       return next();
     }
     
-    if (realm.length > 1) {
-      return serveVariantIndexForRealms(realm);
+    if (realms.length > 1) {
+      return serveVariantIndexForRealms(realms);
     } else {
-      realm = realm[0];
+      realm = realms[0];
     }
 
     var template = req.query.template && realm.templates.find(t => t.path === req.query.template);
