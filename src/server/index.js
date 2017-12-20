@@ -9,13 +9,7 @@ const serveStatic = require("./serve-static");
 const serveRealm = require("./serve-realm");
 const searchMeta = require("./meta/search-meta");
 const serveMeta = require("./meta/serve-meta");
-const serveLynxIcon = require("./serve-lynx-icon");
-const serveFavIcon = require("./serve-favicon");
-const serveMetaIcon = require("./meta/serve-meta-icon");
-const serveMetaHereIcon = require("./meta/serve-meta-here-icon");
-const serveMetaUpIcon = require("./meta/serve-meta-up-icon");
-const serveMetaDownIcon = require("./meta/serve-meta-down-icon");
-const serveAppIcon = require("./meta/serve-app-icon");
+const serveImages = require("./serve-images");
 const log = require("logatim");
 
 function serveNotFound(req, res) {
@@ -82,13 +76,7 @@ function startServer(options) {
   }
   
   handlers = handlers.concat([
-    serveLynxIcon,
-    serveFavIcon,
-    serveMetaIcon,
-    serveMetaHereIcon,
-    serveMetaUpIcon,
-    serveMetaDownIcon,
-    serveAppIcon,
+    serveImages,
     serveMeta(options),
     searchMeta(options),
     serveRealm(options),

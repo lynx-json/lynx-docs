@@ -111,17 +111,23 @@ module.exports = exports = function createRealmHandler(options) {
       return next();
     }
     
+    if (req.query.template) {
+      var template = realms.reduce(function (acc, r) {  
+        if (acc) return acc;
+        return r.templates.find(t => t.path === req.query.template);
+      }, null);
+      
+      if (template) {
+        return serveTemplate(template);
+      }  
+    }
+    
     if (realms.length > 1) {
       return serveVariantIndexForRealms(realms);
     } else {
       realm = realms[0];
     }
-
-    var template = req.query.template && realm.templates.find(t => t.path === req.query.template);
-    if (template) {
-      return serveTemplate(template);
-    }
-
+    
     var variantName = req.query.variant || "default";
     var variant = realm.variants.find(v => v.name === variantName || v.content !== undefined);
 

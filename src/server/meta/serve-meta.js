@@ -55,6 +55,17 @@ module.exports = exports = function createMetaHandler(options) {
           results.push(mapRealm(child, "/meta/icons/meta-down.svg"));
         });
       }
+      
+      if (realm.templates) {
+        realm.templates.forEach(function (template) {
+          results.push({
+            icon: "/meta/icons/template.svg",
+            title: template.title || "Untitled",
+            url: template.url,
+            details: [ `path: ${template.path}` ]
+          });
+        });
+      }
     }
     
     if (req.pathname !== "/meta/realm/") return next();
