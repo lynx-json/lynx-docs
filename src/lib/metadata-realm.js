@@ -149,7 +149,7 @@ function resolvePaths(realmObj, folder) {
 }
 
 function isTemplateFile(pathToFile) {
-  return pathToFile.match(/\.lynx\.yml$/);
+  return pathToFile.match(/\.(lynx|template)\.yml$/);
 }
 
 function isDataFile(pathToFile) {

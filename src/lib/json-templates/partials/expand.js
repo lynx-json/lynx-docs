@@ -1,10 +1,16 @@
 "use strict";
 
 const url = require("url");
+const path = require("path");
 const traverse = require("traverse");
 const templateKey = require("../template-key");
 const expandTokens = require("../expand-tokens");
 const types = require("../../../types");
+
+function calculateParentPath(child) {
+  if (!child) return child;
+  return path.join(child, "../");
+}
 
 function calculatePartialUrl(templatePath, partialName) {
   if (!partialName) throw Error("partialName is required to calculate a partialUrl");
@@ -17,11 +23,12 @@ function calculatePartialUrl(templatePath, partialName) {
 function expandPartials(template, resolvePartial, templatePath) {
   return traverse(template).map(function (value) {
     if (!this.keys || types.isArray(value)) return; //no keys that contain partial references
+    let searchPath = templatePath;
 
     //need to create the functions outside the while loop
-    let processPartialMeta = (meta, parameters) => {
-      if (meta.name) throw Error("Template needs be expanded using 'expand-tokens' module for expanding partials.");
-      let partialUrl = exports.calculatePartialUrl(templatePath, meta.partial.variable);
+    let processPartialMeta = (meta) => {
+      if (meta.name) throw Error("Template needs be expanded using 'expand-tokens' module before expanding partials.");
+      let partialUrl = exports.calculatePartialUrl(searchPath, meta.partial.variable);
       let processPartial = resolvePartial(partialUrl);
       let partial = processPartial(result[meta.source]);
       let expanded = expandTokens.expand(partial);
@@ -43,6 +50,7 @@ function expandPartials(template, resolvePartial, templatePath) {
       partialMetas.forEach(processPartialMeta);
       this.update(result);
       keys = types.isObject(result) && Object.keys(result);
+      searchPath = calculateParentPath(searchPath);
     }
   });
 }

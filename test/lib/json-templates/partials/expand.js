@@ -16,12 +16,30 @@ describe("expand partials module", function () {
         expected: { foo: "Foo" }
       },
       {
-        description: "verifying resolve called with template url",
-        template: { foo: "Foo" },
+        description: "verifying resolve called with url calculated from template path",
+        template: { foo: { ">p": "Foo" } },
         expected: { foo: "Foo" },
+        templatePath: "a/b/",
         resolvePartial: function (partialUrl) {
-          expect(partialUrl).to.not.be.null();
+          expect(partialUrl).to.equal("a/b/?partial=p");
           return (value) => value;
+        }
+      },
+      {
+        description: "verifying partial overriding partial can call overridden partial",
+        template: { ">p": { ">p": { ">p": "A value" } } },
+        expected: "A value created by calling overridden partials",
+        templatePath: "a/b/c/",
+        resolvePartial: function (partialUrl) {
+          return (value) => {
+            if (partialUrl === "a/b/c/?partial=p") return value;
+            if (partialUrl === "a/b/?partial=p") {
+              value[">p"] += " created by calling";
+              return value;
+            }
+            if (partialUrl === "a/?partial=p") return value += " overridden partials";
+            throw "Unexpected partial url " + partialUrl;
+          };
         }
       },
       {
