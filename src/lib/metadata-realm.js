@@ -251,7 +251,7 @@ function aggregateDataFiles(pathToDir, dataFiles) {
 function isDataFileForTemplate(dataFile, templateFile) {
   if (dataFile === templateFile) return false;
 
-  return getTemplateFileName(dataFile) === getTemplateFileName(templateFile);
+  return getTemplateFileName(dataFile) === getTemplateFileName(templateFile) && isDataFile(dataFile);
 }
 
 function createVariant(templateFile, dataFile) {

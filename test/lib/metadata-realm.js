@@ -108,6 +108,43 @@ var tests = [{
     ]
   },
   {
+    description: "a folder with one template, one data file and child realm",
+    root: "/root",
+    fs: {
+      dirs: {
+        "/root": ["default.lynx.yml", "default.data.yml"],
+        "/root/default": []
+      },
+      files: {
+        "/root/default.lynx.yml": null,
+        "/root/default.data.yml": null
+      }
+    },
+    assertions: [
+      countOf(1),
+      containsRealm("/"),
+      containsVariant("/", "default", "/root/default.lynx.yml", "/root/default.data.yml")
+    ]
+  },
+  {
+    description: "a folder with one template and child realm",
+    root: "/root",
+    fs: {
+      dirs: {
+        "/root": ["default.lynx.yml"],
+        "/root/default": []
+      },
+      files: {
+        "/root/default.lynx.yml": null
+      }
+    },
+    assertions: [
+      countOf(1),
+      containsRealm("/"),
+      containsVariant("/", "default", "/root/default.lynx.yml")
+    ]
+  },
+  {
     description: "a folder with one template (.template.yml) and one data file",
     root: "/root",
     fs: {
