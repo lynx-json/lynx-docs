@@ -8,6 +8,7 @@ var partialsTests = [
   require("./card"),
   require("./complement"),
   require("./content"),
+  require("./image"),
   require("./form"),
   require("./group"),
   require("./link"),
