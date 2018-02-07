@@ -24,7 +24,7 @@ function redirectToSearch(req, res, next) {
 
 module.exports = exports = function createRealmHandler(options) {
   return function (req, res, next) {
-    
+
     function serveTemplate(template) {
       res.setHeader("Content-Type", "text/plain");
       res.setHeader("Cache-control", "no-cache");
@@ -34,7 +34,7 @@ module.exports = exports = function createRealmHandler(options) {
       res.write(templateToHandlebars(template.path, templateOptions, createFile));
       res.end();
     }
-    
+
     function serveTemplateDataVariant(variant) {
       res.setHeader("Content-Type", "application/lynx+json");
       res.setHeader("Cache-control", "no-cache");
@@ -44,24 +44,24 @@ module.exports = exports = function createRealmHandler(options) {
       res.write(variantToLynx(variant, variantOptions, createFile));
       res.end();
     }
-    
+
     function serveJavaScriptVariant(variant) {
       var javascriptModuleName = variant.jsmodule;
-      
+
       if (javascriptModuleName.indexOf(".") === 0) {
         javascriptModuleName = path.resolve(javascriptModuleName);
       }
-      
+
       log.debug("Requiring JS variant module: ", javascriptModuleName);
       var javascriptModule = require(javascriptModuleName);
       delete require.cache[require.resolve(javascriptModuleName)];
-      
+
       log.debug("Getting JS variant handler factory function: ", variant.function || "default");
       var handlerFactory = javascriptModule[variant.function] || javascriptModule;
-      
+
       log.debug("Invoking JS variant handler factory function");
       var handler = handlerFactory(variant, realm);
-      
+
       log.debug("Invoking JS variant handler");
       res.serveVariant = serveTemplateDataVariant;
       handler(req, res, next);
@@ -72,7 +72,7 @@ module.exports = exports = function createRealmHandler(options) {
       if (variant.jsmodule) return serveJavaScriptVariant(variant);
       serveVariantIndexForRealms([realm]);
     }
-    
+
     function reduceToResults(accumulator, currentRealm) {
       accumulator.push({
         icon: "/meta/icons/meta-here.svg",
@@ -80,7 +80,7 @@ module.exports = exports = function createRealmHandler(options) {
         url: currentRealm.metaURL,
         details: [ `realm: ${currentRealm.realm}` ]
       });
-      
+
       currentRealm.variants.forEach(function (currentVariant) {
         accumulator.push({
           icon: "/meta/icons/app.svg",
@@ -88,10 +88,10 @@ module.exports = exports = function createRealmHandler(options) {
           url: currentVariant.url
         });
       });
-      
+
       return accumulator;
     }
-    
+
     function serveVariantIndexForRealms(realms) {
       serveVariant({
         template: { ">.meta.variants": null },
@@ -103,31 +103,31 @@ module.exports = exports = function createRealmHandler(options) {
         }
       });
     }
-    
+
     var realm, realms = req.realms.filter(r => url.parse(r.realm).pathname === url.parse(req.url).pathname);
 
     if (realms.length === 0) {
       if (req.url === "/" || req.url === "") return redirectToSearch(req, res, next);
       return next();
     }
-    
+
     if (req.query.template) {
-      var template = realms.reduce(function (acc, r) {  
+      var template = realms.reduce(function (acc, r) {
         if (acc) return acc;
         return r.templates.find(t => t.path === req.query.template);
       }, null);
-      
+
       if (template) {
         return serveTemplate(template);
-      }  
+      }
     }
-    
+
     if (realms.length > 1) {
       return serveVariantIndexForRealms(realms);
     } else {
       realm = realms[0];
     }
-    
+
     var variantName = req.query.variant || "default";
     var variant = realm.variants.find(v => v.name === variantName || v.content !== undefined);
 

@@ -1,0 +1,16 @@
+'>header':
+  spec.hints: [ banner, header, container ]
+  spec.labeledBy: appLabel
+  for: http://lynx-json.org/docs/
+  primaryColor: '#003b64'
+  secondaryColor: '#642300'
+  icon-lynx>:
+  appLabel>label: Lynx Docs
+  search>link:
+    icon>image:
+      src: /meta/icons/search.svg
+      type: image/svg+xml
+      alt: A magnifying glass
+      width: 24
+      height: 24
+    href: /meta/search/

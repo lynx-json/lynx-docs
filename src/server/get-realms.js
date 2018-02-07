@@ -37,7 +37,12 @@ function isChildOfRealm(parentRealm) {
 }
 
 function expandVariant(realm, variant) {
-  variant.title = variant.title || titleCase(variant.name);
+  variant.title = variant.title || variant.name;
+
+  if (variant.template && !variant.title) {
+    variant.title = titleCase(variant.name);
+  }
+
   if (!variant.url) variant.url = realm.url + "?variant=" + encodeURIComponent(variant.name);
   if (variant.template && variant.data && !variant.handlebarsUrl) variant.handlebarsUrl = variant.url + "&format=handlebars";
 }

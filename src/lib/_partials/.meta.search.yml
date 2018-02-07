@@ -1,9 +1,9 @@
-">container":
+focus: query
+">.meta.page":
   spec.hints: [ http://lynx-json.org/docs/search-page, http://lynx-json.org/docs/page, container ]
   spec.labeledBy: label
   header>:
-    icon-lynx>:
-    label>: 
+    label>:
       value<pageHeading:
   description>text:
     value<description:
@@ -12,6 +12,7 @@
       label>: Query
       query>line:
         spec.input: q
+        spec.labeledBy: label
         value<q: ""
     submit>:
       label>: Search

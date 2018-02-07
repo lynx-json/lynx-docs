@@ -1,14 +1,10 @@
 realm: http://bestbuy.com/retail/oms/hd/
-">container":
+">.meta.page":
   spec.hints: [ http://lynx-json.org/docs/realm-details-page, http://lynx-json.org/docs/page, container ]
   spec.labeledBy: label
   header>:
-    icon-lynx>:
-    label>: 
+    label>:
       value<pageHeading:
-    search>link:
-      label>: Search
-      href: /meta/search/
   description>text:
     value<description:
   results>table:
