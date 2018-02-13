@@ -29,7 +29,18 @@ module.exports = exports = function createMetaHandler(options) {
         };
       }
 
+      function createHeader(label) {
+        return {
+          isHeader: true,
+          label: label
+        };
+      }
+
       results.push(mapRealm(realm, "/meta/icons/meta-here.svg"));
+
+      if (realm.variants.length > 0) {
+        results.push(createHeader("Variants"));
+      }
 
       realm.variants.forEach(function (variant) {
         results.push({
@@ -40,23 +51,27 @@ module.exports = exports = function createMetaHandler(options) {
         });
       });
 
-      results.push({
-        icon: "/meta/icons/app.svg",
-        title: "View All Variants",
-        url: realm.url + "?variant=index"
-      });
+      // TODO: Review. This seems unnecessary since we've already added all variants.
+      // results.push({
+      //   icon: "/meta/icons/app.svg",
+      //   title: "View All Variants",
+      //   url: realm.url + "?variant=index"
+      // });
 
       if (realm.parent) {
+        results.push(createHeader("Parent"));
         results.push(mapRealm(realm.parent, "/meta/icons/meta-up.svg"));
       }
 
-      if (realm.realms) {
+      if (realm.realms && realm.realms.length > 0) {
+        results.push(createHeader("Children"));
         realm.realms.forEach(function (child) {
           results.push(mapRealm(child, "/meta/icons/meta-down.svg"));
         });
       }
 
-      if (realm.templates) {
+      if (realm.templates && realm.templates.length > 0) {
+        results.push(createHeader("Templates"));
         realm.templates.forEach(function (template) {
           results.push({
             icon: "/meta/icons/template.svg",

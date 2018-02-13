@@ -15,7 +15,10 @@ realm: http://bestbuy.com/retail/oms/hd/
         ">group":
           "text>": No data
       "@results":
-        ">group":
+        "#isHeader>header":
+          label>:
+            value<label:
+        "^isHeader>group":
           icon:
             "#icon":
               ">icon":
