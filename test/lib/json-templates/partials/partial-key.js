@@ -2,7 +2,6 @@ const chai = require("chai");
 const expect = chai.expect;
 
 const partialKey = require("../../../../src/lib/json-templates/partials/partial-key");
-const templateKey = require("../../../../src/lib/json-templates/template-key");
 
 let tests = [{
     description: "key has name only",
@@ -17,72 +16,77 @@ let tests = [{
   {
     description: "key with name and variable",
     key: "foo~",
-    expected: { name: "foo", wildcard: false, variable: "foo" }
+    expected: { name: "foo", placeholder: { wildcard: false, variable: "foo" } }
   },
   {
     description: "key with name '<' binding and variable",
     key: "foo<~",
-    expected: { name: "foo<", wildcard: false, variable: "foo<" }
+    expected: { name: "foo", placeholder: { wildcard: false, variable: "foo" } }
+  },
+  {
+    description: "key with name '<' binding, partial reference, and variable",
+    key: "foo<>",
+    expected: { name: "foo" }
   },
   {
     description: "key with name '=' binding and variable",
     key: "foo=~",
-    expected: { name: "foo=", wildcard: false, variable: "foo=" }
+    expected: { name: "foo", placeholder: { wildcard: false, variable: "foo" } }
   },
   {
     description: "key with name '#' binding and variable",
     key: "foo#~",
-    expected: { name: "foo#", wildcard: false, variable: "foo#" }
+    expected: { name: "foo", placeholder: { wildcard: false, variable: "foo" } }
   },
   {
     description: "key with name '^' binding and variable",
     key: "foo^~",
-    expected: { name: "foo^", wildcard: false, variable: "foo^" }
+    expected: { name: "foo", placeholder: { wildcard: false, variable: "foo" } }
   },
   {
-    description: "key with name '>' binding and variable",
+    description: "key with name '>' partial and variable",
     key: "foo>~",
-    expected: { name: "foo>", wildcard: false, variable: "foo>" }
+    expected: { name: "foo", placeholder: { wildcard: false, variable: "foo" } }
   },
   {
     description: "key with name '<' binding and named variable",
     key: "foo<~foo",
-    expected: { name: "foo<", wildcard: false, variable: "foo" }
+    expected: { name: "foo", placeholder: { wildcard: false, variable: "foo" } }
   },
   {
     description: "key with name '=' binding and named variable",
     key: "foo=~foo",
-    expected: { name: "foo=", wildcard: false, variable: "foo" }
+    expected: { name: "foo", placeholder: { wildcard: false, variable: "foo" } }
   },
   {
     description: "key with name '#' binding and named variable",
     key: "foo#~foo",
-    expected: { name: "foo#", wildcard: false, variable: "foo" }
+    expected: { name: "foo", placeholder: { wildcard: false, variable: "foo" } }
   },
   {
     description: "key with name '^' binding and named variable",
     key: "foo^~foo",
-    expected: { name: "foo^", wildcard: false, variable: "foo" }
+    expected: { name: "foo", placeholder: { wildcard: false, variable: "foo" } }
   },
   {
-    description: "key with name '>' binding and named variable",
+    description: "key with name '>' partial and named variable",
     key: "foo>~foo",
-    expected: { name: "foo>", wildcard: false, variable: "foo" }
+    expected: { name: "foo", placeholder: { wildcard: false, variable: "foo" } }
   },
   {
     description: "key with name with dashes and variable",
     key: "foo-name~",
-    expected: { name: "foo-name", wildcard: false, variable: "foo-name" }
+    expected: { name: "foo-name", placeholder: { wildcard: false, variable: "foo-name" } }
   },
   {
     description: "key with name and named variable",
     key: "foo~foo",
-    expected: { name: "foo", wildcard: false, variable: "foo" }
+    expected: { name: "foo", placeholder: { wildcard: false, variable: "foo" } }
   },
   {
     description: "key with name with dashes and named variale with dashes",
     key: "foo-name~bar-name",
-    expected: { name: "foo-name", wildcard: false, variable: "bar-name" }
+    expected: { name: "foo-name", placeholder: { wildcard: false, variable: "bar-name" } }
   },
   {
     description: "wildcard key name only",
@@ -92,19 +96,17 @@ let tests = [{
   {
     description: "wildcard key and variable",
     key: "*~",
-    expected: { name: "*", wildcard: true, variable: "*" }
-  },
-  {
-    description: "wildcard key and named variable",
-    key: "*~foo",
-    expected: { name: "*", wildcard: true, variable: "*" }
+    expected: { name: "*", placeholder: { wildcard: true, variable: "*" } }
   }
 ];
 
 function runTest(test) {
   let result = partialKey.parse(test.key);
-  test.expected.source = test.key;
-  expect(result).to.deep.equal(test.expected);
+  if (result.placeholder || test.expected.placeholder) {
+    expect(result.placeholder).to.deep.equal(test.expected.placeholder);
+  }
+  expect(result.source).to.equal(test.key);
+  expect(result.name).to.equal(test.expected.name);
 }
 
 describe("partial key module", function () {
@@ -114,18 +116,6 @@ describe("partial key module", function () {
       tests.forEach(function (test) {
         describe("when " + test.description + " (i.e '" + test.key + "')", function () {
           it("should result in expected result", function () {
-            runTest(test);
-          });
-        });
-      });
-    });
-
-    describe("when processing keys with tokens", function () {
-      templateKey.allTokens.forEach(token => {
-        describe("when processing key with token '" + token + "'", function () {
-          it("should allow token in key name", function () {
-            let key = "test" + token;
-            let test = { key: key, expected: { name: key } };
             runTest(test);
           });
         });
