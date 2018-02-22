@@ -22,9 +22,30 @@ function redirectToSearch(req, res, next) {
   res.end("Redirecting to search");
 }
 
+function resolveJsModule(name, paths) {
+  console.log(name, paths);
+  log.debug("Requiring JS variant module: ", name);
+  let names = [name];
+  if (name.indexOf(".") === 0) {
+    names = paths.map(p => path.resolve(p, name));
+  }
+
+  let module = names.reduce((acc, current) => {
+    if (acc) return acc;
+    try {
+      delete require.cache[require.resolve(current)];
+      return require(current);
+    } catch (err) { return null; }
+  }, null);
+
+  if (!module) throw `Unable to resolve jsmodule for variant. The following names were used: ['${names.join("' , '")}']`;
+
+  return module;
+}
+
 module.exports = exports = function createRealmHandler(options) {
   return function (req, res, next) {
-    
+
     function serveTemplate(template) {
       res.setHeader("Content-Type", "text/plain");
       res.setHeader("Cache-control", "no-cache");
@@ -34,8 +55,8 @@ module.exports = exports = function createRealmHandler(options) {
       res.write(templateToHandlebars(template.path, templateOptions, createFile));
       res.end();
     }
-    
-    function serveTemplateDataVariant(variant) {
+
+    function serveTemplateDataVariant(variant, realm) {
       res.setHeader("Content-Type", "application/lynx+json");
       res.setHeader("Cache-control", "no-cache");
 
@@ -44,43 +65,36 @@ module.exports = exports = function createRealmHandler(options) {
       res.write(variantToLynx(variant, variantOptions, createFile));
       res.end();
     }
-    
-    function serveJavaScriptVariant(variant) {
-      var javascriptModuleName = variant.jsmodule;
-      
-      if (javascriptModuleName.indexOf(".") === 0) {
-        javascriptModuleName = path.resolve(javascriptModuleName);
-      }
-      
-      log.debug("Requiring JS variant module: ", javascriptModuleName);
-      var javascriptModule = require(javascriptModuleName);
-      delete require.cache[require.resolve(javascriptModuleName)];
-      
+
+    function serveJavaScriptVariant(variant, realm) {
+      let paths = [realm.folder, process.cwd()];
+      var javascriptModule = resolveJsModule(variant.jsmodule, paths);
+
       log.debug("Getting JS variant handler factory function: ", variant.function || "default");
       var handlerFactory = javascriptModule[variant.function] || javascriptModule;
-      
+
       log.debug("Invoking JS variant handler factory function");
       var handler = handlerFactory(variant, realm);
-      
+
       log.debug("Invoking JS variant handler");
       res.serveVariant = serveTemplateDataVariant;
       handler(req, res, next);
     }
 
-    function serveVariant(variant) {
-      if (variant.template) return serveTemplateDataVariant(variant);
-      if (variant.jsmodule) return serveJavaScriptVariant(variant);
+    function serveVariant(variant, realm) {
+      if (variant.template) return serveTemplateDataVariant(variant, realm);
+      if (variant.jsmodule) return serveJavaScriptVariant(variant, realm);
       serveVariantIndexForRealms([realm]);
     }
-    
+
     function reduceToResults(accumulator, currentRealm) {
       accumulator.push({
         icon: "/meta/icons/meta-here.svg",
         title: currentRealm.title || "Untitled",
         url: currentRealm.metaURL,
-        details: [ `realm: ${currentRealm.realm}` ]
+        details: [`realm: ${currentRealm.realm}`]
       });
-      
+
       currentRealm.variants.forEach(function (currentVariant) {
         accumulator.push({
           icon: "/meta/icons/app.svg",
@@ -88,10 +102,10 @@ module.exports = exports = function createRealmHandler(options) {
           url: currentVariant.url
         });
       });
-      
+
       return accumulator;
     }
-    
+
     function serveVariantIndexForRealms(realms) {
       serveVariant({
         template: { ">.meta.variants": null },
@@ -103,31 +117,31 @@ module.exports = exports = function createRealmHandler(options) {
         }
       });
     }
-    
+
     var realm, realms = req.realms.filter(r => url.parse(r.realm).pathname === url.parse(req.url).pathname);
 
     if (realms.length === 0) {
       if (req.url === "/" || req.url === "") return redirectToSearch(req, res, next);
       return next();
     }
-    
+
     if (req.query.template) {
-      var template = realms.reduce(function (acc, r) {  
+      var template = realms.reduce(function (acc, r) {
         if (acc) return acc;
         return r.templates.find(t => t.path === req.query.template);
       }, null);
-      
+
       if (template) {
         return serveTemplate(template);
-      }  
+      }
     }
-    
+
     if (realms.length > 1) {
       return serveVariantIndexForRealms(realms);
     } else {
       realm = realms[0];
     }
-    
+
     var variantName = req.query.variant || "default";
     var variant = realm.variants.find(v => v.name === variantName || v.content !== undefined);
 
@@ -140,6 +154,6 @@ module.exports = exports = function createRealmHandler(options) {
       return next();
     }
 
-    return serveVariant(variant, realm.variants.length > 1);
+    return serveVariant(variant, realm);
   };
 };
