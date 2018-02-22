@@ -102,6 +102,13 @@ let tests = [{
     expected: { value: { "name<": "Your name" }, "message": "Hello" }
   },
   {
+    description: "a partial with named placeholder referencing another partial called with parameter referencing different partial",
+    should: "should replace named placeholder",
+    partial: { header: { "message~>label": "Goodbye" } },
+    parameters: { message: { ">stylized-text": "Hello" } },
+    expected: { header: { message: { ">stylized-text": "Hello" } } }
+  },
+  {
     description: "a partial with the wildcard placeholder",
     should: "should return all parameter keys and values in place of wildcard",
     partial: { value: { "*~": null } },
@@ -122,12 +129,6 @@ let tests = [{
     parameters: { "spec.visibility": "hidden", one: "one" },
     expected: { ">lynx": { "spec.hints": ["container"], "spec.visibility": "hidden", one: "one" } }
   },
-  /*
-  previous#>link:
-  label>: "←"
-  href<: ../slots/
-
-  */
   {
     description: "placeholders that are nested",
     should: "should return perform replacements and return partial",
@@ -153,15 +154,6 @@ let tests = [{
   },
 ];
 
-/*
->section:
-  spec.hints: [ "http://uncategorized/listing/item", card, section, container ]
-  symbol>lynx:
-    spec.hints: [ "http://uncategorized/listing/item/symbol", container]
-    symbol~: ●
-  ~*:
-
-*/
 function getTests() {
   let filtered = tests.filter(test => test.include === true);
   return filtered.length > 0 ? filtered : tests;
