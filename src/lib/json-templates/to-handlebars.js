@@ -15,7 +15,7 @@ function toHandlebars(model) {
   function writeOpenBinding(binding) {
     if (templateKey.simpleTokens.includes(binding.token)) {
       let quote = binding.token === "<" ? "\"" : "";
-      writeContent("{{#if " + binding.variable + "}}" + quote + "{{" + binding.variable + "}}" + quote + "{{else}}");
+      writeContent("{{#if " + binding.variable + " includeZero=true}}" + quote + "{{" + binding.variable + "}}" + quote + "{{else}}");
     } else if (templateKey.sectionTokens.includes(binding.token)) {
       writeContent("{{" + binding.token + binding.variable + "}}");
     } else if (templateKey.iteratorToken === binding.token) {

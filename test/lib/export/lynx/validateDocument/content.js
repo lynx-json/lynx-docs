@@ -8,12 +8,20 @@ let tests = [{
     should: "return no errors",
     content: { src: ".", },
     expected: []
-  }, {
+  },
+  {
+    description: "valid 'content' with empty 'src'",
+    should: "return no errors",
+    content: { src: "", },
+    expected: []
+  },
+  {
     description: "valid 'content' with 'data'",
     should: "return no errors",
     content: { data: "Hello world", type: "text/plain" },
     expected: []
-  }, {
+  },
+  {
     description: "null 'content'",
     should: "return no errors",
     content: null,
