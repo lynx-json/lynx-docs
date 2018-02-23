@@ -22,6 +22,14 @@ let tests = [{
     }
   },
   {
+    description: "key with name and placeholder token as variable",
+    key: "foo<~",
+    expected: {
+      name: "foo",
+      binding: { token: "<", variable: "~" }
+    }
+  },
+  {
     description: "key with name with dashes and binding only",
     key: "foo-name#",
     expected: {
@@ -64,11 +72,20 @@ let tests = [{
     }
   },
   {
-    description: "key with name, binding, and partial",
+    description: "key with name, section binding, and partial",
     key: "foo#>",
     expected: {
       name: "foo",
       binding: { token: "#", variable: "foo" },
+      partial: { token: ">", variable: "foo" }
+    }
+  },
+  {
+    description: "key with name, value binding, and partial",
+    key: "foo<>",
+    expected: {
+      name: "foo",
+      binding: { token: "<", variable: "foo" },
       partial: { token: ">", variable: "foo" }
     }
   },

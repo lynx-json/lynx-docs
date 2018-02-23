@@ -34,6 +34,16 @@ let tests = [{
     expected: { "@foo": { ">partial": { "<bar": "Yes bar" } } }
   },
   {
+    description: "value has multiple explicit template keys (<>)",
+    template: { "foo<bar>partial": "Yes bar" },
+    expected: { "foo": { ">partial": { "<bar": "Yes bar" } } }
+  },
+  {
+    description: "value has multiple implicit template keys (<>)",
+    template: { "foo<>": "Yes bar" },
+    expected: { "foo": { ">foo": { "<foo": "Yes bar" } } }
+  },
+  {
     description: "intermediate syntax",
     template: { "foo#": "Yes foo", "foo^": "No foo" },
     expected: { foo: { "#foo": "Yes foo", "^foo": "No foo" } }

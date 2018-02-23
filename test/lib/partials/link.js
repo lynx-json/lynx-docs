@@ -8,12 +8,21 @@ var tests = [{
     }
   },
   {
-    description: "when no type",
+    description: "when no type and href",
     should: "add application/lynx+json to value",
     parameters: { href: "." },
     expected: {
       spec: { hints: ["link"] },
       value: { href: ".", type: "application/lynx+json" }
+    }
+  },
+  {
+    description: "when explicit type",
+    should: "use provided type value",
+    parameters: { data: "Text plain", type: "text/plain" },
+    expected: {
+      spec: { hints: ["link"] },
+      value: { data: "Text plain", type: "text/plain" }
     }
   },
   {
