@@ -1,7 +1,6 @@
 const types = require("../../../../types");
 const url = require("url");
 const contentTypeParser = require("content-type-parser");
-const empty = "";
 
 function validateData(value, errors) {
   if ("href" in value) errors.push("'link' value with a 'data' property must not have an 'href' property");
