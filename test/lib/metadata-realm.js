@@ -73,6 +73,23 @@ var tests = [{
     ]
   },
   {
+    description: "a folder with one template (.template.yml)",
+    root: "/root",
+    fs: {
+      dirs: {
+        "/root": ["default.template.yml"]
+      },
+      files: {
+        "/root/default.template.yml": null
+      }
+    },
+    assertions: [
+      countOf(1),
+      containsRealm("/"),
+      containsVariant("/", "default", "/root/default.template.yml")
+    ]
+  },
+  {
     description: "a folder with one template and one data file",
     root: "/root",
     fs: {
@@ -88,6 +105,61 @@ var tests = [{
       countOf(1),
       containsRealm("/"),
       containsVariant("/", "default", "/root/default.lynx.yml", "/root/default.data.yml")
+    ]
+  },
+  {
+    description: "a folder with one template, one data file and child realm",
+    root: "/root",
+    fs: {
+      dirs: {
+        "/root": ["default.lynx.yml", "default.data.yml"],
+        "/root/default": []
+      },
+      files: {
+        "/root/default.lynx.yml": null,
+        "/root/default.data.yml": null
+      }
+    },
+    assertions: [
+      countOf(1),
+      containsRealm("/"),
+      containsVariant("/", "default", "/root/default.lynx.yml", "/root/default.data.yml")
+    ]
+  },
+  {
+    description: "a folder with one template and child realm",
+    root: "/root",
+    fs: {
+      dirs: {
+        "/root": ["default.lynx.yml"],
+        "/root/default": []
+      },
+      files: {
+        "/root/default.lynx.yml": null
+      }
+    },
+    assertions: [
+      countOf(1),
+      containsRealm("/"),
+      containsVariant("/", "default", "/root/default.lynx.yml")
+    ]
+  },
+  {
+    description: "a folder with one template (.template.yml) and one data file",
+    root: "/root",
+    fs: {
+      dirs: {
+        "/root": ["default.template.yml", "default.data.yml"]
+      },
+      files: {
+        "/root/default.template.yml": null,
+        "/root/default.data.yml": null
+      }
+    },
+    assertions: [
+      countOf(1),
+      containsRealm("/"),
+      containsVariant("/", "default", "/root/default.template.yml", "/root/default.data.yml")
     ]
   },
   {
@@ -111,6 +183,26 @@ var tests = [{
     ]
   },
   {
+    description: "a folder with one template (.template.yml) and two data files",
+    root: "/root",
+    fs: {
+      dirs: {
+        "/root": ["default.template.yml", "default.data.yml", "default.other.data.yml"]
+      },
+      files: {
+        "/root/default.template.yml": null,
+        "/root/default.data.yml": null,
+        "/root/default.other.data.yml": null
+      }
+    },
+    assertions: [
+      countOf(1),
+      containsRealm("/"),
+      containsVariant("/", "default", "/root/default.template.yml", "/root/default.data.yml"),
+      containsVariant("/", "default-other", "/root/default.template.yml", "/root/default.other.data.yml")
+    ]
+  },
+  {
     description: "a folder with one template and a data folder with one data file",
     root: "/root",
     fs: {
@@ -127,6 +219,25 @@ var tests = [{
       countOf(1),
       containsRealm("/"),
       containsVariant("/", "default", "/root/default.lynx.yml", "/root/default.data/default.yml")
+    ]
+  },
+  {
+    description: "a folder with one template (.template.yml) and a data folder with one data file",
+    root: "/root",
+    fs: {
+      dirs: {
+        "/root": ["default.template.yml", "default.data"],
+        "/root/default.data": ["default.yml"]
+      },
+      files: {
+        "/root/default.template.yml": null,
+        "/root/default.data/default.yml": null
+      }
+    },
+    assertions: [
+      countOf(1),
+      containsRealm("/"),
+      containsVariant("/", "default", "/root/default.template.yml", "/root/default.data/default.yml")
     ]
   },
   {
@@ -151,6 +262,27 @@ var tests = [{
     ]
   },
   {
+    description: "a folder with one template (.template.yml) and a data folder with two data files",
+    root: "/root",
+    fs: {
+      dirs: {
+        "/root": ["default.template.yml", "default.data"],
+        "/root/default.data": ["default.yml", "other.yml"]
+      },
+      files: {
+        "/root/default.template.yml": null,
+        "/root/default.data/default.yml": null,
+        "/root/default.data/other.yml": null
+      }
+    },
+    assertions: [
+      countOf(1),
+      containsRealm("/"),
+      containsVariant("/", "default", "/root/default.template.yml", "/root/default.data/default.yml"),
+      containsVariant("/", "default-other", "/root/default.template.yml", "/root/default.data/other.yml")
+    ]
+  },
+  {
     description: "a folder with two templates",
     root: "/root",
     fs: {
@@ -167,6 +299,25 @@ var tests = [{
       containsRealm("/"),
       containsVariant("/", "a", "/root/a.lynx.yml"),
       containsVariant("/", "b", "/root/b.lynx.yml")
+    ]
+  },
+  {
+    description: "a folder with two templates (.lynx.yml & .template.yml)",
+    root: "/root",
+    fs: {
+      dirs: {
+        "/root": ["a.lynx.yml", "b.template.yml"]
+      },
+      files: {
+        "/root/a.lynx.yml": null,
+        "/root/b.template.yml": null
+      }
+    },
+    assertions: [
+      countOf(1),
+      containsRealm("/"),
+      containsVariant("/", "a", "/root/a.lynx.yml"),
+      containsVariant("/", "b", "/root/b.template.yml")
     ]
   },
   {

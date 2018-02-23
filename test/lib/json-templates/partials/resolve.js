@@ -44,8 +44,11 @@ describe("resolve partials module", function () {
     let tests = [{
         partialUrl: "./f1/f2/template.lynx.yml?partial=part",
         expected: [
+          path.resolve(process.cwd(), "f1", "f2"),
           path.resolve(process.cwd(), "f1", "f2", resolvePartials.partialDirectory),
+          path.resolve(process.cwd(), "f1"),
           path.resolve(process.cwd(), "f1", resolvePartials.partialDirectory),
+          path.resolve(process.cwd()),
           path.resolve(process.cwd(), resolvePartials.partialDirectory),
           resolvePartials.lynxDocsPartialDirectory
         ]
@@ -53,7 +56,9 @@ describe("resolve partials module", function () {
       {
         partialUrl: "./f1/template.lynx.yml?partial=part",
         expected: [
+          path.resolve(process.cwd(), "f1"),
           path.resolve(process.cwd(), "f1", resolvePartials.partialDirectory),
+          path.resolve(process.cwd()),
           path.resolve(process.cwd(), resolvePartials.partialDirectory),
           resolvePartials.lynxDocsPartialDirectory
         ]
@@ -61,6 +66,7 @@ describe("resolve partials module", function () {
       {
         partialUrl: "./template.lynx.yml?partial=part",
         expected: [
+          path.resolve(process.cwd()),
           path.resolve(process.cwd(), resolvePartials.partialDirectory),
           resolvePartials.lynxDocsPartialDirectory
         ]
@@ -132,9 +138,37 @@ describe("resolve partials module", function () {
         expected: null
       },
       {
-        description: "directory contains one matching .yaml file",
-        should: "return file name",
+        description: "directory contains file with matching name but no matching extension",
+        should: "return null",
         directory: "doesNotMatter",
+        partialName: "partial",
+        stubs: {
+          fs: {
+            existsSync: true,
+            statSync: { isDirectory: () => true },
+            readdirSync: ["partial.one", "partial.two", "partial.whatever"]
+          }
+        },
+        expected: null
+      },
+      {
+        description: "directory contains directory with matching name",
+        should: "return null",
+        directory: "doesNotMatter",
+        partialName: "partial",
+        stubs: {
+          fs: {
+            existsSync: true,
+            statSync: { isDirectory: () => true },
+            readdirSync: ["partial"]
+          }
+        },
+        expected: null
+      },
+      {
+        description: "partial directory contains one matching .yml file",
+        should: "return file name",
+        directory: resolvePartials.partialDirectory,
         partialName: "partial",
         stubs: {
           fs: {
@@ -146,9 +180,37 @@ describe("resolve partials module", function () {
         expected: "partial.yml"
       },
       {
-        description: "directory contains one matching .js file",
+        description: "non partial directory contains one matching .partial.yml file",
         should: "return file name",
         directory: "doesNotMatter",
+        partialName: "partial",
+        stubs: {
+          fs: {
+            existsSync: true,
+            statSync: { isDirectory: () => true },
+            readdirSync: ["partial.partial.yml"]
+          }
+        },
+        expected: "partial.partial.yml"
+      },
+      {
+        description: "non partial directory contains one matching .partial.yml file and folder matching partial name",
+        should: "return matching .partial.yml name",
+        directory: "doesNotMatter",
+        partialName: "partial",
+        stubs: {
+          fs: {
+            existsSync: true,
+            statSync: { isDirectory: () => true },
+            readdirSync: ["partial", "partial.partial.yml"]
+          }
+        },
+        expected: "partial.partial.yml"
+      },
+      {
+        description: "partial directory contains one matching .js file",
+        should: "return file name",
+        directory: resolvePartials.partialDirectory,
         partialName: "partial",
         stubs: {
           fs: {
@@ -160,9 +222,23 @@ describe("resolve partials module", function () {
         expected: "partial.js"
       },
       {
-        description: "directory contains matching .yml and .js file",
-        should: "return first matching file name (.yml)",
+        description: "non partial directory contains one matching .partial.js file",
+        should: "return file name",
         directory: "doesNotMatter",
+        partialName: "partial",
+        stubs: {
+          fs: {
+            existsSync: true,
+            statSync: { isDirectory: () => true },
+            readdirSync: ["partial.partial.js"]
+          }
+        },
+        expected: "partial.partial.js"
+      },
+      {
+        description: "partial directory contains matching .yml and .js file",
+        should: "return first matching file name (.yml)",
+        directory: resolvePartials.partialDirectory,
         partialName: "partial",
         stubs: {
           fs: {
@@ -174,9 +250,23 @@ describe("resolve partials module", function () {
         expected: "partial.yml"
       },
       {
-        description: "directory contains matching .js and .yml file",
-        should: "return first matching file name (.js)",
+        description: "non partials directory contains matching .partial.yml and partial.js file",
+        should: "return first matching file name (.partial.yml)",
         directory: "doesNotMatter",
+        partialName: "partial",
+        stubs: {
+          fs: {
+            existsSync: true,
+            statSync: { isDirectory: () => true },
+            readdirSync: ["partial.partial.yml", "partial.partial.js"]
+          }
+        },
+        expected: "partial.partial.yml"
+      },
+      {
+        description: "partial directory contains matching .js and .yml file",
+        should: "return first matching file name (.js)",
+        directory: resolvePartials.partialDirectory,
         partialName: "partial",
         stubs: {
           fs: {
