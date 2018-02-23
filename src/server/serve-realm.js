@@ -23,7 +23,6 @@ function redirectToSearch(req, res, next) {
 }
 
 function resolveJsModule(name, paths) {
-  console.log(name, paths);
   log.debug("Requiring JS variant module: ", name);
   let names = [name];
   if (name.indexOf(".") === 0) {
@@ -56,7 +55,7 @@ module.exports = exports = function createRealmHandler(options) {
       res.end();
     }
 
-    function serveTemplateDataVariant(variant, realm) {
+    function serveTemplateDataVariant(variant) {
       res.setHeader("Content-Type", "application/lynx+json");
       res.setHeader("Cache-control", "no-cache");
 
@@ -66,7 +65,7 @@ module.exports = exports = function createRealmHandler(options) {
       res.end();
     }
 
-    function serveJavaScriptVariant(variant, realm) {
+    function serveJavaScriptVariant(variant) {
       let paths = [realm.folder, process.cwd()];
       var javascriptModule = resolveJsModule(variant.jsmodule, paths);
 
@@ -81,9 +80,9 @@ module.exports = exports = function createRealmHandler(options) {
       handler(req, res, next);
     }
 
-    function serveVariant(variant, realm) {
-      if (variant.template) return serveTemplateDataVariant(variant, realm);
-      if (variant.jsmodule) return serveJavaScriptVariant(variant, realm);
+    function serveVariant(variant) {
+      if (variant.template) return serveTemplateDataVariant(variant);
+      if (variant.jsmodule) return serveJavaScriptVariant(variant);
       serveVariantIndexForRealms([realm]);
     }
 
@@ -154,6 +153,6 @@ module.exports = exports = function createRealmHandler(options) {
       return next();
     }
 
-    return serveVariant(variant, realm);
+    return serveVariant(variant);
   };
 };
