@@ -34,6 +34,30 @@ var tests = [{
     options: { realm: { realm: "http://whatever" } },
     data: { boolVar: false },
     expected: { value: "Falsey", spec: { hints: ["text"] }, realm: "http://whatever" }
+  },
+  {
+    description: "Issue #83. Converting binding token '<' with empty string value",
+    template: { "foo<": "No foo" },
+    data: { foo: "" },
+    expected: { foo: "" }
+  },
+  {
+    description: "Issue #83. Converting binding token '<' with 0 number value",
+    template: { "foo<": "No foo" },
+    data: { foo: 0 },
+    expected: { foo: "0" }
+  },
+  {
+    description: "Issue #83. Converting binding token '<' with positive number value",
+    template: { "foo<": "No foo" },
+    data: { foo: 10 },
+    expected: { foo: "10" }
+  },
+  {
+    description: "Issue #83. Converting binding token '<' with negative number value",
+    template: { "foo<": "No foo" },
+    data: { foo: -10 },
+    expected: { foo: "-10" }
   }
 ];
 

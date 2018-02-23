@@ -1,5 +1,4 @@
 "use strict";
-
 const util = require("util");
 const path = require("path");
 const processTemplate = require("./process-template");
@@ -10,13 +9,27 @@ const jsonLint = require("json-lint");
 const types = require("../../types");
 const log = require("logatim");
 const validateLynxDocument = require("./lynx/validateDocument");
+const empty = "";
 
-handlebars.Utils.escapeExpression = function (toEscape) {
+function handlebarsEscapeExpression(toEscape) {
   if (toEscape === null || toEscape === undefined) return "";
   if (!types.isString(toEscape)) return toEscape;
 
   let stringified = JSON.stringify(toEscape);
   return stringified.substr(1, stringified.length - 2);
+}
+
+function handlebarsIsEmpty(value) {
+  if (!value && value !== empty && value !== 0) return true;
+  if (types.isArray(value) && value.length === 0) return true;
+  return false;
+}
+
+handlebars.Utils.escapeExpression = function (toEscape) {
+  return exports.handlebarsEscapeExpression(toEscape);
+};
+handlebars.Utils.isEmpty = function (value) {
+  return exports.handlebarsIsEmpty(value);
 };
 
 function exportLynxDocuments(realms, createFile, options) {
@@ -140,3 +153,5 @@ function createErrorDocumentSection(label, content) {
 
 exports.one = transformVariantToLynx;
 exports.all = exportLynxDocuments;
+exports.handlebarsEscapeExpression = handlebarsEscapeExpression;
+exports.handlebarsIsEmpty = handlebarsIsEmpty;

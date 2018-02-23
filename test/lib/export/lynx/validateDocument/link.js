@@ -6,14 +6,34 @@ const validateLink = require("../../../../../src/lib/export/lynx/validateDocumen
 let tests = [{
     description: "valid 'link' with 'href'",
     should: "return no errors",
-    link: { href: ".", },
+    link: { href: "." },
     expected: []
-  }, {
+  },
+  {
+    description: "valid 'link' with empty 'href'",
+    should: "return no errors",
+    link: { href: "" },
+    expected: []
+  },
+  {
+    description: "valid 'link' with null 'href'",
+    should: "return errors",
+    link: { href: null },
+    expected: ["'href' must be a valid URI"]
+  },
+  {
     description: "valid 'link' with 'data'",
     should: "return no errors",
     link: { data: "Hello world", type: "text/plain" },
     expected: []
-  }, {
+  },
+  {
+    description: "valid 'link' with empty 'data'",
+    should: "return no errors",
+    link: { data: "", type: "text/plain" },
+    expected: []
+  },
+  {
     description: "null 'link'",
     should: "return no errors",
     link: null,
@@ -30,10 +50,20 @@ let tests = [{
     should: "return errors",
     link: {},
     expected: ["'link' value must have an 'href' or 'data' property"]
-  }, {
+  },
+  {
     description: "'link' with 'data' and 'href'",
     should: "return errors",
     link: { href: ".", type: "text/plain", data: "Hello world" },
+    expected: [
+      "'link' value with an 'href' property must not have a 'data' property",
+      "'link' value with a 'data' property must not have an 'href' property"
+    ]
+  },
+  {
+    description: "'link' with empty 'data' and empty 'href'",
+    should: "return errors",
+    link: { href: "", type: "text/plain", data: "" },
     expected: [
       "'link' value with an 'href' property must not have a 'data' property",
       "'link' value with a 'data' property must not have an 'href' property"
