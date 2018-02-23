@@ -66,20 +66,8 @@ module.exports = exports = function createRealmHandler(options) {
     }
 
     function serveJavaScriptVariant(variant) {
-<<<<<<< HEAD
-      var javascriptModuleName = variant.jsmodule;
-
-      if (javascriptModuleName.indexOf(".") === 0) {
-        javascriptModuleName = path.resolve(javascriptModuleName);
-      }
-
-      log.debug("Requiring JS variant module: ", javascriptModuleName);
-      var javascriptModule = require(javascriptModuleName);
-      delete require.cache[require.resolve(javascriptModuleName)];
-=======
       let paths = [realm.folder, process.cwd()];
       var javascriptModule = resolveJsModule(variant.jsmodule, paths);
->>>>>>> a00aef0ef41e62c52f120085de18be65f3c4b660
 
       log.debug("Getting JS variant handler factory function: ", variant.function || "default");
       var handlerFactory = javascriptModule[variant.function] || javascriptModule;
@@ -106,7 +94,6 @@ module.exports = exports = function createRealmHandler(options) {
         details: [`realm: ${currentRealm.realm}`]
       });
 
-<<<<<<< HEAD
       if (currentRealm.variants.length > 0) {
         accumulator.push({
           isHeader: true,
@@ -114,8 +101,6 @@ module.exports = exports = function createRealmHandler(options) {
         });
       }
 
-=======
->>>>>>> a00aef0ef41e62c52f120085de18be65f3c4b660
       currentRealm.variants.forEach(function (currentVariant) {
         accumulator.push({
           icon: "/meta/icons/app.svg",
