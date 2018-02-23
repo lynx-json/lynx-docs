@@ -81,6 +81,13 @@ module.exports = exports = function createRealmHandler(options) {
         details: [ `realm: ${currentRealm.realm}` ]
       });
 
+      if (currentRealm.variants.length > 0) {
+        accumulator.push({
+          isHeader: true,
+          label: "Variants"
+        });
+      }
+
       currentRealm.variants.forEach(function (currentVariant) {
         accumulator.push({
           icon: "/meta/icons/app.svg",

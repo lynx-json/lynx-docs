@@ -15,7 +15,10 @@ realm<:
         ">group":
           "text>": No variants
       "@results":
-        ">group":
+        "#isHeader>header":
+          label>:
+            value<label:
+        "^isHeader>group":
           icon:
             "#icon":
               ">icon":
