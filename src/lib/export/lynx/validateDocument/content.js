@@ -14,9 +14,9 @@ function validateData(value, errors) {
 
 function validateSrc(value, errors) {
   try {
-    let parsed = url.parse(value.src);
+    let parsed = value.src !== null && url.parse(value.src);
   } catch (err) {
-    errors.push("'src' must be a valid URI");
+    errors.push("'src' must be a valid URI or null");
   }
   if ("data" in value) errors.push("'content' value with an 'src' property must not have a 'data' property");
   if ("encoding" in value) errors.push("'content' value with an 'src' property must not have an 'encoding' property");
