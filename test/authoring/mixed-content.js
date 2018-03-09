@@ -34,7 +34,57 @@ var tests = [{
     options: { realm: { realm: "http://whatever" } },
     data: { boolVar: false },
     expected: { value: "Falsey", spec: { hints: ["text"] }, realm: "http://whatever" }
-  }
+  },
+  {
+    description: "Issue #86. Verify with spec and flattening.",
+    template: { ">content": { data: { realm: "http://somerealm/", ">text": "A message" } } },
+    options: { realm: { realm: "http://whatever/" }, spec: { dir: "specs", url: "/specs/" }, flatten: true },
+    onFile: (path, content) => {},
+    data: null,
+    expected: {
+      realm: "http://whatever/",
+      spec: "/specs/c78ed022973e01c91bd89c7ebb49eceb.lnxs",
+      data: {
+        realm: "http://somerealm/",
+        spec: "/specs/c389beed6629fe88882175b4fa0bba4e.lnxs",
+        value: "A message"
+      }
+    }
+  },
+  {
+    description: "Issue #86. Content with data and sources.",
+    template: {
+      ">content": {
+        type: "application/lynx+json",
+        "data>text": null,
+        sources: [{
+          media: "http//example.com/some-media",
+          type: "application/vnd.example.some-media+json",
+          data: '{ "openingForm": { "name": "BBY_DisplayWelcomeForm", "args": ["{{one}}", "{{two}}"] } }'
+        }]
+      }
+    },
+    options: { realm: { realm: "http://example.com/" }, spec: { dir: "specs", url: "/specs/" }, flatten: true },
+    onFile: (path, content) => {},
+    data: {
+      one: "I'm one",
+      two: "I'm two"
+    },
+    expected: {
+      realm: "http://example.com/",
+      spec: "/specs/c78ed022973e01c91bd89c7ebb49eceb.lnxs",
+      type: "application/lynx+json",
+      data: {
+        spec: "/specs/c389beed6629fe88882175b4fa0bba4e.lnxs",
+        value: null
+      },
+      sources: [{
+        media: "http//example.com/some-media",
+        type: "application/vnd.example.some-media+json",
+        data: `{ "openingForm": { "name": "BBY_DisplayWelcomeForm", "args": ["I'm one", "I'm two"] } }`
+      }]
+    }
+  },
 ];
 
 tests.suite = "mixed content (static and dynamic)";

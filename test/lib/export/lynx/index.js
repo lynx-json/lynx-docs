@@ -105,12 +105,6 @@ describe("lynx export module", function () {
         expected: false
       },
       {
-        description: "when value is a template for lynx value",
-        should: "be true",
-        value: { "": { spec: { hints: [] }, value: {} } },
-        expected: true
-      },
-      {
         description: "when value contains two sections that are templates for lynx values",
         should: "be true",
         value: { "#true": { spec: { hints: [] }, value: {} }, "#false": { spec: { hints: [] }, value: {} } },
