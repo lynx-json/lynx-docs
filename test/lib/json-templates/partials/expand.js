@@ -91,12 +91,12 @@ describe("expand partials module", function () {
       {
         description: "lynx text partial with string parameter",
         template: { foo: { ">text": "Foo" } },
-        expected: { foo: { spec: { hints: ["text"] }, value: { "": "Foo" } } },
+        expected: { foo: { spec: { hints: ["text"] }, value: "Foo" } },
       },
       {
         description: "container partial with array parameter",
         template: { foo: { ">container": ["Foo", "Bar"] } },
-        expected: { foo: { spec: { hints: ["container"] }, value: { "": ["Foo", "Bar"] } } },
+        expected: { foo: { spec: { hints: ["container"] }, value: ["Foo", "Bar"] } },
       },
       {
         description: "container partial with positive and negative sections for value",
@@ -106,7 +106,7 @@ describe("expand partials module", function () {
       {
         description: "partial with null parameter",
         template: { foo: { ">text": null } },
-        expected: { foo: { spec: { hints: ["text"] }, value: { "": null } } },
+        expected: { foo: { spec: { hints: ["text"] }, value: null } },
       },
       {
         description: "deeply nested partials at root",
@@ -159,13 +159,13 @@ describe("expand partials module", function () {
                     "#bar": {
                       fooBar: {
                         spec: { hints: ["text"] },
-                        value: { "": "Foo and bar" }
+                        value: "Foo and bar"
                       }
                     },
                     "^bar": {
                       fooNoBar: {
                         spec: { hints: ["text"] },
-                        value: { "": "Foo no bar" }
+                        value: "Foo no bar"
                       }
                     }
                   }
@@ -178,13 +178,13 @@ describe("expand partials module", function () {
                     "#bar": {
                       noFooBar: {
                         spec: { hints: ["text"] },
-                        value: { "": "No foo and bar" }
+                        value: "No foo and bar"
                       }
                     },
                     "^bar": {
                       noFooNoBar: {
                         spec: { hints: ["text"] },
-                        value: { "": "No foo and no bar" }
+                        value: "No foo and no bar"
                       }
                     }
                   }

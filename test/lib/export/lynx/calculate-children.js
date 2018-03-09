@@ -11,7 +11,7 @@ var tests = [{
     expected: {
       bar: {
         spec: { hints: ["text"] },
-        value: { "": "Bar" }
+        value: "Bar"
       }
     }
   },
@@ -29,8 +29,8 @@ var tests = [{
           ]
         },
         value: {
-          bar: { spec: { hints: ["text"] }, value: { "": "Bar" } },
-          qux: { spec: { hints: ["text"] }, value: { "": "Qux" } }
+          bar: { spec: { hints: ["text"] }, value: "Bar" },
+          qux: { spec: { hints: ["text"] }, value: "Qux" }
         }
       }
     }
@@ -47,7 +47,7 @@ var tests = [{
           labeledBy: "label"
         },
         value: {
-          label: { spec: { hints: ["label", "text"] }, value: { "": "A link" } },
+          label: { spec: { hints: ["label", "text"] }, value: "A link" },
           href: ".",
           type: "application/lynx+json"
         }
@@ -72,7 +72,7 @@ var tests = [{
           labeledBy: "label"
         },
         value: {
-          label: { spec: { hints: ["label", "text"] }, value: { "": "Click Me" } },
+          label: { spec: { hints: ["label", "text"] }, value: "Click Me" },
           data: {
             spec: {
               hints: ["link"],
@@ -80,7 +80,7 @@ var tests = [{
               labeledBy: "label"
             },
             value: {
-              label: { spec: { hints: ["label", "text"] }, value: { "": "Click Me Too" } },
+              label: { spec: { hints: ["label", "text"] }, value: "Click Me Too" },
               type: "text/plain",
               data: "Hello, World!"
             }
@@ -99,21 +99,19 @@ var tests = [{
         spec: {
           hints: ["container"]
         },
-        value: {
-          "": [{
-              bar: {
-                spec: { hints: ["text"] },
-                value: { "": "Bar" }
-              }
-            },
-            {
-              qux: {
-                spec: { hints: ["text"] },
-                value: { "": "Qux" }
-              }
+        value: [{
+            bar: {
+              spec: { hints: ["text"] },
+              value: "Bar"
             }
-          ]
-        }
+          },
+          {
+            qux: {
+              spec: { hints: ["text"] },
+              value: "Qux"
+            }
+          }
+        ]
       }
     }
   },
@@ -129,13 +127,13 @@ var tests = [{
         value: [{
             bar: {
               spec: { hints: ["text"] },
-              value: { "": "Bar" }
+              value: "Bar"
             }
           },
           {
             qux: {
               spec: { hints: ["text"] },
-              value: { "": "Qux" }
+              value: "Qux"
             }
           }
         ]
@@ -173,11 +171,11 @@ var tests = [{
           value: {
             oneOne: {
               spec: { hints: ["text"] },
-              value: { "": "One and one" }
+              value: "One and one"
             },
             oneTwo: {
               spec: { hints: ["text"] },
-              value: { "": "One and two" }
+              value: "One and two"
             }
           }
         },
@@ -189,11 +187,11 @@ var tests = [{
           value: {
             oneOne: {
               spec: { hints: ["text"] },
-              value: { "": "One and one" }
+              value: "One and one"
             },
             oneTwo: {
               spec: { hints: ["text"] },
-              value: { "": "One and two" }
+              value: "One and two"
             }
           }
         }
@@ -219,11 +217,11 @@ var tests = [{
           "#foo": {
             bar: {
               spec: { hints: ["text"] },
-              value: { "": "Bar" }
+              value: "Bar"
             },
             qux: {
               spec: { hints: ["text"] },
-              value: { "": "Qux" }
+              value: "Qux"
             }
           },
           "^foo": null
@@ -249,7 +247,7 @@ var tests = [{
       value: {
         message: {
           spec: { hints: ["text"] },
-          value: { "": "Static content" }
+          value: "Static content"
         },
         foo: {
           "#foo": {
@@ -260,11 +258,11 @@ var tests = [{
             value: {
               bar: {
                 spec: { hints: ["text"] },
-                value: { "": "Bar" }
+                value: "Bar"
               },
               qux: {
                 spec: { hints: ["text"] },
-                value: { "": "Qux" }
+                value: "Qux"
               }
             }
           },
@@ -349,13 +347,13 @@ var tests = [{
                 "#bar": {
                   fooBar: {
                     spec: { hints: ["text"] },
-                    value: { "": "Foo and bar" }
+                    value: "Foo and bar"
                   }
                 },
                 "^bar": {
                   fooBar: {
                     spec: { hints: ["text"] },
-                    value: { "": "Foo no bar" }
+                    value: "Foo no bar"
                   }
                 }
               }
@@ -368,13 +366,13 @@ var tests = [{
                 "#bar": {
                   fooBar: {
                     spec: { hints: ["text"] },
-                    value: { "": "No foo and bar" }
+                    value: "No foo and bar"
                   }
                 },
                 "^bar": {
                   fooBar: {
                     spec: { hints: ["text"] },
-                    value: { "": "No foo and no bar" }
+                    value: "No foo and no bar"
                   }
                 }
               }
@@ -415,13 +413,13 @@ var tests = [{
             "#bar": {
               fooBar: {
                 spec: { hints: ["text"] },
-                value: { "": "Foo and bar" }
+                value: "Foo and bar"
               }
             },
             "^bar": {
               fooBar: {
                 spec: { hints: ["text"] },
-                value: { "": "Foo no bar" }
+                value: "Foo no bar"
               }
             }
           },
@@ -429,13 +427,13 @@ var tests = [{
             "#bar": {
               fooBar: {
                 spec: { hints: ["text"] },
-                value: { "": "No foo and bar" }
+                value: "No foo and bar"
               }
             },
             "^bar": {
               fooBar: {
                 spec: { hints: ["text"] },
-                value: { "": "No foo and no bar" }
+                value: "No foo and no bar"
               }
             }
           }

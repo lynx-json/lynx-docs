@@ -12,7 +12,7 @@ function shouldCondenseObject(jsValue) {
     .every(meta => meta.binding && (templateKey.sectionTokens.includes(meta.binding.token) || templateKey.simpleTokens.includes(meta.binding.token)));
   if (dynamicValue) return false; //if the value is dynamic, then we need to keep the value key
 
-  if (exportLynx.isLynxValue(jsValue) && !exportLynx.getLynxParentNode(this)) {
+  if (exportLynx.isLynxValue(jsValue)) {
     var keys = documentKeys.filter(key => key in jsValue.value);
     if (keys.length > 0) {
       log.yellow("Unexpected document key(s) '" + keys.join("','") + "' exist in the 'value' component. Flattening disabled.").warn();

@@ -12,7 +12,7 @@ var tests = [{
     expected: {
       message: {
         spec: { hints: ["text"] },
-        value: { "": "Hello" }
+        value: "Hello"
       }
     }
   },
@@ -25,7 +25,18 @@ var tests = [{
         hints: ["container"],
         children: [{ name: "message", hints: ["text"] }]
       },
-      message: { "": "Hello" }
+      message: "Hello"
+    }
+  },
+  {
+    description: "object container with `null` value",
+    should: "flatten not template",
+    template: { ">container": null },
+    expected: {
+      spec: {
+        hints: ["container"]
+      },
+      value: null
     }
   },
   {
@@ -41,7 +52,7 @@ var tests = [{
         ]
       },
       value: {
-        message: { "": "Hello" },
+        message: "Hello",
         realm: "http://example.com/foo/"
       }
     }
@@ -59,7 +70,7 @@ var tests = [{
         ]
       },
       value: {
-        message: { "": "Hello" },
+        message: "Hello",
         base: "http://example.com/foo/"
       }
     }
@@ -77,7 +88,7 @@ var tests = [{
         ]
       },
       value: {
-        message: { "": "Hello" },
+        message: "Hello",
         focus: "foo"
       }
     }
@@ -95,7 +106,7 @@ var tests = [{
         ]
       },
       value: {
-        message: { "": "Hello" },
+        message: "Hello",
         context: "http://example.com/foo/"
       }
     }
@@ -113,7 +124,7 @@ var tests = [{
           children: [{ name: "message", hints: ["text"] }]
         }]
       },
-      c1: { message: { "": "Hello" } }
+      c1: { message: "Hello" }
     }
   },
   {
@@ -122,7 +133,7 @@ var tests = [{
     template: { ">container": [{ ">text": "Hello" }] },
     expected: {
       spec: { hints: ["container"] },
-      value: { "": [{ spec: { hints: ["text"] }, value: { "": "Hello" } }] }
+      value: [{ spec: { hints: ["text"] }, value: "Hello" }]
     }
   },
   {
@@ -160,7 +171,7 @@ var tests = [{
       },
       value: {
         "#firstName": {
-          label: { "": "First Name" },
+          label: "First Name",
           firstName: {
             spec: {
               hints: ["line", "text"],
@@ -174,7 +185,7 @@ var tests = [{
             },
             value: { "<value": "" }
           },
-          requiredError: { "": "Required" }
+          requiredError: "Required"
         },
         "^firstName": null
       }
@@ -189,7 +200,7 @@ var tests = [{
         "#firstName": {
           "label>": "First Name",
           "firstName>line": {
-            "value": "",
+            value: "",
             "spec.input": true,
             "spec.validation": {
               required: {
@@ -215,7 +226,7 @@ var tests = [{
       },
       value: {
         "#firstName": {
-          label: { "": "First Name" },
+          label: "First Name",
           firstName: {
             spec: {
               hints: ["line", "text"],
@@ -229,7 +240,7 @@ var tests = [{
             },
             value: ""
           },
-          requiredError: { "": "Required" }
+          requiredError: "Required"
         },
         "^firstName": null
       }
@@ -241,15 +252,13 @@ var tests = [{
     template: { ">container": [{ ">container": { "message>text": "Hello" } }] },
     expected: {
       spec: { hints: ["container"] },
-      value: {
-        "": [{
-          spec: {
-            hints: ["container"],
-            children: [{ name: "message", hints: ["text"] }]
-          },
-          "message": { "": "Hello" }
-        }]
-      }
+      value: [{
+        spec: {
+          hints: ["container"],
+          children: [{ name: "message", hints: ["text"] }]
+        },
+        "message": "Hello"
+      }]
     }
   },
   {
@@ -264,21 +273,21 @@ var tests = [{
           { name: "foo" }
         ]
       },
-      message: { "": "Hello" },
+      message: "Hello",
       foo: {
         "#foo": {
           spec: {
             hints: ["container"],
             children: [{ name: "name", hints: ["text"] }]
           },
-          "name": { "": "Foo" }
+          "name": "Foo"
         },
         "^foo": {
           spec: {
             hints: ["container"],
             children: [{ name: "name", hints: ["text"] }]
           },
-          "name": { "": "No foo" }
+          "name": "No foo"
         }
       }
     }
