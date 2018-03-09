@@ -60,7 +60,7 @@ var tests = [{
         sources: [{
           media: "http//example.com/some-media",
           type: "application/vnd.example.some-media+json",
-          data: '{ "openingForm": { "name": "BBY_DisplayWelcomeForm", "args": ["{{one}}", "{{two}}"] } }'
+          data: '{ "openingForm": { "name": "A form name", "args": ["{{one}}", "{{two}}"] } }'
         }]
       }
     },
@@ -81,7 +81,7 @@ var tests = [{
       sources: [{
         media: "http//example.com/some-media",
         type: "application/vnd.example.some-media+json",
-        data: `{ "openingForm": { "name": "BBY_DisplayWelcomeForm", "args": ["I'm one", "I'm two"] } }`
+        data: `{ "openingForm": { "name": "A form name", "args": ["I'm one", "I'm two"] } }`
       }]
     }
   },
