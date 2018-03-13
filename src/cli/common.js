@@ -23,6 +23,10 @@ function applyDefaults(options) {
   if (options.root === undefined) options.root = ".";
   if (options.log === undefined) options.log = "error";
   if (options.flatten === undefined) options.flatten = false;
+  if (types.isString(options.flatten)) {
+    if (options.flatten.toLowerCase() === "false") options.flatten = false;
+    else options.flatten = true;
+  }
   let command = options._[0];
   if (command.toLowerCase() === "start") {
     if (options.port === undefined) options.port = 3000;

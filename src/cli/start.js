@@ -22,8 +22,7 @@ function buildCommand(yargs) {
       describe: "Lint json and lynx content (true, false). [default true]"
     })
     .option("flatten", {
-      describe: "Move spec object to parent spec object if possible. [default: false]",
-      boolean: true
+      describe: "Move spec object to parent spec object if possible. [default: false]"
     })
     .option("spec.dir", {
       describe: "The directory to write files representing the spec object(s) in the template that can be extracted"

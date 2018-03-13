@@ -4,7 +4,6 @@ const traverse = require("traverse");
 const expandTokens = require("../expand-tokens");
 const partialKey = require("./partial-key");
 const types = require("../../../types");
-const emptyKey = "";
 
 function sortPlaceholders(placeholders) {
   placeholders.sort((a, b) => { //partials with wildcard replacements need to processed last
@@ -27,7 +26,7 @@ function processPlaceholders(placeholders, parameters) {
       let placeholder = key.placeholder;
       if (placeholder.wildcard) {
         if (!types.isObject(parameters)) {
-          level.value[emptyKey] = parameters; //create value template for non-object parameters
+          level.value[exports.process.keyForNonObjectParameters] = parameters; //place non object parameter in a key instead of copying keys
         } else {
           Object.keys(parameters).forEach(key => {
             level.value[key] = parameters[key];
@@ -63,3 +62,4 @@ function processPartial(partial, parameters) {
 }
 
 exports.process = processPartial;
+exports.process.keyForNonObjectParameters = "";

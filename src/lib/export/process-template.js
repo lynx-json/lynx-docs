@@ -7,6 +7,8 @@ const jsonTemplates = require("../json-templates");
 const lynxExport = require("./lynx");
 const log = require("logatim");
 
+jsonTemplates.partials.process.keyForNonObjectParameters = "value";
+
 function getTemplate(pathOrTemplate) {
   if (types.isObject(pathOrTemplate) || types.isArray(pathOrTemplate)) return pathOrTemplate;
   if (types.isString(pathOrTemplate)) {
