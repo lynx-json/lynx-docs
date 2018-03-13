@@ -6,10 +6,6 @@ function lynxPartial(parameters) {
 
   if (types.isObject(parameters)) {
     result.spec.hints = ["container"];
-    if ("" in parameters) { //implicit value handling
-      result.value = parameters[""];
-      delete parameters[""];
-    }
     if ("value" in parameters) { //explicit value handling
       result.value = parameters.value;
       delete parameters.value;
