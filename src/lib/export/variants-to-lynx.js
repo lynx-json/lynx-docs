@@ -46,7 +46,7 @@ function exportLynxDocuments(realms, createFile, options) {
 function transformVariantToLynx(variant, options, createFile) {
   try {
     let template = processTemplate(variant.template, options, createFile);
-    let hbContent = toHandlebars(template, options) + "\n";
+    let hbContent = toHandlebars(template, options.handlebars) + "\n";
     log.blue("# Handlebars Content #").debug();
     log.debug(hbContent);
 
