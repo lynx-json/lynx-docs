@@ -5,8 +5,9 @@ const templateKey = require("./template-key");
 const types = require("../../types");
 const simpleTypes = ["number", "boolean", "string"];
 
-function toHandlebars(model) {
+function toHandlebars(model, options) {
   let buffer = "";
+  options = options || {};
 
   function writeContent(content) {
     buffer += content;
@@ -15,11 +16,12 @@ function toHandlebars(model) {
   function writeOpenBinding(binding) {
     if (templateKey.simpleTokens.includes(binding.token)) {
       let quote = binding.token === "<" ? "\"" : "";
-      writeContent("{{#if " + binding.variable + " includeZero=true}}" + quote + "{{" + binding.variable + "}}" + quote + "{{else}}");
+      let directives = options.allowBindToZeroAndEmptyString ? " includeZero=true" : "";
+      writeContent(`{{#if ${binding.variable}${directives}}}${quote}{{${binding.variable}}}${quote}{{else}}`);
     } else if (templateKey.sectionTokens.includes(binding.token)) {
-      writeContent("{{" + binding.token + binding.variable + "}}");
+      writeContent(`{{${binding.token}${binding.variable} }}`);
     } else if (templateKey.iteratorToken === binding.token) {
-      writeContent("{{#each " + binding.variable + "}}");
+      writeContent(`{{#each ${binding.variable}}}`);
     }
   }
 
