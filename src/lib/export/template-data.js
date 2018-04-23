@@ -1,5 +1,6 @@
 const fs = require("fs");
 const path = require("path");
+const jsonTemplates = require("../json-templates");
 const parseYaml = require("../parse-yaml");
 
 function readDataFile(dataFile) {
@@ -14,14 +15,19 @@ function readDataFile(dataFile) {
 
   try {
     let parsedPath = path.parse(dataFile);
-    if (parsedPath.ext === ".yml") return parseYaml(getContents()) || {};
-    if (parsedPath.ext === ".json") return JSON.parse(getContents().toString());
+    let data = {};
+
+    if (parsedPath.ext === ".yml") data = parseYaml(getContents()) || {};
+    if (parsedPath.ext === ".json") data = JSON.parse(getContents().toString());
     if (parsedPath.ext === ".js") {
       delete require.cache[require.resolve(dataFile)];
 
       let generator = require(dataFile);
-      return generator(resolveDataFile);
+      data = generator(resolveDataFile);
     }
+
+    data = jsonTemplates.expandTokens(data);
+    return jsonTemplates.partials.expand(data, jsonTemplates.partials.resolve, dataFile);
   } catch (err) {
     err.message = `Error reading data file '${dataFile}'\r\n${err.message}`;
     throw err;
