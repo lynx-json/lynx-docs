@@ -19,7 +19,7 @@ function toHandlebars(model, options) {
       let directives = options.allowBindToZeroAndEmptyString ? " includeZero=true" : "";
       writeContent(`{{#if ${binding.variable}${directives}}}${quote}{{${binding.variable}}}${quote}{{else}}`);
     } else if (templateKey.sectionTokens.includes(binding.token)) {
-      writeContent(`{{${binding.token}${binding.variable} }}`);
+      writeContent(`{{${binding.token}${binding.variable}}}`);
     } else if (templateKey.iteratorToken === binding.token) {
       writeContent(`{{#each ${binding.variable}}}`);
     }
