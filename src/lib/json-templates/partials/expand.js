@@ -27,7 +27,7 @@ function expandPartials(template, resolvePartial, templatePath) {
 
     //need to create the functions outside the while loop
     let processPartialMeta = (meta) => {
-      if (meta.name) throw Error("Template needs be expanded using 'expand-tokens' module before expanding partials.");
+      if (meta.name) throw Error("Template needs to be expanded using 'expand-tokens' module before expanding partials.");
       let partialUrl = exports.calculatePartialUrl(searchPath, meta.partial.variable);
       let processPartial = resolvePartial(partialUrl);
       let partial = processPartial(result[meta.source]);
