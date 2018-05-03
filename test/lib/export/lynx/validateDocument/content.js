@@ -6,14 +6,28 @@ const validateContent = require("../../../../../src/lib/export/lynx/validateDocu
 let tests = [{
     description: "valid 'content' with 'src'",
     should: "return no errors",
-    content: { src: ".", },
+    content: { src: "." },
     expected: []
-  }, {
+  },
+  {
+    description: "valid 'content' with empty 'src'",
+    should: "return no errors",
+    content: { src: "" },
+    expected: []
+  },
+  {
+    description: "valid 'content' with null 'src'",
+    should: "return no errors",
+    content: { src: null },
+    expected: []
+  },
+  {
     description: "valid 'content' with 'data'",
     should: "return no errors",
     content: { data: "Hello world", type: "text/plain" },
     expected: []
-  }, {
+  },
+  {
     description: "null 'content'",
     should: "return no errors",
     content: null,
@@ -24,6 +38,14 @@ let tests = [{
     should: "return errors",
     content: [],
     expected: ["'content' value must be an object"]
+  },
+  {
+    description: "'content' with invalid 'src'",
+    should: "return errors",
+    content: { src: {} },
+    expected: [
+      "'src' must be a valid URI or null"
+    ]
   },
   {
     description: "'content' with 'data' and 'src'",

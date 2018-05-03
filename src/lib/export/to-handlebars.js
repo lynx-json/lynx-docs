@@ -23,7 +23,7 @@ function exportTemplatesToHandlebars(realms, createFile, options) {
 function transformTemplateToHandlebars(pathOrTemplate, options, createFile) {
   try {
     var template = processTemplate(pathOrTemplate, options, createFile);
-    return toHandlebars(template, options) + "\n";
+    return toHandlebars(template, options.handlebars) + "\n";
   } catch (err) {
     err.message = "Unable to export ".concat(util.inspect(pathOrTemplate), " to handlebars format.\n\n", err.message);
     throw err;

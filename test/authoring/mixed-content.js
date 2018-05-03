@@ -85,6 +85,44 @@ var tests = [{
       }]
     }
   },
+  {
+    description: "Issue #83. Converting binding token '<' with empty string value. Default behavior",
+    template: { "foo<": "No foo" },
+    data: { foo: "" },
+    expected: { foo: "No foo" }
+  },
+  {
+    description: "Issue #83. Converting binding token '<' with empty string value. Options define handlebars.allowBindToZeroAndEmptyString",
+    options: { handlebars: { allowBindToZeroAndEmptyString: true } },
+    template: { "foo<": "No foo" },
+    data: { foo: "" },
+    expected: { foo: "" }
+  },
+  {
+    description: "Issue #83. Converting binding token '<' with 0 number value. Default behavior",
+    template: { "foo<": "No foo" },
+    data: { foo: 0 },
+    expected: { foo: "No foo" }
+  },
+  {
+    description: "Issue #83. Converting binding token '<' with 0 number value. Options define handlebars.allowBindToZeroAndEmptyString",
+    template: { "foo<": "No foo" },
+    options: { handlebars: { allowBindToZeroAndEmptyString: true } },
+    data: { foo: 0 },
+    expected: { foo: "0" }
+  },
+  {
+    description: "Issue #83. Converting binding token '<' with positive number value",
+    template: { "foo<": "No foo" },
+    data: { foo: 10 },
+    expected: { foo: "10" }
+  },
+  {
+    description: "Issue #83. Converting binding token '<' with negative number value. Default behavior",
+    template: { "foo<": "No foo" },
+    data: { foo: -10 },
+    expected: { foo: "-10" }
+  }
 ];
 
 tests.suite = "mixed content (static and dynamic)";

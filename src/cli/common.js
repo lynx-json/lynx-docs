@@ -5,6 +5,7 @@ const path = require("path");
 const types = require("../types");
 const log = require("logatim");
 const parseYaml = require("../lib/parse-yaml");
+const commands = ["start", "export"];
 
 function handleOptions(options) {
   processRunControl(options); //fill in run control values for empty switches
@@ -58,9 +59,11 @@ function applyRunControlToOptions(rc, options) {
     if (options[key] === undefined) options[key] = value;
   }
   let rcOptions = {};
-  ["root", "log", "spec", "flatten"].forEach(key => {
-    if (rc[key] !== undefined) rcOptions[key] = rc[key];
-  });
+  Object.keys(rc)
+    .filter(key => !commands.includes(key))
+    .forEach(key => {
+      if (rc[key] !== undefined) rcOptions[key] = rc[key];
+    });
 
   //based on command (start or export) apply run control settings if they exist
   let command = options._[0];

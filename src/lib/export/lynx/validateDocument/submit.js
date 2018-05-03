@@ -12,10 +12,9 @@ function validateType(value, errors) {
 }
 
 function validateAction(value, errors) {
-  if (!value.action) errors.push("'submit' value must have an 'action'");
+  if (!("action" in value)) return errors.push("'submit' value must have an 'action'");
   try {
     let parsed = url.parse(value.action);
-    if (!parsed || parsed.href.length === 0) errors.push("'action' must be a valid URI");
   } catch (err) {
     errors.push("'action' must be a valid URI");
   }
@@ -26,8 +25,8 @@ function validateSubmit(value) {
   if (value && !types.isObject(value)) return ["'submit' value must be an object"];
   let errors = [];
   validateAction(value, errors);
-  if (value.type) validateType(value, errors);
-  if (value.send) validateSend(value, errors);
+  if ("type" in value) validateType(value, errors);
+  if ("send" in value) validateSend(value, errors);
   return errors;
 }
 

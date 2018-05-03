@@ -26,9 +26,22 @@ let tests = [{
     should: "return errors",
     submit: {},
     expected: [
-      "'submit' value must have an 'action'",
+      "'submit' value must have an 'action'"
+    ]
+  },
+  {
+    description: "object 'submit' with null action",
+    should: "return errors",
+    submit: { action: null },
+    expected: [
       "'action' must be a valid URI"
     ]
+  },
+  {
+    description: "object 'submit' with empty action",
+    should: "return no errors",
+    submit: { action: "" },
+    expected: []
   },
   {
     description: "'submit' with valid 'type'",
