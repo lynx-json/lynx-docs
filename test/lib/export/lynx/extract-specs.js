@@ -9,9 +9,17 @@ const expect = chai.expect;
 const lynxExport = require("../../../../src/lib/export/lynx/");
 const jsonTemplates = require("../../../../src/lib/json-templates");
 
-const defaultOptions = { spec: { dir: "./specs", url: "./specs" } };
+const defaultOptions = { spec: { dir: "./specs", url: "./specs" }, output: "./out" };
 
-function CreateFileFnStub(specs) {
+function calculateSpecPath(specDir, name) {
+  if (!path.isAbsolute(specDir)) {
+    specDir = path.resolve(specDir);
+  }
+
+  return path.resolve(specDir, name);
+}
+
+function CreateFileFnStub(specs, options) {
   let self = this;
 
   let index = 0;
@@ -20,7 +28,7 @@ function CreateFileFnStub(specs) {
     let spec = specs[index];
     let content = JSON.stringify(spec);
     let name = md5(content) + ".lnxs";
-    let resultPath = path.resolve(defaultOptions.spec.dir, name);
+    let resultPath = calculateSpecPath(options.spec.dir, name);
 
     expect(resultPath).to.equal(specPath);
     expect(content).to.equal(specContent);
@@ -78,6 +86,17 @@ var tests = [{
     }
   },
   {
+    description: "when spec dir is absolute",
+    should: "call create file once",
+    options: Object.assign({}, defaultOptions, { spec: { dir: "/specs", url: "./specs" } }),
+    template: {
+      spec: {
+        hints: ["text"]
+      },
+      value: "Hello"
+    }
+  },
+  {
     description: "multiple spec values",
     should: "call create file for each spec",
     options: defaultOptions,
@@ -114,13 +133,13 @@ function runTest(test) {
   if (test.throws) return expect(() => lynxExport.extractSpecs(test.template, test.options, test.createFile)).to.throw(test.throws);
 
   let specs = getSpecsForTemplate(test.template);
-  let createFileStub = new CreateFileFnStub(specs);
+  let createFileStub = new CreateFileFnStub(specs, test.options);
 
   let result = lynxExport.extractSpecs(test.template, test.options, createFileStub.fn);
   expect(specs.length).to.equal(createFileStub.getCount());
 }
 
-describe("flatten lynx document templates", function () {
+describe("extracting spec content", function () {
   getTests().forEach(function (test) {
     describe("when " + test.description, function () {
       it("should " + test.should, function () {

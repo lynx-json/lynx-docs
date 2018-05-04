@@ -14,21 +14,26 @@ function extractSpecs(template, options, createFile) {
 
   if (!types.isFunction(createFile)) throw Error("createFile must be a function");
 
+  let specDir = options.spec.dir;
+  if (!path.isAbsolute(specDir)) {
+    specDir = path.resolve(specDir);
+  }
+
   return traverse(template).map(function (jsValue) {
     if (exportLynx.isLynxValue(jsValue)) {
       if (exportLynx.containsDynamicContent(jsValue.spec)) return;
-      
+
       let specContent = JSON.stringify(jsValue.spec);
       if (("size" in options.spec) && (specContent.length < options.spec.size)) {
         log.debug(`Skipping extraction for the following spec because its size is less than ${options.spec.size} bytes:`);
         log.debug(specContent);
         return;
       }
-      
+
       let specName = md5(specContent) + ".lnxs";
       jsValue.spec = url.resolve(options.spec.url, specName);
 
-      var specPath = path.resolve(options.spec.dir, specName);
+      var specPath = path.resolve(specDir, specName);
       createFile(specPath, specContent);
       this.update(jsValue);
     }
