@@ -38,7 +38,7 @@ var tests = [{
   {
     description: "Issue #86. Verify with spec and flattening.",
     template: { ">content": { data: { realm: "http://somerealm/", ">text": "A message" } } },
-    options: { realm: { realm: "http://whatever/" }, spec: { dir: "specs", url: "/specs/" }, flatten: true },
+    options: { realm: { realm: "http://whatever/" }, spec: { dir: "specs", url: "/specs/" }, flatten: true, output: "out" },
     onFile: (path, content) => {},
     data: null,
     expected: {
@@ -64,7 +64,7 @@ var tests = [{
         }]
       }
     },
-    options: { realm: { realm: "http://example.com/" }, spec: { dir: "specs", url: "/specs/" }, flatten: true },
+    options: { realm: { realm: "http://example.com/" }, spec: { dir: "specs", url: "/specs/" }, flatten: true, output: "out" },
     onFile: (path, content) => {},
     data: {
       one: "I'm one",
