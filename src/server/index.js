@@ -34,7 +34,12 @@ function serveError(req, res) {
 function reduction(acc, cv) {
   return function (req, res) {
     cv(req, res, function () {
-      acc(req, res);
+      try {
+        acc(req, res);
+      } catch (e) {
+        req.error = e;
+        serveError(req, res);
+      }
     });
   };
 }
@@ -51,21 +56,11 @@ function startServer(options) {
     next();
   }
 
-  function addErrorHandler(req, res, next) {
-    try {
-      next();
-    } catch (e) {
-      req.error = e;
-      serveError(req, res);
-    }
-  }
-
   var handlers = [
     addRequestContext,
-    addErrorHandler,
     serveCors(options)
   ];
-  
+
   if (Array.isArray(options.handlers)) {
     options.handlers.forEach(function (handler) {
       if (handler.indexOf(".") === 0) {
@@ -74,7 +69,7 @@ function startServer(options) {
       handlers.push(require(handler));
     });
   }
-  
+
   handlers = handlers.concat([
     serveImages,
     serveMeta(options),
