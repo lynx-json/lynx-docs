@@ -2,13 +2,12 @@ const path = require("path");
 const finder = require("./finder");
 const variantToLynx = require("../../lib/export/variants-to-lynx").one;
 
-
 module.exports = exports = function createSearchHandler(options) {
   return function searchRealms(req, res, next) {
-    
+
     function renderVariant(res, variant) {
       res.setHeader("Content-Type", "application/lynx+json");
-      res.setHeader("Cache-control", "no-cache");
+      res.setHeader("Cache-Control", "no-cache");
 
       var variantOptions = Object.assign({}, options, {
         realm: {
@@ -36,12 +35,12 @@ module.exports = exports = function createSearchHandler(options) {
 
       renderVariant(res, variant);
     }
-    
+
     if (req.url.indexOf("/meta/search") !== 0) return next();
-    
+
     var q = req.query ? req.query.q : "";
     var results = finder.find(q, req.realms);
-    
+
     renderResults(results);
   };
 };

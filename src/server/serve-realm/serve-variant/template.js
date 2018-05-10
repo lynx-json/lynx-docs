@@ -13,7 +13,7 @@ function serveTemplateVariant(options) {
       let content = variantToLynx(variant, variantOptions, createFile);
       let headers = {
         "Content-Type": "application/lynx+json",
-        "Cache-control": "no-cache"
+        "Cache-Control": "no-cache"
       };
 
       res.writeHead(200, headers);

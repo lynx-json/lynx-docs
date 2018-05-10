@@ -154,6 +154,75 @@ let tests = [{
     }
   },
   {
+    description: "request for realm with default variant using path",
+    should: "call serve variant with default",
+    stubs: getStubs({
+      serveVariant: function (options, variant, realm, req, res, next) {
+        expect(variant.template).to.equal("default.lynx.yml");
+        expect(variant.data).to.equal("default.data.yml");
+      }
+    }),
+    options: {},
+    req: {
+      url: "/default",
+      query: {},
+      realms: [{
+        url: "/",
+        variants: [{
+          name: "default",
+          template: "default.lynx.yml",
+          data: "default.data.yml"
+        }]
+      }],
+    }
+  },
+  {
+    description: "request for realm with explicit variant",
+    should: "call serve variant with explicit",
+    stubs: getStubs({
+      serveVariant: function (options, variant, realm, req, res, next) {
+        expect(variant.template).to.equal("explicit.lynx.yml");
+        expect(variant.data).to.equal("explicit.data.yml");
+      }
+    }),
+    options: {},
+    req: {
+      url: "/",
+      query: { variant: "explicit" },
+      realms: [{
+        url: "/",
+        variants: [{
+          name: "explicit",
+          template: "explicit.lynx.yml",
+          data: "explicit.data.yml"
+        }]
+      }],
+    }
+  },
+  {
+    description: "request for realm with explicit variant using path",
+    should: "call serve variant with explicit",
+    stubs: getStubs({
+      serveVariant: function (options, variant, realm, req, res, next) {
+        expect(variant.template).to.equal("explicit.lynx.yml");
+        expect(variant.data).to.equal("explicit.data.yml");
+      }
+    }),
+    options: {},
+    req: {
+      url: "/explicit",
+      query: {},
+      realms: [{
+        url: "/",
+        variants: [{
+          name: "explicit",
+          template: "explicit.lynx.yml",
+          data: "explicit.data.yml"
+        }]
+      }],
+    }
+  },
+  {
     description: "request results in multiple matching realms with matching variants",
     should: "call serve variant index",
     stubs: getStubs({
@@ -228,6 +297,28 @@ let tests = [{
     req: {
       url: "/",
       query: { variant: "index" },
+      realms: [{
+        url: "/",
+        variants: [{
+          name: "default",
+          template: "default.lynx.yml",
+          data: "default.data.yml"
+        }]
+      }],
+    }
+  },
+  {
+    description: "request for realm with index variant using path",
+    should: "call serve variant index",
+    stubs: getStubs({
+      serveVariantIndex: function (options, realms, req, res, next) {
+        expect(realms.length).to.equal(1);
+      }
+    }),
+    options: {},
+    req: {
+      url: "/index",
+      query: {},
       realms: [{
         url: "/",
         variants: [{
