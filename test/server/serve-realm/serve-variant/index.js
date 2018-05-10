@@ -66,7 +66,7 @@ let tests = [{
   },
   {
     description: "variant without template or jsmodule keys",
-    should: "call seve variant index",
+    should: "call serve variant index",
     stubs: getStubs({
       index: function (options, realms, req, res, next) {
         expect(realms.length).to.equal(1);
