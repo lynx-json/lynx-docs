@@ -9,13 +9,15 @@ function createFile(path, content) {
 function serveTemplate(options) {
   return function (template, realm) {
     return function (req, res, next) {
-      res.setHeader("Content-Type", "text/plain");
-      res.setHeader("Cache-control", "no-cache");
+      let templateOptions = Object.assign({}, options, { realm: realm });
+      let content = templateToHandlebars(template.path, templateOptions, createFile)
+      let headers = {
+        "Content-Type": "text/plain",
+        "Cache-Control": "no-cache"
+      };
 
-      var templateOptions = Object.assign({}, options, { realm: realm });
-
-      res.write(templateToHandlebars(template.path, templateOptions, createFile));
-      res.end();
+      res.writeHead(200, headers);
+      res.end(content);
     };
   };
 }
