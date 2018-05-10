@@ -11,26 +11,26 @@ function getStubs(assertions) {
         return function (req, res, next) {
           if (assertions.javascript) assertions.javascript(options, variant, realm, req, res, next);
           else throw new Error("Serve JavaScript variant should not be called");
-        }
-      }
+        };
+      };
     },
     './template': function (options) {
       return function (variant, realm) {
         return function (req, res, next) {
           if (assertions.template) assertions.template(options, variant, realm, req, res, next);
           else throw new Error("Serve template variant should not be called");
-        }
-      }
+        };
+      };
     },
     './meta-index': function (options, serveVariant) {
       return function (realms) {
         return function (req, res, next) {
           if (assertions.index) assertions.index(options, realms, req, res, next);
           else throw new Error("Serve variant index should not be called");
-        }
-      }
+        };
+      };
     }
-  }
+  };
 }
 
 let tests = [{

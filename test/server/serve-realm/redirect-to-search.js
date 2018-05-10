@@ -15,7 +15,7 @@ let tests = [{
       expect(headers["Cache-Control"]).to.equal("no-cache");
     },
     end: function (message) {
-      expect(message).to.equal("Redirecting to search")
+      expect(message).to.equal("Redirecting to search");
     }
   }
 }];

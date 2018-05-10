@@ -10,7 +10,7 @@ function serveTemplate(options) {
   return function (template, realm) {
     return function (req, res, next) {
       let templateOptions = Object.assign({}, options, { realm: realm });
-      let content = templateToHandlebars(template.path, templateOptions, createFile)
+      let content = templateToHandlebars(template.path, templateOptions, createFile);
       let headers = {
         "Content-Type": "text/plain",
         "Cache-Control": "no-cache"

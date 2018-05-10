@@ -10,41 +10,41 @@ function getStubs(assertions) {
       return function (req, res, next) {
         if (assertions.redirectToSearch) assertions.redirectToSearch(options, req, res, next);
         else throw new Error("Redirect to search should not be called");
-      }
+      };
     },
     './serve-template': function (options) {
       return function (template, realm) {
         return function (req, res, next) {
           if (assertions.serveTemplate) assertions.serveTemplate(options, template, realm, req, res, next);
           else throw new Error("Serve template should not be called");
-        }
-      }
+        };
+      };
     },
     './serve-variant': function (options) {
       return function (variant, realm) {
         return function (req, res, next) {
           if (assertions.serveVariant) assertions.serveVariant(options, variant, realm, req, res, next);
           else throw new Error("Serve variant should not be called");
-        }
-      }
+        };
+      };
     },
     './serve-variant/meta-index': function (options) {
       return function (realms) {
         return function (req, res, next) {
           if (assertions.serveVariantIndex) assertions.serveVariantIndex(options, realms, req, res, next);
           else throw new Error("Serve variant index should not be called");
-        }
-      }
+        };
+      };
     },
     '../serve-file': function (options) {
       return function (filename) {
         return function (req, res, next) {
           if (assertions.serveFile) assertions.serveFile(options, filename, req, res, next);
           else throw new Error("Serve variant index should not be called");
-        }
-      }
+        };
+      };
     }
-  }
+  };
 }
 
 let tests = [{
