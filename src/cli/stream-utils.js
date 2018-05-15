@@ -12,11 +12,10 @@ function createSourceStream(input) {
   return vfs.src(input);
 }
 
-function createDestStream(output) {
-  if (isStream(output)) return vinylToWritable(output); //convert from vinyl stream to regular stream
+function createDestStream(options) {
+  if (isStream(options.output)) return vinylToWritable(options.output); //convert from vinyl stream to regular stream
   const resolveFolder = function (vinyl) {
-    let absolute = path.isAbsolute(vinyl.path) ? vinyl.path : path.resolve(process.cwd(), output, vinyl.path);
-    return path.dirname(absolute);
+    return path.extname(vinyl.path) === ".lnxs" ? options.spec.dir : options.output;
   };
 
   return vfs.dest(resolveFolder);

@@ -11,14 +11,6 @@ const jsonTemplates = require("../../../../src/lib/json-templates");
 
 const defaultOptions = { spec: { dir: "./specs", url: "./specs" }, output: "./out" };
 
-function calculateSpecPath(specDir, name) {
-  if (!path.isAbsolute(specDir)) {
-    specDir = path.resolve(specDir);
-  }
-
-  return path.resolve(specDir, name);
-}
-
 function CreateFileFnStub(specs, options) {
   let self = this;
 
@@ -28,9 +20,8 @@ function CreateFileFnStub(specs, options) {
     let spec = specs[index];
     let content = JSON.stringify(spec);
     let name = md5(content) + ".lnxs";
-    let resultPath = calculateSpecPath(options.spec.dir, name);
 
-    expect(resultPath).to.equal(specPath);
+    expect(name).to.equal(specPath);
     expect(content).to.equal(specContent);
     index++;
   };

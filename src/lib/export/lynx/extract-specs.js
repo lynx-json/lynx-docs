@@ -2,22 +2,15 @@
 
 const traverse = require("traverse");
 const md5 = require("md5");
-const path = require("path");
 const url = require("url");
 const exportLynx = require("./index");
 const types = require("../../../types");
-const templateKey = require("../../json-templates/template-key");
 const log = require("logatim");
 
 function extractSpecs(template, options, createFile) {
   if (!types.isObject(options) || !types.isObject(options.spec) || !types.isString(options.spec.url) || !types.isString(options.spec.dir)) throw Error("Options must have a spec.url and spec.dir value in order to correctly write spec content and spec urls.");
 
   if (!types.isFunction(createFile)) throw Error("createFile must be a function");
-
-  let specDir = options.spec.dir;
-  if (!path.isAbsolute(specDir)) {
-    specDir = path.resolve(specDir);
-  }
 
   return traverse(template).map(function (jsValue) {
     if (exportLynx.isLynxValue(jsValue)) {
@@ -33,8 +26,7 @@ function extractSpecs(template, options, createFile) {
       let specName = md5(specContent) + ".lnxs";
       jsValue.spec = url.resolve(options.spec.url, specName);
 
-      var specPath = path.resolve(specDir, specName);
-      createFile(specPath, specContent);
+      createFile(specName, specContent, "spec");
       this.update(jsValue);
     }
   });
