@@ -74,8 +74,8 @@ function startServer(options) {
     serveImages,
     serveMeta(options),
     searchMeta(options),
-    serveRealm(options),
-    serveStatic(options)
+    serveStatic(options),
+    serveRealm(options)
   ]);
 
   var handler = handlers.reverse().reduce(reduction, serveNotFound);

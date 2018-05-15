@@ -7,7 +7,7 @@ module.exports = exports = function createMetaHandler(options) {
   return function (req, res, next) {
     function serveVariant(variant) {
       res.setHeader("Content-Type", "application/lynx+json");
-      res.setHeader("Cache-control", "no-cache");
+      res.setHeader("Cache-Control", "no-cache");
 
       var metaRealm = Object.assign({}, firstRealm, { realm: "http://lynx-json.org/docs/meta/realm/" });
       var variantOptions = Object.assign({}, options, { realm: metaRealm, spec: undefined });
@@ -77,7 +77,7 @@ module.exports = exports = function createMetaHandler(options) {
             icon: "/meta/icons/template.svg",
             title: template.title || "Untitled",
             url: template.url,
-            details: [ `path: ${template.path}` ]
+            details: [`path: ${template.path}`]
           });
         });
       }
@@ -90,10 +90,10 @@ module.exports = exports = function createMetaHandler(options) {
     if (realms.length === 0) return next();
 
     var firstRealm = realms[0],
-        realmTitle,
-        pageHeading,
-        resultsHeading,
-        results = [];
+      realmTitle,
+      pageHeading,
+      resultsHeading,
+      results = [];
 
     if (realms.length > 1) {
       var titles = realms.reduce(function (acc, cv) {
