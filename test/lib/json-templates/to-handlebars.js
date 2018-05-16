@@ -137,6 +137,48 @@ let tests = [{
     expected: { foo: null }
   },
   {
+    description: "converting binding token '=' with default null value - numeric literal",
+    template: { "content=": null },
+    data: { content: 42 },
+    expected: { content: 42 }
+  },
+  {
+    description: "converting binding token '=' with default null value - string literal",
+    template: { "content=": null },
+    data: { content: '"I am a string"' },
+    expected: { content: "I am a string" }
+  },
+  {
+    description: "converting binding token '=' with default null value - `true` literal",
+    template: { "content=": null },
+    data: { content: 'true' },
+    expected: { content: true }
+  },
+  {
+    description: "converting binding token '=' with default null value - `false` literal",
+    template: { "content=": null },
+    data: { content: 'false' },
+    expected: { content: false }
+  },
+  {
+    description: "converting binding token '=' with default null value - `null` literal",
+    template: { "content=": null },
+    data: { content: 'null' },
+    expected: { content: null }
+  },
+  {
+    description: "converting binding token '=' with default null value - object literal",
+    template: { "content=": null },
+    data: { content: '{ "name": "one", "value": "two" }' },
+    expected: { content: { name: "one", value: "two" } }
+  },
+  {
+    description: "converting binding token '=' with default null value - array literal",
+    template: { "content=": null },
+    data: { content: '[ "one", "two", "three" ]' },
+    expected: { content: ["one", "two", "three"] }
+  },
+  {
     description: "converting binding token '=' with default boolean value - if case",
     template: { "foo=": true },
     data: { foo: 42 },
