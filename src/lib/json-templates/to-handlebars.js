@@ -4,10 +4,15 @@ const traverse = require("traverse");
 const templateKey = require("./template-key");
 const types = require("../../types");
 const simpleTypes = ["number", "boolean", "string"];
+const simpleBraces = {
+  "<": { open: '"{{', close: '}}"' },
+  "=": { open: '{{{', close: '}}}' }
+};
 
 function toHandlebars(model, options) {
   let buffer = "";
   options = options || {};
+  const directives = options.allowBindToZeroAndEmptyString ? " includeZero=true" : "";
 
   function writeContent(content) {
     buffer += content;
@@ -15,9 +20,8 @@ function toHandlebars(model, options) {
 
   function writeOpenBinding(binding) {
     if (templateKey.simpleTokens.includes(binding.token)) {
-      let quote = binding.token === "<" ? "\"" : "";
-      let directives = options.allowBindToZeroAndEmptyString ? " includeZero=true" : "";
-      writeContent(`{{#if ${binding.variable}${directives}}}${quote}{{${binding.variable}}}${quote}{{else}}`);
+      let braces = simpleBraces[binding.token];
+      writeContent(`{{#if ${binding.variable}${directives}}}${braces.open}${binding.variable}${braces.close}{{else}}`);
     } else if (templateKey.sectionTokens.includes(binding.token)) {
       writeContent(`{{${binding.token}${binding.variable}}}`);
     } else if (templateKey.iteratorToken === binding.token) {
@@ -94,14 +98,14 @@ function toHandlebars(model, options) {
   }
 
   function shouldSeparate(traverseNode, meta, binding) {
+    let parentKeys = traverseNode.parent && traverseNode.parent.keys;
     if (binding) {
       if (templateKey.sectionTokens.includes(binding.token)) return false;
       if (templateKey.iteratorToken === binding.token &&
-        traverseNode.parent.keys.length === 2 &&
-        traverseNode.parent.keys.includes("^" + binding.variable)) return false;
+        parentKeys.length === 2 &&
+        parentKeys.includes("^" + binding.variable)) return false;
     }
-    return traverseNode.parent &&
-      traverseNode.parent.keys.indexOf(traverseNode.key) !== traverseNode.parent.keys.length - 1;
+    return parentKeys && (parentKeys.indexOf(traverseNode.key) !== (parentKeys.length - 1));
   }
 
   traverse(model).forEach(function (value) {
