@@ -9,9 +9,9 @@ const expect = chai.expect;
 const lynxExport = require("../../../../src/lib/export/lynx/");
 const jsonTemplates = require("../../../../src/lib/json-templates");
 
-const defaultOptions = { spec: { dir: "./specs", url: "./specs" }, output: "./out" };
+const defaultOptions = { spec: { dir: "./specs", url: "./specs" } };
 
-function CreateFileFnStub(specs, options) {
+function CreateFileFnStub(specs) {
   let self = this;
 
   let index = 0;
@@ -77,17 +77,6 @@ var tests = [{
     }
   },
   {
-    description: "when spec dir is absolute",
-    should: "call create file once",
-    options: Object.assign({}, defaultOptions, { spec: { dir: "/specs", url: "./specs" } }),
-    template: {
-      spec: {
-        hints: ["text"]
-      },
-      value: "Hello"
-    }
-  },
-  {
     description: "multiple spec values",
     should: "call create file for each spec",
     options: defaultOptions,
@@ -124,7 +113,7 @@ function runTest(test) {
   if (test.throws) return expect(() => lynxExport.extractSpecs(test.template, test.options, test.createFile)).to.throw(test.throws);
 
   let specs = getSpecsForTemplate(test.template);
-  let createFileStub = new CreateFileFnStub(specs, test.options);
+  let createFileStub = new CreateFileFnStub(specs);
 
   let result = lynxExport.extractSpecs(test.template, test.options, createFileStub.fn);
   expect(specs.length).to.equal(createFileStub.getCount());

@@ -26,7 +26,7 @@ function extractSpecs(template, options, createFile) {
       let specName = md5(specContent) + ".lnxs";
       jsValue.spec = url.resolve(options.spec.url, specName);
 
-      createFile(specName, specContent, "spec");
+      createFile(specName, specContent);
       this.update(jsValue);
     }
   });
