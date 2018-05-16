@@ -42,8 +42,8 @@ var exportCli = function (options) {
 
   commonCli(options);
 
-  var output = options.output === "stdout" ? process.stdout : options.output;
-  var dest = streamUtils.createDestinationStream(output);
+  if (options.output === "stdout") options.output = process.stdout;
+  var dest = streamUtils.createDestinationStream(options);
 
   var realms = getRealmMetadata(options.root);
   exportLib(realms, options).pipe(dest);

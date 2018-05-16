@@ -20,9 +20,8 @@ function CreateFileFnStub(specs) {
     let spec = specs[index];
     let content = JSON.stringify(spec);
     let name = md5(content) + ".lnxs";
-    let resultPath = path.resolve(defaultOptions.spec.dir, name);
 
-    expect(resultPath).to.equal(specPath);
+    expect(name).to.equal(specPath);
     expect(content).to.equal(specContent);
     index++;
   };
@@ -120,7 +119,7 @@ function runTest(test) {
   expect(specs.length).to.equal(createFileStub.getCount());
 }
 
-describe("flatten lynx document templates", function () {
+describe("extracting spec content", function () {
   getTests().forEach(function (test) {
     describe("when " + test.description, function () {
       it("should " + test.should, function () {
