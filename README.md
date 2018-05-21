@@ -4,13 +4,13 @@
 
 ## Installation
 
-`npm install -g @lynx-json/lynx-docs`
+`npm install @lynx-json/lynx-docs --save-dev`
 
 ## Starting the server
 
-`lynx-docs start --root ./templates`
+`npx lynx-docs start --root ./templates`
 
-Use `lynx-docs --help` to get help or review [command line parameters reference](https://github.com/lynx-json/lynx-docs/wiki/Command-Line-Parameters)
+Use `npx lynx-docs --help` to get help or review [command line parameters reference](https://github.com/lynx-json/lynx-docs/wiki/Command-Line-Parameters)
 
 ## Origin
 

@@ -577,7 +577,7 @@ function containsVariant(realmUri, name, pathToTemplateFile, pathToDataFile) {
 }
 
 function containsContentVariant(realmUri, name, pathToContentFile) {
-  var contentType = mime.lookup(pathToContentFile);
+  var contentType = mime.getType(pathToContentFile);
 
   var assertion = function (realms) {
     var result = realms.some(
