@@ -329,7 +329,7 @@ function aggregateContentFiles(contentFiles, realmsForFolder) {
 function createContentVariant(contentFile) {
   var variant = {
     content: contentFile,
-    type: mime.lookup(contentFile)
+    type: mime.getType(contentFile)
   };
 
   variant.name = getVariantName(variant);
