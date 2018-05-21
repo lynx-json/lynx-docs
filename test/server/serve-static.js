@@ -16,7 +16,7 @@ describe("serve static module", function () {
     var handler = serveStatic({});
 
     it("should return a function", function () {
-      expect(handler).to.be.a.Function;
+      expect(handler).to.be.a("function");
     });
 
     it("should accept three arguments", function () {
