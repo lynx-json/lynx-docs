@@ -440,6 +440,23 @@ var tests = [{
         }
       }
     }
+  },
+  {
+    description: "sections with incompatible lynx values",
+    should: "result in error",
+    template: {
+      spec: { hints: ["container"] },
+      value: {
+        "#truthy": {
+          spec: { hints: ["link"] },
+          value: { href: "." }
+        },
+        "^truthy": null
+      }
+    },
+    expected: {
+      error: { message: "Children are not compatible between value templates. In order to correct this, each binding must be it's own value spec pair. Sections that are incompatible are '#truthy','^truthy'" }
+    }
   }
 ];
 
@@ -453,9 +470,13 @@ function runTest(test) {
   let processed = jsonTemplates.process(test.template, false);
   if (test.include || test.log) console.log("processed", "\n" + JSON.stringify(processed, null, 2));
   if (test.throws) return expect(function () { return calculateChildren(processed); }).to.throw(test.throws);
-  let result = calculateChildren(processed);
-  if (test.include || test.log) console.log("result", "\n" + JSON.stringify(result, null, 2));
-  expect(result).to.deep.equal(test.expected);
+  try {
+    let result = calculateChildren(processed);
+    if (test.include || test.log) console.log("result", "\n" + JSON.stringify(result, null, 2));
+    expect(result).to.deep.equal(test.expected);
+  } catch (err) {
+    expect(test.expected.error.message).to.equal(err.message);
+  }
 }
 
 describe("calculate children for lynx document templates", function () {
