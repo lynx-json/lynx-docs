@@ -50,7 +50,7 @@ function transformVariantToLynx(variant, options, createFile) {
     log.blue("# Handlebars Content #").debug();
     log.debug(hbContent);
 
-    let data = types.isString(variant.data) ? templateData(variant.data) : variant.data || null;
+    let data = types.isString(variant.data) ? templateData(variant.data, options) : variant.data || null;
     let json = handlebars.compile(hbContent)(data);
     return lintContent(json, variant, options);
   } catch (err) {

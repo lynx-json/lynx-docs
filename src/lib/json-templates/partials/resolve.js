@@ -43,8 +43,8 @@ function scanDirectoryForPartial(directory, partialName) {
 function convertJsPartialToFunction(partialFile) {
   delete require.cache[require.resolve(partialFile)];
   let partialFn = require(partialFile);
-  return (parameters) => {
-    let partial = partialFn(parameters);
+  return (parameters, options) => {
+    let partial = partialFn(parameters, options);
     return partials.process(partial, parameters);
   };
 }

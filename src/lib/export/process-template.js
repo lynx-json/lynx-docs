@@ -38,7 +38,7 @@ function processTemplate(pathOrTemplate, options, createFile) {
   logDebug("Tokens Expanded", template);
 
   let templatePath = types.isString(pathOrTemplate) ? pathOrTemplate : null;
-  template = jsonTemplates.partials.expand(template, jsonTemplates.partials.resolve, templatePath);
+  template = jsonTemplates.partials.expand(template, jsonTemplates.partials.resolve, templatePath, options);
   logDebug("Partials Processed", template);
 
   if (options && options.realm) {
