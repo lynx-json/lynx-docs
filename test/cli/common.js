@@ -5,7 +5,7 @@ const chai = require("chai");
 const expect = chai.expect;
 const sinon = require("sinon");
 const log = require("logatim");
-const yaml = require("yamljs");
+const YAML = require("js-yaml");
 
 const commonCli = require("../../src/cli/common");
 
@@ -55,7 +55,7 @@ describe("common cli module", function () {
         before: function () {
           let rc = { log: "info" };
           sinon.stub(fs, "existsSync").returns(true);
-          sinon.stub(fs, "readFileSync").returns(yaml.stringify(rc));
+          sinon.stub(fs, "readFileSync").returns(YAML.safeDump(rc));
         },
         after: function () {
           fs.existsSync.restore();
@@ -312,7 +312,7 @@ describe("common cli module", function () {
     function runner(test) {
       if (test.runControl) {
         sinon.stub(fs, "existsSync").returns(true);
-        sinon.stub(fs, "readFileSync").returns(yaml.stringify(test.runControl));
+        sinon.stub(fs, "readFileSync").returns(YAML.safeDump(test.runControl));
       } else sinon.stub(fs, "existsSync").returns(false);
 
       commonCli(test.input);
