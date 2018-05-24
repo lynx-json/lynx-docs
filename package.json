@@ -31,6 +31,7 @@
     "content-type-parser": "^1.0.2",
     "handlebars": "^4.0.11",
     "isstream": "^0.1.2",
+    "js-yaml": "^3.11.0",
     "json-lint": "^0.1.0",
     "logatim": "^0.9.0",
     "md5": "^2.2.1",
@@ -43,7 +44,6 @@
     "vinyl-buffer": "^1.0.0",
     "vinyl-fs": "^3.0.3",
     "vinyl-source-stream": "^2.0.0",
-    "yamljs": "^0.3.0",
     "yargs": "^11.0.0"
   },
   "devDependencies": {
