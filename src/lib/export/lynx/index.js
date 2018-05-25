@@ -11,8 +11,8 @@ function getValuePortionOfLynxValue(lynxJsValue) {
 
 function validateSections(sections) {
   function sectionsAreCompatible(reference, comparison) {
-    if (isLynxValue(reference.value) ^ isLynxValue(comparison.value)) return false;
-    if (isLynxValue(reference.value) && isLynxValue(comparison.value)) return true;
+    if (exports.isLynxOrResultsInLynx(reference.value) ^ exports.isLynxOrResultsInLynx(comparison.value)) return false;
+    if (exports.isLynxOrResultsInLynx(reference.value) && exports.isLynxOrResultsInLynx(comparison.value)) return true;
     if (reference.children.length === 0 || comparison.children.length === 0) return true;
     if (reference.children.length !== comparison.children.length) return false;
     return reference.children.every((child, index) => {
