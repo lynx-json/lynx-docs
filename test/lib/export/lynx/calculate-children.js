@@ -457,6 +457,38 @@ var tests = [{
     expected: {
       error: { message: "Children are not compatible between value templates. In order to correct this, each binding must be it's own value spec pair. Sections that are incompatible are '#truthy','^truthy'" }
     }
+  },
+  {
+    description: "nested sections result in lynx content",
+    should: "result calculate children",
+    template: {
+      "container>": {
+        child: {
+          "#foo>text": null,
+          "^foo": {
+            "#bar>text": null,
+            "^bar>text": null
+          }
+        }
+      }
+    },
+    expected: {
+      "container": {
+        "spec": {
+          "children": [{ "name": "child" }],
+          "hints": ["container"]
+        },
+        "value": {
+          "child": {
+            "#foo": { "spec": { "hints": ["text"] }, "value": null },
+            "^foo": {
+              "#bar": { "spec": { "hints": ["text"] }, "value": null },
+              "^bar": { "spec": { "hints": ["text"] }, "value": null }
+            }
+          }
+        }
+      }
+    }
   }
 ];
 
@@ -475,7 +507,8 @@ function runTest(test) {
     if (test.include || test.log) console.log("result", "\n" + JSON.stringify(result, null, 2));
     expect(result).to.deep.equal(test.expected);
   } catch (err) {
-    expect(test.expected.error.message).to.equal(err.message);
+    if (test.expected.error) expect(test.expected.error.message).to.equal(err.message);
+    else throw err;
   }
 }
 
