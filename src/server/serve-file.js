@@ -18,7 +18,7 @@ function serveFile(options) {
           return next();
         }
 
-        var headers = { "Content-Type": mime.lookup(filename) };
+        var headers = { "Content-Type": mime.getType(filename) };
         if (options.spec && options.spec.cache && path.extname(filename) === ".lnxs") {
           headers["Cache-Control"] = "public, max-age=31536000";
         }

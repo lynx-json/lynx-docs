@@ -9,7 +9,7 @@ const fs = require("fs");
 const types = require("../../src/types");
 const getRealms = require("../../src/lib/metadata-realm");
 const path = require("path");
-const YAML = require("yamljs");
+const YAML = require("js-yaml");
 
 function statsFake(isDirectory) {
   return {
@@ -23,7 +23,7 @@ function statsFake(isDirectory) {
 }
 
 function toYamlBuffer(value) {
-  return new Buffer(YAML.stringify(value, null));
+  return new Buffer(YAML.safeDump(value));
 }
 
 var tests = [{
@@ -577,7 +577,7 @@ function containsVariant(realmUri, name, pathToTemplateFile, pathToDataFile) {
 }
 
 function containsContentVariant(realmUri, name, pathToContentFile) {
-  var contentType = mime.lookup(pathToContentFile);
+  var contentType = mime.getType(pathToContentFile);
 
   var assertion = function (realms) {
     var result = realms.some(

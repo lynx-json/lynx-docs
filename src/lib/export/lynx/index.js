@@ -11,7 +11,8 @@ function getValuePortionOfLynxValue(lynxJsValue) {
 
 function validateSections(sections) {
   function sectionsAreCompatible(reference, comparison) {
-    if (isLynxValue(reference.value) && isLynxValue(comparison.value)) return true;
+    if (exports.isLynxOrResultsInLynx(reference.value) ^ exports.isLynxOrResultsInLynx(comparison.value)) return false;
+    if (exports.isLynxOrResultsInLynx(reference.value) && exports.isLynxOrResultsInLynx(comparison.value)) return true;
     if (reference.children.length === 0 || comparison.children.length === 0) return true;
     if (reference.children.length !== comparison.children.length) return false;
     return reference.children.every((child, index) => {
@@ -46,7 +47,7 @@ function accumulateLynxChildren(lynxJsValue) {
     .reduce((acc, meta) => {
       if (meta.name && isLynxOrResultsInLynx(source[meta.source])) {
         acc.push({ meta: meta, value: source[meta.source], updateValue: function (newValue) { source[meta.source] = newValue; } });
-      } else if (meta.binding && templateKey.sectionTokens.includes(meta.binding.token) && !isLynxValue(source[meta.source])) {
+      } else if (meta.binding && templateKey.sectionTokens.includes(meta.binding.token)) {
         let sectionChildren = accumulateLynxChildren(source[meta.source]);
         sections.push({ meta: meta, value: source[meta.source], children: sectionChildren });
         acc = acc.concat(sectionChildren.filter(item => !!item.meta.name));
