@@ -109,10 +109,6 @@ function createErrorDocument(variant, options, err) {
   };
 
   doc.value.message = createErrorDocumentSection("Error message", err.message);
-  if (err.snippet) {
-    doc.value.snippet = createErrorDocumentSection("YAML parse error details", `line ${err.parsedLine} near "${err.snippet}"`);
-    doc.spec.children.push({ name: "snippet" });
-  }
   if (err.before) {
     doc.value.before = createErrorDocumentSection("Content before JSON lint error", err.before);
     doc.spec.children.push({ name: "before" });

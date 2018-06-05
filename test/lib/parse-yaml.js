@@ -18,5 +18,10 @@ describe("parse yaml module", function () {
       parsed.foo.value = "second";
       expect(parsed.bar.value).to.not.equal("second");
     });
+    it("should allow empty content", function () {
+      let template = ``;
+      let parsed = parseYAML(template);
+      expect(parsed).to.deep.equal({});
+    });
   });
 });

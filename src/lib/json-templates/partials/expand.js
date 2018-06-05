@@ -35,7 +35,7 @@ function expandPartials(template, resolvePartial, templatePath) {
 
       if (types.isObject(expanded)) {
         delete result[meta.source];
-        Object.assign(result, expanded);
+        result = Object.assign(expanded, result);
       } else {
         result = expanded;
       }
