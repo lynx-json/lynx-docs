@@ -1,64 +1,72 @@
 "use strict";
 
 const traverse = require("traverse");
-const expandTokens = require("../expand-tokens");
 const partialKey = require("./partial-key");
+const templateKey = require("../template-key");
 const types = require("../../../types");
 
-function sortPlaceholders(placeholders) {
-  placeholders.sort((a, b) => { //partials with wildcard replacements need to processed last
-    if (a.keys.some(k => k.placeholder.wildcard)) return 1;
-    if (b.keys.some(k => k.placeholder.wildcard)) return -1;
-    return 0;
-  });
-  placeholders.forEach(p =>
-    p.keys.sort((a, b) => { //wildcards need to be processed last      
-      if (a.placeholder.wildcard) return 1;
-      if (b.placeholder.wildcard) return -1;
-      return 0;
-    }));
+/* the purpose of this method is to handle situations where a partial with a wildcard placeholder
+   is called with parameters that share key names with the partial. The value from the parameters should win */
+function setValue(object, key, value) {
+  if (key in object === true) return;
+  object[key] = value;
 }
 
-function processPlaceholders(placeholders, parameters) {
-  sortPlaceholders(placeholders);
-  placeholders.forEach(level => {
-    level.keys.forEach(key => {
-      let placeholder = key.placeholder;
-      if (placeholder.wildcard) {
-        if (!types.isObject(parameters)) {
-          level.value[exports.process.keyForNonObjectParameters] = parameters; //place non object parameter in a key instead of copying keys
-        } else {
-          Object.keys(parameters).forEach(key => {
-            level.value[key] = parameters[key];
-            delete parameters[key]; //consume the parameter
-          });
+function processPlaceholders(traverseNode, value, placeholderKeys, parameters) {
+  return function () {
+    let result = Object.keys(value).reduce((acc, key) => {
+      let placeholderKey = placeholderKeys.find(p => p.source === key);
+      if (placeholderKey) {
+        let pairs = getPairsForPlaceholder(placeholderKey.placeholder, parameters);
+        if (!pairs) setValue(acc, placeholderKey.name, value[placeholderKey.source]); //value from partial
+        else {
+          pairs.forEach(pair => acc[pair.key] = pair.value); //value from paramaters
         }
       } else {
-        if (types.isObject(parameters) && Object.keys(parameters).includes(placeholder.variable)) {
-          level.value[key.name] = parameters[placeholder.variable];
-          delete parameters[placeholder.variable]; //consume the parameter
-        } else { //didn't match in parameters so use default
-          level.value[key.name] = level.value[key.source];
-        }
+        setValue(acc, key, value[key]); //value from partial
       }
-      delete level.value[key.source]; //remove the original from the partial
-    });
-  });
+      return acc;
+    }, {});
+    traverseNode.update(result);
+  };
+}
+
+function getPairsForPlaceholder(placeholder, parameters) {
+  if (placeholder.wildcard) {
+    if (!types.isObject(parameters)) {
+      return [{ key: exports.process.keyForNonObjectParameters, value: parameters }]; //place non object parameter in a key instead of copying keys
+    } else {
+      return Object.keys(parameters).map(key => {
+        let pair = { key: key, value: parameters[key] };
+        delete parameters[key]; //consume the parameter
+        return pair;
+      });
+    }
+  } else {
+    if (!types.isObject(parameters)) return null;
+    let match = Object.keys(parameters).map(templateKey.parse).find(key => key.name === placeholder.variable);
+    if (!match) return null;
+    let pairs = [{ key: match.source, value: parameters[match.source] }];
+    delete parameters[match.source]; //consume the parameter
+    return pairs;
+  }
 }
 
 function processPartial(partial, parameters) {
-  let placeholders = traverse(partial).reduce(function (acc, value) {
-    if (!this.keys || types.isArray(value)) return acc;
-    let keys = this.keys.map(partialKey.parse).filter(key => !!key.placeholder);
-    if (keys.length === 0) return acc;
+  let wildcardFn = null;
+  return traverse(partial).forEach(function (value) {
+    if (this.isRoot) {
+      this.after(function () { if (wildcardFn !== null) wildcardFn(); /*do wildcard replacement after all others*/ });
+    }
 
-    acc.push({ keys: keys, value: value });
-    return acc;
-  }, []);
-
-  processPlaceholders(placeholders, parameters);
-
-  return partial;
+    if (!this.keys || types.isArray(value)) return;
+    let placeholderKeys = this.keys.map(partialKey.parse).filter(key => !!key.placeholder);
+    if (placeholderKeys.length > 0) {
+      if (placeholderKeys.find(p => p.placeholder.wildcard)) {
+        wildcardFn = processPlaceholders(this, value, placeholderKeys, parameters);
+      } else processPlaceholders(this, value, placeholderKeys, parameters)();
+    }
+  });
 }
 
 exports.process = processPartial;
