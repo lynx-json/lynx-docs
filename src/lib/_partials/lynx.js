@@ -1,7 +1,7 @@
 const types = require("../../types");
 const specKey = /^spec\.(.*)$/;
 
-function lynxPartial(parameters) {
+function lynxPartial(parameters, options) {
   let result = { spec: {}, value: { "*~": null } };
 
   if (types.isObject(parameters)) {

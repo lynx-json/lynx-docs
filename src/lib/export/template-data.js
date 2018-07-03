@@ -3,14 +3,14 @@ const path = require("path");
 const jsonTemplates = require("../json-templates");
 const parseYaml = require("../parse-yaml");
 
-function readDataFile(dataFile) {
+function readDataFile(dataFile, options) {
   function getContents() {
     return fs.readFileSync(dataFile);
   }
 
   function resolveDataFile(otherDataFile) {
     otherDataFile = path.resolve(path.dirname(dataFile), otherDataFile);
-    return readDataFile(otherDataFile);
+    return readDataFile(otherDataFile, options);
   }
 
   try {
@@ -23,7 +23,7 @@ function readDataFile(dataFile) {
       delete require.cache[require.resolve(dataFile)];
 
       let generator = require(dataFile);
-      data = generator(resolveDataFile);
+      data = generator(resolveDataFile, options);
     }
 
     data = jsonTemplates.expandTokens(data);

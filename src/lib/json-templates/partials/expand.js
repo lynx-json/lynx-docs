@@ -20,7 +20,7 @@ function calculatePartialUrl(templatePath, partialName) {
   return url.format(parsed);
 }
 
-function expandPartials(template, resolvePartial, templatePath) {
+function expandPartials(template, resolvePartial, templatePath, options) {
   return traverse(template).map(function (value) {
     if (!this.keys || types.isArray(value)) return; //no keys that contain partial references
     let searchPath = templatePath;
@@ -30,7 +30,8 @@ function expandPartials(template, resolvePartial, templatePath) {
       if (meta.name) throw Error("Template needs to be expanded using 'expand-tokens' module before expanding partials.");
       let partialUrl = exports.calculatePartialUrl(searchPath, meta.partial.variable);
       let processPartial = resolvePartial(partialUrl);
-      let partial = processPartial(result[meta.source]);
+      let partialOptions = Object.assign(options || {}, { template: templatePath })
+      let partial = processPartial(result[meta.source], partialOptions);
       let expanded = expandTokens.expand(partial);
 
       if (types.isObject(expanded)) {
