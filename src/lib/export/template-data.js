@@ -27,7 +27,7 @@ function readDataFile(dataFile, options) {
     }
 
     data = jsonTemplates.expandTokens(data);
-    return jsonTemplates.partials.expand(data, jsonTemplates.partials.resolve, dataFile);
+    return jsonTemplates.partials.expand(data, jsonTemplates.partials.resolve, dataFile, options);
   } catch (err) {
     err.message = `Error reading data file '${dataFile}'\r\n${err.message}`;
     throw err;
