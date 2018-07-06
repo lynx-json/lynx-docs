@@ -291,6 +291,33 @@ let tests = [{
       }
     }
   },
+  {
+    description: "When same placeholder is referenced in multiple locations",
+    should: "should use parameter in all locations",
+    partial: {
+      "electronicTerms~": true,
+      "mobilePhone>mobile-phone-input-data": {
+        "enforceRequired~electronicTerms": true
+      },
+
+      "emailAddress>email-address-input-data": {
+        "enforceRequired~electronicTerms": true
+      },
+      "*~": null
+    },
+    parameters: { electronicTerms: false, foo: { bar: "qux" } },
+    expected: {
+      "electronicTerms": false,
+      "mobilePhone>mobile-phone-input-data": {
+        "enforceRequired": false
+      },
+
+      "emailAddress>email-address-input-data": {
+        "enforceRequired": false
+      },
+      foo: { bar: "qux" }
+    }
+  },
 ];
 
 function getTests() {

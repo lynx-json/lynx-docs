@@ -12,18 +12,23 @@ function setValue(object, key, value) {
   object[key] = value;
 }
 
-function processPlaceholders(traverseNode, value, placeholderKeys, parameters) {
+function processPlaceholders(traverseNode, placeholderKeys, parameters, used) {
   return function () {
+    let value = traverseNode.node;
     let result = Object.keys(value).reduce((acc, key) => {
       let placeholderKey = placeholderKeys.find(p => p.source === key);
       if (placeholderKey) {
-        let pairs = getPairsForPlaceholder(placeholderKey.placeholder, parameters);
-        if (!pairs) setValue(acc, placeholderKey.name, value[placeholderKey.source]); //value from partial
+        let pairs = getPairsForPlaceholder(placeholderKey, parameters);
+        if (!pairs) setValue(acc, placeholderKey.name, value[placeholderKey.source]); //use value in partial
         else {
-          pairs.forEach(pair => acc[pair.key] = pair.value); //value from paramaters
+          //use value in parameters set
+          pairs.forEach(pair => {
+            acc[pair.key] = pair.value;
+            used.push(pair.key);
+          });
         }
       } else {
-        setValue(acc, key, value[key]); //value from partial
+        setValue(acc, key, value[key]); //use value in partial
       }
       return acc;
     }, {});
@@ -31,40 +36,44 @@ function processPlaceholders(traverseNode, value, placeholderKeys, parameters) {
   };
 }
 
-function getPairsForPlaceholder(placeholder, parameters) {
+function getPairsForPlaceholder(placeholderKey, parameters) {
+  let placeholder = placeholderKey.placeholder;
   if (placeholder.wildcard) {
     if (!types.isObject(parameters)) {
       return [{ key: exports.process.keyForNonObjectParameters, value: parameters }]; //place non object parameter in a key instead of copying keys
     } else {
       return Object.keys(parameters).map(key => {
-        let pair = { key: key, value: parameters[key] };
-        delete parameters[key]; //consume the parameter
-        return pair;
+        return { key: key, value: parameters[key] };
       });
     }
   } else {
     if (!types.isObject(parameters)) return null;
     let match = Object.keys(parameters).map(templateKey.parse).find(key => key.name === placeholder.variable);
     if (!match) return null;
-    let pairs = [{ key: match.source, value: parameters[match.source] }];
-    delete parameters[match.source]; //consume the parameter
-    return pairs;
+    let key = placeholderKey.name === match.name ? match.source : placeholderKey.name;
+    return [{ key, value: parameters[match.source] }];
   }
 }
 
 function processPartial(partial, parameters) {
   let wildcardFn = null;
+  let used = [];
   return traverse(partial).forEach(function (value) {
     if (this.isRoot) {
-      this.after(function () { if (wildcardFn !== null) wildcardFn(); /*do wildcard replacement after all others*/ });
+      this.after(function () {
+        if (wildcardFn !== null) {
+          used.forEach(key => delete parameters[key]);
+          wildcardFn();
+        }
+      });
     }
 
     if (!this.keys || types.isArray(value)) return;
     let placeholderKeys = this.keys.map(partialKey.parse).filter(key => !!key.placeholder);
     if (placeholderKeys.length > 0) {
       if (placeholderKeys.find(p => p.placeholder.wildcard)) {
-        wildcardFn = processPlaceholders(this, value, placeholderKeys, parameters);
-      } else processPlaceholders(this, value, placeholderKeys, parameters)();
+        wildcardFn = processPlaceholders(this, placeholderKeys, parameters, used);
+      } else processPlaceholders(this, placeholderKeys, parameters, used)();
     }
   });
 }
