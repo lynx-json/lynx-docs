@@ -2,38 +2,50 @@ const fs = require("fs");
 const path = require("path");
 const jsonTemplates = require("../json-templates");
 const parseYaml = require("../parse-yaml");
+const types = require("../../types");
 
-function readDataFile(dataFile, options) {
+function processDataOrFile(dataOrFile, options) {
   function getContents() {
-    return fs.readFileSync(dataFile);
+    return fs.readFileSync(dataOrFile);
   }
 
   function resolveDataFile(otherDataFile) {
-    otherDataFile = path.resolve(path.dirname(dataFile), otherDataFile);
-    return readDataFile(otherDataFile, options);
+    otherDataFile = path.resolve(path.dirname(dataOrFile), otherDataFile);
+    return processDataOrFile(otherDataFile, options);
+  }
+
+  function calculateResolveParitalStartPath(dataOrFile, options) {
+    if (types.isString(dataOrFile)) return dataOrFile;
+    if (options && options.realm && options.realm.folder) return options.realm.folder;
+    return null;
   }
 
   try {
-    let parsedPath = path.parse(dataFile);
+    if (!dataOrFile) return dataOrFile;
+
+    let resolveParitalStartPath = calculateResolveParitalStartPath(dataOrFile, options);
+    if (!types.isString(dataOrFile)) return jsonTemplates.process(dataOrFile, resolveParitalStartPath, options);
+
+    let parsedPath = path.parse(dataOrFile);
     let data = {};
 
     if (parsedPath.ext === ".yml") data = parseYaml(getContents()) || {};
     if (parsedPath.ext === ".json") data = JSON.parse(getContents().toString());
     if (parsedPath.ext === ".js") {
-      delete require.cache[require.resolve(dataFile)];
+      delete require.cache[require.resolve(dataOrFile)];
 
-      let generator = require(dataFile);
+      let generator = require(dataOrFile);
       data = generator(resolveDataFile, options);
     }
 
-    data = jsonTemplates.expandTokens(data);
-    return jsonTemplates.partials.expand(data, jsonTemplates.partials.resolve, dataFile, options);
+    return jsonTemplates.process(data, resolveParitalStartPath, options);
+
   } catch (err) {
-    err.message = `Error reading data file '${dataFile}'\r\n${err.message}`;
+    err.message = `Error reading data file '${dataOrFile}'\r\n${err.message}`;
     throw err;
   }
 
   throw new Error("Unrecognized data file format: ", parsedPath.ext);
 }
 
-module.exports = exports = readDataFile;
+module.exports = exports = processDataOrFile;
