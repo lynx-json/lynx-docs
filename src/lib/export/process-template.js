@@ -23,6 +23,12 @@ function getTemplate(pathOrTemplate) {
   throw Error("Unexpected template value. Expected path to template or template object. Received \n" + JSON.stringify(pathOrTemplate));
 }
 
+function calculateResolveParitalStartPath(pathOrTemplate, options) {
+  if (types.isString(pathOrTemplate)) return pathOrTemplate;
+  if (options && options.realm && options.realm.folder) return options.realm.folder;
+  return null;
+}
+
 function logDebug(header, value) {
   log.blue("# " + header + " #").debug();
   log.debug(JSON.stringify(value));
@@ -37,8 +43,8 @@ function processTemplate(pathOrTemplate, options, createFile) {
   template = jsonTemplates.expandTokens(template);
   logDebug("Tokens Expanded", template);
 
-  let templatePath = types.isString(pathOrTemplate) ? pathOrTemplate : null;
-  template = jsonTemplates.partials.expand(template, jsonTemplates.partials.resolve, templatePath);
+  let resolveParitalStartPath = calculateResolveParitalStartPath(pathOrTemplate, options);
+  template = jsonTemplates.partials.expand(template, jsonTemplates.partials.resolve, resolveParitalStartPath, options);
   logDebug("Partials Processed", template);
 
   if (options && options.realm) {

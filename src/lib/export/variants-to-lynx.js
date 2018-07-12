@@ -1,5 +1,4 @@
 "use strict";
-const util = require("util");
 const path = require("path");
 const processTemplate = require("./process-template");
 const toHandlebars = require("../json-templates/to-handlebars");
@@ -50,7 +49,7 @@ function transformVariantToLynx(variant, options, createFile) {
     log.blue("# Handlebars Content #").debug();
     log.debug(hbContent);
 
-    let data = types.isString(variant.data) ? templateData(variant.data) : variant.data || null;
+    let data = templateData(variant.data, options);
     let json = handlebars.compile(hbContent)(data);
     return lintContent(json, variant, options);
   } catch (err) {

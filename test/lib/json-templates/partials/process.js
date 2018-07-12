@@ -1,5 +1,6 @@
 const chai = require("chai");
 const expect = chai.expect;
+const types = require("../../../../src/types");
 
 const processPartial = require("../../../../src/lib/json-templates/partials/process").process;
 
@@ -152,6 +153,171 @@ let tests = [{
       }
     }
   },
+  {
+    description: "Issue 108: paramater with partial reference",
+    should: "should replace nested placeholders and maintain key ordering",
+    partial: {
+      ">list": {
+        "label>~": "Name",
+        "input>line": {
+          "spec.input~": "name",
+          "value~": ""
+        }
+      }
+    },
+    parameters: { "label>": "First Name", "spec.input": "firstName", value: "John" },
+    expected: {
+      ">list": {
+        "label>": "First Name",
+        "input>line": {
+          "spec.input": "firstName",
+          "value": "John"
+        }
+      }
+    }
+  },
+  {
+    description: "Issue 108: paramater with key only",
+    should: "should replace nested placeholders and maintain key ordering",
+    partial: {
+      ">list": {
+        "label>~": "Name",
+        "input>line": {
+          "spec.input~": "name",
+          "value~": ""
+        }
+      }
+    },
+    parameters: { "label": "First Name", "spec.input": "firstName", value: "John" },
+    expected: {
+      ">list": {
+        "label": "First Name",
+        "input>line": {
+          "spec.input": "firstName",
+          "value": "John"
+        }
+      }
+    }
+  },
+  {
+    description: "Issue 108: paramater with quoted binding",
+    should: "should replace nested placeholders and maintain key ordering",
+    partial: {
+      ">list": {
+        "label>~": "Name",
+        "input>line": {
+          "spec.input~": "name",
+          "value~": ""
+        }
+      }
+    },
+    parameters: { "label<": "First Name", "spec.input": "firstName", value: "John" },
+    expected: {
+      ">list": {
+        "label<": "First Name",
+        "input>line": {
+          "spec.input": "firstName",
+          "value": "John"
+        }
+      }
+    }
+  },
+  {
+    description: "Issue 108: paramater with literal binding",
+    should: "should replace nested placeholders and maintain key ordering",
+    partial: {
+      ">list": {
+        "label>~": "Name",
+        "input>line": {
+          "spec.input~": "name",
+          "value~": ""
+        }
+      }
+    },
+    parameters: { "label=": "First Name", "spec.input": "firstName", value: "John" },
+    expected: {
+      ">list": {
+        "label=": "First Name",
+        "input>line": {
+          "spec.input": "firstName",
+          "value": "John"
+        }
+      }
+    }
+  },
+  {
+    description: "Issue 108: paramater with partial reference and placeholder",
+    should: "should replace nested placeholders and maintain key ordering",
+    partial: {
+      ">list": {
+        "label>~": "Name",
+        "input>line": {
+          "spec.input~": "name",
+          "value~": ""
+        }
+      }
+    },
+    parameters: { "label>~": "First Name", "spec.input": "firstName", value: "John" },
+    expected: {
+      ">list": {
+        "label>~": "First Name",
+        "input>line": {
+          "spec.input": "firstName",
+          "value": "John"
+        }
+      }
+    }
+  },
+  {
+    description: "Issue 108: paramater with partial reference and quoted binding",
+    should: "should replace nested placeholders and maintain key ordering",
+    partial: {
+      ">list": {
+        "label>~": "Name",
+        "input>line": {
+          "spec.input~": "name",
+          "value~": ""
+        }
+      }
+    },
+    parameters: { "label<title>stylized-text": "First Name", "spec.input": "firstName", value: "John" },
+    expected: {
+      ">list": {
+        "label<title>stylized-text": "First Name",
+        "input>line": {
+          "spec.input": "firstName",
+          "value": "John"
+        }
+      }
+    }
+  },
+  {
+    description: "When same placeholder is referenced in multiple locations",
+    should: "should use parameter in all locations",
+    partial: {
+      "electronicTerms~": true,
+      "mobilePhone>mobile-phone-input-data": {
+        "enforceRequired~electronicTerms": true
+      },
+
+      "emailAddress>email-address-input-data": {
+        "enforceRequired~electronicTerms": true
+      },
+      "*~": null
+    },
+    parameters: { electronicTerms: false, foo: { bar: "qux" } },
+    expected: {
+      "electronicTerms": false,
+      "mobilePhone>mobile-phone-input-data": {
+        "enforceRequired": false
+      },
+
+      "emailAddress>email-address-input-data": {
+        "enforceRequired": false
+      },
+      foo: { bar: "qux" }
+    }
+  },
 ];
 
 function getTests() {
@@ -165,6 +331,20 @@ function runTest(test) {
   let result = processPartial(test.partial, test.parameters);
   if (test.include || test.log) console.log("result", "\n" + JSON.stringify(result, null, 2));
   expect(result).to.deep.equal(test.expected);
+  //assert that the keys are in the same order as expected
+  let keys = types.isArray(result) ? result : getDeepKeys(result);
+  let compare = types.isArray(test.expected) ? test.expected : getDeepKeys(test.expected);
+  expect(keys).to.have.ordered.deep.members(compare);
+}
+
+function getDeepKeys(obj) {
+  return Object.keys(obj).reduce((acc, key) => {
+    acc.push(key);
+    if (types.isObject(obj[key])) {
+      acc = acc.concat(getDeepKeys(obj[key]).map(sub => `${key}.${sub}`));
+    }
+    return acc;
+  }, []);
 }
 
 describe("process partials module", function () {
