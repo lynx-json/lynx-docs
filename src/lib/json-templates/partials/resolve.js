@@ -9,9 +9,9 @@ const parseYaml = require("../../parse-yaml");
 const partials = require("./index");
 const types = require("../../../types");
 
-function calculateSearchDirectories(templatePath) {
+function calculateSearchDirectories(startPath) {
   let cwd = process.cwd();
-  let relative = path.relative(cwd, templatePath);
+  let relative = path.relative(cwd, startPath);
   let dirnames = path.dirname(relative).split(path.sep);
 
   let searchPaths = dirnames.reduce((acc, segment, index) => {
@@ -43,8 +43,8 @@ function scanDirectoryForPartial(directory, partialName) {
 function convertJsPartialToFunction(partialFile) {
   delete require.cache[require.resolve(partialFile)];
   let partialFn = require(partialFile);
-  return (parameters) => {
-    let partial = partialFn(parameters);
+  return (parameters, options) => {
+    let partial = partialFn(parameters, options);
     return partials.process(partial, parameters);
   };
 }

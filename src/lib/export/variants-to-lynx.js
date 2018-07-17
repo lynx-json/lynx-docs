@@ -1,5 +1,4 @@
 "use strict";
-const util = require("util");
 const path = require("path");
 const processTemplate = require("./process-template");
 const toHandlebars = require("../json-templates/to-handlebars");
@@ -50,7 +49,7 @@ function transformVariantToLynx(variant, options, createFile) {
     log.blue("# Handlebars Content #").debug();
     log.debug(hbContent);
 
-    let data = types.isString(variant.data) ? templateData(variant.data) : variant.data || null;
+    let data = templateData(variant.data, options);
     let json = handlebars.compile(hbContent)(data);
     return lintContent(json, variant, options);
   } catch (err) {
@@ -109,10 +108,6 @@ function createErrorDocument(variant, options, err) {
   };
 
   doc.value.message = createErrorDocumentSection("Error message", err.message);
-  if (err.snippet) {
-    doc.value.snippet = createErrorDocumentSection("YAML parse error details", `line ${err.parsedLine} near "${err.snippet}"`);
-    doc.spec.children.push({ name: "snippet" });
-  }
   if (err.before) {
     doc.value.before = createErrorDocumentSection("Content before JSON lint error", err.before);
     doc.spec.children.push({ name: "before" });

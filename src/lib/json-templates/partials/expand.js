@@ -12,30 +12,30 @@ function calculateParentPath(child) {
   return path.join(child, "../");
 }
 
-function calculatePartialUrl(templatePath, partialName) {
+function calculatePartialUrl(resolvePartialStartPath, partialName) {
   if (!partialName) throw Error("partialName is required to calculate a partialUrl");
-  if (!templatePath) templatePath = process.cwd(); //assume cwd() if no path provided.
-  let parsed = url.parse(templatePath, true);
+  if (!resolvePartialStartPath) resolvePartialStartPath = process.cwd(); //assume cwd() if no path provided.
+  let parsed = url.parse(resolvePartialStartPath, true);
   parsed.query = { partial: partialName };
   return url.format(parsed);
 }
 
-function expandPartials(template, resolvePartial, templatePath) {
-  return traverse(template).map(function (value) {
+function expandPartials(source, resolvePartial, resolvePartialStartPath, options) {
+  return traverse(source).map(function (value) {
     if (!this.keys || types.isArray(value)) return; //no keys that contain partial references
-    let searchPath = templatePath;
+    let searchPath = resolvePartialStartPath;
 
     //need to create the functions outside the while loop
     let processPartialMeta = (meta) => {
-      if (meta.name) throw Error("Template needs to be expanded using 'expand-tokens' module before expanding partials.");
+      if (meta.name) throw Error("The 'source' needs to be expanded using 'expand-tokens' module before expanding partials.");
       let partialUrl = exports.calculatePartialUrl(searchPath, meta.partial.variable);
       let processPartial = resolvePartial(partialUrl);
-      let partial = processPartial(result[meta.source]);
+      let partial = processPartial(result[meta.source], options);
       let expanded = expandTokens.expand(partial);
 
       if (types.isObject(expanded)) {
         delete result[meta.source];
-        Object.assign(result, expanded);
+        result = Object.assign(expanded, result);
       } else {
         result = expanded;
       }
