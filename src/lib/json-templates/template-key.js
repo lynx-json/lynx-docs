@@ -19,12 +19,11 @@ function parse(key, partialSyntax) {
     if (match.index === 0 && !match[1]) parsed.name = match[2]; //key name doesn't have tokens
     else {
       if (match[1]) { //if we have a template token then push the template info
-        let variable = match[2] || parsed.name;
-        if (!variable) throw Error("Token must have explicit variable if 'name' does not exist.");
-        let token = match[1];
-        if (exports.partialToken === token) parsed.partial = { token: token, variable: variable };
-        else if (exports.placeHolderToken === token) parsed.placeholder = { variable: variable };
-        else parsed.binding = { token: token, variable: variable };
+        let result = { token: match[1], variable: match[2] || parsed.name, explicit: !!match[2] };
+        if (!result.variable) throw Error("Token must have explicit variable if 'name' does not exist.");
+        if (exports.partialToken === result.token) parsed.partial = result
+        else if (exports.placeHolderToken === result.token) parsed.placeholder = result;
+        else parsed.binding = result;
       }
     }
   }

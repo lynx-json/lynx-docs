@@ -18,7 +18,7 @@ let tests = [{
     key: "foo#",
     expected: {
       name: "foo",
-      binding: { token: "#", variable: "foo" }
+      binding: { token: "#", variable: "foo", explicit: false }
     }
   },
   {
@@ -26,7 +26,7 @@ let tests = [{
     key: "foo<~",
     expected: {
       name: "foo",
-      binding: { token: "<", variable: "~" }
+      binding: { token: "<", variable: "~", explicit: true }
     }
   },
   {
@@ -34,7 +34,7 @@ let tests = [{
     key: "foo-name#",
     expected: {
       name: "foo-name",
-      binding: { token: "#", variable: "foo-name" }
+      binding: { token: "#", variable: "foo-name", explicit: false }
     }
   },
   {
@@ -42,7 +42,7 @@ let tests = [{
     key: "foo#bar",
     expected: {
       name: "foo",
-      binding: { token: "#", variable: "bar" }
+      binding: { token: "#", variable: "bar", explicit: true }
     }
   },
   {
@@ -50,7 +50,7 @@ let tests = [{
     key: "foo-name#bar-name",
     expected: {
       name: "foo-name",
-      binding: { token: "#", variable: "bar-name" }
+      binding: { token: "#", variable: "bar-name", explicit: true }
     }
   },
   {
@@ -58,8 +58,8 @@ let tests = [{
     key: "foo#bar>partial",
     expected: {
       name: "foo",
-      binding: { token: "#", variable: "bar" },
-      partial: { token: ">", variable: "partial" }
+      binding: { token: "#", variable: "bar", explicit: true },
+      partial: { token: ">", variable: "partial", explicit: true }
     }
   },
   {
@@ -67,8 +67,8 @@ let tests = [{
     key: "foo-name#bar-name>partial-name",
     expected: {
       name: "foo-name",
-      binding: { token: "#", variable: "bar-name" },
-      partial: { token: ">", variable: "partial-name" }
+      binding: { token: "#", variable: "bar-name", explicit: true },
+      partial: { token: ">", variable: "partial-name", explicit: true }
     }
   },
   {
@@ -76,8 +76,8 @@ let tests = [{
     key: "foo#>",
     expected: {
       name: "foo",
-      binding: { token: "#", variable: "foo" },
-      partial: { token: ">", variable: "foo" }
+      binding: { token: "#", variable: "foo", explicit: false },
+      partial: { token: ">", variable: "foo", explicit: false }
     }
   },
   {
@@ -85,8 +85,8 @@ let tests = [{
     key: "foo<>",
     expected: {
       name: "foo",
-      binding: { token: "<", variable: "foo" },
-      partial: { token: ">", variable: "foo" }
+      binding: { token: "<", variable: "foo", explicit: false },
+      partial: { token: ">", variable: "foo", explicit: false }
     }
   },
   {
@@ -94,19 +94,19 @@ let tests = [{
     key: "foo#>partial",
     expected: {
       name: "foo",
-      binding: { token: "#", variable: "foo" },
-      partial: { token: ">", variable: "partial" }
+      binding: { token: "#", variable: "foo", explicit: false },
+      partial: { token: ">", variable: "partial", explicit: true }
     }
   },
   {
     description: "key with binding only",
     key: "#bar",
-    expected: { binding: { token: "#", variable: "bar" } }
+    expected: { binding: { token: "#", variable: "bar", explicit: true } }
   },
   {
     description: "key with partial only",
     key: ">partial",
-    expected: { partial: { token: ">", variable: "partial" } }
+    expected: { partial: { token: ">", variable: "partial", explicit: true } }
   }
 ];
 

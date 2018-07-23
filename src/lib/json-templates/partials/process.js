@@ -19,8 +19,11 @@ function processPlaceholders(traverseNode, placeholderKeys, parameters, used) {
       let placeholderKey = placeholderKeys.find(p => p.source === key);
       if (placeholderKey) {
         let pairs = getPairsForPlaceholder(placeholderKey, parameters);
-        if (!pairs) setValue(acc, placeholderKey.name, value[placeholderKey.source]); //use value in partial
-        else {
+        if (!pairs) { //use value in partial
+          let placeholder = placeholderKey.placeholder;
+          let newKey = placeholderKey.source.replace(placeholder.token + (placeholder.explicit ? placeholder.variable : ''), '');
+          setValue(acc, newKey, value[placeholderKey.source]);
+        } else {
           //use value in parameters set
           pairs.forEach(pair => {
             acc[pair.key] = pair.value;
