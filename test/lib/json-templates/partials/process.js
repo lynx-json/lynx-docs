@@ -318,6 +318,28 @@ let tests = [{
       foo: { bar: "qux" }
     }
   },
+  {
+    description: "When placeholder includes explicit partial reference and no matching parameter",
+    should: "should use key name with partial reference in result",
+    partial: {
+      "optional>foo~bar": "default"
+    },
+    parameters: {},
+    expected: {
+      "optional>foo": "default"
+    }
+  },
+  {
+    description: "When placeholder includes implicit partial reference and no matching parameter",
+    should: "should use key name with partial reference in result",
+    partial: {
+      "optional>foo~": "default"
+    },
+    parameters: {},
+    expected: {
+      "optional>foo": "default"
+    }
+  },
 ];
 
 function getTests() {
