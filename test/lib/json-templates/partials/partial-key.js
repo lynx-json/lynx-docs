@@ -16,12 +16,12 @@ let tests = [{
   {
     description: "key with name and variable",
     key: "foo~",
-    expected: { name: "foo", placeholder: { wildcard: false, variable: "foo" } }
+    expected: { name: "foo", placeholder: { token: "~", wildcard: false, variable: "foo", explicit: false } }
   },
   {
     description: "key with name '<' binding and variable",
     key: "foo<~",
-    expected: { name: "foo", placeholder: { wildcard: false, variable: "foo" } }
+    expected: { name: "foo", placeholder: { token: "~", wildcard: false, variable: "foo", explicit: false } }
   },
   {
     description: "key with name '<' binding, partial reference, and variable",
@@ -31,62 +31,62 @@ let tests = [{
   {
     description: "key with name '=' binding and variable",
     key: "foo=~",
-    expected: { name: "foo", placeholder: { wildcard: false, variable: "foo" } }
+    expected: { name: "foo", placeholder: { token: "~", wildcard: false, variable: "foo", explicit: false } }
   },
   {
     description: "key with name '#' binding and variable",
     key: "foo#~",
-    expected: { name: "foo", placeholder: { wildcard: false, variable: "foo" } }
+    expected: { name: "foo", placeholder: { token: "~", wildcard: false, variable: "foo", explicit: false } }
   },
   {
     description: "key with name '^' binding and variable",
     key: "foo^~",
-    expected: { name: "foo", placeholder: { wildcard: false, variable: "foo" } }
+    expected: { name: "foo", placeholder: { token: "~", wildcard: false, variable: "foo", explicit: false } }
   },
   {
     description: "key with name '>' partial and variable",
     key: "foo>~",
-    expected: { name: "foo", placeholder: { wildcard: false, variable: "foo" } }
+    expected: { name: "foo", placeholder: { token: "~", wildcard: false, variable: "foo", explicit: false } }
   },
   {
     description: "key with name '<' binding and named variable",
     key: "foo<~foo",
-    expected: { name: "foo", placeholder: { wildcard: false, variable: "foo" } }
+    expected: { name: "foo", placeholder: { token: "~", wildcard: false, variable: "foo", explicit: true } }
   },
   {
     description: "key with name '=' binding and named variable",
     key: "foo=~foo",
-    expected: { name: "foo", placeholder: { wildcard: false, variable: "foo" } }
+    expected: { name: "foo", placeholder: { token: "~", wildcard: false, variable: "foo", explicit: true } }
   },
   {
     description: "key with name '#' binding and named variable",
     key: "foo#~foo",
-    expected: { name: "foo", placeholder: { wildcard: false, variable: "foo" } }
+    expected: { name: "foo", placeholder: { token: "~", wildcard: false, variable: "foo", explicit: true } }
   },
   {
     description: "key with name '^' binding and named variable",
     key: "foo^~foo",
-    expected: { name: "foo", placeholder: { wildcard: false, variable: "foo" } }
+    expected: { name: "foo", placeholder: { token: "~", wildcard: false, variable: "foo", explicit: true } }
   },
   {
     description: "key with name '>' partial and named variable",
     key: "foo>~foo",
-    expected: { name: "foo", placeholder: { wildcard: false, variable: "foo" } }
+    expected: { name: "foo", placeholder: { token: "~", wildcard: false, variable: "foo", explicit: true } }
   },
   {
     description: "key with name with dashes and variable",
     key: "foo-name~",
-    expected: { name: "foo-name", placeholder: { wildcard: false, variable: "foo-name" } }
+    expected: { name: "foo-name", placeholder: { token: "~", wildcard: false, variable: "foo-name", explicit: false } }
   },
   {
     description: "key with name and named variable",
     key: "foo~foo",
-    expected: { name: "foo", placeholder: { wildcard: false, variable: "foo" } }
+    expected: { name: "foo", placeholder: { token: "~", wildcard: false, variable: "foo", explicit: true } }
   },
   {
     description: "key with name with dashes and named variale with dashes",
     key: "foo-name~bar-name",
-    expected: { name: "foo-name", placeholder: { wildcard: false, variable: "bar-name" } }
+    expected: { name: "foo-name", placeholder: { token: "~", wildcard: false, variable: "bar-name", explicit: true } }
   },
   {
     description: "wildcard key name only",
@@ -96,7 +96,7 @@ let tests = [{
   {
     description: "wildcard key and variable",
     key: "*~",
-    expected: { name: "*", placeholder: { wildcard: true, variable: "*" } }
+    expected: { name: "*", placeholder: { token: "~", wildcard: true, variable: "*", explicit: false } }
   }
 ];
 
