@@ -20,7 +20,9 @@ function setupStubs(stubs) {
   if (!stubs) return;
   Object.keys(stubs).forEach(stub => {
     Object.keys(stubs[stub]).forEach(key => {
-      sinon.stub(getStubSourceReference(stub), key).returns(stubs[stub][key]);
+      let value = stubs[stub][key];
+      if (typeof (value) === 'function') sinon.stub(getStubSourceReference(stub), key).callsFake(value);
+      else sinon.stub(getStubSourceReference(stub), key).returns(value);
     });
   });
 }
@@ -177,7 +179,7 @@ describe("resolve partials module", function () {
             readdirSync: ["partial.yml"]
           }
         },
-        expected: "partial.yml"
+        expected: `${resolvePartials.partialDirectory}${path.sep}partial.yml`
       },
       {
         description: "non partial directory contains one matching .partial.yml file",
@@ -191,7 +193,7 @@ describe("resolve partials module", function () {
             readdirSync: ["partial.partial.yml"]
           }
         },
-        expected: "partial.partial.yml"
+        expected: `doesNotMatter${path.sep}partial.partial.yml`
       },
       {
         description: "non partial directory contains one matching .partial.yml file and folder matching partial name",
@@ -205,7 +207,7 @@ describe("resolve partials module", function () {
             readdirSync: ["partial", "partial.partial.yml"]
           }
         },
-        expected: "partial.partial.yml"
+        expected: `doesNotMatter${path.sep}partial.partial.yml`
       },
       {
         description: "partial directory contains one matching .js file",
@@ -219,7 +221,7 @@ describe("resolve partials module", function () {
             readdirSync: ["partial.js"]
           }
         },
-        expected: "partial.js"
+        expected: `${resolvePartials.partialDirectory}${path.sep}partial.js`
       },
       {
         description: "non partial directory contains one matching .partial.js file",
@@ -233,7 +235,7 @@ describe("resolve partials module", function () {
             readdirSync: ["partial.partial.js"]
           }
         },
-        expected: "partial.partial.js"
+        expected: `doesNotMatter${path.sep}partial.partial.js`
       },
       {
         description: "partial directory contains matching .yml and .js file",
@@ -247,7 +249,7 @@ describe("resolve partials module", function () {
             readdirSync: ["partial.yml", "partial.js"]
           }
         },
-        expected: "partial.yml"
+        expected: `${resolvePartials.partialDirectory}${path.sep}partial.yml`
       },
       {
         description: "non partials directory contains matching .partial.yml and partial.js file",
@@ -261,7 +263,7 @@ describe("resolve partials module", function () {
             readdirSync: ["partial.partial.yml", "partial.partial.js"]
           }
         },
-        expected: "partial.partial.yml"
+        expected: `doesNotMatter${path.sep}partial.partial.yml`
       },
       {
         description: "partial directory contains matching .js and .yml file",
@@ -275,7 +277,64 @@ describe("resolve partials module", function () {
             readdirSync: ["partial.js", "partial.yml"]
           }
         },
-        expected: "partial.js"
+        expected: `${resolvePartials.partialDirectory}${path.sep}partial.js`
+      },
+      {
+        description: "partial directory contains child directories with matching partial",
+        should: "return path to file in child directory",
+        directory: resolvePartials.partialDirectory,
+        partialName: "partial",
+        stubs: {
+          fs: {
+            existsSync: true,
+            statSync: { isDirectory: () => true },
+            readdirSync: (dirPath) => {
+              if (dirPath === resolvePartials.partialDirectory) return ['child'];
+              if (dirPath === path.join(resolvePartials.partialDirectory, 'child')) return ['partial.js', 'partial.yml'];
+              return [];
+            }
+          }
+        },
+        expected: `${resolvePartials.partialDirectory}${path.sep}child${path.sep}partial.js`
+      },
+      {
+        description: "partial directory contains matching partial and child directory with matching partial",
+        should: "return path to file in partial directory and not child directory",
+        directory: resolvePartials.partialDirectory,
+        partialName: "partial",
+        stubs: {
+          fs: {
+            existsSync: true,
+            statSync: (itemPath) => {
+              return { isDirectory: () => !path.extname(itemPath) }
+            },
+            readdirSync: (dirPath) => {
+              if (dirPath === resolvePartials.partialDirectory) return ['child', 'partial.js'];
+              if (dirPath === path.join(resolvePartials.partialDirectory, 'child')) return ['partial.js', 'partial.yml'];
+              return [];
+            }
+          }
+        },
+        expected: `${resolvePartials.partialDirectory}${path.sep}partial.js`
+      },
+      {
+        description: "partial directory contains grandchild directories with matching partial",
+        should: "return path to file in child directory",
+        directory: resolvePartials.partialDirectory,
+        partialName: "partial",
+        stubs: {
+          fs: {
+            existsSync: true,
+            statSync: { isDirectory: () => true },
+            readdirSync: (dirPath) => {
+              if (dirPath === resolvePartials.partialDirectory) return ['child', 'another.js'];
+              if (dirPath === path.join(resolvePartials.partialDirectory, 'child')) return ['grandchild', 'child-other.js'];
+              if (dirPath === path.join(resolvePartials.partialDirectory, 'child', 'grandchild')) return ['partial.js', 'partial.yml'];
+              return [];
+            }
+          }
+        },
+        expected: `${resolvePartials.partialDirectory}${path.sep}child${path.sep}grandchild${path.sep}partial.js`
       }
     ];
 
@@ -307,7 +366,7 @@ describe("resolve partials module", function () {
         stubs: {
           resolvePartials: {
             scanDirectoryForPartial: "partial.js",
-            convertJsPartialToFunction: dummyFn
+            convertJsPartialToFunction: () => dummyFn
           }
         }
       },
@@ -319,7 +378,7 @@ describe("resolve partials module", function () {
         stubs: {
           resolvePartials: {
             scanDirectoryForPartial: "partial.yml",
-            convertYamlPartialToFunction: dummyFn
+            convertYamlPartialToFunction: () => dummyFn
           }
         }
       },

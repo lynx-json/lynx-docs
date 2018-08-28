@@ -27,17 +27,33 @@ function calculateSearchDirectories(startPath) {
   return searchPaths;
 }
 
-function scanDirectoryForPartial(directory, partialName) {
+function scanDirectoryForPartial(directory, partialName, partialFolder) {
   if (!fs.existsSync(directory)) return null;
   if (!fs.statSync(directory).isDirectory()) return null;
 
-  let partialFolder = directory.endsWith(exports.partialDirectory) || directory === lynxDocsPartialDirectory;
+  //determine if we are in a partialFolder context. Context could have been established by ancestor
+  partialFolder = partialFolder || directory.endsWith(exports.partialDirectory) || directory === lynxDocsPartialDirectory;
   let extensions = partialFolder ? partialExtensions : partialExtensions.map(ext => ".partial" + ext);
 
-  return fs.readdirSync(directory).find(filename => {
-    return path.extname(filename) &&
-      extensions.some(ext => partialName === path.basename(filename, ext));
-  }) || null; //normalize failure to return null. Without would be undefined
+  return fs.readdirSync(directory)
+    .map(child => {
+      return { name: child, path: path.join(directory, child), isDirectory: fs.statSync(path.join(directory, child)).isDirectory() };
+    })
+    .sort((a, b) => {
+      if (a.isDirectory && !b.isDirectory) return 1; //process files first
+      if (b.isDirectory && !a.isDirectory) return -1; //only process directories last
+      return 0;
+    })
+    .reduce((result, child) => {
+      if (result) return result;
+
+      if (path.extname(child.name) &&
+        extensions.some(ext => partialName === path.basename(child.name, ext))) return child.path;
+
+      return partialFolder ? scanDirectoryForPartial(child.path, partialName, partialFolder) : null;
+
+    }, null);
+
 }
 
 function convertJsPartialToFunction(partialFile) {
@@ -62,9 +78,7 @@ function resolvePartial(partialUrl) { //initial/search/path?partial=name
 
   let directories = exports.calculateSearchDirectories(path.resolve(parsed.pathname));
   let partialFile = directories.reduce((acc, directory) => {
-    if (acc) return acc; //partial already resolved, just move along
-    let fileName = exports.scanDirectoryForPartial(directory, parsed.query.partial);
-    return !!fileName ? path.join(directory, fileName) : acc;
+    return acc ? acc : exports.scanDirectoryForPartial(directory, parsed.query.partial);
   }, null);
 
   if (!partialFile) throw Error("Unable to find partial '" + parsed.query.partial + "'. The following directories where scanned. \n" + directories.join("\n"));
