@@ -74,7 +74,7 @@ function lintContent(json, variant, options) {
     }
   }
 
-  if (linting && linting.lynx) {
+  if (linting && linting.lynx && !options.spec) {
     let baseHints = linting.lynx.baseHints || [];
     let result = validateLynxDocument(JSON.parse(json), baseHints);
     if (!result.valid) {
