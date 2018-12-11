@@ -50,7 +50,7 @@ function scanDirectoryForPartial(directory, partialName, partialFolder) {
       if (path.extname(child.name) &&
         extensions.some(ext => partialName === path.basename(child.name, ext))) return child.path;
 
-      return partialFolder ? scanDirectoryForPartial(child.path, partialName, partialFolder) : null;
+      return partialFolder && child.isDirectory ? scanDirectoryForPartial(child.path, partialName, partialFolder) : null;
 
     }, null);
 
