@@ -21,7 +21,7 @@ module.exports = exports = function createMetaHandler(options) {
         return {
           icon: icon,
           title: r.title || "Untitled",
-          url: r.metaURL,
+          urls: [{ label: r.title || 'Untitled', href: r.metaURL }],
           details: [
             `realm: ${r.realm}`,
             `folder: ${r.folder}`
@@ -43,12 +43,7 @@ module.exports = exports = function createMetaHandler(options) {
       }
 
       realm.variants.forEach(function (variant) {
-        results.push({
-          icon: "/meta/icons/app.svg",
-          title: variant.title || "Untitled",
-          url: variant.url,
-          details: metaUtil.getObjectDetails(variant, metaUtil.variantDetailKeys)
-        });
+        results.push(metaUtil.createVariantResult(variant));
       });
 
       // TODO: Review. This seems unnecessary since we've already added all variants.
@@ -60,25 +55,13 @@ module.exports = exports = function createMetaHandler(options) {
 
       if (realm.parent) {
         results.push(createHeader("Parent"));
-        results.push(mapRealm(realm.parent, "/meta/icons/meta-up.svg"));
+        results.push(metaUtil.createRealmResult(realm.parent, "/meta/icons/meta-up.svg"));
       }
 
       if (realm.realms && realm.realms.length > 0) {
         results.push(createHeader("Children"));
         realm.realms.forEach(function (child) {
-          results.push(mapRealm(child, "/meta/icons/meta-down.svg"));
-        });
-      }
-
-      if (realm.templates && realm.templates.length > 0) {
-        results.push(createHeader("Templates"));
-        realm.templates.forEach(function (template) {
-          results.push({
-            icon: "/meta/icons/template.svg",
-            title: template.title || "Untitled",
-            url: template.url,
-            details: [`path: ${template.path}`]
-          });
+          results.push(metaUtil.createRealmResult(child, "/meta/icons/meta-down.svg"));
         });
       }
     }

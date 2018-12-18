@@ -11,45 +11,42 @@ realm<:
     - ">header":
         label>:
           value<resultsHeading:
-    - "^results":
-        ">group":
-          "text>": No variants
+    - "^results>group":
+        "text>": No variants
       "@results":
         "#isHeader>header":
           label>:
             value<label:
         "^isHeader>group":
           icon:
-            "#icon":
-              ">icon":
-                src<.:
-            "^icon":
-              ">text": ""
+            "#icon>icon":
+              src<.:
+            "^icon>text": 
+              spec.visibility: hidden
+              value: ""
           details>list:
-            - "#urls":
-                ">group":
-                  self>link:
-                    label>:
-                      value<../title:
-                    href<self:
-                  template:
-                    "#template>link":
-                      label>: "( template |"
-                      href<.:
-                    "^template>text":
-                      spec.visibility: hidden
-                      value: null
-                  data:
-                    "#data>link":
-                      label>: "data )"
-                      href<.:
-                    "^data>text":
-                      spec.visibility: hidden
-                      value: null
-              "^urls":
-                ">header":
+            - "#urls>group":
+                self>link:
                   label>:
-                    value<title:
+                    value<../title:
+                  href<self:
+                template:
+                  "#template>link":
+                    label>: "( template |"
+                    href<.:
+                  "^template>text":
+                    spec.visibility: hidden
+                    value: null
+                data:
+                  "#data>link":
+                    label>: "data )"
+                    href<.:
+                  "^data>text":
+                    spec.visibility: hidden
+                    value: null
+              "^urls>header":
+                label>:
+                  value<title:
             - "^details>text": 
                 spec.visibility: hidden
                 value: null
