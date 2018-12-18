@@ -306,7 +306,7 @@ describe("resolve partials module", function () {
           fs: {
             existsSync: true,
             statSync: (itemPath) => {
-              return { isDirectory: () => !path.extname(itemPath) }
+              return { isDirectory: () => !path.extname(itemPath) };
             },
             readdirSync: (dirPath) => {
               if (dirPath === resolvePartials.partialDirectory) return ['child', 'partial.js'];

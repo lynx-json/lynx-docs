@@ -494,7 +494,7 @@ var tests = [{
       files: {
         "/root/.meta.yml": toYamlBuffer([
           { realm: "/" },
-          { realm: "/bar", templates: ["bar.lynx.yml"] }
+          { realm: "/bar", templates: [{ path: "bar.lynx.yml", name: "bar" }] }
         ]),
         "/root/bar.lynx.yml": null,
         "/root/bar.data.yml": null,

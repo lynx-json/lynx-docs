@@ -48,11 +48,7 @@ function expandVariant(realm, variant) {
 }
 
 function expandTemplate(realm, template) {
-  var firstVariant = realm.variants.find(v => v.template === template);
-  return {
-    path: template,
-    url: realm.url + "?template=" + encodeURIComponent(template)
-  };
+  if (!template.url) template.url = realm.url + "?template=" + encodeURIComponent(template.name);
 }
 
 function reloadRealms(target, options) {
@@ -63,7 +59,7 @@ function reloadRealms(target, options) {
     realm.url = realm.url || url.parse(realm.realm).pathname;
     realm.metaURL = "/meta/realm/?uri=" + realm.realm;
     realm.variants.forEach(variant => expandVariant(realm, variant));
-    realm.templates = realm.templates.map(template => expandTemplate(realm, template));
+    realm.templates.forEach(template => expandTemplate(realm, template));
     realm.realms = realms.filter(isChildOfRealm(realm));
     realm.realms.forEach(child => child.parent = realm);
     let matches = realms.filter(check => check.url === realm.url);

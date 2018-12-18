@@ -14,11 +14,27 @@ function getStubs(assertions) {
         };
       };
     },
-    './template': function (options) {
+    './lynx-content': function (options) {
       return function (variant, realm) {
         return function (req, res, next) {
-          if (assertions.template) assertions.template(options, variant, realm, req, res, next);
-          else throw new Error("Serve template variant should not be called");
+          if (assertions.lynx) assertions.lynx(options, variant, realm, req, res, next);
+          else throw new Error("Lynx content variant should not be called");
+        };
+      };
+    },
+    './template-content': function (options) {
+      return function (template, realm) {
+        return function (req, res, next) {
+          if (assertions.template) assertions.template(options, template, realm, req, res, next);
+          else throw new Error("Template content variant should not be called");
+        };
+      };
+    },
+    './data-content': function (options) {
+      return function (data, realm) {
+        return function (req, res, next) {
+          if (assertions.data) assertions.data(options, data, realm, req, res, next);
+          else throw new Error("Data content variant should not be called");
         };
       };
     },
@@ -34,15 +50,48 @@ function getStubs(assertions) {
 }
 
 let tests = [{
-    description: "template variant",
-    should: "call template variant handler",
+    description: "lynx variant",
+    should: "call lynx variant handler",
     stubs: getStubs({
-      template: function (options, variant, realm, req, res, next) {
+      lynx: function (options, variant, realm, req, res, next) {
         expect(variant.template).to.equal("default.lynx.yml");
         expect(variant.data).to.equal("default.data.yml");
       }
     }),
     options: {},
+    req: {},
+    realm: {},
+    variant: {
+      template: "default.lynx.yml",
+      data: "default.data.yml"
+    }
+  },
+  {
+    description: "template content variant",
+    should: "call template content handler",
+    stubs: getStubs({
+      template: function (options, template, realm, req, res, next) {
+        expect(template).to.equal("default.lynx.yml");
+      }
+    }),
+    options: {},
+    req: { query: { "ld-content": "template" } },
+    realm: {},
+    variant: {
+      template: "default.lynx.yml",
+      data: "default.data.yml"
+    }
+  },
+  {
+    description: "data content variant",
+    should: "call data content handler",
+    stubs: getStubs({
+      data: function (options, data, realm, req, res, next) {
+        expect(data).to.equal("default.data.yml");
+      }
+    }),
+    options: {},
+    req: { query: { "ld-content": "data" } },
     realm: {},
     variant: {
       template: "default.lynx.yml",
@@ -59,6 +108,7 @@ let tests = [{
       }
     }),
     options: {},
+    req: {},
     realm: { folder: __dirname },
     variant: {
       jsmodule: "./dummy"
@@ -74,6 +124,7 @@ let tests = [{
       }
     }),
     options: {},
+    req: {},
     realm: { folder: __dirname },
     variant: {
       name: "without template or jsmodule"

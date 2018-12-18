@@ -12,14 +12,6 @@ function getStubs(assertions) {
         else throw new Error("Redirect to search should not be called");
       };
     },
-    './serve-template': function (options) {
-      return function (template, realm) {
-        return function (req, res, next) {
-          if (assertions.serveTemplate) assertions.serveTemplate(options, template, realm, req, res, next);
-          else throw new Error("Serve template should not be called");
-        };
-      };
-    },
     './serve-variant': function (options) {
       return function (variant, realm) {
         return function (req, res, next) {
@@ -91,42 +83,46 @@ let tests = [{
     }
   },
   {
-    description: "request for template that exists in realms",
-    should: "call serve template",
+    description: "request for template",
+    should: "call serve variant",
     stubs: getStubs({
-      serveTemplate: function (options, template, realm, req, res, next) {
-        expect(template.path).to.equal("/path-to-template/template.lynx.yml");
+      serveVariant: function (options, variant, realm, req, res, next) {
+        expect(variant.template.path).to.equal("/path-to-template/default.lynx.yml");
       }
     }),
     options: {},
     req: {
       url: "/",
-      query: { template: "/path-to-template/template.lynx.yml" },
+      query: { 'ld-content': "template" },
       realms: [{
         url: "/",
-        templates: [
-          { path: "/path-to-template/template.lynx.yml" }
-        ]
+        variants: [{
+          name: "default",
+          template: { name: "default", path: "/path-to-template/default.lynx.yml" },
+          data: "/default.data.yml"
+        }]
       }],
     }
   },
   {
-    description: "request for template that doesn't exists in realms",
-    should: "call serve variant index",
+    description: "request for data",
+    should: "call serve variant",
     stubs: getStubs({
-      serveVariantIndex: function (options, realms, req, res, next) {
-        expect(realms.length).to.equal(1);
+      serveVariant: function (options, variant, req, res, next) {
+        expect(variant.data).to.equal("/default.data.yml");
       }
     }),
     options: {},
     req: {
       url: "/",
-      query: { template: "/path-to-template-that-doesnt-exist/template.lynx.yml" },
+      query: { 'ld-content': "data" },
       realms: [{
         url: "/",
-        templates: [
-          { path: "/path-to-template/template.lynx.yml" }
-        ]
+        variants: [{
+          name: "default",
+          template: { name: "default", path: "/path-to-template/default.lynx.yml" },
+          data: "/default.data.yml"
+        }]
       }],
     }
   },

@@ -1,4 +1,4 @@
-const serveTemplateDataVariant = require("./template");
+const serveTemplateDataVariant = require('./lynx-content');
 
 function serveVariantIndex(options) {
   let templateVariantHandler = serveTemplateDataVariant(options);
@@ -7,24 +7,30 @@ function serveVariantIndex(options) {
     return function (req, res, next) {
       function reduceToResults(accumulator, currentRealm) {
         accumulator.push({
-          icon: "/meta/icons/meta-here.svg",
-          title: currentRealm.title || "Untitled",
-          url: currentRealm.metaURL,
+          icon: '/meta/icons/meta-here.svg',
+          title: currentRealm.title || 'Untitled',
+          urls: {
+            self: currentRealm.metaURL
+          },
           details: [`realm: ${currentRealm.realm}`]
         });
 
         if (currentRealm.variants.length > 0) {
           accumulator.push({
             isHeader: true,
-            label: "Variants"
+            label: 'Variants'
           });
         }
 
         currentRealm.variants.forEach(function (currentVariant) {
           accumulator.push({
-            icon: "/meta/icons/app.svg",
-            title: currentVariant.title || "Untitled",
-            url: currentVariant.url
+            icon: '/meta/icons/app.svg',
+            title: currentVariant.title || 'Untitled',
+            urls: {
+              self: currentVariant.url,
+              template: currentVariant.url + "&ld-content=template",
+              data: currentVariant.url + "&ld-content=data",
+            },
           });
         });
 
@@ -32,11 +38,11 @@ function serveVariantIndex(options) {
       }
 
       let variant = {
-        template: { ">.meta.variants": null },
+        template: { '>.meta.variants': null },
         data: {
           realm: realms[0].realm,
-          pageHeading: "Choose a Variant",
-          resultsHeading: "",
+          pageHeading: 'Choose a Variant',
+          resultsHeading: '',
           results: realms.reduce(reduceToResults, [])
         }
       };

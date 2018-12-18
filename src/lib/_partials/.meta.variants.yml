@@ -26,16 +26,32 @@ realm<:
             "^icon":
               ">text": ""
           details>list:
-            - "#url":
-                ">header":
-                    link>:
-                      label>:
-                        value<../title:
+            - "#urls":
+                ">group":
+                  self>link:
+                    label>:
+                      value<../title:
+                    href<self:
+                  template:
+                    "#template>link":
+                      label>: "( template |"
                       href<.:
-              "^url":
+                    "^template>text":
+                      spec.visibility: hidden
+                      value: null
+                  data:
+                    "#data>link":
+                      label>: "data )"
+                      href<.:
+                    "^data>text":
+                      spec.visibility: hidden
+                      value: null
+              "^urls":
                 ">header":
                   label>:
                     value<title:
-            - "^details>text": ""
+            - "^details>text": 
+                spec.visibility: hidden
+                value: null
               "@details>text":
                 value<.:

@@ -138,7 +138,7 @@ function resolveRealm(realmObj, parentRealm) {
 
 function resolvePaths(realmObj, folder) {
   realmObj.templates.forEach(function (val, idx, arr) {
-    arr[idx] = path.resolve(folder, val);
+    arr[idx].path = path.resolve(folder, val.path);
   });
 
   realmObj.variants.forEach(function (val) {
@@ -171,15 +171,10 @@ function isContentFile(pathToFile) {
 }
 
 function aggregateTemplateFiles(templateFiles, realmsForFolder) {
-  function equals(a) {
-    return function (b) {
-      return a === b;
-    };
-  }
 
   function hasTemplate(templateFile) {
     return function (realm) {
-      return realm.templates && realm.templates.some(equals(templateFile));
+      return realm.templates && realm.templates.some(t => t.path === templateFile);
     };
   }
 
@@ -187,7 +182,7 @@ function aggregateTemplateFiles(templateFiles, realmsForFolder) {
 
   templateFiles.forEach(function (templateFile) {
     var realmForTemplate = realmsForFolder.filter(hasTemplate(templateFile));
-    if (realmForTemplate.length === 0) defaultRealm.templates.push(templateFile);
+    if (realmForTemplate.length === 0) defaultRealm.templates.push({ path: templateFile, name: getTemplateFileName(templateFile) });
   });
 
   realmsForFolder.forEach(function (realm) {
@@ -195,22 +190,22 @@ function aggregateTemplateFiles(templateFiles, realmsForFolder) {
   });
 }
 
-function aggregateVariants(templateFiles, realm) {
-  templateFiles.forEach(function (templateFile) {
-    var dataFiles = getDataFilesForTemplate(templateFile);
+function aggregateVariants(templates, realm) {
+  templates.forEach(function (template) {
+    var dataFiles = getDataFilesForTemplate(template.path);
 
     dataFiles.forEach(function (dataFile) {
-      if (realm.variants.some(v => templateFile === v.template && dataFile === v.data)) return;
-      realm.variants.push(createVariant(templateFile, dataFile));
+      if (realm.variants.some(v => template.path === v.template && dataFile === v.data)) return;
+      realm.variants.push(createVariant(template.path, dataFile));
     });
 
     if (dataFiles.length > 0) return;
-    if (realm.variants.some(v => v.template === templateFile)) return;
+    if (realm.variants.some(v => v.template === template.path)) return;
 
     // if there are no data files for this template
     // and if there are no variants already defined for this template
     // then the template is the only variant
-    realm.variants.push(createVariant(templateFile));
+    realm.variants.push(createVariant(template.path));
   });
 }
 

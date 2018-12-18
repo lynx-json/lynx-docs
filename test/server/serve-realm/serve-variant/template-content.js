@@ -2,13 +2,13 @@ var proxyquire = require("proxyquire");
 var chai = require("chai");
 var should = chai.should();
 var expect = chai.expect;
-var sutPath = "../../../src/server/serve-realm/serve-template";
+var sutPath = '../../../../src/server/serve-realm/serve-variant/template-content';
 
 let tests = [{
   description: "when called",
   should: "write template content to response",
   stubs: {
-    '../../lib/export/to-handlebars': {
+    '../../../lib/export/to-handlebars': {
       one: function (path, options) {
         expect(path).to.equal("./template-path");
         expect(options.realm.url).to.equal("/realm-url/");
@@ -18,11 +18,11 @@ let tests = [{
   },
   options: {},
   realm: { url: "/realm-url/" },
-  template: { path: "./template-path" },
+  template: "./template-path",
   res: {
     writeHead: function (status, headers) {
       expect(status).to.equal(200);
-      expect(headers["Content-Type"]).to.equal("text/plain");
+      expect(headers["Content-Type"]).to.equal("text/x-handlebars-template");
       expect(headers["Cache-Control"]).to.equal("no-cache");
     },
     end: function (content) {
@@ -31,7 +31,7 @@ let tests = [{
   }
 }];
 
-describe("serve realm (serve template)", function () {
+describe("serve variant (template content)", function () {
   tests.forEach(test => {
     describe(test.description, function () {
       let sut = proxyquire(sutPath, test.stubs);
