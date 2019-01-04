@@ -1,8 +1,8 @@
 "use strict";
 
 const types = require("../../types");
-const templateKeySection = /([@#\^><=]){0,1}([a-zA-Z0-9.\-~*:\/]*)/g;
-const partialKeySection = /([@#\^><=~]){0,1}([a-zA-Z0-9.\-*:\/]*)/g;
+const templateKeySection = /([@#\^><=]){0,1}([a-zA-Z0-9.\-_~*:\/]*)/g;
+const partialKeySection = /([@#\^><=~]){0,1}([a-zA-Z0-9.\-_*:\/]*)/g;
 
 function parse(key, partialSyntax) {
   // key, key@, key#, key^, key<, key@foo, key#foo, key^foo, key<foo, should all yield 'key'

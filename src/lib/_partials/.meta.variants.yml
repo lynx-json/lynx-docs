@@ -1,6 +1,5 @@
 realm<:
 ">.meta.page":
-  spec.hints: [ http://lynx-json.org/docs/variant-index-page, http://lynx-json.org/docs/page, container ]
   spec.labeledBy: label
   header>:
     label>:
@@ -8,6 +7,8 @@ realm<:
   description>text:
     value<description:
   results>table:
+    spec.cohesion: very-low
+    value:
     - ">header":
         label>:
           value<resultsHeading:
@@ -19,13 +20,19 @@ realm<:
           label>:
             value<label:
         "^isHeader>group":
+          spec.cohesion: low
           icon:
             "#icon":
               ">icon":
+                spec.expanse: 2
                 src<.:
             "^icon":
-              ">text": ""
+              ">text":
+                spec.expanse: 2
+                value: ""
           details>list:
+            spec.expanse: 10
+            value:
             - "#url":
                 ">header":
                     link>:

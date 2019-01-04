@@ -42,7 +42,9 @@ function scanDirectoryForPartial(directory, partialName) {
 
 function convertJsPartialToFunction(partialFile) {
   delete require.cache[require.resolve(partialFile)];
+  console.log("Partial File", partialFile);
   let partialFn = require(partialFile);
+  console.log("Partial File Fn", partialFn);
   return (parameters, options) => {
     let partial = partialFn(parameters, options);
     return partials.process(partial, parameters);
@@ -67,7 +69,30 @@ function resolvePartial(partialUrl) { //initial/search/path?partial=name
     return !!fileName ? path.join(directory, fileName) : acc;
   }, null);
 
-  if (!partialFile) throw Error("Unable to find partial '" + parsed.query.partial + "'. The following directories where scanned. \n" + directories.join("\n"));
+  if (!partialFile) return (parameters, options) => {
+    function throwUnableToFindPartial() {
+      throw Error("Unable to find partial '" + parsed.query.partial + "'. The following directories where scanned. \n" + directories.join("\n"));
+    }
+
+    var partialName = parsed.query.partial;
+    var configuredPartials = options.partials;
+    if (configuredPartials === undefined) throwUnableToFindPartial();
+
+    var matchingPartial = configuredPartials.find(p => {
+      var namePattern = new RegExp(p.namePattern);
+      return namePattern.test(partialName);
+    });
+
+    if (!matchingPartial) throwUnableToFindPartial();
+
+    var matchingPartialPath = matchingPartial.path;
+    if (matchingPartialPath.indexOf(".") === 0) {
+      matchingPartialPath = path.resolve(matchingPartialPath);
+    }
+
+    return exports.convertJsPartialToFunction(matchingPartialPath)(parameters, Object.assign({ partialName: partialName }, options));
+  };
+
   if (path.extname(partialFile) === ".js") return exports.convertJsPartialToFunction(partialFile);
   else return exports.convertYamlPartialToFunction(partialFile);
 }

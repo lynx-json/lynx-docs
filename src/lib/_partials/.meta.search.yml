@@ -1,6 +1,5 @@
 focus: query
 ">.meta.page":
-  spec.hints: [ http://lynx-json.org/docs/search-page, http://lynx-json.org/docs/page, container ]
   spec.labeledBy: label
   header>:
     label>:
@@ -10,14 +9,20 @@ focus: query
   searchForm>form:
     searchQuery>list:
       label>: Query
-      query>line:
-        spec.input: q
-        spec.labeledBy: label
-        value<q: ""
-    submit>:
-      label>: Search
-      action: .
+      group>:
+        spec.cohesion: very-low
+        query>line:
+          spec.expanse: 10
+          spec.input: q
+          spec.labeledBy: label
+          value<q: ""
+        submit>:
+          spec.expanse: 2
+          label>: Search
+          action: .
   results>table:
+    spec.cohesion: very-low
+    value:
     - ">header":
         label>:
           value<resultsHeading:
@@ -26,13 +31,19 @@ focus: query
           "text>": No results
       "@results":
         ">group":
+          spec.cohesion: low
           icon:
             "#icon":
               ">icon":
+                spec.expanse: 2
                 src<.:
             "^icon":
-              ">text": ""
+              ">text":
+                spec.expanse: 2
+                value: ""
           details>list:
+            spec.expanse: 10
+            value:
             - "#url":
                 ">header":
                     link>:

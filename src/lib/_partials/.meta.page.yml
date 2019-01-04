@@ -1,4 +1,3 @@
-'>container':
-  spec.hints: [ http://lynx-json.org/docs/page, container ]
+'>section':
   banner>.meta.banner:
   "*~":

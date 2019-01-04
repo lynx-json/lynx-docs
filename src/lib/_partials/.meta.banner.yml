@@ -1,12 +1,17 @@
 '>header':
   spec.hints: [ banner, header, container ]
   spec.labeledBy: appLabel
+  spec.cohesion: very-low
   for: http://lynx-json.org/docs/
   primaryColor: '#003b64'
   secondaryColor: '#642300'
   icon-lynx>:
-  appLabel>label: Lynx Docs
+    spec.expanse: 1
+  appLabel>label:
+    spec.expanse: 10
+    value: Lynx Docs
   search>link:
+    spec.expanse: 1
     icon>image:
       src: /meta/icons/search.svg
       type: image/svg+xml
