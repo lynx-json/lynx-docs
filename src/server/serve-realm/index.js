@@ -5,7 +5,6 @@ const path = require("path");
 
 module.exports = exports = function createRealmHandler(options) {
   const redirectToSearch = require("./redirect-to-search")(options);
-  const serveTemplate = require("./serve-template")(options);
   const serveVariant = require("./serve-variant")(options);
   const serveVariantIndex = require("./serve-variant/meta-index")(options);
   const serveFile = require("../serve-file")(options);
@@ -25,17 +24,6 @@ module.exports = exports = function createRealmHandler(options) {
     if (realms.length === 0) {
       if (req.url === "/" || req.url === "") return redirectToSearch(req, res, next);
       return next();
-    }
-
-    if (req.query.template) {
-      var result = realms.reduce(function (acc, realm) {
-        if (acc) return acc;
-        let template = realm.templates.find(t => t.path === req.query.template);
-        if (template) return { template: template, realm: realm };
-      }, null);
-
-      if (result) return serveTemplate(result.template, result.realm)(req, res, next);
-      return serveVariantIndex(realms)(req, res, next);
     }
 
     var variantName = req.query.variant || variantSegment || "default";

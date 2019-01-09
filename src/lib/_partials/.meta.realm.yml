@@ -10,31 +10,29 @@
     - ">header":
         label>:
           value<resultsHeading:
-    - "^results":
-        ">group":
-          "text>": No data
+    - "^results>group":
+        "text>": No data
       "@results":
         "#isHeader>header":
           label>:
             value<label:
         "^isHeader>group":
           icon:
-            "#icon":
-              ">icon":
-                src<.:
-            "^icon":
-              ">text": ""
+            "#icon>icon":
+              src<.:
+            "^icon>text": 
+              spec.visibility: hidden
+              value: null
           details>list:
-            - "#url":
-                ">header":
-                    link>:
-                      label>:
-                        value<../title:
-                      href<.:
-              "^url":
-                ">header":
-                  label>:
-                    value<title:
-            - "^details>text": ""
+            - "@urls>link":
+                label>:
+                  value<label:
+                href<:
+              "^urls>header":
+                label>:
+                  value<title:
+            - "^details>text": 
+                spec.visibility: hidden
+                value: null
               "@details>text":
                 value<.:

@@ -21,28 +21,25 @@ focus: query
     - ">header":
         label>:
           value<resultsHeading:
-    - "^results":
-        ">group":
-          "text>": No results
-      "@results":
-        ">group":
-          icon:
-            "#icon":
-              ">icon":
-                src<.:
-            "^icon":
-              ">text": ""
-          details>list:
-            - "#url":
-                ">header":
-                    link>:
-                      label>:
-                        value<../title:
-                      href<.:
-              "^url":
-                ">header":
-                  label>:
-                    value<title:
-            - "^details>text": ""
-              "@details>text":
-                value<.:
+    - "^results>group":
+        "text>": No results
+      "@results>group":
+        icon:
+          "#icon>icon":
+            src<.:
+          "^icon>text": 
+            spec.visibility: hidden
+            value: ""
+        details>list:
+          - "@urls>link":
+              label>:
+                value<label:
+              href<:
+            "^urls>header":
+              label>:
+                value<title:
+          - "^details>text": 
+              spec.visibility: hidden
+              value: null
+            "@details>text":
+              value<.:
