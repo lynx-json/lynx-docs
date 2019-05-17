@@ -1,7 +1,7 @@
 const chai = require("chai");
 const expect = chai.expect;
 
-const validateDocument = require("../../../../../src/lib/export/lynx/validateDocument");
+const validateDocument = require("../../../../../src/lib/export/lynx/validate-document").validateLynxDocument;
 
 let tests = [{
     description: "valid document",

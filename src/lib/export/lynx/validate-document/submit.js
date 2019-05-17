@@ -1,3 +1,4 @@
+"use strict";
 const types = require("../../../../types");
 const url = require("url");
 const contentTypeParser = require("content-type-parser");

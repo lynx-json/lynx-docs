@@ -1,7 +1,7 @@
 const chai = require("chai");
 const expect = chai.expect;
 
-const addRealm = require("../../../../src/lib/export/lynx/add-realm");
+const addRealm = require("../../../../src/lib/export/lynx/add-realm").addRealm;
 
 let testRealm = "http://example.com/foo/";
 

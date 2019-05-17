@@ -1,3 +1,4 @@
+"use strict";
 const traverse = require("traverse");
 const types = require("../../../types");
 const exportLynx = require("./index");
@@ -23,4 +24,4 @@ function resolveRelativeUrls(realm) {
   };
 }
 
-module.exports = exports = resolveRelativeUrls;
+exports.resolveRelativeUrls = resolveRelativeUrls;

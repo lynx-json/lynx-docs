@@ -1,6 +1,8 @@
 "use strict";
 
-const commonCli = require("./common");
+const lynxDocs = require("../index");
+const common = require("./common");
+const config = require("./config");
 
 function buildCommand(yargs) {
   return yargs
@@ -13,6 +15,9 @@ function buildCommand(yargs) {
     .option("root", {
       alias: "r",
       describe: "Root folder(s) for the web site. [default '.']"
+    })
+    .option("config", {
+      describe: "Module to customize lynx-docs instance."
     })
     .option("log", {
       alias: "l",
@@ -37,8 +42,8 @@ function buildCommand(yargs) {
 }
 
 var startCli = function (options) {
-
-  commonCli(options);
+  common(options);
+  config(options, lynxDocs);
 
   // start the server
   require("../server/index.js")(options);

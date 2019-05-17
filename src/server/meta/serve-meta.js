@@ -1,3 +1,4 @@
+"use strict";
 const path = require("path");
 const variantToLynx = require("../../lib/export/variants-to-lynx").one;
 const url = require("url");

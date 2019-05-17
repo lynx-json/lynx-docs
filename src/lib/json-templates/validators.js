@@ -1,3 +1,4 @@
+"use strict";
 const templateKey = require("./template-key");
 
 function validateCompatibleSections(metas) {

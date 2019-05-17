@@ -1,3 +1,4 @@
+"use strict";
 const processData = require('../../../lib/export/template-data');
 const jsYaml = require('js-yaml');
 

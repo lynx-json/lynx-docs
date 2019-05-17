@@ -1,3 +1,4 @@
+"use strict";
 const url = require("url");
 
 module.exports = exports = function (options) {

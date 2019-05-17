@@ -43,7 +43,7 @@ function getPairsForPlaceholder(placeholderKey, parameters) {
   let placeholder = placeholderKey.placeholder;
   if (placeholder.wildcard) {
     if (!types.isObject(parameters)) {
-      return [{ key: exports.process.keyForNonObjectParameters, value: parameters }]; //place non object parameter in a key instead of copying keys
+      return [{ key: exports.keyForNonObjectParameters, value: parameters }]; //place non object parameter in a key instead of copying keys
     } else {
       return Object.keys(parameters).map(key => {
         return { key: key, value: parameters[key] };
@@ -58,7 +58,7 @@ function getPairsForPlaceholder(placeholderKey, parameters) {
   }
 }
 
-function processPartial(partial, parameters) {
+function applyParameters(partial, parameters) {
   let wildcardFn = null;
   let used = [];
   return traverse(partial).forEach(function (value) {
@@ -81,5 +81,5 @@ function processPartial(partial, parameters) {
   });
 }
 
-exports.process = processPartial;
-exports.process.keyForNonObjectParameters = "";
+module.exports = exports = applyParameters;
+exports.keyForNonObjectParameters = "";

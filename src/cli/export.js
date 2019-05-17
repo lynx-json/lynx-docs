@@ -1,8 +1,9 @@
 "use strict";
 
-const commonCli = require("./common");
+const lynxDocs = require("../index");
+const common = require("./common");
+const config = require("./config");
 const streamUtils = require("./stream-utils");
-const exportLib = require("../lib/export");
 
 const getRealmMetadata = require("../lib/metadata-realm");
 
@@ -22,6 +23,9 @@ function buildCommand(yargs) {
       alias: "f",
       describe: "The format to export to. [default 'handlebars']"
     })
+    .option("config", {
+      describe: "Module to customize lynx-docs instance."
+    })
     .option("log", {
       alias: "l",
       describe: "Set console logging level (error|warn|info|debug|trace). [default 'error']"
@@ -39,14 +43,14 @@ function buildCommand(yargs) {
 }
 
 var exportCli = function (options) {
-
-  commonCli(options);
+  common(options);
+  config(options, lynxDocs);
 
   if (options.output === "stdout") options.output = process.stdout;
   var dest = streamUtils.createDestinationStream(options);
 
   var realms = getRealmMetadata(options.root);
-  exportLib(realms, options).pipe(dest);
+  lynxDocs.export.exportRealms(realms, options).pipe(dest);
 };
 
 exports.handler = exportCli;

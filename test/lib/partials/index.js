@@ -41,7 +41,7 @@ function runTest(test, partialName) {
 
   if (test.log) console.log("template", "\n" + JSON.stringify(template, null, 2));
 
-  var expanded = jsonTemplates.partials.expand(template, jsonTemplates.partials.resolve);
+  var expanded = jsonTemplates.partials.expanding.expand(template, jsonTemplates.partials.resolving.resolve);
   if (test.log) console.log("expanded", "\n" + JSON.stringify(expanded, null, 2));
 
   let hbContent = jsonTemplates.toHandlebars(expanded);

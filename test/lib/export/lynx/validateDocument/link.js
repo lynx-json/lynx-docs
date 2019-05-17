@@ -1,7 +1,7 @@
 const chai = require("chai");
 const expect = chai.expect;
 
-const validateLink = require("../../../../../src/lib/export/lynx/validateDocument/link");
+const validateLink = require("../../../../../src/lib/export/lynx/validate-document/link");
 
 let tests = [{
     description: "valid 'link' with 'href'",

@@ -32,4 +32,4 @@ function extractSpecs(template, options, createFile) {
   });
 }
 
-module.exports = exports = extractSpecs;
+exports.extractSpecs = extractSpecs;

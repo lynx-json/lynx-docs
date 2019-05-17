@@ -10,11 +10,6 @@ function createMetaForExpansion(meta, keys, value) {
   return Object.assign({}, meta, { value: value, keys: keys });
 }
 
-function findInverseMeta(metas, reference) {
-  return metas.find(candidate => candidate !== reference &&
-    candidate.binding && reference.binding && candidate.binding.variable === reference.binding.variable);
-}
-
 function convertForExpansion(metas, sourceValue) {
   let converted = metas.map(meta => createMetaForExpansion(meta, [], sourceValue[meta.source]));
 

@@ -1,3 +1,4 @@
+"use strict";
 const fs = require('fs');
 const templateToHandlebars = require('../../../lib/export/to-handlebars').one;
 

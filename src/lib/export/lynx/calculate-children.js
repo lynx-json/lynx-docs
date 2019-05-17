@@ -1,3 +1,4 @@
+"use strict";
 const traverse = require("traverse");
 const types = require("../../../types");
 const exportLynx = require("./index");
@@ -30,4 +31,4 @@ function calculateLynxChildren(template) {
   });
 }
 
-module.exports = exports = calculateLynxChildren;
+exports.calculateLynxChildren = calculateLynxChildren;

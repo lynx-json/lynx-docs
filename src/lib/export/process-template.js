@@ -7,7 +7,7 @@ const jsonTemplates = require("../json-templates");
 const lynxExport = require("./lynx");
 const log = require("logatim");
 
-jsonTemplates.partials.process.keyForNonObjectParameters = "value";
+jsonTemplates.partials.applyParameters.keyForNonObjectParameters = "value";
 
 function getTemplate(pathOrTemplate) {
   if (types.isObject(pathOrTemplate) || types.isArray(pathOrTemplate)) return pathOrTemplate;
@@ -23,7 +23,7 @@ function getTemplate(pathOrTemplate) {
   throw Error("Unexpected template value. Expected path to template or template object. Received \n" + JSON.stringify(pathOrTemplate));
 }
 
-function calculateResolveParitalStartPath(pathOrTemplate, options) {
+function calculateResolvePartialStartPath(pathOrTemplate, options) {
   if (types.isString(pathOrTemplate)) return pathOrTemplate;
   if (options && options.realm && options.realm.folder) return options.realm.folder;
   return null;
@@ -40,11 +40,11 @@ function processTemplate(pathOrTemplate, options, createFile) {
   let template = getTemplate(pathOrTemplate);
   logDebug("Template Object", template);
 
-  template = jsonTemplates.expandTokens(template);
+  template = jsonTemplates.expandTokens.expand(template);
   logDebug("Tokens Expanded", template);
 
-  let resolveParitalStartPath = calculateResolveParitalStartPath(pathOrTemplate, options);
-  template = jsonTemplates.partials.expand(template, jsonTemplates.partials.resolve, resolveParitalStartPath, options);
+  let resolvePartialStartPath = calculateResolvePartialStartPath(pathOrTemplate, options);
+  template = jsonTemplates.partials.expanding.expand(template, jsonTemplates.partials.resolving.resolve, resolvePartialStartPath, options);
   logDebug("Partials Processed", template);
 
   if (options && options.realm) {

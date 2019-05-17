@@ -1,5 +1,5 @@
+"use strict";
 const traverse = require("traverse");
-const types = require("../../../types");
 const exportLynx = require("./index");
 
 function addRealm(realm) {
@@ -12,4 +12,4 @@ function addRealm(realm) {
   };
 }
 
-module.exports = exports = addRealm;
+exports.addRealm = addRealm;

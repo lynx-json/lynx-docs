@@ -80,12 +80,12 @@ describe("template-data module", function () {
       describe("when ".concat(test.description), function () {
         beforeEach(function () {
           sinon.stub(fs, "readFileSync").returns(Buffer.from(test.content));
-          if (test.resolve) sinon.stub(jsonTemplates.partials, "resolve").returns(test.resolve);
+          if (test.resolve) sinon.stub(jsonTemplates.partials.resolving, "resolve").returns(test.resolve);
         });
 
         afterEach(function () {
           fs.readFileSync.restore();
-          if (jsonTemplates.partials.resolve.restore) jsonTemplates.partials.resolve.restore();
+          if (jsonTemplates.partials.resolving.resolve.restore) jsonTemplates.partials.resolving.resolve.restore();
         });
 
         it(test.should, function () {

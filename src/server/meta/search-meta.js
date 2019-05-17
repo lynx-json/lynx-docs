@@ -1,3 +1,4 @@
+"use strict";
 const path = require("path");
 const finder = require("./finder");
 const variantToLynx = require("../../lib/export/variants-to-lynx").one;
