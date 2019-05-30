@@ -1,3 +1,4 @@
+"use strict";
 const serveJavaScriptVariant = require('./javascript');
 const serveLynxContent = require('./lynx-content');
 const serveTemplateContent = require('./template-content');

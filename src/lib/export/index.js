@@ -1,11 +1,12 @@
 "use strict";
+const Vinyl = require("vinyl");
+const streamFromArray = require("stream-from-array");
+exports.toHandlebars = require("./to-handlebars");
+exports.variantsToLynx = require("./variants-to-lynx");
 
-var Vinyl = require("vinyl");
-var streamFromArray = require("stream-from-array");
-
-var formats = {
-  handlebars: require("./to-handlebars").all,
-  lynx: require("./variants-to-lynx").all
+const formats = {
+  handlebars: exports.toHandlebars.all,
+  lynx: exports.variantsToLynx.all
 };
 
 function exportRealms(realms, options) {
@@ -32,4 +33,7 @@ exportRealms.add = function addExportFn(format, exportFn) {
   formats[format] = exportFn;
 };
 
-module.exports = exports = exportRealms;
+exports.exportRealms = exportRealms;
+exports.processTemplate = require("./process-template");
+exports.templateData = require("./template-data");
+exports.lynx = require("./lynx");

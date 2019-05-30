@@ -61,14 +61,25 @@ function convertJsPartialToFunction(partialFile) {
   let partialFn = require(partialFile);
   return (parameters, options) => {
     let partial = partialFn(parameters, options);
-    return partials.process(partial, parameters);
+    return partials.applyParameters(partial, parameters);
   };
 }
 
 function convertYamlPartialToFunction(partialFile) {
   let contents = fs.readFileSync(partialFile);
   let partial = parseYaml(contents);
-  return (parameters) => partials.process(partial, parameters);
+  return (parameters) => partials.applyParameters(partial, parameters);
+}
+
+function resolvePartialFromName(basePath, partialName) {
+  let directories = exports.calculateSearchDirectories(path.resolve(basePath));
+  let partialFile = directories.reduce((acc, directory) => {
+    return acc ? acc : exports.scanDirectoryForPartial(directory, partialName);
+  }, null);
+
+  if (!partialFile) throw Error("Unable to find partial '" + partialName + "'. The following directories where scanned. \n" + directories.join("\n"));
+
+  return partialFile;
 }
 
 function resolvePartial(partialUrl) { //initial/search/path?partial=name
@@ -76,17 +87,16 @@ function resolvePartial(partialUrl) { //initial/search/path?partial=name
   let parsed = url.parse(partialUrl, true);
   if (!parsed.query || !parsed.pathname || !parsed.query.partial) throw Error("Invalid partial value. The partial format is expected to be the absolute path to the the template file with a query string for the partial name to resolve (e.g. '/full/path/to/template.(lynx|template).yml?partial=partialName').");
 
-  let directories = exports.calculateSearchDirectories(path.resolve(parsed.pathname));
-  let partialFile = directories.reduce((acc, directory) => {
-    return acc ? acc : exports.scanDirectoryForPartial(directory, parsed.query.partial);
-  }, null);
+  let partial = exports.resolvePartialFromName(parsed.pathname, parsed.query.partial);
+  if (types.isObject(partial)) return (parameters) => partials.applyParameters(partial, parameters);
+  if (!types.isString(partial)) throw Error("Resolved partial must be a partial object or a path to a partial file.");
 
-  if (!partialFile) throw Error("Unable to find partial '" + parsed.query.partial + "'. The following directories where scanned. \n" + directories.join("\n"));
-  if (path.extname(partialFile) === ".js") return exports.convertJsPartialToFunction(partialFile);
-  else return exports.convertYamlPartialToFunction(partialFile);
+  if (path.extname(partial) === ".js") return exports.convertJsPartialToFunction(partial);
+  else return exports.convertYamlPartialToFunction(partial);
 }
 
 exports.resolve = resolvePartial;
+exports.resolvePartialFromName = resolvePartialFromName;
 exports.calculateSearchDirectories = calculateSearchDirectories;
 exports.scanDirectoryForPartial = scanDirectoryForPartial;
 exports.convertJsPartialToFunction = convertJsPartialToFunction;

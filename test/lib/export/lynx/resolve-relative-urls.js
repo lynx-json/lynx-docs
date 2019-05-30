@@ -2,7 +2,7 @@ const chai = require("chai");
 const expect = chai.expect;
 const url = require("url");
 
-const resolveRelativeUrls = require("../../../../src/lib/export/lynx/resolve-relative-urls");
+const resolveRelativeUrls = require("../../../../src/lib/export/lynx/resolve-relative-urls").resolveRelativeUrls;
 
 let testRealm = "http://example.com/foo/";
 

@@ -1,3 +1,4 @@
+"use strict";
 var variantDetailKeys = ['jsmodule', 'function', 'content', 'type'];
 
 var realmDetailKeys = ['realm', 'folder'];
@@ -27,7 +28,7 @@ function createVariantResult(variant) {
     title: variant.title || "Untitled",
     urls: [{ label: variant.title || 'Untitled', href: variant.url }],
     details: getObjectDetails(variant, variantDetailKeys)
-  }
+  };
   if (variant.template) result.urls.push({ label: `template: ${variant.template}`, href: `${variant.url}&ld-content=template` });
   if (variant.data) result.urls.push({ label: `data: ${variant.data}`, href: `${variant.url}&ld-content=data` });
 

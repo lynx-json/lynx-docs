@@ -1,6 +1,5 @@
+"use strict";
 const traverse = require("traverse");
-const types = require("../../../../types");
-const log = require("logatim");
 const lynxHelpers = require("../index");
 const validators = {
   hints: require("./hints"),
@@ -39,4 +38,4 @@ function validateLynxDocument(document, domainSpecificBaseHints) {
   return { valid: validationErrors.length === 0, errors: validationErrors };
 }
 
-module.exports = exports = validateLynxDocument;
+exports.validateLynxDocument = validateLynxDocument;

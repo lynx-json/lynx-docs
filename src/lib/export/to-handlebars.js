@@ -3,19 +3,19 @@
 const util = require("util");
 const path = require("path");
 const processTemplate = require("./process-template");
-const toHandlebars = require("../json-templates/to-handlebars");
+const toHandlebars = require("../json-templates").toHandlebars;
 
 function exportTemplatesToHandlebars(realms, createFile, options) {
   realms.forEach(realm => realm.templates
-    .forEach(templatePath => {
+    .forEach(template => {
       if (options.template) {
         var regex = new RegExp(options.template);
-        if (regex.test(templatePath) === false) return;
+        if (regex.test(template.path) === false) return;
       }
 
       var templateOptions = Object.assign({}, options, { realm: realm });
-      var content = transformTemplateToHandlebars(templatePath, templateOptions, createFile);
-      var outputPath = path.join(path.relative(realm.root, path.dirname(templatePath)), path.basename(templatePath, ".yml") + ".handlebars");
+      var content = transformTemplateToHandlebars(template.path, templateOptions, createFile);
+      var outputPath = path.join(path.relative(realm.root, path.dirname(template.path)), path.basename(template.path, ".yml") + ".handlebars");
       createFile(outputPath, content);
     }));
 }

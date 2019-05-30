@@ -1,13 +1,13 @@
 "use strict";
 const path = require("path");
 const processTemplate = require("./process-template");
-const toHandlebars = require("../json-templates/to-handlebars");
+const toHandlebars = require("../json-templates").toHandlebars;
 const templateData = require("./template-data");
 const handlebars = require("handlebars");
 const jsonLint = require("json-lint");
 const types = require("../../types");
 const log = require("logatim");
-const validateLynxDocument = require("./lynx/validateDocument");
+const validateLynxDocument = require("./lynx/validate-document").validateLynxDocument;
 const empty = "";
 
 function handlebarsEscapeExpression(toEscape) {

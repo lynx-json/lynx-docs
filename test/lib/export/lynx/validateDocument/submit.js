@@ -1,7 +1,7 @@
 const chai = require("chai");
 const expect = chai.expect;
 
-const validateSubmit = require("../../../../../src/lib/export/lynx/validateDocument/submit");
+const validateSubmit = require("../../../../../src/lib/export/lynx/validate-document/submit");
 
 let tests = [{
     description: "null 'submit'",

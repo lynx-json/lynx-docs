@@ -1,7 +1,7 @@
 const chai = require("chai");
 const expect = chai.expect;
 
-const validateContent = require("../../../../../src/lib/export/lynx/validateDocument/content");
+const validateContent = require("../../../../../src/lib/export/lynx/validate-document/content");
 
 let tests = [{
     description: "valid 'content' with 'src'",

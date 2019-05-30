@@ -1,3 +1,4 @@
+"use strict";
 const traverse = require("traverse");
 const types = require("../../../types");
 const exportLynx = require("./index");
@@ -63,4 +64,4 @@ function flattenLynx(template) {
   });
 }
 
-module.exports = exports = flattenLynx;
+exports.flattenLynx = flattenLynx;

@@ -14,7 +14,7 @@ let tests = [{
       root: "/src/",
       realm: "/src/folder-one/",
       templates: [
-        "/src/folder-one/default.lynx.yml"
+        { path: "/src/folder-one/default.lynx.yml", name: "default" }
       ]
     }],
     options: {},
@@ -29,8 +29,8 @@ let tests = [{
       root: "/src/",
       realm: "/src/folder-one/",
       templates: [
-        "/src/folder-one/default.lynx.yml",
-        "/src/folder-one/default.invalid.lynx.yml"
+        { path: "/src/folder-one/default.lynx.yml", name: "default" },
+        { path: "/src/folder-one/default.invalid.lynx.yml", name: "default-invalid" }
       ]
     }],
     options: {},

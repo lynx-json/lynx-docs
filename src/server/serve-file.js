@@ -1,6 +1,8 @@
+"use strict";
 const mime = require("mime");
 const fs = require("fs");
 const log = require("logatim");
+const path = require("path");
 
 mime.define({
   "application/lynx+json": ["lnx"],

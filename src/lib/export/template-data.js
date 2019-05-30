@@ -1,3 +1,4 @@
+"use strict";
 const fs = require("fs");
 const path = require("path");
 const jsonTemplates = require("../json-templates");
@@ -14,7 +15,7 @@ function processDataOrFile(dataOrFile, options) {
     return processDataOrFile(otherDataFile, options);
   }
 
-  function calculateResolveParitalStartPath(dataOrFile, options) {
+  function calculateResolvePartialStartPath(dataOrFile, options) {
     if (types.isString(dataOrFile)) return dataOrFile;
     if (options && options.realm && options.realm.folder) return options.realm.folder;
     return null;
@@ -23,8 +24,8 @@ function processDataOrFile(dataOrFile, options) {
   try {
     if (!dataOrFile) return dataOrFile;
 
-    let resolveParitalStartPath = calculateResolveParitalStartPath(dataOrFile, options);
-    if (!types.isString(dataOrFile)) return jsonTemplates.process(dataOrFile, resolveParitalStartPath, options);
+    let resolvePartialStartPath = calculateResolvePartialStartPath(dataOrFile, options);
+    if (!types.isString(dataOrFile)) return jsonTemplates.process(dataOrFile, resolvePartialStartPath, options);
 
     let parsedPath = path.parse(dataOrFile);
     let data = {};
@@ -38,14 +39,11 @@ function processDataOrFile(dataOrFile, options) {
       data = generator(resolveDataFile, options);
     }
 
-    return jsonTemplates.process(data, resolveParitalStartPath, options);
-
+    return jsonTemplates.process(data, resolvePartialStartPath, options);
   } catch (err) {
     err.message = `Error reading data file '${dataOrFile}'\r\n${err.message}`;
     throw err;
   }
-
-  throw new Error("Unrecognized data file format: ", parsedPath.ext);
 }
 
 module.exports = exports = processDataOrFile;

@@ -2,7 +2,7 @@ const chai = require("chai");
 const expect = chai.expect;
 const types = require("../../../../src/types");
 
-const processPartial = require("../../../../src/lib/json-templates/partials/process").process;
+const applyParameters = require("../../../../src/lib/json-templates/partials/apply-parameters");
 
 let tests = [{
     description: "partial with no placeholders",
@@ -350,7 +350,7 @@ function getTests() {
 function runTest(test) {
   if (test.include || test.log) console.log("partial", "\n" + JSON.stringify(test.partial, null, 2));
   if (test.include || test.log) console.log("parameters", "\n" + JSON.stringify(test.parameters, null, 2));
-  let result = processPartial(test.partial, test.parameters);
+  let result = applyParameters(test.partial, test.parameters);
   if (test.include || test.log) console.log("result", "\n" + JSON.stringify(result, null, 2));
   expect(result).to.deep.equal(test.expected);
   //assert that the keys are in the same order as expected
@@ -369,7 +369,7 @@ function getDeepKeys(obj) {
   }, []);
 }
 
-describe("process partials module", function () {
+describe("apply parameters to partials module", function () {
   getTests().forEach(function (test) {
     describe("when ".concat(test.description), function () {
       it(test.should, function () {

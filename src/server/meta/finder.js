@@ -1,3 +1,4 @@
+"use strict";
 const metaUtil = require("./meta-util");
 
 function noTermsFilter() {
@@ -98,7 +99,7 @@ function parse(userQuery) {
     plan.reduce = reduceRealmsToVariants;
     plan.map = metaUtil.createVariantResult;
   } else {
-    plan.map = function (realm) { return metaUtil.createRealmResult(realm) };
+    plan.map = function (realm) { return metaUtil.createRealmResult(realm); };
   }
 
   buildFilter(plan);

@@ -1,3 +1,4 @@
+"use strict";
 const serveTemplateDataVariant = require('./lynx-content');
 
 function serveVariantIndex(options) {

@@ -1,7 +1,7 @@
 const chai = require("chai");
 const expect = chai.expect;
 
-const validateHints = require("../../../../../src/lib/export/lynx/validateDocument/hints");
+const validateHints = require("../../../../../src/lib/export/lynx/validate-document/hints");
 
 let tests = [{
     description: "valid hints",

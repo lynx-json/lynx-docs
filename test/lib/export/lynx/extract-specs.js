@@ -7,7 +7,6 @@ const chai = require("chai");
 const expect = chai.expect;
 
 const lynxExport = require("../../../../src/lib/export/lynx/");
-const jsonTemplates = require("../../../../src/lib/json-templates");
 
 const defaultOptions = { spec: { dir: "./specs", url: "./specs" } };
 

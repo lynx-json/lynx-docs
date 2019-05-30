@@ -1,3 +1,4 @@
+"use strict";
 module.exports = exports = function createCorsHandler(options) {
   return function (req, res, next) {
     let origin = req.headers.origin || "http://localhost:" + options.port;

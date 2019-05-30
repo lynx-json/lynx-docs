@@ -5,7 +5,7 @@ const path = require("path");
 const url = require("url");
 const sinon = require("sinon");
 
-const resolvePartials = require("../../../../src/lib/json-templates/partials/resolve");
+const resolvePartials = require("../../../../src/lib/json-templates/partials/resolving");
 
 function getStubSourceReference(stubName) {
   switch (stubName) {

@@ -1,7 +1,7 @@
 const chai = require("chai");
 const expect = chai.expect;
 
-const calculateChildren = require("../../../../src/lib/export/lynx/calculate-children");
+const calculateChildren = require("../../../../src/lib/export/lynx/calculate-children").calculateLynxChildren;
 const jsonTemplates = require("../../../../src/lib/json-templates");
 
 var tests = [{

@@ -1,3 +1,4 @@
+"use strict";
 const path = require('path');
 const log = require('logatim');
 const processDataOrFile = require('../../../lib/export/');

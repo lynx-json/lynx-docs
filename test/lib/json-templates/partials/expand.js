@@ -2,8 +2,8 @@ const chai = require("chai");
 const expect = chai.expect;
 const sinon = require("sinon");
 
-const expandPartials = require("../../../../src/lib/json-templates/partials/expand");
-const resolvePartial = require("../../../../src/lib/json-templates/partials/resolve");
+const expanding = require("../../../../src/lib/json-templates/partials/expanding");
+const resolving = require("../../../../src/lib/json-templates/partials/resolving");
 
 describe("expand partials module", function () {
   describe("when calculating partial urls", function () {
@@ -203,8 +203,8 @@ describe("expand partials module", function () {
 
     function runTest(test) {
       if (test.include || test.log) console.log("partial", "\n" + JSON.stringify(test.template, null, 2));
-      test.resolvePartial = test.resolvePartial || resolvePartial.resolve;
-      let result = expandPartials.expand(test.template, test.resolvePartial, test.templatePath);
+      test.resolvePartial = test.resolvePartial || resolving.resolve;
+      let result = expanding.expand(test.template, test.resolvePartial, test.templatePath);
       if (test.include || test.log) console.log("result", "\n" + JSON.stringify(result, null, 2));
       expect(result).to.deep.equal(test.expected);
     }
