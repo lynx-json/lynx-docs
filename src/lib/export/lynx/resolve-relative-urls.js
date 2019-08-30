@@ -10,6 +10,7 @@ const shouldResolve = {
 const candidateKeys = Object.keys(shouldResolve);
 
 const url = require("url");
+const escapedHandlebarsTokens = /%7B%7B([^%]+?)%7D%7D/;
 
 function resolveRelativeUrls(realm) {
   return function (template) {
@@ -19,7 +20,7 @@ function resolveRelativeUrls(realm) {
         return key === this.key && shouldResolve[key](this);
       });
 
-      if (update) this.update(url.resolve(realm, value));
+      if (update) this.update(url.resolve(realm, value).replace(escapedHandlebarsTokens, "{{$1}}"));
     });
   };
 }

@@ -59,6 +59,18 @@ var tests = [{
     should: "not change value",
     template: { root: { for: "./bar" } },
     expected: { root: { for: "./bar" } }
+  },
+  {
+    description: "databound absolute 'realm' value with handlebars tokens",
+    should: "not escape handlebars tokens",
+    template: { realm: "http://example.com/bar/{{path}}" },
+    expected: { realm: "http://example.com/bar/{{path}}" }
+  },
+  {
+    description: "databound relative 'realm' value with handlebars tokens",
+    should: "not escape handlebars tokens",
+    template: { realm: "./bar/{{path}}" },
+    expected: { realm: `${testRealm}bar/{{path}}` }
   }
 ];
 
