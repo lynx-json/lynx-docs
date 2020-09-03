@@ -10,7 +10,7 @@ mime.define({
 });
 
 function serveFile(options) {
-  if (options.mime) mime.define(options.mime);
+  if (options.mime) mime.define(options.mime, true);
 
   return function (filename) {
     return function (req, res, next) {
